@@ -206,11 +206,13 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 	for i := range nodes.UAMethod {
 		ot := nodes.UAMethod[i]
 		nid := ua.MustParseNodeID(ot.NodeIdAttr)
+
 		var attrs Attributes = make(map[ua.AttributeID]*ua.DataValue)
 		attrs[ua.AttributeIDAccessRestrictions] = DataValueFromValue(ot.AccessRestrictionsAttr)
 		attrs[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr})
 		attrs[ua.AttributeIDUserWriteMask] = DataValueFromValue(ot.UserWriteMaskAttr)
 		attrs[ua.AttributeIDWriteMask] = DataValueFromValue(ot.WriteMaskAttr)
+
 		if len(ot.DisplayName) > 0 {
 			attrs[ua.AttributeIDDisplayName] = DataValueFromValue(ua.NewLocalizedText(ot.DisplayName[0].Value))
 		}
@@ -222,6 +224,9 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 		var refs References = make([]*ua.ReferenceDescription, 0)
 
 		n := NewNode(nid, attrs, refs, nil)
+
+		SetMethod(n, func(_ context.Context) ua.StatusCode { return ua.StatusBadNotImplemented })
+
 		ns, err := srv.Namespace(int(nid.Namespace()))
 		if err != nil {
 			// This namespace doesn't exist.
