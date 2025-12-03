@@ -150,3 +150,9 @@ func SoftwareVersion(name string) Option {
 		s.softwareVersion = name
 	}
 }
+
+func WithMethodMiddleware(mw MethodMiddleware) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.methodCallMiddleware = mw
+	}
+}
