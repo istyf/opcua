@@ -225,7 +225,7 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 
 		n := NewNode(nid, attrs, refs, nil)
 
-		SetMethod(n, func(_ context.Context) ua.StatusCode { return ua.StatusBadNotImplemented })
+		SetMethod(n, func(_ context.Context) error { return ua.StatusBadNotImplemented })
 
 		ns, err := srv.Namespace(int(nid.Namespace()))
 		if err != nil {
