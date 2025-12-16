@@ -7,2312 +7,1616 @@
 package id
 
 const (
-	ProgramStateMachineType_Start                                                                                                                 = 2426
-	ProgramStateMachineType_Suspend                                                                                                               = 2427
-	ProgramStateMachineType_Resume                                                                                                                = 2428
-	ProgramStateMachineType_Halt                                                                                                                  = 2429
-	ProgramStateMachineType_Reset                                                                                                                 = 2430
-	ShelvedStateMachineType_Unshelve                                                                                                              = 2947
-	ShelvedStateMachineType_OneShotShelve                                                                                                         = 2948
-	ShelvedStateMachineType_TimedShelve                                                                                                           = 2949
-	AddCommentMethodType                                                                                                                          = 3863
-	ConditionType_ConditionRefresh                                                                                                                = 3875
-	DialogConditionType_ConditionRefresh                                                                                                          = 4198
-	AcknowledgeableConditionType_ConditionRefresh                                                                                                 = 5123
-	AlarmConditionType_ConditionRefresh                                                                                                           = 5550
-	TimedShelveMethodType                                                                                                                         = 6102
-	LimitAlarmType_ConditionRefresh                                                                                                               = 6126
-	ConditionRefreshMethodType                                                                                                                    = 9007
-	ConditionType_Enable                                                                                                                          = 9027
-	ConditionType_Disable                                                                                                                         = 9028
-	ConditionType_AddComment                                                                                                                      = 9029
-	DialogResponseMethodType                                                                                                                      = 9031
-	DialogConditionType_Enable                                                                                                                    = 9051
-	DialogConditionType_Disable                                                                                                                   = 9052
-	DialogConditionType_AddComment                                                                                                                = 9053
-	DialogConditionType_Respond                                                                                                                   = 9069
-	AcknowledgeableConditionType_Enable                                                                                                           = 9089
-	AcknowledgeableConditionType_Disable                                                                                                          = 9090
-	AcknowledgeableConditionType_AddComment                                                                                                       = 9091
-	AcknowledgeableConditionType_Acknowledge                                                                                                      = 9111
-	AcknowledgeableConditionType_Confirm                                                                                                          = 9113
-	AlarmConditionType_Enable                                                                                                                     = 9134
-	AlarmConditionType_Disable                                                                                                                    = 9135
-	AlarmConditionType_AddComment                                                                                                                 = 9136
-	AlarmConditionType_Acknowledge                                                                                                                = 9156
-	AlarmConditionType_Confirm                                                                                                                    = 9158
-	AlarmConditionType_ShelvingState_Unshelve                                                                                                     = 9211
-	AlarmConditionType_ShelvingState_OneShotShelve                                                                                                = 9212
-	AlarmConditionType_ShelvingState_TimedShelve                                                                                                  = 9213
-	LimitAlarmType_Enable                                                                                                                         = 9235
-	LimitAlarmType_Disable                                                                                                                        = 9236
-	LimitAlarmType_AddComment                                                                                                                     = 9237
-	LimitAlarmType_Acknowledge                                                                                                                    = 9257
-	LimitAlarmType_Confirm                                                                                                                        = 9259
-	LimitAlarmType_ShelvingState_Unshelve                                                                                                         = 9312
-	LimitAlarmType_ShelvingState_OneShotShelve                                                                                                    = 9313
-	LimitAlarmType_ShelvingState_TimedShelve                                                                                                      = 9314
-	ExclusiveLimitAlarmType_Enable                                                                                                                = 9370
-	ExclusiveLimitAlarmType_Disable                                                                                                               = 9371
-	ExclusiveLimitAlarmType_AddComment                                                                                                            = 9372
-	ExclusiveLimitAlarmType_ConditionRefresh                                                                                                      = 9374
-	ExclusiveLimitAlarmType_Acknowledge                                                                                                           = 9394
-	ExclusiveLimitAlarmType_Confirm                                                                                                               = 9396
-	ExclusiveLimitAlarmType_ShelvingState_Unshelve                                                                                                = 9449
-	ExclusiveLimitAlarmType_ShelvingState_OneShotShelve                                                                                           = 9450
-	ExclusiveLimitAlarmType_ShelvingState_TimedShelve                                                                                             = 9451
-	ExclusiveLevelAlarmType_Enable                                                                                                                = 9511
-	ExclusiveLevelAlarmType_Disable                                                                                                               = 9512
-	ExclusiveLevelAlarmType_AddComment                                                                                                            = 9513
-	ExclusiveLevelAlarmType_ConditionRefresh                                                                                                      = 9515
-	ExclusiveLevelAlarmType_Acknowledge                                                                                                           = 9535
-	ExclusiveLevelAlarmType_Confirm                                                                                                               = 9537
-	ExclusiveLevelAlarmType_ShelvingState_Unshelve                                                                                                = 9590
-	ExclusiveLevelAlarmType_ShelvingState_OneShotShelve                                                                                           = 9591
-	ExclusiveLevelAlarmType_ShelvingState_TimedShelve                                                                                             = 9592
-	ExclusiveRateOfChangeAlarmType_Enable                                                                                                         = 9652
-	ExclusiveRateOfChangeAlarmType_Disable                                                                                                        = 9653
-	ExclusiveRateOfChangeAlarmType_AddComment                                                                                                     = 9654
-	ExclusiveRateOfChangeAlarmType_ConditionRefresh                                                                                               = 9656
-	ExclusiveRateOfChangeAlarmType_Acknowledge                                                                                                    = 9676
-	ExclusiveRateOfChangeAlarmType_Confirm                                                                                                        = 9678
-	ExclusiveRateOfChangeAlarmType_ShelvingState_Unshelve                                                                                         = 9731
-	ExclusiveRateOfChangeAlarmType_ShelvingState_OneShotShelve                                                                                    = 9732
-	ExclusiveRateOfChangeAlarmType_ShelvingState_TimedShelve                                                                                      = 9733
-	ExclusiveDeviationAlarmType_Enable                                                                                                            = 9793
-	ExclusiveDeviationAlarmType_Disable                                                                                                           = 9794
-	ExclusiveDeviationAlarmType_AddComment                                                                                                        = 9795
-	ExclusiveDeviationAlarmType_ConditionRefresh                                                                                                  = 9797
-	ExclusiveDeviationAlarmType_Acknowledge                                                                                                       = 9817
-	ExclusiveDeviationAlarmType_Confirm                                                                                                           = 9819
-	ExclusiveDeviationAlarmType_ShelvingState_Unshelve                                                                                            = 9872
-	ExclusiveDeviationAlarmType_ShelvingState_OneShotShelve                                                                                       = 9873
-	ExclusiveDeviationAlarmType_ShelvingState_TimedShelve                                                                                         = 9874
-	NonExclusiveLimitAlarmType_Enable                                                                                                             = 9935
-	NonExclusiveLimitAlarmType_Disable                                                                                                            = 9936
-	NonExclusiveLimitAlarmType_AddComment                                                                                                         = 9937
-	NonExclusiveLimitAlarmType_ConditionRefresh                                                                                                   = 9939
-	NonExclusiveLimitAlarmType_Acknowledge                                                                                                        = 9959
-	NonExclusiveLimitAlarmType_Confirm                                                                                                            = 9961
-	NonExclusiveLimitAlarmType_ShelvingState_Unshelve                                                                                             = 10014
-	NonExclusiveLimitAlarmType_ShelvingState_OneShotShelve                                                                                        = 10015
-	NonExclusiveLimitAlarmType_ShelvingState_TimedShelve                                                                                          = 10016
-	NonExclusiveLevelAlarmType_Enable                                                                                                             = 10089
-	NonExclusiveLevelAlarmType_Disable                                                                                                            = 10090
-	NonExclusiveLevelAlarmType_AddComment                                                                                                         = 10091
-	NonExclusiveLevelAlarmType_ConditionRefresh                                                                                                   = 10093
-	NonExclusiveLevelAlarmType_Acknowledge                                                                                                        = 10113
-	NonExclusiveLevelAlarmType_Confirm                                                                                                            = 10115
-	NonExclusiveLevelAlarmType_ShelvingState_Unshelve                                                                                             = 10168
-	NonExclusiveLevelAlarmType_ShelvingState_OneShotShelve                                                                                        = 10169
-	NonExclusiveLevelAlarmType_ShelvingState_TimedShelve                                                                                          = 10170
-	NonExclusiveRateOfChangeAlarmType_Enable                                                                                                      = 10243
-	NonExclusiveRateOfChangeAlarmType_Disable                                                                                                     = 10244
-	NonExclusiveRateOfChangeAlarmType_AddComment                                                                                                  = 10245
-	NonExclusiveRateOfChangeAlarmType_ConditionRefresh                                                                                            = 10247
-	NonExclusiveRateOfChangeAlarmType_Acknowledge                                                                                                 = 10267
-	NonExclusiveRateOfChangeAlarmType_Confirm                                                                                                     = 10269
-	NonExclusiveRateOfChangeAlarmType_ShelvingState_Unshelve                                                                                      = 10322
-	NonExclusiveRateOfChangeAlarmType_ShelvingState_OneShotShelve                                                                                 = 10323
-	NonExclusiveRateOfChangeAlarmType_ShelvingState_TimedShelve                                                                                   = 10324
-	NonExclusiveDeviationAlarmType_Enable                                                                                                         = 10397
-	NonExclusiveDeviationAlarmType_Disable                                                                                                        = 10398
-	NonExclusiveDeviationAlarmType_AddComment                                                                                                     = 10399
-	NonExclusiveDeviationAlarmType_ConditionRefresh                                                                                               = 10401
-	NonExclusiveDeviationAlarmType_Acknowledge                                                                                                    = 10421
-	NonExclusiveDeviationAlarmType_Confirm                                                                                                        = 10423
-	NonExclusiveDeviationAlarmType_ShelvingState_Unshelve                                                                                         = 10476
-	NonExclusiveDeviationAlarmType_ShelvingState_OneShotShelve                                                                                    = 10477
-	NonExclusiveDeviationAlarmType_ShelvingState_TimedShelve                                                                                      = 10478
-	DiscreteAlarmType_Enable                                                                                                                      = 10552
-	DiscreteAlarmType_Disable                                                                                                                     = 10553
-	DiscreteAlarmType_AddComment                                                                                                                  = 10554
-	DiscreteAlarmType_ConditionRefresh                                                                                                            = 10556
-	DiscreteAlarmType_Acknowledge                                                                                                                 = 10576
-	DiscreteAlarmType_Confirm                                                                                                                     = 10578
-	DiscreteAlarmType_ShelvingState_Unshelve                                                                                                      = 10631
-	DiscreteAlarmType_ShelvingState_OneShotShelve                                                                                                 = 10632
-	DiscreteAlarmType_ShelvingState_TimedShelve                                                                                                   = 10633
-	OffNormalAlarmType_Enable                                                                                                                     = 10666
-	OffNormalAlarmType_Disable                                                                                                                    = 10667
-	OffNormalAlarmType_AddComment                                                                                                                 = 10668
-	OffNormalAlarmType_ConditionRefresh                                                                                                           = 10670
-	OffNormalAlarmType_Acknowledge                                                                                                                = 10690
-	OffNormalAlarmType_Confirm                                                                                                                    = 10692
-	OffNormalAlarmType_ShelvingState_Unshelve                                                                                                     = 10745
-	OffNormalAlarmType_ShelvingState_OneShotShelve                                                                                                = 10746
-	OffNormalAlarmType_ShelvingState_TimedShelve                                                                                                  = 10747
-	TripAlarmType_Enable                                                                                                                          = 10780
-	TripAlarmType_Disable                                                                                                                         = 10781
-	TripAlarmType_AddComment                                                                                                                      = 10782
-	TripAlarmType_ConditionRefresh                                                                                                                = 10784
-	TripAlarmType_Acknowledge                                                                                                                     = 10804
-	TripAlarmType_Confirm                                                                                                                         = 10806
-	TripAlarmType_ShelvingState_Unshelve                                                                                                          = 10859
-	TripAlarmType_ShelvingState_OneShotShelve                                                                                                     = 10860
-	TripAlarmType_ShelvingState_TimedShelve                                                                                                       = 10861
-	ServerType_GetMonitoredItems                                                                                                                  = 11489
-	Server_GetMonitoredItems                                                                                                                      = 11492
-	GetMonitoredItemsMethodType                                                                                                                   = 11495
-	FileType_Open                                                                                                                                 = 11580
-	FileType_Close                                                                                                                                = 11583
-	FileType_Read                                                                                                                                 = 11585
-	FileType_Write                                                                                                                                = 11588
-	FileType_GetPosition                                                                                                                          = 11590
-	FileType_SetPosition                                                                                                                          = 11593
-	AddressSpaceFileType_Open                                                                                                                     = 11600
-	AddressSpaceFileType_Close                                                                                                                    = 11603
-	AddressSpaceFileType_Read                                                                                                                     = 11605
-	AddressSpaceFileType_Write                                                                                                                    = 11608
-	AddressSpaceFileType_GetPosition                                                                                                              = 11610
-	AddressSpaceFileType_SetPosition                                                                                                              = 11613
-	AddressSpaceFileType_ExportNamespace                                                                                                          = 11615
-	NamespaceMetadataType_NamespaceFile_Open                                                                                                      = 11629
-	NamespaceMetadataType_NamespaceFile_Close                                                                                                     = 11632
-	NamespaceMetadataType_NamespaceFile_Read                                                                                                      = 11634
-	NamespaceMetadataType_NamespaceFile_Write                                                                                                     = 11637
-	NamespaceMetadataType_NamespaceFile_GetPosition                                                                                               = 11639
-	NamespaceMetadataType_NamespaceFile_SetPosition                                                                                               = 11642
-	NamespaceMetadataType_NamespaceFile_ExportNamespace                                                                                           = 11644
-	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_Open                                                                             = 11659
-	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_Close                                                                            = 11662
-	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_Read                                                                             = 11664
-	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_Write                                                                            = 11667
-	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_GetPosition                                                                      = 11669
-	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_SetPosition                                                                      = 11672
-	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_ExportNamespace                                                                  = 11674
-	OpenMethodType                                                                                                                                = 11738
-	CloseMethodType                                                                                                                               = 11741
-	ReadMethodType                                                                                                                                = 11743
-	WriteMethodType                                                                                                                               = 11746
-	GetPositionMethodType                                                                                                                         = 11748
-	SetPositionMethodType                                                                                                                         = 11751
-	SystemOffNormalAlarmType_Disable                                                                                                              = 11784
-	SystemOffNormalAlarmType_Enable                                                                                                               = 11785
-	SystemOffNormalAlarmType_AddComment                                                                                                           = 11786
-	SystemOffNormalAlarmType_ConditionRefresh                                                                                                     = 11788
-	SystemOffNormalAlarmType_Acknowledge                                                                                                          = 11808
-	SystemOffNormalAlarmType_Confirm                                                                                                              = 11810
-	SystemOffNormalAlarmType_ShelvingState_Unshelve                                                                                               = 11844
-	SystemOffNormalAlarmType_ShelvingState_OneShotShelve                                                                                          = 11845
-	SystemOffNormalAlarmType_ShelvingState_TimedShelve                                                                                            = 11846
-	OpenWithMasksMethodType                                                                                                                       = 12513
-	CloseAndUpdateMethodType                                                                                                                      = 12516
-	AddCertificateMethodType                                                                                                                      = 12518
-	RemoveCertificateMethodType                                                                                                                   = 12520
-	TrustListType_Open                                                                                                                            = 12527
-	TrustListType_Close                                                                                                                           = 12530
-	TrustListType_Read                                                                                                                            = 12532
-	TrustListType_Write                                                                                                                           = 12535
-	TrustListType_GetPosition                                                                                                                     = 12537
-	TrustListType_SetPosition                                                                                                                     = 12540
-	TrustListType_OpenWithMasks                                                                                                                   = 12543
-	TrustListType_CloseAndUpdate                                                                                                                  = 12546
-	TrustListType_AddCertificate                                                                                                                  = 12548
-	TrustListType_RemoveCertificate                                                                                                               = 12550
-	UpdateCertificateMethodType                                                                                                                   = 12578
-	ServerConfigurationType_UpdateCertificate                                                                                                     = 12616
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Open                                                                  = 12647
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Close                                                                 = 12650
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Read                                                                  = 12652
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Write                                                                 = 12655
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition                                                           = 12657
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition                                                           = 12660
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks                                                         = 12663
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate                                                        = 12666
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate                                                        = 12668
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate                                                     = 12670
-	ServerConfigurationType_CreateSigningRequest                                                                                                  = 12731
-	ServerConfigurationType_ApplyChanges                                                                                                          = 12734
-	ServerConfiguration_CreateSigningRequest                                                                                                      = 12737
-	ServerConfiguration_ApplyChanges                                                                                                              = 12740
-	CreateSigningRequestMethodType                                                                                                                = 12741
-	ServerType_SetSubscriptionDurable                                                                                                             = 12746
-	Server_SetSubscriptionDurable                                                                                                                 = 12749
-	SetSubscriptionDurableMethodType                                                                                                              = 12752
-	GetRejectedListMethodType                                                                                                                     = 12773
-	ServerConfigurationType_GetRejectedList                                                                                                       = 12775
-	ServerConfiguration_GetRejectedList                                                                                                           = 12777
-	ServerType_ResendData                                                                                                                         = 12871
-	Server_ResendData                                                                                                                             = 12873
-	ResendDataMethodType                                                                                                                          = 12875
-	ServerType_RequestServerStateChange                                                                                                           = 12883
-	Server_RequestServerStateChange                                                                                                               = 12886
-	RequestServerStateChangeMethodType                                                                                                            = 12888
-	ConditionType_ConditionRefresh2                                                                                                               = 12912
-	ConditionRefresh2MethodType                                                                                                                   = 12914
-	DialogConditionType_ConditionRefresh2                                                                                                         = 12916
-	AcknowledgeableConditionType_ConditionRefresh2                                                                                                = 12918
-	AlarmConditionType_ConditionRefresh2                                                                                                          = 12984
-	LimitAlarmType_ConditionRefresh2                                                                                                              = 12986
-	ExclusiveLimitAlarmType_ConditionRefresh2                                                                                                     = 12988
-	NonExclusiveLimitAlarmType_ConditionRefresh2                                                                                                  = 12990
-	NonExclusiveLevelAlarmType_ConditionRefresh2                                                                                                  = 12992
-	ExclusiveLevelAlarmType_ConditionRefresh2                                                                                                     = 12994
-	NonExclusiveDeviationAlarmType_ConditionRefresh2                                                                                              = 12996
-	ExclusiveDeviationAlarmType_ConditionRefresh2                                                                                                 = 12998
-	NonExclusiveRateOfChangeAlarmType_ConditionRefresh2                                                                                           = 13000
-	ExclusiveRateOfChangeAlarmType_ConditionRefresh2                                                                                              = 13002
-	DiscreteAlarmType_ConditionRefresh2                                                                                                           = 13004
-	OffNormalAlarmType_ConditionRefresh2                                                                                                          = 13006
-	SystemOffNormalAlarmType_ConditionRefresh2                                                                                                    = 13008
-	TripAlarmType_ConditionRefresh2                                                                                                               = 13010
-	CertificateExpirationAlarmType_Disable                                                                                                        = 13256
-	CertificateExpirationAlarmType_Enable                                                                                                         = 13257
-	CertificateExpirationAlarmType_AddComment                                                                                                     = 13258
-	CertificateExpirationAlarmType_ConditionRefresh                                                                                               = 13260
-	CertificateExpirationAlarmType_ConditionRefresh2                                                                                              = 13262
-	CertificateExpirationAlarmType_Acknowledge                                                                                                    = 13282
-	CertificateExpirationAlarmType_Confirm                                                                                                        = 13284
-	CertificateExpirationAlarmType_ShelvingState_Unshelve                                                                                         = 13318
-	CertificateExpirationAlarmType_ShelvingState_OneShotShelve                                                                                    = 13319
-	CertificateExpirationAlarmType_ShelvingState_TimedShelve                                                                                      = 13320
-	CreateDirectoryMethodType                                                                                                                     = 13342
-	CreateFileMethodType                                                                                                                          = 13345
-	DeleteFileMethodType                                                                                                                          = 13348
-	MoveOrCopyMethodType                                                                                                                          = 13350
-	FileDirectoryType_FileDirectoryName_Placeholder_CreateDirectory                                                                               = 13355
-	FileDirectoryType_FileDirectoryName_Placeholder_CreateFile                                                                                    = 13358
-	FileDirectoryType_FileDirectoryName_Placeholder_MoveOrCopy                                                                                    = 13363
-	FileDirectoryType_FileName_Placeholder_Open                                                                                                   = 13372
-	FileDirectoryType_FileName_Placeholder_Close                                                                                                  = 13375
-	FileDirectoryType_FileName_Placeholder_Read                                                                                                   = 13377
-	FileDirectoryType_FileName_Placeholder_Write                                                                                                  = 13380
-	FileDirectoryType_FileName_Placeholder_GetPosition                                                                                            = 13382
-	FileDirectoryType_FileName_Placeholder_SetPosition                                                                                            = 13385
-	FileDirectoryType_CreateDirectory                                                                                                             = 13387
-	FileDirectoryType_CreateFile                                                                                                                  = 13390
-	FileDirectoryType_DeleteFileSystemObject                                                                                                      = 13393
-	FileDirectoryType_MoveOrCopy                                                                                                                  = 13395
-	CertificateGroupType_TrustList_Open                                                                                                           = 13605
-	CertificateGroupType_TrustList_Close                                                                                                          = 13608
-	CertificateGroupType_TrustList_Read                                                                                                           = 13610
-	CertificateGroupType_TrustList_Write                                                                                                          = 13613
-	CertificateGroupType_TrustList_GetPosition                                                                                                    = 13615
-	CertificateGroupType_TrustList_SetPosition                                                                                                    = 13618
-	CertificateGroupType_TrustList_OpenWithMasks                                                                                                  = 13621
-	CertificateGroupType_TrustList_CloseAndUpdate                                                                                                 = 13624
-	CertificateGroupType_TrustList_AddCertificate                                                                                                 = 13627
-	CertificateGroupType_TrustList_RemoveCertificate                                                                                              = 13629
-	ServerConfiguration_UpdateCertificate                                                                                                         = 13737
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_Open                                                                             = 13821
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_Close                                                                            = 13824
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_Read                                                                             = 13826
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_Write                                                                            = 13829
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_GetPosition                                                                      = 13831
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_SetPosition                                                                      = 13834
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_OpenWithMasks                                                                    = 13837
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_CloseAndUpdate                                                                   = 13840
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_AddCertificate                                                                   = 13843
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_RemoveCertificate                                                                = 13845
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_Open                                                                                   = 13855
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_Close                                                                                  = 13858
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_Read                                                                                   = 13860
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_Write                                                                                  = 13863
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_GetPosition                                                                            = 13865
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_SetPosition                                                                            = 13868
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_OpenWithMasks                                                                          = 13871
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_CloseAndUpdate                                                                         = 13874
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_AddCertificate                                                                         = 13877
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_RemoveCertificate                                                                      = 13879
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_Open                                                                               = 13889
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_Close                                                                              = 13892
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_Read                                                                               = 13894
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_Write                                                                              = 13897
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_GetPosition                                                                        = 13899
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_SetPosition                                                                        = 13902
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_OpenWithMasks                                                                      = 13905
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_CloseAndUpdate                                                                     = 13908
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_AddCertificate                                                                     = 13911
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_RemoveCertificate                                                                  = 13913
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_Open                                                                         = 13923
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_Close                                                                        = 13926
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_Read                                                                         = 13928
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_Write                                                                        = 13931
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_GetPosition                                                                  = 13933
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_SetPosition                                                                  = 13936
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_OpenWithMasks                                                                = 13939
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_CloseAndUpdate                                                               = 13942
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_AddCertificate                                                               = 13945
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_RemoveCertificate                                                            = 13947
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Open                                                              = 13958
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Close                                                             = 13961
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Read                                                              = 13963
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Write                                                             = 13966
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition                                                       = 13968
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition                                                       = 13971
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks                                                     = 13974
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate                                                    = 13977
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate                                                    = 13980
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate                                                 = 13982
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Open                                                                    = 13992
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Close                                                                   = 13995
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Read                                                                    = 13997
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Write                                                                   = 14000
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition                                                             = 14002
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition                                                             = 14005
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks                                                           = 14008
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate                                                          = 14011
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate                                                          = 14014
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate                                                       = 14016
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Open                                                                = 14026
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Close                                                               = 14029
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Read                                                                = 14031
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Write                                                               = 14034
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition                                                         = 14036
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition                                                         = 14039
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks                                                       = 14042
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate                                                      = 14045
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate                                                      = 14048
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate                                                   = 14050
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Open                                                                        = 14095
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Close                                                                       = 14098
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Read                                                                        = 14100
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Write                                                                       = 14103
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition                                                                 = 14105
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition                                                                 = 14108
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks                                                               = 14111
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate                                                              = 14114
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate                                                              = 14117
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate                                                           = 14119
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Open                                                                    = 14129
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Close                                                                   = 14132
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Read                                                                    = 14134
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Write                                                                   = 14137
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition                                                             = 14139
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition                                                             = 14142
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks                                                           = 14145
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate                                                          = 14148
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate                                                          = 14151
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate                                                       = 14153
-	RemoveConnectionMethodType                                                                                                                    = 14183
-	PubSubConnectionType_RemoveGroup                                                                                                              = 14225
-	PublishSubscribeType_ConnectionName_Placeholder_Status_Enable                                                                                 = 14421
-	PublishSubscribeType_ConnectionName_Placeholder_Status_Disable                                                                                = 14422
-	PublishSubscribeType_ConnectionName_Placeholder_RemoveGroup                                                                                   = 14424
-	PublishSubscribeType_RemoveConnection                                                                                                         = 14432
-	PublishSubscribeType_PublishedDataSets_AddPublishedDataItems                                                                                  = 14435
-	PublishSubscribeType_PublishedDataSets_AddPublishedEvents                                                                                     = 14438
-	PublishSubscribeType_PublishedDataSets_RemovePublishedDataSet                                                                                 = 14441
-	DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedDataItems                                                                         = 14479
-	DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedEvents                                                                            = 14482
-	DataSetFolderType_DataSetFolderName_Placeholder_RemovePublishedDataSet                                                                        = 14485
-	DataSetFolderType_AddPublishedDataItems                                                                                                       = 14493
-	DataSetFolderType_AddPublishedEvents                                                                                                          = 14496
-	DataSetFolderType_RemovePublishedDataSet                                                                                                      = 14499
-	AddPublishedDataItemsMethodType                                                                                                               = 14501
-	AddPublishedEventsMethodType                                                                                                                  = 14504
-	RemovePublishedDataSetMethodType                                                                                                              = 14507
-	PublishedDataItemsType_AddVariables                                                                                                           = 14555
-	PublishedDataItemsType_RemoveVariables                                                                                                        = 14558
-	PublishedDataItemsAddVariablesMethodType                                                                                                      = 14564
-	PublishedDataItemsRemoveVariablesMethodType                                                                                                   = 14567
-	PubSubConnectionType_Status_Enable                                                                                                            = 14602
-	PubSubConnectionType_Status_Disable                                                                                                           = 14603
-	PubSubConnectionTypeRemoveGroupMethodType                                                                                                     = 14604
-	PubSubGroupTypeRemoveWriterMethodType                                                                                                         = 14623
-	PubSubGroupTypeRemoveReaderMethodType                                                                                                         = 14625
-	PubSubStatusType_Enable                                                                                                                       = 14645
-	PubSubStatusType_Disable                                                                                                                      = 14646
-	PublishedEventsType_ModifyFieldSelection                                                                                                      = 15052
-	PublishedEventsTypeModifyFieldSelectionMethodType                                                                                             = 15054
-	TargetVariablesType_AddTargetVariables                                                                                                        = 15115
-	TargetVariablesType_RemoveTargetVariables                                                                                                     = 15118
-	TargetVariablesTypeAddTargetVariablesMethodType                                                                                               = 15121
-	TargetVariablesTypeRemoveTargetVariablesMethodType                                                                                            = 15124
-	PublishSubscribeType_GetSecurityKeys                                                                                                          = 15212
-	PublishSubscribe_GetSecurityKeys                                                                                                              = 15215
-	GetSecurityKeysMethodType                                                                                                                     = 15218
-	PublishedDataSetType_DataSetWriterName_Placeholder_Status_Enable                                                                              = 15225
-	PublishedDataSetType_DataSetWriterName_Placeholder_Status_Disable                                                                             = 15226
-	PublishedDataItemsType_DataSetWriterName_Placeholder_Status_Enable                                                                            = 15233
-	PublishedDataItemsType_DataSetWriterName_Placeholder_Status_Disable                                                                           = 15234
-	PublishedEventsType_DataSetWriterName_Placeholder_Status_Enable                                                                               = 15241
-	PublishedEventsType_DataSetWriterName_Placeholder_Status_Disable                                                                              = 15242
-	CreateCredentialMethodType                                                                                                                    = 15248
-	PubSubGroupType_Status_Enable                                                                                                                 = 15267
-	PubSubGroupType_Status_Disable                                                                                                                = 15268
-	DataSetWriterType_Status_Enable                                                                                                               = 15301
-	DataSetWriterType_Status_Disable                                                                                                              = 15302
-	DataSetReaderType_Status_Enable                                                                                                               = 15309
-	DataSetReaderType_Status_Disable                                                                                                              = 15310
-	PublishSubscribeType_GetSecurityGroup                                                                                                         = 15431
-	PublishSubscribeType_SecurityGroups_AddSecurityGroup                                                                                          = 15435
-	PublishSubscribeType_SecurityGroups_RemoveSecurityGroup                                                                                       = 15438
-	PublishSubscribe_GetSecurityGroup                                                                                                             = 15440
-	PublishSubscribe_SecurityGroups_AddSecurityGroup                                                                                              = 15444
-	PublishSubscribe_SecurityGroups_RemoveSecurityGroup                                                                                           = 15447
-	GetSecurityGroupMethodType                                                                                                                    = 15449
-	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder_AddSecurityGroup                                                                  = 15454
-	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder_RemoveSecurityGroup                                                               = 15457
-	SecurityGroupFolderType_AddSecurityGroup                                                                                                      = 15461
-	SecurityGroupFolderType_RemoveSecurityGroup                                                                                                   = 15464
-	AddSecurityGroupMethodType                                                                                                                    = 15466
-	RemoveSecurityGroupMethodType                                                                                                                 = 15469
-	DataSetFolderType_PublishedDataSetName_Placeholder_ExtensionFields_AddExtensionField                                                          = 15474
-	DataSetFolderType_PublishedDataSetName_Placeholder_ExtensionFields_RemoveExtensionField                                                       = 15477
-	PublishedDataSetType_ExtensionFields_AddExtensionField                                                                                        = 15482
-	PublishedDataSetType_ExtensionFields_RemoveExtensionField                                                                                     = 15485
-	ExtensionFieldsType_AddExtensionField                                                                                                         = 15491
-	ExtensionFieldsType_RemoveExtensionField                                                                                                      = 15494
-	AddExtensionFieldMethodType                                                                                                                   = 15496
-	RemoveExtensionFieldMethodType                                                                                                                = 15499
-	PublishedDataItemsType_ExtensionFields_AddExtensionField                                                                                      = 15504
-	PublishedDataItemsType_ExtensionFields_RemoveExtensionField                                                                                   = 15507
-	PublishedEventsType_ExtensionFields_AddExtensionField                                                                                         = 15512
-	PublishedEventsType_ExtensionFields_RemoveExtensionField                                                                                      = 15515
-	RoleSetType_RoleName_Placeholder_AddIdentity                                                                                                  = 15612
-	RoleSetType_RoleName_Placeholder_RemoveIdentity                                                                                               = 15614
-	RoleType_AddIdentity                                                                                                                          = 15624
-	RoleType_RemoveIdentity                                                                                                                       = 15626
-	AddIdentityMethodType                                                                                                                         = 15636
-	RemoveIdentityMethodType                                                                                                                      = 15638
-	WellKnownRole_Anonymous_AddIdentity                                                                                                           = 15648
-	WellKnownRole_Anonymous_RemoveIdentity                                                                                                        = 15650
-	WellKnownRole_AuthenticatedUser_AddIdentity                                                                                                   = 15660
-	WellKnownRole_AuthenticatedUser_RemoveIdentity                                                                                                = 15662
-	WellKnownRole_Observer_AddIdentity                                                                                                            = 15672
-	WellKnownRole_Observer_RemoveIdentity                                                                                                         = 15674
-	WellKnownRole_Operator_AddIdentity                                                                                                            = 15684
-	WellKnownRole_Operator_RemoveIdentity                                                                                                         = 15686
-	WellKnownRole_Supervisor_AddIdentity                                                                                                          = 15696
-	WellKnownRole_Supervisor_RemoveIdentity                                                                                                       = 15698
-	WellKnownRole_SecurityAdmin_AddIdentity                                                                                                       = 15708
-	WellKnownRole_SecurityAdmin_RemoveIdentity                                                                                                    = 15710
-	WellKnownRole_ConfigureAdmin_AddIdentity                                                                                                      = 15720
-	WellKnownRole_ConfigureAdmin_RemoveIdentity                                                                                                   = 15722
-	TemporaryFileTransferType_GenerateFileForRead                                                                                                 = 15746
-	TemporaryFileTransferType_GenerateFileForWrite                                                                                                = 15749
-	TemporaryFileTransferType_CloseAndCommit                                                                                                      = 15751
-	TemporaryFileTransferType_TransferState_Placeholder_Reset                                                                                     = 15794
-	GenerateFileForReadMethodType                                                                                                                 = 15795
-	GenerateFileForWriteMethodType                                                                                                                = 15798
-	CloseAndCommitMethodType                                                                                                                      = 15800
-	FileTransferStateMachineType_Reset                                                                                                            = 15843
-	PublishSubscribeType_Status_Enable                                                                                                            = 15846
-	PublishSubscribeType_Status_Disable                                                                                                           = 15847
-	PublishSubscribe_ConnectionName_Placeholder_Status_Enable                                                                                     = 15893
-	PublishSubscribe_ConnectionName_Placeholder_Status_Disable                                                                                    = 15894
-	PubSubKeyServiceType_GetSecurityKeys                                                                                                          = 15907
-	PubSubKeyServiceType_GetSecurityGroup                                                                                                         = 15910
-	PubSubKeyServiceType_SecurityGroups_AddSecurityGroup                                                                                          = 15914
-	PubSubKeyServiceType_SecurityGroups_RemoveSecurityGroup                                                                                       = 15917
-	OPCUANamespaceMetadata_NamespaceFile_Open                                                                                                     = 15971
-	OPCUANamespaceMetadata_NamespaceFile_Close                                                                                                    = 15974
-	OPCUANamespaceMetadata_NamespaceFile_Read                                                                                                     = 15976
-	OPCUANamespaceMetadata_NamespaceFile_Write                                                                                                    = 15979
-	OPCUANamespaceMetadata_NamespaceFile_GetPosition                                                                                              = 15981
-	OPCUANamespaceMetadata_NamespaceFile_SetPosition                                                                                              = 15984
-	OPCUANamespaceMetadata_NamespaceFile_ExportNamespace                                                                                          = 15986
-	RoleSetType_AddRole                                                                                                                           = 15997
-	RoleSetType_RemoveRole                                                                                                                        = 16000
-	AddRoleMethodType                                                                                                                             = 16002
-	RemoveRoleMethodType                                                                                                                          = 16005
-	WellKnownRole_Engineer_AddIdentity                                                                                                            = 16041
-	WellKnownRole_Engineer_RemoveIdentity                                                                                                         = 16043
-	PublishSubscribe_ConnectionName_Placeholder_Diagnostics_Reset                                                                                 = 16076
-	RoleSetType_RoleName_Placeholder_AddApplication                                                                                               = 16165
-	RoleSetType_RoleName_Placeholder_RemoveApplication                                                                                            = 16167
-	RoleSetType_RoleName_Placeholder_AddEndpoint                                                                                                  = 16169
-	RoleSetType_RoleName_Placeholder_RemoveEndpoint                                                                                               = 16171
-	RoleType_AddApplication                                                                                                                       = 16176
-	RoleType_RemoveApplication                                                                                                                    = 16178
-	RoleType_AddEndpoint                                                                                                                          = 16180
-	RoleType_RemoveEndpoint                                                                                                                       = 16182
-	AddApplicationMethodType                                                                                                                      = 16184
-	RemoveApplicationMethodType                                                                                                                   = 16186
-	AddEndpointMethodType                                                                                                                         = 16188
-	RemoveEndpointMethodType                                                                                                                      = 16190
-	WellKnownRole_Anonymous_AddApplication                                                                                                        = 16195
-	WellKnownRole_Anonymous_RemoveApplication                                                                                                     = 16197
-	WellKnownRole_Anonymous_AddEndpoint                                                                                                           = 16199
-	WellKnownRole_Anonymous_RemoveEndpoint                                                                                                        = 16201
-	WellKnownRole_AuthenticatedUser_AddApplication                                                                                                = 16206
-	WellKnownRole_AuthenticatedUser_RemoveApplication                                                                                             = 16208
-	WellKnownRole_AuthenticatedUser_AddEndpoint                                                                                                   = 16210
-	WellKnownRole_AuthenticatedUser_RemoveEndpoint                                                                                                = 16212
-	WellKnownRole_Observer_AddApplication                                                                                                         = 16217
-	WellKnownRole_Observer_RemoveApplication                                                                                                      = 16219
-	WellKnownRole_Observer_AddEndpoint                                                                                                            = 16221
-	WellKnownRole_Observer_RemoveEndpoint                                                                                                         = 16223
-	WellKnownRole_Operator_AddApplication                                                                                                         = 16228
-	WellKnownRole_Operator_RemoveApplication                                                                                                      = 16230
-	WellKnownRole_Operator_AddEndpoint                                                                                                            = 16232
-	WellKnownRole_Operator_RemoveEndpoint                                                                                                         = 16234
-	WellKnownRole_Engineer_AddApplication                                                                                                         = 16239
-	WellKnownRole_Engineer_RemoveApplication                                                                                                      = 16241
-	WellKnownRole_Engineer_AddEndpoint                                                                                                            = 16243
-	WellKnownRole_Engineer_RemoveEndpoint                                                                                                         = 16245
-	WellKnownRole_Supervisor_AddApplication                                                                                                       = 16250
-	WellKnownRole_Supervisor_RemoveApplication                                                                                                    = 16252
-	WellKnownRole_Supervisor_AddEndpoint                                                                                                          = 16254
-	WellKnownRole_Supervisor_RemoveEndpoint                                                                                                       = 16256
-	WellKnownRole_SecurityAdmin_AddApplication                                                                                                    = 16261
-	WellKnownRole_SecurityAdmin_RemoveApplication                                                                                                 = 16263
-	WellKnownRole_SecurityAdmin_AddEndpoint                                                                                                       = 16265
-	WellKnownRole_SecurityAdmin_RemoveEndpoint                                                                                                    = 16267
-	WellKnownRole_ConfigureAdmin_AddApplication                                                                                                   = 16272
-	WellKnownRole_ConfigureAdmin_RemoveApplication                                                                                                = 16274
-	WellKnownRole_ConfigureAdmin_AddEndpoint                                                                                                      = 16276
-	WellKnownRole_ConfigureAdmin_RemoveEndpoint                                                                                                   = 16278
-	ServerType_ServerCapabilities_RoleSet_AddRole                                                                                                 = 16290
-	ServerType_ServerCapabilities_RoleSet_RemoveRole                                                                                              = 16293
-	ServerCapabilitiesType_RoleSet_AddRole                                                                                                        = 16296
-	ServerCapabilitiesType_RoleSet_RemoveRole                                                                                                     = 16299
-	Server_ServerCapabilities_RoleSet_AddRole                                                                                                     = 16301
-	Server_ServerCapabilities_RoleSet_RemoveRole                                                                                                  = 16304
-	FileSystem_FileDirectoryName_Placeholder_CreateDirectory                                                                                      = 16316
-	FileSystem_FileDirectoryName_Placeholder_CreateFile                                                                                           = 16319
-	FileSystem_FileDirectoryName_Placeholder_MoveOrCopy                                                                                           = 16324
-	FileSystem_FileName_Placeholder_Open                                                                                                          = 16333
-	FileSystem_FileName_Placeholder_Close                                                                                                         = 16336
-	FileSystem_FileName_Placeholder_Read                                                                                                          = 16338
-	FileSystem_FileName_Placeholder_Write                                                                                                         = 16341
-	FileSystem_FileName_Placeholder_GetPosition                                                                                                   = 16343
-	FileSystem_FileName_Placeholder_SetPosition                                                                                                   = 16346
-	FileSystem_CreateDirectory                                                                                                                    = 16348
-	FileSystem_CreateFile                                                                                                                         = 16351
-	FileSystem_DeleteFileSystemObject                                                                                                             = 16354
-	FileSystem_MoveOrCopy                                                                                                                         = 16356
-	AlarmConditionType_Silence                                                                                                                    = 16402
-	AlarmConditionType_Suppress                                                                                                                   = 16403
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Disable                                                                                     = 16439
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Enable                                                                                      = 16440
-	AlarmGroupType_AlarmConditionInstance_Placeholder_AddComment                                                                                  = 16441
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Acknowledge                                                                                 = 16461
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Confirm                                                                                     = 16463
-	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_Unshelve                                                                      = 16515
-	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_OneShotShelve                                                                 = 16516
-	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_TimedShelve                                                                   = 16517
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Silence                                                                                     = 16533
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Suppress                                                                                    = 16534
-	PublishSubscribeType_ConnectionName_Placeholder_AddWriterGroup                                                                                = 16535
-	PublishSubscribeType_ConnectionName_Placeholder_AddReaderGroup                                                                                = 16560
-	LimitAlarmType_Silence                                                                                                                        = 16569
-	LimitAlarmType_Suppress                                                                                                                       = 16570
-	PublishSubscribeType_AddConnection                                                                                                            = 16598
-	PublishSubscribeType_PublishedDataSets_AddPublishedDataItemsTemplate                                                                          = 16601
-	ExclusiveLimitAlarmType_Silence                                                                                                               = 16609
-	ExclusiveLimitAlarmType_Suppress                                                                                                              = 16610
-	PublishSubscribeType_PublishedDataSets_AddPublishedEventsTemplate                                                                             = 16639
-	NonExclusiveLimitAlarmType_Silence                                                                                                            = 16649
-	NonExclusiveLimitAlarmType_Suppress                                                                                                           = 16650
-	PublishSubscribeType_PublishedDataSets_AddDataSetFolder                                                                                       = 16651
-	PublishSubscribeType_PublishedDataSets_RemoveDataSetFolder                                                                                    = 16680
-	NonExclusiveLevelAlarmType_Silence                                                                                                            = 16689
-	NonExclusiveLevelAlarmType_Suppress                                                                                                           = 16690
-	AddConnectionMethodType                                                                                                                       = 16691
-	ExclusiveLevelAlarmType_Silence                                                                                                               = 16729
-	ExclusiveLevelAlarmType_Suppress                                                                                                              = 16730
-	NonExclusiveDeviationAlarmType_Silence                                                                                                        = 16769
-	NonExclusiveDeviationAlarmType_Suppress                                                                                                       = 16770
-	ExclusiveDeviationAlarmType_Silence                                                                                                           = 16810
-	ExclusiveDeviationAlarmType_Suppress                                                                                                          = 16811
-	DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedDataItemsTemplate                                                                 = 16842
-	NonExclusiveRateOfChangeAlarmType_Silence                                                                                                     = 16851
-	NonExclusiveRateOfChangeAlarmType_Suppress                                                                                                    = 16852
-	DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedEventsTemplate                                                                    = 16881
-	DataSetFolderType_DataSetFolderName_Placeholder_AddDataSetFolder                                                                              = 16884
-	ExclusiveRateOfChangeAlarmType_Silence                                                                                                        = 16892
-	ExclusiveRateOfChangeAlarmType_Suppress                                                                                                       = 16893
-	DataSetFolderType_DataSetFolderName_Placeholder_RemoveDataSetFolder                                                                           = 16923
-	DiscreteAlarmType_Silence                                                                                                                     = 16933
-	DiscreteAlarmType_Suppress                                                                                                                    = 16934
-	DataSetFolderType_AddPublishedDataItemsTemplate                                                                                               = 16935
-	DataSetFolderType_AddPublishedEventsTemplate                                                                                                  = 16960
-	OffNormalAlarmType_Silence                                                                                                                    = 16969
-	OffNormalAlarmType_Suppress                                                                                                                   = 16970
-	DataSetFolderType_AddDataSetFolder                                                                                                            = 16994
-	DataSetFolderType_RemoveDataSetFolder                                                                                                         = 16997
-	SystemOffNormalAlarmType_Silence                                                                                                              = 17005
-	SystemOffNormalAlarmType_Suppress                                                                                                             = 17006
-	AddPublishedDataItemsTemplateMethodType                                                                                                       = 17030
-	AddPublishedEventsTemplateMethodType                                                                                                          = 17033
-	TripAlarmType_Silence                                                                                                                         = 17041
-	TripAlarmType_Suppress                                                                                                                        = 17042
-	AddDataSetFolderMethodType                                                                                                                    = 17067
-	CertificateExpirationAlarmType_Silence                                                                                                        = 17077
-	CertificateExpirationAlarmType_Suppress                                                                                                       = 17078
-	RemoveDataSetFolderMethodType                                                                                                                 = 17079
-	DiscrepancyAlarmType_Disable                                                                                                                  = 17113
-	DiscrepancyAlarmType_Enable                                                                                                                   = 17114
-	DiscrepancyAlarmType_AddComment                                                                                                               = 17115
-	DiscrepancyAlarmType_ConditionRefresh                                                                                                         = 17117
-	DiscrepancyAlarmType_ConditionRefresh2                                                                                                        = 17119
-	DiscrepancyAlarmType_Acknowledge                                                                                                              = 17139
-	DiscrepancyAlarmType_Confirm                                                                                                                  = 17141
-	DiscrepancyAlarmType_ShelvingState_Unshelve                                                                                                   = 17193
-	DiscrepancyAlarmType_ShelvingState_OneShotShelve                                                                                              = 17194
-	DiscrepancyAlarmType_ShelvingState_TimedShelve                                                                                                = 17195
-	DiscrepancyAlarmType_Silence                                                                                                                  = 17212
-	DiscrepancyAlarmType_Suppress                                                                                                                 = 17213
-	PubSubConnectionType_WriterGroupName_Placeholder_AddDataSetWriter                                                                             = 17293
-	PublishSubscribeType_SetSecurityKeys                                                                                                          = 17296
-	SetSecurityKeysMethodType                                                                                                                     = 17298
-	PubSubConnectionType_WriterGroupName_Placeholder_Status_Enable                                                                                = 17316
-	PubSubConnectionType_WriterGroupName_Placeholder_Status_Disable                                                                               = 17317
-	PubSubConnectionType_WriterGroupName_Placeholder_RemoveDataSetWriter                                                                          = 17323
-	PubSubConnectionType_ReaderGroupName_Placeholder_Status_Enable                                                                                = 17331
-	PubSubConnectionType_ReaderGroupName_Placeholder_Status_Disable                                                                               = 17332
-	PubSubConnectionType_ReaderGroupName_Placeholder_RemoveDataSetReader                                                                          = 17333
-	PubSubConnectionType_ReaderGroupName_Placeholder_AddDataSetReader                                                                             = 17355
-	PublishSubscribe_ConnectionName_Placeholder_AddWriterGroup                                                                                    = 17356
-	PublishSubscribe_ConnectionName_Placeholder_AddReaderGroup                                                                                    = 17359
-	PublishSubscribe_ConnectionName_Placeholder_RemoveGroup                                                                                       = 17362
-	PublishSubscribe_SetSecurityKeys                                                                                                              = 17364
-	PublishSubscribe_AddConnection                                                                                                                = 17366
-	PublishSubscribe_RemoveConnection                                                                                                             = 17369
-	PublishSubscribe_PublishedDataSets_AddPublishedDataItems                                                                                      = 17372
-	PublishSubscribe_PublishedDataSets_AddPublishedEvents                                                                                         = 17375
-	PublishSubscribe_PublishedDataSets_AddPublishedDataItemsTemplate                                                                              = 17378
-	PublishSubscribe_PublishedDataSets_AddPublishedEventsTemplate                                                                                 = 17381
-	PublishSubscribe_PublishedDataSets_RemovePublishedDataSet                                                                                     = 17384
-	DataSetReaderType_CreateTargetVariables                                                                                                       = 17386
-	DataSetReaderType_CreateDataSetMirror                                                                                                         = 17389
-	DataSetReaderTypeCreateTargetVariablesMethodType                                                                                              = 17392
-	DataSetReaderTypeCreateDataSetMirrorMethodType                                                                                                = 17395
-	PublishSubscribe_PublishedDataSets_AddDataSetFolder                                                                                           = 17398
-	PublishSubscribe_PublishedDataSets_RemoveDataSetFolder                                                                                        = 17403
-	PublishSubscribe_Status_Enable                                                                                                                = 17407
-	PublishSubscribe_Status_Disable                                                                                                               = 17408
-	PublishSubscribe_Diagnostics_Reset                                                                                                            = 17421
-	PubSubConnectionType_AddWriterGroup                                                                                                           = 17427
-	PubSubConnectionType_AddReaderGroup                                                                                                           = 17465
-	KeyCredentialConfigurationFolderType_ServiceName_Placeholder_GetEncryptingKey                                                                 = 17516
-	KeyCredentialConfigurationFolderType_ServiceName_Placeholder_UpdateCredential                                                                 = 17519
-	KeyCredentialConfigurationFolderType_ServiceName_Placeholder_DeleteCredential                                                                 = 17521
-	KeyCredentialConfigurationFolderType_CreateCredential                                                                                         = 17522
-	KeyCredentialConfiguration_ServiceName_Placeholder_GetEncryptingKey                                                                           = 17525
-	KeyCredentialConfiguration_CreateCredential                                                                                                   = 17528
-	GetEncryptingKeyMethodType                                                                                                                    = 17531
-	KeyCredentialConfigurationType_GetEncryptingKey                                                                                               = 17534
-	PubSubConnectionTypeAddWriterGroupMethodType                                                                                                  = 17561
-	PubSubConnectionAddReaderGroupGroupMethodType                                                                                                 = 17630
-	FileDirectoryType_FileDirectoryName_Placeholder_DeleteFileSystemObject                                                                        = 17718
-	FileSystem_FileDirectoryName_Placeholder_DeleteFileSystemObject                                                                               = 17722
-	WriterGroupType_Status_Enable                                                                                                                 = 17734
-	WriterGroupType_Status_Disable                                                                                                                = 17735
-	WriterGroupType_DataSetWriterName_Placeholder_Status_Enable                                                                                   = 17751
-	WriterGroupType_DataSetWriterName_Placeholder_Status_Disable                                                                                  = 17752
-	WriterGroupType_DataSetWriterName_Placeholder_Diagnostics_Reset                                                                               = 17765
-	WriterGroupType_Diagnostics_Reset                                                                                                             = 17824
-	AlarmConditionType_Unsuppress                                                                                                                 = 17868
-	AlarmConditionType_RemoveFromService                                                                                                          = 17869
-	AlarmConditionType_PlaceInService                                                                                                             = 17870
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Unsuppress                                                                                  = 17875
-	AlarmGroupType_AlarmConditionInstance_Placeholder_RemoveFromService                                                                           = 17876
-	AlarmGroupType_AlarmConditionInstance_Placeholder_PlaceInService                                                                              = 17877
-	LimitAlarmType_Unsuppress                                                                                                                     = 17882
-	LimitAlarmType_RemoveFromService                                                                                                              = 17883
-	LimitAlarmType_PlaceInService                                                                                                                 = 17884
-	ExclusiveLimitAlarmType_Unsuppress                                                                                                            = 17889
-	ExclusiveLimitAlarmType_RemoveFromService                                                                                                     = 17890
-	ExclusiveLimitAlarmType_PlaceInService                                                                                                        = 17891
-	NonExclusiveLimitAlarmType_Unsuppress                                                                                                         = 17896
-	NonExclusiveLimitAlarmType_RemoveFromService                                                                                                  = 17897
-	NonExclusiveLimitAlarmType_PlaceInService                                                                                                     = 17898
-	NonExclusiveLevelAlarmType_RemoveFromService                                                                                                  = 17904
-	NonExclusiveLevelAlarmType_PlaceInService                                                                                                     = 17905
-	ExclusiveLevelAlarmType_Unsuppress                                                                                                            = 17910
-	ExclusiveLevelAlarmType_RemoveFromService                                                                                                     = 17911
-	ExclusiveLevelAlarmType_PlaceInService                                                                                                        = 17912
-	NonExclusiveDeviationAlarmType_Unsuppress                                                                                                     = 17917
-	NonExclusiveDeviationAlarmType_RemoveFromService                                                                                              = 17918
-	NonExclusiveDeviationAlarmType_PlaceInService                                                                                                 = 17919
-	NonExclusiveRateOfChangeAlarmType_Unsuppress                                                                                                  = 17924
-	NonExclusiveRateOfChangeAlarmType_RemoveFromService                                                                                           = 17925
-	NonExclusiveRateOfChangeAlarmType_PlaceInService                                                                                              = 17926
-	ExclusiveDeviationAlarmType_Unsuppress                                                                                                        = 17931
-	ExclusiveDeviationAlarmType_RemoveFromService                                                                                                 = 17932
-	ExclusiveDeviationAlarmType_PlaceInService                                                                                                    = 17933
-	ExclusiveRateOfChangeAlarmType_Unsuppress                                                                                                     = 17938
-	ExclusiveRateOfChangeAlarmType_RemoveFromService                                                                                              = 17939
-	ExclusiveRateOfChangeAlarmType_PlaceInService                                                                                                 = 17940
-	DiscreteAlarmType_Unsuppress                                                                                                                  = 17945
-	DiscreteAlarmType_RemoveFromService                                                                                                           = 17946
-	DiscreteAlarmType_PlaceInService                                                                                                              = 17947
-	OffNormalAlarmType_Unsuppress                                                                                                                 = 17952
-	OffNormalAlarmType_RemoveFromService                                                                                                          = 17953
-	OffNormalAlarmType_PlaceInService                                                                                                             = 17954
-	SystemOffNormalAlarmType_Unsuppress                                                                                                           = 17959
-	SystemOffNormalAlarmType_RemoveFromService                                                                                                    = 17960
-	SystemOffNormalAlarmType_PlaceInService                                                                                                       = 17961
-	TripAlarmType_Unsuppress                                                                                                                      = 17966
-	TripAlarmType_RemoveFromService                                                                                                               = 17967
-	TripAlarmType_PlaceInService                                                                                                                  = 17968
-	WriterGroupType_AddDataSetWriter                                                                                                              = 17969
-	CertificateExpirationAlarmType_Unsuppress                                                                                                     = 17973
-	CertificateExpirationAlarmType_RemoveFromService                                                                                              = 17974
-	CertificateExpirationAlarmType_PlaceInService                                                                                                 = 17975
-	DiscrepancyAlarmType_Unsuppress                                                                                                               = 17980
-	DiscrepancyAlarmType_RemoveFromService                                                                                                        = 17981
-	DiscrepancyAlarmType_PlaceInService                                                                                                           = 17982
-	WriterGroupType_RemoveDataSetWriter                                                                                                           = 17992
-	PubSubGroupTypeAddWriterMethodType                                                                                                            = 17994
-	KeyCredentialConfigurationType_UpdateCredential                                                                                               = 18006
-	KeyCredentialConfigurationType_DeleteCredential                                                                                               = 18008
-	KeyCredentialUpdateMethodType                                                                                                                 = 18009
-	ReaderGroupType_Status_Enable                                                                                                                 = 18074
-	ReaderGroupType_Status_Disable                                                                                                                = 18075
-	ReaderGroupType_DataSetReaderName_Placeholder_Status_Enable                                                                                   = 18090
-	ReaderGroupType_DataSetReaderName_Placeholder_Status_Disable                                                                                  = 18091
-	ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics_Reset                                                                               = 18104
-	KeyCredentialConfiguration_ServiceName_Placeholder_UpdateCredential                                                                           = 18161
-	KeyCredentialConfiguration_ServiceName_Placeholder_DeleteCredential                                                                           = 18163
-	AlarmConditionType_Reset                                                                                                                      = 18199
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Reset                                                                                       = 18212
-	LimitAlarmType_Reset                                                                                                                          = 18222
-	ExclusiveLimitAlarmType_Reset                                                                                                                 = 18232
-	NonExclusiveLimitAlarmType_Reset                                                                                                              = 18242
-	NonExclusiveLevelAlarmType_Unsuppress                                                                                                         = 18255
-	NonExclusiveLevelAlarmType_Reset                                                                                                              = 18256
-	ExclusiveLevelAlarmType_Reset                                                                                                                 = 18266
-	NonExclusiveDeviationAlarmType_Reset                                                                                                          = 18276
-	NonExclusiveRateOfChangeAlarmType_Reset                                                                                                       = 18286
-	ExclusiveDeviationAlarmType_Reset                                                                                                             = 18296
-	ExclusiveRateOfChangeAlarmType_Reset                                                                                                          = 18306
-	DiscreteAlarmType_Reset                                                                                                                       = 18316
-	OffNormalAlarmType_Reset                                                                                                                      = 18326
-	SystemOffNormalAlarmType_Reset                                                                                                                = 18336
-	TripAlarmType_Reset                                                                                                                           = 18346
-	InstrumentDiagnosticAlarmType_Disable                                                                                                         = 18380
-	InstrumentDiagnosticAlarmType_Enable                                                                                                          = 18381
-	InstrumentDiagnosticAlarmType_AddComment                                                                                                      = 18382
-	InstrumentDiagnosticAlarmType_ConditionRefresh                                                                                                = 18384
-	InstrumentDiagnosticAlarmType_ConditionRefresh2                                                                                               = 18386
-	InstrumentDiagnosticAlarmType_Acknowledge                                                                                                     = 18406
-	InstrumentDiagnosticAlarmType_Confirm                                                                                                         = 18408
-	InstrumentDiagnosticAlarmType_ShelvingState_TimedShelve                                                                                       = 18453
-	InstrumentDiagnosticAlarmType_ShelvingState_Unshelve                                                                                          = 18455
-	InstrumentDiagnosticAlarmType_ShelvingState_OneShotShelve                                                                                     = 18456
-	InstrumentDiagnosticAlarmType_Silence                                                                                                         = 18489
-	InstrumentDiagnosticAlarmType_Suppress                                                                                                        = 18490
-	InstrumentDiagnosticAlarmType_Unsuppress                                                                                                      = 18491
-	InstrumentDiagnosticAlarmType_RemoveFromService                                                                                               = 18492
-	InstrumentDiagnosticAlarmType_PlaceInService                                                                                                  = 18493
-	InstrumentDiagnosticAlarmType_Reset                                                                                                           = 18494
-	SystemDiagnosticAlarmType_Disable                                                                                                             = 18529
-	SystemDiagnosticAlarmType_Enable                                                                                                              = 18530
-	SystemDiagnosticAlarmType_AddComment                                                                                                          = 18531
-	SystemDiagnosticAlarmType_ConditionRefresh                                                                                                    = 18533
-	SystemDiagnosticAlarmType_ConditionRefresh2                                                                                                   = 18535
-	SystemDiagnosticAlarmType_Acknowledge                                                                                                         = 18555
-	SystemDiagnosticAlarmType_Confirm                                                                                                             = 18557
-	SystemDiagnosticAlarmType_ShelvingState_TimedShelve                                                                                           = 18602
-	SystemDiagnosticAlarmType_ShelvingState_Unshelve                                                                                              = 18604
-	SystemDiagnosticAlarmType_ShelvingState_OneShotShelve                                                                                         = 18605
-	SystemDiagnosticAlarmType_Silence                                                                                                             = 18638
-	SystemDiagnosticAlarmType_Suppress                                                                                                            = 18639
-	SystemDiagnosticAlarmType_Unsuppress                                                                                                          = 18640
-	SystemDiagnosticAlarmType_RemoveFromService                                                                                                   = 18641
-	SystemDiagnosticAlarmType_PlaceInService                                                                                                      = 18642
-	SystemDiagnosticAlarmType_Reset                                                                                                               = 18643
-	CertificateExpirationAlarmType_Reset                                                                                                          = 18654
-	DiscrepancyAlarmType_Reset                                                                                                                    = 18664
-	AlarmMetricsType_Reset                                                                                                                        = 18666
-	PublishSubscribeType_ConnectionName_Placeholder_Diagnostics_Reset                                                                             = 18679
-	PublishSubscribeType_Diagnostics_Reset                                                                                                        = 18727
-	PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics_Reset                                                                          = 18883
-	PublishedDataItemsType_DataSetWriterName_Placeholder_Diagnostics_Reset                                                                        = 18942
-	PublishedEventsType_DataSetWriterName_Placeholder_Diagnostics_Reset                                                                           = 19001
-	PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics_Reset                                                                            = 19119
-	PubSubConnectionType_ReaderGroupName_Placeholder_Diagnostics_Reset                                                                            = 19188
-	PubSubConnectionType_Diagnostics_Reset                                                                                                        = 19253
-	TrustListOutOfDateAlarmType_Disable                                                                                                           = 19330
-	TrustListOutOfDateAlarmType_Enable                                                                                                            = 19331
-	TrustListOutOfDateAlarmType_AddComment                                                                                                        = 19332
-	TrustListOutOfDateAlarmType_ConditionRefresh                                                                                                  = 19334
-	TrustListOutOfDateAlarmType_ConditionRefresh2                                                                                                 = 19336
-	TrustListOutOfDateAlarmType_Acknowledge                                                                                                       = 19356
-	TrustListOutOfDateAlarmType_Confirm                                                                                                           = 19358
-	TrustListOutOfDateAlarmType_ShelvingState_TimedShelve                                                                                         = 19403
-	TrustListOutOfDateAlarmType_ShelvingState_Unshelve                                                                                            = 19405
-	TrustListOutOfDateAlarmType_ShelvingState_OneShotShelve                                                                                       = 19406
-	TrustListOutOfDateAlarmType_Silence                                                                                                           = 19439
-	TrustListOutOfDateAlarmType_Suppress                                                                                                          = 19440
-	TrustListOutOfDateAlarmType_Unsuppress                                                                                                        = 19441
-	TrustListOutOfDateAlarmType_RemoveFromService                                                                                                 = 19442
-	TrustListOutOfDateAlarmType_PlaceInService                                                                                                    = 19443
-	TrustListOutOfDateAlarmType_Reset                                                                                                             = 19444
-	CertificateGroupType_CertificateExpired_Disable                                                                                               = 19483
-	CertificateGroupType_CertificateExpired_Enable                                                                                                = 19484
-	CertificateGroupType_CertificateExpired_AddComment                                                                                            = 19485
-	CertificateGroupType_CertificateExpired_Acknowledge                                                                                           = 19505
-	CertificateGroupType_CertificateExpired_Confirm                                                                                               = 19507
-	DataSetWriterType_Diagnostics_Reset                                                                                                           = 19562
-	DataSetReaderType_Diagnostics_Reset                                                                                                           = 19621
-	PubSubDiagnosticsType_Reset                                                                                                                   = 19689
-	PubSubDiagnosticsRootType_Reset                                                                                                               = 19744
-	PubSubDiagnosticsConnectionType_Reset                                                                                                         = 19798
-	PubSubDiagnosticsWriterGroupType_Reset                                                                                                        = 19846
-	PubSubDiagnosticsReaderGroupType_Reset                                                                                                        = 19915
-	PubSubDiagnosticsDataSetWriterType_Reset                                                                                                      = 19980
-	PubSubDiagnosticsDataSetReaderType_Reset                                                                                                      = 20039
-	CertificateGroupType_CertificateExpired_ShelvingState_TimedShelve                                                                             = 20097
-	CertificateGroupType_CertificateExpired_ShelvingState_Unshelve                                                                                = 20099
-	CertificateGroupType_CertificateExpired_ShelvingState_OneShotShelve                                                                           = 20100
-	CertificateGroupType_CertificateExpired_Silence                                                                                               = 20132
-	CertificateGroupType_CertificateExpired_Suppress                                                                                              = 20133
-	CertificateGroupType_CertificateExpired_Unsuppress                                                                                            = 20134
-	CertificateGroupType_CertificateExpired_RemoveFromService                                                                                     = 20135
-	CertificateGroupType_CertificateExpired_PlaceInService                                                                                        = 20136
-	CertificateGroupType_CertificateExpired_Reset                                                                                                 = 20137
-	CertificateGroupType_TrustListOutOfDate_Disable                                                                                               = 20176
-	CertificateGroupType_TrustListOutOfDate_Enable                                                                                                = 20177
-	CertificateGroupType_TrustListOutOfDate_AddComment                                                                                            = 20178
-	CertificateGroupType_TrustListOutOfDate_Acknowledge                                                                                           = 20198
-	CertificateGroupType_TrustListOutOfDate_Confirm                                                                                               = 20200
-	CertificateGroupType_TrustListOutOfDate_ShelvingState_TimedShelve                                                                             = 20245
-	CertificateGroupType_TrustListOutOfDate_ShelvingState_Unshelve                                                                                = 20247
-	CertificateGroupType_TrustListOutOfDate_ShelvingState_OneShotShelve                                                                           = 20248
-	CertificateGroupType_TrustListOutOfDate_Silence                                                                                               = 20280
-	CertificateGroupType_TrustListOutOfDate_Suppress                                                                                              = 20281
-	CertificateGroupType_TrustListOutOfDate_Unsuppress                                                                                            = 20282
-	CertificateGroupType_TrustListOutOfDate_RemoveFromService                                                                                     = 20283
-	CertificateGroupType_TrustListOutOfDate_PlaceInService                                                                                        = 20284
-	CertificateGroupType_TrustListOutOfDate_Reset                                                                                                 = 20285
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Disable                                                                 = 20324
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Enable                                                                  = 20325
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_AddComment                                                              = 20326
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Acknowledge                                                             = 20346
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Confirm                                                                 = 20348
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve                                               = 20393
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve                                                  = 20395
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve                                             = 20396
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Silence                                                                 = 20430
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Suppress                                                                = 20431
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Unsuppress                                                              = 20432
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_RemoveFromService                                                       = 20433
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_PlaceInService                                                          = 20434
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Reset                                                                   = 20435
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Disable                                                                 = 20474
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Enable                                                                  = 20475
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_AddComment                                                              = 20476
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                                                             = 20496
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Confirm                                                                 = 20498
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                               = 20543
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                  = 20545
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                             = 20546
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Silence                                                                 = 20578
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Suppress                                                                = 20579
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                                                              = 20580
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService                                                       = 20581
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService                                                          = 20582
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Reset                                                                   = 20583
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Disable                                                                       = 20622
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Enable                                                                        = 20623
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_AddComment                                                                    = 20624
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Acknowledge                                                                   = 20644
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Confirm                                                                       = 20646
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve                                                     = 20691
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve                                                        = 20693
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve                                                   = 20694
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Silence                                                                       = 20726
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Suppress                                                                      = 20727
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Unsuppress                                                                    = 20728
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_RemoveFromService                                                             = 20729
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_PlaceInService                                                                = 20730
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Reset                                                                         = 20731
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Disable                                                                       = 20770
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Enable                                                                        = 20771
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_AddComment                                                                    = 20772
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                                                                   = 20792
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Confirm                                                                       = 20794
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                                     = 20839
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                        = 20841
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                                   = 20842
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Silence                                                                       = 20874
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Suppress                                                                      = 20875
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                                                                    = 20876
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                                                             = 20877
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                                                                = 20878
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Reset                                                                         = 20879
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Disable                                                                   = 20918
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Enable                                                                    = 20919
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_AddComment                                                                = 20920
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Acknowledge                                                               = 20940
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Confirm                                                                   = 20942
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve                                                 = 20987
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve                                                    = 20989
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve                                               = 20990
-	ReaderGroupType_DataSetReaderName_Placeholder_CreateTargetVariables                                                                           = 21009
-	ReaderGroupType_DataSetReaderName_Placeholder_CreateDataSetMirror                                                                             = 21012
-	ReaderGroupType_Diagnostics_Reset                                                                                                             = 21027
-	ReaderGroupType_AddDataSetReader                                                                                                              = 21082
-	ReaderGroupType_RemoveDataSetReader                                                                                                           = 21085
-	PubSubGroupTypeAddReaderMethodType                                                                                                            = 21087
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Silence                                                                   = 21225
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Suppress                                                                  = 21226
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Unsuppress                                                                = 21227
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_RemoveFromService                                                         = 21228
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_PlaceInService                                                            = 21229
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Reset                                                                     = 21230
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Disable                                                                   = 21269
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Enable                                                                    = 21270
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                                                                = 21271
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                                                               = 21291
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                                                                   = 21293
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                                 = 21338
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                    = 21340
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                               = 21341
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Silence                                                                   = 21373
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                                                                  = 21374
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                                                                = 21375
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService                                                         = 21376
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                                                            = 21377
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Reset                                                                     = 21378
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Disable                                                             = 21417
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Enable                                                              = 21418
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_AddComment                                                          = 21419
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Acknowledge                                                         = 21439
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Confirm                                                             = 21441
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_TimedShelve                                           = 21486
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_Unshelve                                              = 21488
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_OneShotShelve                                         = 21489
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Silence                                                             = 21521
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Suppress                                                            = 21522
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Unsuppress                                                          = 21523
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_RemoveFromService                                                   = 21524
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_PlaceInService                                                      = 21525
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Reset                                                               = 21526
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Disable                                                             = 21565
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Enable                                                              = 21566
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_AddComment                                                          = 21567
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Acknowledge                                                         = 21587
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Confirm                                                             = 21589
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_TimedShelve                                           = 21634
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_Unshelve                                              = 21636
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_OneShotShelve                                         = 21637
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Silence                                                             = 21669
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Suppress                                                            = 21670
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Unsuppress                                                          = 21671
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_RemoveFromService                                                   = 21672
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_PlaceInService                                                      = 21673
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Reset                                                               = 21674
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable                                                  = 21713
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable                                                   = 21714
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment                                               = 21715
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge                                              = 21735
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm                                                  = 21737
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve                                = 21782
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve                                   = 21784
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve                              = 21785
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence                                                  = 21817
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress                                                 = 21818
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress                                               = 21819
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService                                        = 21820
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService                                           = 21821
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset                                                    = 21822
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable                                                  = 21861
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable                                                   = 21862
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment                                               = 21863
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                                              = 21883
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm                                                  = 21885
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                = 21930
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve                                   = 21932
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                              = 21933
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence                                                  = 21965
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress                                                 = 21966
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                                               = 21967
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService                                        = 21968
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService                                           = 21969
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset                                                    = 21970
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable                                                        = 22009
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable                                                         = 22010
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment                                                     = 22011
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge                                                    = 22031
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm                                                        = 22033
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve                                      = 22078
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve                                         = 22080
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve                                    = 22081
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence                                                        = 22113
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress                                                       = 22114
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress                                                     = 22115
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService                                              = 22116
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService                                                 = 22117
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset                                                          = 22118
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable                                                        = 22157
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable                                                         = 22158
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment                                                     = 22159
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                                                    = 22179
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm                                                        = 22181
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                      = 22226
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve                                         = 22228
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                    = 22229
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence                                                        = 22261
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress                                                       = 22262
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                                                     = 22263
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                                              = 22264
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                                                 = 22265
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset                                                          = 22266
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable                                                    = 22305
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable                                                     = 22306
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment                                                 = 22307
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge                                                = 22327
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm                                                    = 22329
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve                                  = 22374
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve                                     = 22376
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve                                = 22377
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence                                                    = 22409
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress                                                   = 22410
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress                                                 = 22411
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService                                          = 22412
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService                                             = 22413
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset                                                      = 22414
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable                                                    = 22453
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable                                                     = 22454
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                                                 = 22455
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                                                = 22475
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                                                    = 22477
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                  = 22522
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve                                     = 22524
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                = 22525
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence                                                    = 22557
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                                                   = 22558
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                                                 = 22559
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService                                          = 22560
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                                             = 22561
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset                                                      = 22562
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable                                                      = 22601
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable                                                       = 22602
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment                                                   = 22603
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge                                                  = 22623
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm                                                      = 22625
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve                                    = 22670
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve                                       = 22672
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve                                  = 22673
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence                                                      = 22705
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress                                                     = 22706
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress                                                   = 22707
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService                                            = 22708
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService                                               = 22709
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset                                                        = 22710
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable                                                      = 22749
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable                                                       = 22750
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment                                                   = 22751
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                                                  = 22771
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm                                                      = 22773
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                    = 22818
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve                                       = 22820
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                  = 22821
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence                                                      = 22853
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress                                                     = 22854
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                                                   = 22855
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService                                            = 22856
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService                                               = 22857
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset                                                        = 22858
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable                                                            = 22897
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable                                                             = 22898
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment                                                         = 22899
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge                                                        = 22919
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm                                                            = 22921
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve                                          = 22966
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve                                             = 22968
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve                                        = 22969
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence                                                            = 23001
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress                                                           = 23002
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress                                                         = 23003
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService                                                  = 23004
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService                                                     = 23005
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset                                                              = 23006
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable                                                            = 23045
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable                                                             = 23046
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment                                                         = 23047
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                                                        = 23067
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm                                                            = 23069
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                          = 23114
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve                                             = 23116
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                        = 23117
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence                                                            = 23149
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress                                                           = 23150
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                                                         = 23151
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                                                  = 23152
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                                                     = 23153
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset                                                              = 23154
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable                                                        = 23193
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable                                                         = 23194
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment                                                     = 23195
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge                                                    = 23215
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm                                                        = 23217
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve                                      = 23262
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve                                         = 23264
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve                                    = 23265
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence                                                        = 23297
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress                                                       = 23298
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress                                                     = 23299
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService                                              = 23300
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService                                                 = 23301
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset                                                          = 23302
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable                                                        = 23341
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable                                                         = 23342
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                                                     = 23343
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                                                    = 23363
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                                                        = 23365
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                      = 23410
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve                                         = 23412
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                    = 23413
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence                                                        = 23445
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                                                       = 23446
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                                                     = 23447
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService                                              = 23448
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                                                 = 23449
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset                                                          = 23450
-	AliasNameCategoryType_SubAliasNameCategories_Placeholder_FindAlias                                                                            = 23459
-	AliasNameCategoryType_FindAlias                                                                                                               = 23462
-	FindAliasMethodType                                                                                                                           = 23465
-	Aliases_SubAliasNameCategories_Placeholder_FindAlias                                                                                          = 23473
-	Aliases_FindAlias                                                                                                                             = 23476
-	TagVariables_SubAliasNameCategories_Placeholder_FindAlias                                                                                     = 23482
-	TagVariables_FindAlias                                                                                                                        = 23485
-	Topics_SubAliasNameCategories_Placeholder_FindAlias                                                                                           = 23491
-	Topics_FindAlias                                                                                                                              = 23494
-	CertificateGroupType_GetRejectedList                                                                                                          = 23526
-	CertificateGroupFolderType_DefaultApplicationGroup_GetRejectedList                                                                            = 23529
-	CertificateGroupFolderType_DefaultHttpsGroup_GetRejectedList                                                                                  = 23531
-	CertificateGroupFolderType_DefaultUserTokenGroup_GetRejectedList                                                                              = 23533
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_GetRejectedList                                                                        = 23535
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_GetRejectedList                                                             = 23544
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_GetRejectedList                                                                   = 23546
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_GetRejectedList                                                               = 23548
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_GetRejectedList                                                                 = 23550
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_GetRejectedList                                                                       = 23552
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_GetRejectedList                                                                   = 23554
-	PublishSubscribeType_SubscribedDataSets_AddDataSetFolder                                                                                      = 23637
-	PublishSubscribeType_SubscribedDataSets_RemoveDataSetFolder                                                                                   = 23640
-	PublishSubscribe_SubscribedDataSets_AddDataSetFolder                                                                                          = 23673
-	PublishSubscribe_SubscribedDataSets_RemoveDataSetFolder                                                                                       = 23676
-	GetConnectionMethodType                                                                                                                       = 23726
-	ModifyConnectionMethodType                                                                                                                    = 23729
-	GetWriterGroupMethodType                                                                                                                      = 23745
-	ModifyWriterGroupMethodType                                                                                                                   = 23748
-	GetReaderGroupMethodType                                                                                                                      = 23767
-	ModifyReaderGroupMethodType                                                                                                                   = 23770
-	GetDataSetWriterMethodType                                                                                                                    = 23779
-	ModifyDataSetWriterMethodType                                                                                                                 = 23781
-	GetDataSetReaderMethodType                                                                                                                    = 23790
-	ModifyDataSetReaderMethodType                                                                                                                 = 23792
-	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder_AddSubscribedDataSet                                                      = 23797
-	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder_RemoveSubscribedDataSet                                                   = 23800
-	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder_AddDataSetFolder                                                          = 23802
-	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder_RemoveDataSetFolder                                                       = 23805
-	SubscribedDataSetFolderType_AddSubscribedDataSet                                                                                              = 23811
-	SubscribedDataSetFolderType_RemoveSubscribedDataSet                                                                                           = 23814
-	SubscribedDataSetFolderType_AddDataSetFolder                                                                                                  = 23816
-	SubscribedDataSetFolderType_RemoveDataSetFolder                                                                                               = 23819
-	AddSubscribedDataSetMethodType                                                                                                                = 23821
-	RemoveSubscribedDataSetMethodType                                                                                                             = 23824
-	PublishSubscribeType_SubscribedDataSets_AddSubscribedDataSet                                                                                  = 24004
-	PublishSubscribeType_SubscribedDataSets_RemoveSubscribedDataSet                                                                               = 24007
-	PublishSubscribe_SubscribedDataSets_AddSubscribedDataSet                                                                                      = 24010
-	PublishSubscribe_SubscribedDataSets_RemoveSubscribedDataSet                                                                                   = 24013
-	UserManagementType_AddUser                                                                                                                    = 24269
-	UserManagementType_ModifyUser                                                                                                                 = 24271
-	UserManagementType_RemoveUser                                                                                                                 = 24273
-	UserManagementType_ChangePassword                                                                                                             = 24275
-	AddUserMethodType                                                                                                                             = 24282
-	ModifyUserMethodType                                                                                                                          = 24284
-	RemoveUserMethodType                                                                                                                          = 24286
-	ChangePasswordMethodType                                                                                                                      = 24288
-	UserManagement_AddUser                                                                                                                        = 24304
-	UserManagement_ModifyUser                                                                                                                     = 24306
-	UserManagement_RemoveUser                                                                                                                     = 24308
-	UserManagement_ChangePassword                                                                                                                 = 24310
-	DialogConditionType_Respond2                                                                                                                  = 24312
-	DialogResponse2MethodType                                                                                                                     = 24314
-	AlarmConditionType_Suppress2                                                                                                                  = 24316
-	AlarmConditionType_Unsuppress2                                                                                                                = 24318
-	AlarmConditionType_RemoveFromService2                                                                                                         = 24320
-	AlarmConditionType_PlaceInService2                                                                                                            = 24322
-	AlarmConditionType_Reset2                                                                                                                     = 24324
-	WithCommentMethodType                                                                                                                         = 24326
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Suppress2                                                                                   = 24328
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Unsuppress2                                                                                 = 24330
-	AlarmGroupType_AlarmConditionInstance_Placeholder_RemoveFromService2                                                                          = 24332
-	AlarmGroupType_AlarmConditionInstance_Placeholder_PlaceInService2                                                                             = 24334
-	AlarmGroupType_AlarmConditionInstance_Placeholder_Reset2                                                                                      = 24336
-	LimitAlarmType_Suppress2                                                                                                                      = 24338
-	LimitAlarmType_Unsuppress2                                                                                                                    = 24340
-	LimitAlarmType_RemoveFromService2                                                                                                             = 24342
-	LimitAlarmType_PlaceInService2                                                                                                                = 24344
-	LimitAlarmType_Reset2                                                                                                                         = 24346
-	ExclusiveLimitAlarmType_Suppress2                                                                                                             = 24348
-	ExclusiveLimitAlarmType_Unsuppress2                                                                                                           = 24350
-	ExclusiveLimitAlarmType_RemoveFromService2                                                                                                    = 24352
-	ExclusiveLimitAlarmType_PlaceInService2                                                                                                       = 24354
-	ExclusiveLimitAlarmType_Reset2                                                                                                                = 24356
-	NonExclusiveLimitAlarmType_Suppress2                                                                                                          = 24358
-	NonExclusiveLimitAlarmType_Unsuppress2                                                                                                        = 24360
-	NonExclusiveLimitAlarmType_RemoveFromService2                                                                                                 = 24362
-	NonExclusiveLimitAlarmType_PlaceInService2                                                                                                    = 24364
-	NonExclusiveLimitAlarmType_Reset2                                                                                                             = 24366
-	NonExclusiveLevelAlarmType_Suppress2                                                                                                          = 24368
-	NonExclusiveLevelAlarmType_Unsuppress2                                                                                                        = 24370
-	NonExclusiveLevelAlarmType_RemoveFromService2                                                                                                 = 24372
-	NonExclusiveLevelAlarmType_PlaceInService2                                                                                                    = 24374
-	NonExclusiveLevelAlarmType_Reset2                                                                                                             = 24376
-	ExclusiveLevelAlarmType_Suppress2                                                                                                             = 24378
-	ExclusiveLevelAlarmType_Unsuppress2                                                                                                           = 24380
-	ExclusiveLevelAlarmType_RemoveFromService2                                                                                                    = 24382
-	ExclusiveLevelAlarmType_PlaceInService2                                                                                                       = 24384
-	ExclusiveLevelAlarmType_Reset2                                                                                                                = 24386
-	NonExclusiveDeviationAlarmType_Suppress2                                                                                                      = 24388
-	NonExclusiveDeviationAlarmType_Unsuppress2                                                                                                    = 24390
-	NonExclusiveDeviationAlarmType_RemoveFromService2                                                                                             = 24392
-	NonExclusiveDeviationAlarmType_PlaceInService2                                                                                                = 24394
-	NonExclusiveDeviationAlarmType_Reset2                                                                                                         = 24396
-	NonExclusiveRateOfChangeAlarmType_Suppress2                                                                                                   = 24398
-	NonExclusiveRateOfChangeAlarmType_Unsuppress2                                                                                                 = 24400
-	NonExclusiveRateOfChangeAlarmType_RemoveFromService2                                                                                          = 24402
-	NonExclusiveRateOfChangeAlarmType_PlaceInService2                                                                                             = 24404
-	NonExclusiveRateOfChangeAlarmType_Reset2                                                                                                      = 24406
-	ExclusiveDeviationAlarmType_Suppress2                                                                                                         = 24408
-	ExclusiveDeviationAlarmType_Unsuppress2                                                                                                       = 24410
-	ExclusiveDeviationAlarmType_RemoveFromService2                                                                                                = 24412
-	ExclusiveDeviationAlarmType_PlaceInService2                                                                                                   = 24414
-	ExclusiveDeviationAlarmType_Reset2                                                                                                            = 24416
-	ExclusiveRateOfChangeAlarmType_Suppress2                                                                                                      = 24418
-	ExclusiveRateOfChangeAlarmType_Unsuppress2                                                                                                    = 24420
-	ExclusiveRateOfChangeAlarmType_RemoveFromService2                                                                                             = 24422
-	ExclusiveRateOfChangeAlarmType_PlaceInService2                                                                                                = 24424
-	ExclusiveRateOfChangeAlarmType_Reset2                                                                                                         = 24426
-	DiscreteAlarmType_Suppress2                                                                                                                   = 24428
-	DiscreteAlarmType_Unsuppress2                                                                                                                 = 24430
-	DiscreteAlarmType_RemoveFromService2                                                                                                          = 24432
-	DiscreteAlarmType_PlaceInService2                                                                                                             = 24434
-	DiscreteAlarmType_Reset2                                                                                                                      = 24436
-	OffNormalAlarmType_Suppress2                                                                                                                  = 24438
-	OffNormalAlarmType_Unsuppress2                                                                                                                = 24440
-	OffNormalAlarmType_RemoveFromService2                                                                                                         = 24442
-	OffNormalAlarmType_PlaceInService2                                                                                                            = 24444
-	OffNormalAlarmType_Reset2                                                                                                                     = 24446
-	SystemOffNormalAlarmType_Suppress2                                                                                                            = 24448
-	SystemOffNormalAlarmType_Unsuppress2                                                                                                          = 24450
-	SystemOffNormalAlarmType_RemoveFromService2                                                                                                   = 24452
-	SystemOffNormalAlarmType_PlaceInService2                                                                                                      = 24454
-	SystemOffNormalAlarmType_Reset2                                                                                                               = 24456
-	TripAlarmType_Suppress2                                                                                                                       = 24458
-	TripAlarmType_Unsuppress2                                                                                                                     = 24460
-	TripAlarmType_RemoveFromService2                                                                                                              = 24462
-	TripAlarmType_PlaceInService2                                                                                                                 = 24464
-	TripAlarmType_Reset2                                                                                                                          = 24466
-	InstrumentDiagnosticAlarmType_Suppress2                                                                                                       = 24468
-	InstrumentDiagnosticAlarmType_Unsuppress2                                                                                                     = 24470
-	InstrumentDiagnosticAlarmType_RemoveFromService2                                                                                              = 24472
-	InstrumentDiagnosticAlarmType_PlaceInService2                                                                                                 = 24474
-	InstrumentDiagnosticAlarmType_Reset2                                                                                                          = 24476
-	SystemDiagnosticAlarmType_Suppress2                                                                                                           = 24478
-	SystemDiagnosticAlarmType_Unsuppress2                                                                                                         = 24480
-	SystemDiagnosticAlarmType_RemoveFromService2                                                                                                  = 24482
-	SystemDiagnosticAlarmType_PlaceInService2                                                                                                     = 24484
-	SystemDiagnosticAlarmType_Reset2                                                                                                              = 24486
-	CertificateExpirationAlarmType_Suppress2                                                                                                      = 24488
-	CertificateExpirationAlarmType_Unsuppress2                                                                                                    = 24490
-	CertificateExpirationAlarmType_RemoveFromService2                                                                                             = 24492
-	CertificateExpirationAlarmType_PlaceInService2                                                                                                = 24494
-	CertificateExpirationAlarmType_Reset2                                                                                                         = 24496
-	DiscrepancyAlarmType_Suppress2                                                                                                                = 24498
-	DiscrepancyAlarmType_Unsuppress2                                                                                                              = 24500
-	DiscrepancyAlarmType_RemoveFromService2                                                                                                       = 24502
-	DiscrepancyAlarmType_PlaceInService2                                                                                                          = 24504
-	DiscrepancyAlarmType_Reset2                                                                                                                   = 24506
-	TrustListOutOfDateAlarmType_Suppress2                                                                                                         = 24508
-	TrustListOutOfDateAlarmType_Unsuppress2                                                                                                       = 24510
-	TrustListOutOfDateAlarmType_RemoveFromService2                                                                                                = 24512
-	TrustListOutOfDateAlarmType_PlaceInService2                                                                                                   = 24514
-	TrustListOutOfDateAlarmType_Reset2                                                                                                            = 24516
-	CertificateGroupType_CertificateExpired_Suppress2                                                                                             = 24518
-	CertificateGroupType_CertificateExpired_Unsuppress2                                                                                           = 24520
-	CertificateGroupType_CertificateExpired_RemoveFromService2                                                                                    = 24522
-	CertificateGroupType_CertificateExpired_PlaceInService2                                                                                       = 24524
-	CertificateGroupType_CertificateExpired_Reset2                                                                                                = 24526
-	CertificateGroupType_TrustListOutOfDate_Suppress2                                                                                             = 24528
-	CertificateGroupType_TrustListOutOfDate_Unsuppress2                                                                                           = 24530
-	CertificateGroupType_TrustListOutOfDate_RemoveFromService2                                                                                    = 24532
-	CertificateGroupType_TrustListOutOfDate_PlaceInService2                                                                                       = 24534
-	CertificateGroupType_TrustListOutOfDate_Reset2                                                                                                = 24536
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Suppress2                                                               = 24538
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Unsuppress2                                                             = 24540
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_RemoveFromService2                                                      = 24542
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_PlaceInService2                                                         = 24544
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Reset2                                                                  = 24546
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                                                               = 24548
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                                                             = 24550
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2                                                      = 24552
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2                                                         = 24554
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Reset2                                                                  = 24556
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Suppress2                                                                     = 24558
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Unsuppress2                                                                   = 24560
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                                                            = 24562
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_PlaceInService2                                                               = 24564
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Reset2                                                                        = 24566
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                                                                     = 24568
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                                                                   = 24570
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                                                            = 24572
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                                                               = 24574
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Reset2                                                                        = 24576
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Suppress2                                                                 = 24578
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                                                               = 24580
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2                                                        = 24582
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                                                           = 24584
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Reset2                                                                    = 24586
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                                                                 = 24588
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                                                               = 24590
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2                                                        = 24592
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                                                           = 24594
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                                                                    = 24596
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Suppress2                                                           = 24598
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Unsuppress2                                                         = 24600
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_RemoveFromService2                                                  = 24602
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_PlaceInService2                                                     = 24604
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Reset2                                                              = 24606
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Suppress2                                                           = 24608
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Unsuppress2                                                         = 24610
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_RemoveFromService2                                                  = 24612
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_PlaceInService2                                                     = 24614
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Reset2                                                              = 24616
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2                                                = 24618
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2                                              = 24620
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2                                       = 24622
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2                                          = 24624
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2                                                   = 24626
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                                                = 24628
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                                              = 24630
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2                                       = 24632
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2                                          = 24634
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2                                                   = 24636
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2                                                      = 24638
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2                                                    = 24640
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                                             = 24642
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2                                                = 24644
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2                                                         = 24646
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                                                      = 24648
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                                                    = 24650
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                                             = 24652
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                                                = 24654
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2                                                         = 24656
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2                                                  = 24658
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                                                = 24660
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2                                         = 24662
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                                            = 24664
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2                                                     = 24666
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                                                  = 24668
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                                                = 24670
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2                                         = 24672
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                                            = 24674
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                                                     = 24676
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2                                                    = 24678
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2                                                  = 24680
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2                                           = 24682
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2                                              = 24684
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2                                                       = 24686
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                                                    = 24688
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                                                  = 24690
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2                                           = 24692
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2                                              = 24694
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2                                                       = 24696
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2                                                          = 24698
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2                                                        = 24700
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                                                 = 24702
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2                                                    = 24704
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2                                                             = 24706
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                                                          = 24708
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                                                        = 24710
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                                                 = 24712
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                                                    = 24714
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2                                                             = 24716
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2                                                      = 24718
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                                                    = 24720
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2                                             = 24722
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                                                = 24724
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2                                                         = 24726
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                                                      = 24728
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                                                    = 24730
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2                                             = 24732
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                                                = 24734
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                                                         = 24736
-	AlarmConditionType_ShelvingState_TimedShelve2                                                                                                 = 24738
-	AlarmConditionType_ShelvingState_Unshelve2                                                                                                    = 24740
-	AlarmConditionType_ShelvingState_OneShotShelve2                                                                                               = 24742
-	AlarmConditionType_GetGroupMemberships                                                                                                        = 24744
-	GetGroupMembershipsMethodType                                                                                                                 = 24746
-	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_TimedShelve2                                                                  = 24748
-	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_Unshelve2                                                                     = 24750
-	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_OneShotShelve2                                                                = 24752
-	AlarmGroupType_AlarmConditionInstance_Placeholder_GetGroupMemberships                                                                         = 24754
-	ShelvedStateMachineType_TimedShelve2                                                                                                          = 24756
-	ShelvedStateMachineType_Unshelve2                                                                                                             = 24758
-	ShelvedStateMachineType_OneShotShelve2                                                                                                        = 24760
-	LimitAlarmType_ShelvingState_TimedShelve2                                                                                                     = 24762
-	LimitAlarmType_ShelvingState_Unshelve2                                                                                                        = 24764
-	LimitAlarmType_ShelvingState_OneShotShelve2                                                                                                   = 24766
-	LimitAlarmType_GetGroupMemberships                                                                                                            = 24768
-	ExclusiveLimitAlarmType_ShelvingState_TimedShelve2                                                                                            = 24778
-	ExclusiveLimitAlarmType_ShelvingState_Unshelve2                                                                                               = 24780
-	ExclusiveLimitAlarmType_ShelvingState_OneShotShelve2                                                                                          = 24782
-	ExclusiveLimitAlarmType_GetGroupMemberships                                                                                                   = 24784
-	NonExclusiveLimitAlarmType_ShelvingState_TimedShelve2                                                                                         = 24794
-	NonExclusiveLimitAlarmType_ShelvingState_Unshelve2                                                                                            = 24796
-	NonExclusiveLimitAlarmType_ShelvingState_OneShotShelve2                                                                                       = 24798
-	NonExclusiveLimitAlarmType_GetGroupMemberships                                                                                                = 24800
-	NonExclusiveLevelAlarmType_ShelvingState_TimedShelve2                                                                                         = 24810
-	NonExclusiveLevelAlarmType_ShelvingState_Unshelve2                                                                                            = 24812
-	NonExclusiveLevelAlarmType_ShelvingState_OneShotShelve2                                                                                       = 24814
-	NonExclusiveLevelAlarmType_GetGroupMemberships                                                                                                = 24816
-	ExclusiveLevelAlarmType_ShelvingState_TimedShelve2                                                                                            = 24826
-	ExclusiveLevelAlarmType_ShelvingState_Unshelve2                                                                                               = 24828
-	ExclusiveLevelAlarmType_ShelvingState_OneShotShelve2                                                                                          = 24830
-	ExclusiveLevelAlarmType_GetGroupMemberships                                                                                                   = 24832
-	NonExclusiveDeviationAlarmType_ShelvingState_TimedShelve2                                                                                     = 24842
-	NonExclusiveDeviationAlarmType_ShelvingState_Unshelve2                                                                                        = 24844
-	NonExclusiveDeviationAlarmType_ShelvingState_OneShotShelve2                                                                                   = 24846
-	NonExclusiveDeviationAlarmType_GetGroupMemberships                                                                                            = 24848
-	NonExclusiveRateOfChangeAlarmType_ShelvingState_TimedShelve2                                                                                  = 24858
-	NonExclusiveRateOfChangeAlarmType_ShelvingState_Unshelve2                                                                                     = 24860
-	NonExclusiveRateOfChangeAlarmType_ShelvingState_OneShotShelve2                                                                                = 24862
-	NonExclusiveRateOfChangeAlarmType_GetGroupMemberships                                                                                         = 24864
-	ExclusiveDeviationAlarmType_ShelvingState_TimedShelve2                                                                                        = 24874
-	ExclusiveDeviationAlarmType_ShelvingState_Unshelve2                                                                                           = 24876
-	ExclusiveDeviationAlarmType_ShelvingState_OneShotShelve2                                                                                      = 24878
-	ExclusiveDeviationAlarmType_GetGroupMemberships                                                                                               = 24880
-	ExclusiveRateOfChangeAlarmType_ShelvingState_TimedShelve2                                                                                     = 24890
-	ExclusiveRateOfChangeAlarmType_ShelvingState_Unshelve2                                                                                        = 24892
-	ExclusiveRateOfChangeAlarmType_ShelvingState_OneShotShelve2                                                                                   = 24894
-	ExclusiveRateOfChangeAlarmType_GetGroupMemberships                                                                                            = 24896
-	DiscreteAlarmType_ShelvingState_TimedShelve2                                                                                                  = 24906
-	DiscreteAlarmType_ShelvingState_Unshelve2                                                                                                     = 24908
-	DiscreteAlarmType_ShelvingState_OneShotShelve2                                                                                                = 24910
-	DiscreteAlarmType_GetGroupMemberships                                                                                                         = 24912
-	OffNormalAlarmType_ShelvingState_TimedShelve2                                                                                                 = 24914
-	OffNormalAlarmType_ShelvingState_Unshelve2                                                                                                    = 24916
-	OffNormalAlarmType_ShelvingState_OneShotShelve2                                                                                               = 24918
-	OffNormalAlarmType_GetGroupMemberships                                                                                                        = 24920
-	SystemOffNormalAlarmType_ShelvingState_TimedShelve2                                                                                           = 24922
-	SystemOffNormalAlarmType_ShelvingState_Unshelve2                                                                                              = 24924
-	SystemOffNormalAlarmType_ShelvingState_OneShotShelve2                                                                                         = 24926
-	SystemOffNormalAlarmType_GetGroupMemberships                                                                                                  = 24928
-	TripAlarmType_ShelvingState_TimedShelve2                                                                                                      = 24930
-	TripAlarmType_ShelvingState_Unshelve2                                                                                                         = 24932
-	TripAlarmType_ShelvingState_OneShotShelve2                                                                                                    = 24934
-	TripAlarmType_GetGroupMemberships                                                                                                             = 24936
-	InstrumentDiagnosticAlarmType_ShelvingState_TimedShelve2                                                                                      = 24938
-	InstrumentDiagnosticAlarmType_ShelvingState_Unshelve2                                                                                         = 24940
-	InstrumentDiagnosticAlarmType_ShelvingState_OneShotShelve2                                                                                    = 24942
-	InstrumentDiagnosticAlarmType_GetGroupMemberships                                                                                             = 24944
-	SystemDiagnosticAlarmType_ShelvingState_TimedShelve2                                                                                          = 24946
-	SystemDiagnosticAlarmType_ShelvingState_Unshelve2                                                                                             = 24948
-	SystemDiagnosticAlarmType_ShelvingState_OneShotShelve2                                                                                        = 24950
-	SystemDiagnosticAlarmType_GetGroupMemberships                                                                                                 = 24952
-	CertificateExpirationAlarmType_ShelvingState_TimedShelve2                                                                                     = 24954
-	CertificateExpirationAlarmType_ShelvingState_Unshelve2                                                                                        = 24956
-	CertificateExpirationAlarmType_ShelvingState_OneShotShelve2                                                                                   = 24958
-	CertificateExpirationAlarmType_GetGroupMemberships                                                                                            = 24960
-	DiscrepancyAlarmType_ShelvingState_TimedShelve2                                                                                               = 24962
-	DiscrepancyAlarmType_ShelvingState_Unshelve2                                                                                                  = 24964
-	DiscrepancyAlarmType_ShelvingState_OneShotShelve2                                                                                             = 24966
-	DiscrepancyAlarmType_GetGroupMemberships                                                                                                      = 24968
-	TrustListOutOfDateAlarmType_ShelvingState_TimedShelve2                                                                                        = 24970
-	TrustListOutOfDateAlarmType_ShelvingState_Unshelve2                                                                                           = 24972
-	TrustListOutOfDateAlarmType_ShelvingState_OneShotShelve2                                                                                      = 24974
-	TrustListOutOfDateAlarmType_GetGroupMemberships                                                                                               = 24976
-	CertificateGroupType_CertificateExpired_ShelvingState_TimedShelve2                                                                            = 24978
-	CertificateGroupType_CertificateExpired_ShelvingState_Unshelve2                                                                               = 24980
-	CertificateGroupType_CertificateExpired_ShelvingState_OneShotShelve2                                                                          = 24982
-	CertificateGroupType_CertificateExpired_GetGroupMemberships                                                                                   = 24984
-	CertificateGroupType_TrustListOutOfDate_ShelvingState_TimedShelve2                                                                            = 24986
-	CertificateGroupType_TrustListOutOfDate_ShelvingState_Unshelve2                                                                               = 24988
-	CertificateGroupType_TrustListOutOfDate_ShelvingState_OneShotShelve2                                                                          = 24990
-	CertificateGroupType_TrustListOutOfDate_GetGroupMemberships                                                                                   = 24992
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2                                              = 24994
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2                                                 = 24996
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2                                            = 24998
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships                                                     = 25000
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                              = 25002
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                 = 25004
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                            = 25006
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships                                                     = 25008
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2                                                    = 25010
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2                                                       = 25012
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2                                                  = 25014
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                                                           = 25016
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                                    = 25018
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                       = 25020
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                                  = 25022
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                                                           = 25024
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2                                                = 25026
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2                                                   = 25028
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2                                              = 25030
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships                                                       = 25032
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                                = 25034
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                   = 25036
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                              = 25038
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships                                                       = 25040
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_TimedShelve2                                          = 25042
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_Unshelve2                                             = 25044
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_OneShotShelve2                                        = 25046
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_GetGroupMemberships                                                 = 25048
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_TimedShelve2                                          = 25050
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_Unshelve2                                             = 25052
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_OneShotShelve2                                        = 25054
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_GetGroupMemberships                                                 = 25056
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2                               = 25058
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2                                  = 25060
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2                             = 25062
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships                                      = 25064
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                               = 25066
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                  = 25068
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                             = 25070
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships                                      = 25072
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2                                     = 25074
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2                                        = 25076
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2                                   = 25078
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                                            = 25080
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                     = 25082
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                        = 25084
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                   = 25086
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                                            = 25088
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2                                 = 25090
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2                                    = 25092
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2                               = 25094
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships                                        = 25096
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                 = 25098
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                    = 25100
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                               = 25102
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships                                        = 25104
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2                                   = 25106
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2                                      = 25108
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2                                 = 25110
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships                                          = 25112
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                   = 25114
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                      = 25116
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                 = 25118
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships                                          = 25120
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2                                         = 25122
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2                                            = 25124
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2                                       = 25126
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                                                = 25128
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                         = 25130
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                            = 25132
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                       = 25134
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                                                = 25136
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2                                     = 25138
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2                                        = 25140
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2                                   = 25142
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships                                            = 25144
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                     = 25146
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                        = 25148
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                   = 25150
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships                                            = 25152
-	TimedShelve2MethodType                                                                                                                        = 25157
-	PriorityMappingTableType_AddPriorityMappingEntry                                                                                              = 25229
-	PriorityMappingTableType_DeletePriorityMappingEntry                                                                                           = 25231
-	AddPriorityMappingEntryMethodType                                                                                                             = 25233
-	DeletePriorityMappingEntryMethodType                                                                                                          = 25235
-	PubSubKeyServiceType_SecurityGroups_AddSecurityGroupFolder                                                                                    = 25271
-	PubSubKeyServiceType_SecurityGroups_RemoveSecurityGroupFolder                                                                                 = 25274
-	PubSubKeyServiceType_KeyPushTargets_AddPushTarget                                                                                             = 25278
-	PubSubKeyServiceType_KeyPushTargets_RemovePushTarget                                                                                          = 25281
-	PubSubKeyServiceType_KeyPushTargets_AddPushTargetFolder                                                                                       = 25283
-	PubSubKeyServiceType_KeyPushTargets_RemovePushTargetFolder                                                                                    = 25286
-	AddSecurityGroupFolderMethodType                                                                                                              = 25288
-	RemoveSecurityGroupFolderMethodType                                                                                                           = 25291
-	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder_AddSecurityGroupFolder                                                            = 25293
-	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder_RemoveSecurityGroupFolder                                                         = 25296
-	SecurityGroupFolderType_AddSecurityGroupFolder                                                                                                = 25312
-	SecurityGroupFolderType_RemoveSecurityGroupFolder                                                                                             = 25315
-	ConnectSecurityGroupsMethodType                                                                                                               = 25331
-	DisconnectSecurityGroupsMethodType                                                                                                            = 25334
-	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder_AddPushTarget                                                                  = 25348
-	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder_RemovePushTarget                                                               = 25351
-	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder_AddPushTargetFolder                                                            = 25353
-	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder_RemovePushTargetFolder                                                         = 25356
-	PubSubKeyPushTargetFolderType_AddPushTarget                                                                                                   = 25366
-	PubSubKeyPushTargetFolderType_RemovePushTarget                                                                                                = 25369
-	PubSubKeyPushTargetFolderType_AddPushTargetFolder                                                                                             = 25371
-	PubSubKeyPushTargetFolderType_RemovePushTargetFolder                                                                                          = 25374
-	AddPushTargetMethodType                                                                                                                       = 25376
-	RemovePushTargetMethodType                                                                                                                    = 25379
-	AddPushTargetFolderMethodType                                                                                                                 = 25381
-	RemovePushTargetFolderMethodType                                                                                                              = 25384
-	PublishSubscribeType_SecurityGroups_AddSecurityGroupFolder                                                                                    = 25386
-	PublishSubscribeType_SecurityGroups_RemoveSecurityGroupFolder                                                                                 = 25389
-	PublishSubscribeType_KeyPushTargets_AddPushTarget                                                                                             = 25393
-	PublishSubscribeType_KeyPushTargets_RemovePushTarget                                                                                          = 25396
-	PublishSubscribeType_KeyPushTargets_AddPushTargetFolder                                                                                       = 25398
-	PublishSubscribeType_KeyPushTargets_RemovePushTargetFolder                                                                                    = 25401
-	PublishSubscribeType_PubSubConfiguration_Open                                                                                                 = 25411
-	PublishSubscribeType_PubSubConfiguration_Close                                                                                                = 25414
-	PublishSubscribeType_PubSubConfiguration_Read                                                                                                 = 25416
-	PublishSubscribeType_PubSubConfiguration_Write                                                                                                = 25419
-	PublishSubscribeType_PubSubConfiguration_GetPosition                                                                                          = 25421
-	PublishSubscribeType_PubSubConfiguration_SetPosition                                                                                          = 25424
-	PublishSubscribeType_PubSubConfiguration_ReserveIDs                                                                                           = 25426
-	PublishSubscribeType_PubSubConfiguration_CloseAndUpdate                                                                                       = 25429
-	PublishSubscribe_SecurityGroups_AddSecurityGroupFolder                                                                                        = 25434
-	PublishSubscribe_SecurityGroups_RemoveSecurityGroupFolder                                                                                     = 25437
-	PublishSubscribe_KeyPushTargets_AddPushTarget                                                                                                 = 25441
-	PublishSubscribe_KeyPushTargets_RemovePushTarget                                                                                              = 25444
-	PublishSubscribe_KeyPushTargets_AddPushTargetFolder                                                                                           = 25446
-	PublishSubscribe_KeyPushTargets_RemovePushTargetFolder                                                                                        = 25449
-	PublishSubscribe_PubSubConfiguration_Open                                                                                                     = 25459
-	PublishSubscribe_PubSubConfiguration_Close                                                                                                    = 25462
-	PublishSubscribe_PubSubConfiguration_Read                                                                                                     = 25464
-	PublishSubscribe_PubSubConfiguration_Write                                                                                                    = 25467
-	PublishSubscribe_PubSubConfiguration_GetPosition                                                                                              = 25469
-	PublishSubscribe_PubSubConfiguration_SetPosition                                                                                              = 25472
-	PublishSubscribe_PubSubConfiguration_ReserveIDs                                                                                               = 25474
-	PublishSubscribe_PubSubConfiguration_CloseAndUpdate                                                                                           = 25477
-	PubSubConfigurationType_Open                                                                                                                  = 25490
-	PubSubConfigurationType_Close                                                                                                                 = 25493
-	PubSubConfigurationType_Read                                                                                                                  = 25495
-	PubSubConfigurationType_Write                                                                                                                 = 25498
-	PubSubConfigurationType_GetPosition                                                                                                           = 25500
-	PubSubConfigurationType_SetPosition                                                                                                           = 25503
-	PubSubConfigurationType_ReserveIDs                                                                                                            = 25505
-	PubSubConfigurationType_CloseAndUpdate                                                                                                        = 25508
-	PubSubConfigurationTypeReserveIDsMethodType                                                                                                   = 25511
-	PubSubConfigurationTypeCloseAndUpdateMethodType                                                                                               = 25514
-	WellKnownRole_SecurityKeyServerAdmin_AddIdentity                                                                                              = 25572
-	WellKnownRole_SecurityKeyServerAdmin_RemoveIdentity                                                                                           = 25574
-	WellKnownRole_SecurityKeyServerAdmin_AddApplication                                                                                           = 25576
-	WellKnownRole_SecurityKeyServerAdmin_RemoveApplication                                                                                        = 25578
-	WellKnownRole_SecurityKeyServerAdmin_AddEndpoint                                                                                              = 25580
-	WellKnownRole_SecurityKeyServerAdmin_RemoveEndpoint                                                                                           = 25582
-	WellKnownRole_SecurityKeyServerPush_AddIdentity                                                                                               = 25591
-	WellKnownRole_SecurityKeyServerPush_RemoveIdentity                                                                                            = 25593
-	WellKnownRole_SecurityKeyServerPush_AddApplication                                                                                            = 25595
-	WellKnownRole_SecurityKeyServerPush_RemoveApplication                                                                                         = 25597
-	WellKnownRole_SecurityKeyServerPush_AddEndpoint                                                                                               = 25599
-	WellKnownRole_SecurityKeyServerPush_RemoveEndpoint                                                                                            = 25601
-	WellKnownRole_SecurityKeyServerAccess_AddIdentity                                                                                             = 25610
-	WellKnownRole_SecurityKeyServerAccess_RemoveIdentity                                                                                          = 25612
-	WellKnownRole_SecurityKeyServerAccess_AddApplication                                                                                          = 25614
-	WellKnownRole_SecurityKeyServerAccess_RemoveApplication                                                                                       = 25616
-	WellKnownRole_SecurityKeyServerAccess_AddEndpoint                                                                                             = 25618
-	WellKnownRole_SecurityKeyServerAccess_RemoveEndpoint                                                                                          = 25620
-	SecurityGroupFolderType_SecurityGroupName_Placeholder_InvalidateKeys                                                                          = 25622
-	SecurityGroupFolderType_SecurityGroupName_Placeholder_ForceKeyRotation                                                                        = 25623
-	SecurityGroupType_InvalidateKeys                                                                                                              = 25624
-	SecurityGroupType_ForceKeyRotation                                                                                                            = 25625
-	PubSubKeyPushTargetType_SecurityGroupName_Placeholder_InvalidateKeys                                                                          = 25632
-	PubSubKeyPushTargetType_SecurityGroupName_Placeholder_ForceKeyRotation                                                                        = 25633
-	PubSubKeyPushTargetType_ConnectSecurityGroups                                                                                                 = 25641
-	PubSubKeyPushTargetType_DisconnectSecurityGroups                                                                                              = 25644
-	PubSubKeyPushTargetType_TriggerKeyUpdate                                                                                                      = 25647
-	PubSubKeyPushTargetFolderType_PushTargetName_Placeholder_ConnectSecurityGroups                                                                = 25655
-	PubSubKeyPushTargetFolderType_PushTargetName_Placeholder_DisconnectSecurityGroups                                                             = 25658
-	PubSubKeyPushTargetFolderType_PushTargetName_Placeholder_TriggerKeyUpdate                                                                     = 25661
-	ServerConfigurationType_CancelChanges                                                                                                         = 25698
-	ServerConfigurationType_ResetToServerDefaults                                                                                                 = 25699
-	ServerConfiguration_CancelChanges                                                                                                             = 25708
-	ServerConfiguration_ResetToServerDefaults                                                                                                     = 25709
-	ServerConfiguration_SetAdminPassword                                                                                                          = 25710
-	RequestTicketsMethodType                                                                                                                      = 25727
-	SetRegistrarEndpointsMethodType                                                                                                               = 25729
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Open                                                         = 25742
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Close                                                        = 25745
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Read                                                         = 25747
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Write                                                        = 25750
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition                                                  = 25752
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition                                                  = 25755
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks                                                = 25760
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate                                               = 25763
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate                                               = 25766
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate                                            = 25768
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_GetRejectedList                                                        = 25772
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable                                             = 25807
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable                                              = 25808
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment                                          = 25809
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge                                         = 25829
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm                                             = 25831
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve                           = 25876
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2                          = 25878
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve                              = 25880
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2                             = 25881
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve                         = 25883
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2                        = 25884
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence                                             = 25917
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress                                            = 25918
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2                                           = 25919
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress                                          = 25921
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2                                         = 25922
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService                                   = 25924
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2                                  = 25925
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService                                      = 25927
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2                                     = 25928
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset                                               = 25930
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2                                              = 25931
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships                                 = 25933
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable                                             = 25973
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable                                              = 25974
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment                                          = 25975
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                                         = 25995
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm                                             = 25997
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve                           = 26042
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                          = 26044
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve                              = 26046
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2                             = 26047
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                         = 26049
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                        = 26050
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence                                             = 26083
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress                                            = 26084
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                                           = 26085
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                                          = 26087
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                                         = 26088
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService                                   = 26090
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2                                  = 26091
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService                                      = 26093
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2                                     = 26094
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset                                               = 26096
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2                                              = 26097
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships                                 = 26099
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Open                                                               = 26114
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Close                                                              = 26117
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Read                                                               = 26119
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Write                                                              = 26122
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition                                                        = 26124
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition                                                        = 26127
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks                                                      = 26132
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate                                                     = 26135
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate                                                     = 26138
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate                                                  = 26140
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_GetRejectedList                                                              = 26144
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable                                                   = 26179
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable                                                    = 26180
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment                                                = 26181
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge                                               = 26201
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm                                                   = 26203
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve                                 = 26248
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2                                = 26250
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve                                    = 26252
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2                                   = 26253
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve                               = 26255
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2                              = 26256
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence                                                   = 26289
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress                                                  = 26290
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2                                                 = 26291
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress                                                = 26293
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2                                               = 26294
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService                                         = 26296
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                                        = 26297
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService                                            = 26299
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2                                           = 26300
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset                                                     = 26302
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2                                                    = 26303
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                                       = 26305
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable                                                   = 26345
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable                                                    = 26346
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment                                                = 26347
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                                               = 26367
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm                                                   = 26369
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                 = 26414
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                = 26416
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve                                    = 26418
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                   = 26419
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                               = 26421
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                              = 26422
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence                                                   = 26455
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress                                                  = 26456
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                                                 = 26457
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                                                = 26459
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                                               = 26460
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                                         = 26462
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                                        = 26463
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                                            = 26465
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                                           = 26466
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset                                                     = 26468
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2                                                    = 26469
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                                       = 26471
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Open                                                           = 26486
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Close                                                          = 26489
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Read                                                           = 26491
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Write                                                          = 26494
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition                                                    = 26496
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition                                                    = 26499
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks                                                  = 26504
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate                                                 = 26507
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate                                                 = 26510
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate                                              = 26512
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_GetRejectedList                                                          = 26516
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable                                               = 26551
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable                                                = 26552
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment                                            = 26553
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge                                           = 26573
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm                                               = 26575
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve                             = 26620
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2                            = 26622
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve                                = 26624
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2                               = 26625
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve                           = 26627
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2                          = 26628
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence                                               = 26661
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress                                              = 26662
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2                                             = 26663
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress                                            = 26665
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                                           = 26666
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService                                     = 26668
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2                                    = 26669
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService                                        = 26671
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                                       = 26672
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset                                                 = 26674
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2                                                = 26675
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships                                   = 26677
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable                                               = 26717
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable                                                = 26718
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                                            = 26719
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                                           = 26739
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                                               = 26741
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve                             = 26786
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                            = 26788
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve                                = 26790
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2                               = 26791
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                           = 26793
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                          = 26794
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence                                               = 26827
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                                              = 26828
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                                             = 26829
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                                            = 26831
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                                           = 26832
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService                                     = 26834
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2                                    = 26835
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                                        = 26837
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                                       = 26838
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset                                                 = 26840
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                                                = 26841
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships                                   = 26843
-	ApplicationConfigurationType_UpdateCertificate                                                                                                = 26858
-	ApplicationConfigurationType_ApplyChanges                                                                                                     = 26861
-	ApplicationConfigurationType_CancelChanges                                                                                                    = 26862
-	ApplicationConfigurationType_CreateSigningRequest                                                                                             = 26863
-	ApplicationConfigurationType_GetRejectedList                                                                                                  = 26866
-	ApplicationConfigurationType_ResetToServerDefaults                                                                                            = 26868
-	ProvisionableDeviceType_RequestTickets                                                                                                        = 26873
-	ProvisionableDeviceType_SetRegistrarEndpoints                                                                                                 = 26875
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Open                                  = 26889
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Close                                 = 26892
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Read                                  = 26894
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Write                                 = 26897
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition                           = 26899
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition                           = 26902
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks                         = 26907
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate                        = 26910
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate                        = 26913
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate                     = 26915
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_GetRejectedList                                 = 26919
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable                      = 26954
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable                       = 26955
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment                   = 26956
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge                  = 26976
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm                      = 26978
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve    = 27023
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2   = 27025
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve       = 27027
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2      = 27028
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve  = 27030
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2 = 27031
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence                      = 27064
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress                     = 27065
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2                    = 27066
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress                   = 27068
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2                  = 27069
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService            = 27071
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2           = 27072
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService               = 27074
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2              = 27075
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset                        = 27077
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2                       = 27078
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships          = 27080
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable                      = 27120
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable                       = 27121
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment                   = 27122
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                  = 27142
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm                      = 27144
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve    = 27189
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2   = 27191
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve       = 27193
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2      = 27194
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve  = 27196
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2 = 27197
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence                      = 27230
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress                     = 27231
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                    = 27232
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                   = 27234
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                  = 27235
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService            = 27237
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2           = 27238
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService               = 27240
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2              = 27241
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset                        = 27243
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2                       = 27244
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships          = 27246
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Open                                        = 27261
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Close                                       = 27264
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Read                                        = 27266
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Write                                       = 27269
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition                                 = 27271
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition                                 = 27274
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks                               = 27279
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate                              = 27282
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate                              = 27285
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate                           = 27287
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_GetRejectedList                                       = 27291
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable                            = 27326
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable                             = 27327
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment                         = 27328
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge                        = 27348
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm                            = 27350
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve          = 27395
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2         = 27397
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve             = 27399
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2            = 27400
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve        = 27402
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2       = 27403
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence                            = 27436
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress                           = 27437
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2                          = 27438
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress                         = 27440
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2                        = 27441
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService                  = 27443
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                 = 27444
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService                     = 27446
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2                    = 27447
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset                              = 27449
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2                             = 27450
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                = 27452
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable                            = 27492
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable                             = 27493
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment                         = 27494
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                        = 27514
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm                            = 27516
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve          = 27561
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2         = 27563
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve             = 27565
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2            = 27566
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve        = 27568
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2       = 27569
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence                            = 27602
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress                           = 27603
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                          = 27604
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                         = 27606
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                        = 27607
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                  = 27609
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                 = 27610
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                     = 27612
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                    = 27613
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset                              = 27615
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2                             = 27616
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                = 27618
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Open                                    = 27633
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Close                                   = 27636
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Read                                    = 27638
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Write                                   = 27641
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition                             = 27643
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition                             = 27646
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks                           = 27651
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate                          = 27654
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate                          = 27657
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate                       = 27659
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_GetRejectedList                                   = 27663
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable                        = 27698
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable                         = 27699
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment                     = 27700
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge                    = 27720
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm                        = 27722
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve      = 27767
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2     = 27769
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve         = 27771
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2        = 27772
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve    = 27774
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2   = 27775
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence                        = 27808
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress                       = 27809
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2                      = 27810
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress                     = 27812
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                    = 27813
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService              = 27815
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2             = 27816
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService                 = 27818
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                = 27819
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset                          = 27821
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2                         = 27822
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships            = 27824
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable                        = 27864
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable                         = 27865
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                     = 27866
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                    = 27886
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                        = 27888
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve      = 27933
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2     = 27935
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve         = 27937
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2        = 27938
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve    = 27940
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2   = 27941
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence                        = 27974
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                       = 27975
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                      = 27976
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                     = 27978
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                    = 27979
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService              = 27981
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2             = 27982
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                 = 27984
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                = 27985
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset                          = 27987
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                         = 27988
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships            = 27990
-	ProvisionableDeviceType_ApplicationName_Placeholder_UpdateCertificate                                                                         = 28005
-	ProvisionableDeviceType_ApplicationName_Placeholder_ApplyChanges                                                                              = 28008
-	ProvisionableDeviceType_ApplicationName_Placeholder_CancelChanges                                                                             = 28009
-	ProvisionableDeviceType_ApplicationName_Placeholder_CreateSigningRequest                                                                      = 28010
-	ProvisionableDeviceType_ApplicationName_Placeholder_GetRejectedList                                                                           = 28013
-	ProvisionableDeviceType_ApplicationName_Placeholder_ResetToServerDefaults                                                                     = 28015
-	ProvisionableDevice_RequestTickets                                                                                                            = 29880
-	ProvisionableDevice_SetRegistrarEndpoints                                                                                                     = 29882
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Open                                      = 29896
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Close                                     = 29899
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Read                                      = 29901
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Write                                     = 29904
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition                               = 29906
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition                               = 29909
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks                             = 29914
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate                            = 29917
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate                            = 29920
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate                         = 29922
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_GetRejectedList                                     = 29926
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable                          = 29961
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable                           = 29962
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment                       = 29963
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge                      = 29983
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm                          = 29985
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve        = 30030
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2       = 30032
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve           = 30034
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2          = 30035
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve      = 30037
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2     = 30038
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence                          = 30071
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress                         = 30072
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2                        = 30073
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress                       = 30075
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2                      = 30076
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService                = 30078
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2               = 30079
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService                   = 30081
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2                  = 30082
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset                            = 30084
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2                           = 30085
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships              = 30087
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable                          = 30127
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable                           = 30128
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment                       = 30129
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                      = 30149
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm                          = 30151
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve        = 30196
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2       = 30198
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve           = 30200
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2          = 30201
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve      = 30203
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2     = 30204
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence                          = 30237
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress                         = 30238
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                        = 30239
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                       = 30241
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                      = 30242
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService                = 30244
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2               = 30245
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService                   = 30247
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2                  = 30248
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset                            = 30250
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2                           = 30251
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships              = 30253
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Open                                            = 30268
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Close                                           = 30271
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Read                                            = 30273
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Write                                           = 30276
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition                                     = 30278
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition                                     = 30281
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks                                   = 30286
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate                                  = 30289
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate                                  = 30292
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate                               = 30294
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_GetRejectedList                                           = 30298
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable                                = 30333
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable                                 = 30334
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment                             = 30335
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge                            = 30355
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm                                = 30357
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve              = 30402
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2             = 30404
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve                 = 30406
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2                = 30407
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve            = 30409
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2           = 30410
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence                                = 30443
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress                               = 30444
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2                              = 30445
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress                             = 30447
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2                            = 30448
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService                      = 30450
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                     = 30451
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService                         = 30453
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2                        = 30454
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset                                  = 30456
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2                                 = 30457
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                    = 30459
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable                                = 30499
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable                                 = 30500
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment                             = 30501
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                            = 30521
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm                                = 30523
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve              = 30568
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2             = 30570
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve                 = 30572
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2                = 30573
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve            = 30575
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2           = 30576
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence                                = 30609
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress                               = 30610
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                              = 30611
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                             = 30613
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                            = 30614
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                      = 30616
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                     = 30617
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                         = 30619
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                        = 30620
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset                                  = 30622
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2                                 = 30623
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                    = 30625
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Open                                        = 30640
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Close                                       = 30643
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Read                                        = 30645
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Write                                       = 30648
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition                                 = 30650
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition                                 = 30653
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks                               = 30658
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate                              = 30661
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate                              = 30664
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate                           = 30666
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_GetRejectedList                                       = 30670
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable                            = 30705
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable                             = 30706
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment                         = 30707
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge                        = 30727
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm                            = 30729
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve          = 30774
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2         = 30776
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve             = 30778
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2            = 30779
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve        = 30781
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2       = 30782
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence                            = 30815
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress                           = 30816
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2                          = 30817
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress                         = 30819
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                        = 30820
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService                  = 30822
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2                 = 30823
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService                     = 30825
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                    = 30826
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset                              = 30828
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2                             = 30829
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships                = 30831
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable                            = 30871
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable                             = 30872
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                         = 30873
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                        = 30893
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                            = 30895
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve          = 30940
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2         = 30942
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve             = 30944
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2            = 30945
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve        = 30947
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2       = 30948
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence                            = 30981
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                           = 30982
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                          = 30983
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                         = 30985
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                        = 30986
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService                  = 30988
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2                 = 30989
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                     = 30991
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                    = 30992
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset                              = 30994
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                             = 30995
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships                = 30997
-	ProvisionableDevice_ApplicationName_Placeholder_UpdateCertificate                                                                             = 31384
-	ProvisionableDevice_ApplicationName_Placeholder_ApplyChanges                                                                                  = 31387
-	ProvisionableDevice_ApplicationName_Placeholder_CancelChanges                                                                                 = 31388
-	ProvisionableDevice_ApplicationName_Placeholder_CreateSigningRequest                                                                          = 31389
-	ProvisionableDevice_ApplicationName_Placeholder_GetRejectedList                                                                               = 31392
-	ProvisionableDevice_ApplicationName_Placeholder_ResetToServerDefaults                                                                         = 31394
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Disable                                                                          = 32098
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Enable                                                                           = 32099
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_AddComment                                                                       = 32100
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Acknowledge                                                                      = 32120
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Confirm                                                                          = 32122
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_TimedShelve                                                        = 32167
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_TimedShelve2                                                       = 32169
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_Unshelve                                                           = 32171
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_Unshelve2                                                          = 32172
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_OneShotShelve                                                      = 32174
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_OneShotShelve2                                                     = 32175
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Silence                                                                          = 32208
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Suppress                                                                         = 32209
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Suppress2                                                                        = 32210
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Unsuppress                                                                       = 32212
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Unsuppress2                                                                      = 32213
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_RemoveFromService                                                                = 32215
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_RemoveFromService2                                                               = 32216
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_PlaceInService                                                                   = 32218
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_PlaceInService2                                                                  = 32219
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Reset                                                                            = 32221
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Reset2                                                                           = 32222
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_GetGroupMemberships                                                              = 32224
-	GetCertificatesMethodType                                                                                                                     = 32282
-	ServerConfigurationType_GetCertificates                                                                                                       = 32296
-	ServerConfiguration_GetCertificates                                                                                                           = 32333
-	ApplicationConfigurationType_GetCertificates                                                                                                  = 32346
-	ProvisionableDeviceType_ApplicationName_Placeholder_GetCertificates                                                                           = 32359
-	ProvisionableDevice_ApplicationName_Placeholder_GetCertificates                                                                               = 32372
-	DataSetClasses_GetSecurityKeys                                                                                                                = 32406
-	DataSetClasses_GetSecurityGroup                                                                                                               = 32409
-	DataSetClasses_SecurityGroups_AddSecurityGroup                                                                                                = 32413
-	DataSetClasses_SecurityGroups_RemoveSecurityGroup                                                                                             = 32416
-	DataSetClasses_SecurityGroups_AddSecurityGroupFolder                                                                                          = 32418
-	DataSetClasses_SecurityGroups_RemoveSecurityGroupFolder                                                                                       = 32421
-	DataSetClasses_KeyPushTargets_AddPushTarget                                                                                                   = 32425
-	DataSetClasses_KeyPushTargets_RemovePushTarget                                                                                                = 32428
-	DataSetClasses_KeyPushTargets_AddPushTargetFolder                                                                                             = 32430
-	DataSetClasses_KeyPushTargets_RemovePushTargetFolder                                                                                          = 32433
-	DataSetClasses_ConnectionName_Placeholder_Status_Enable                                                                                       = 32450
-	DataSetClasses_ConnectionName_Placeholder_Status_Disable                                                                                      = 32451
-	DataSetClasses_ConnectionName_Placeholder_Diagnostics_Reset                                                                                   = 32464
-	DataSetClasses_ConnectionName_Placeholder_AddWriterGroup                                                                                      = 32500
-	DataSetClasses_ConnectionName_Placeholder_AddReaderGroup                                                                                      = 32503
-	DataSetClasses_ConnectionName_Placeholder_RemoveGroup                                                                                         = 32506
-	DataSetClasses_SetSecurityKeys                                                                                                                = 32508
-	DataSetClasses_AddConnection                                                                                                                  = 32510
-	DataSetClasses_RemoveConnection                                                                                                               = 32513
-	DataSetClasses_PublishedDataSets_AddPublishedDataItems                                                                                        = 32516
-	DataSetClasses_PublishedDataSets_AddPublishedEvents                                                                                           = 32519
-	DataSetClasses_PublishedDataSets_AddPublishedDataItemsTemplate                                                                                = 32522
-	DataSetClasses_PublishedDataSets_AddPublishedEventsTemplate                                                                                   = 32525
-	DataSetClasses_PublishedDataSets_RemovePublishedDataSet                                                                                       = 32528
-	DataSetClasses_PublishedDataSets_AddDataSetFolder                                                                                             = 32530
-	DataSetClasses_PublishedDataSets_RemoveDataSetFolder                                                                                          = 32533
-	DataSetClasses_SubscribedDataSets_AddSubscribedDataSet                                                                                        = 32536
-	DataSetClasses_SubscribedDataSets_RemoveSubscribedDataSet                                                                                     = 32539
-	DataSetClasses_SubscribedDataSets_AddDataSetFolder                                                                                            = 32541
-	DataSetClasses_SubscribedDataSets_RemoveDataSetFolder                                                                                         = 32544
-	DataSetClasses_PubSubConfiguration_Open                                                                                                       = 32554
-	DataSetClasses_PubSubConfiguration_Close                                                                                                      = 32557
-	DataSetClasses_PubSubConfiguration_Read                                                                                                       = 32559
-	DataSetClasses_PubSubConfiguration_Write                                                                                                      = 32562
-	DataSetClasses_PubSubConfiguration_GetPosition                                                                                                = 32564
-	DataSetClasses_PubSubConfiguration_SetPosition                                                                                                = 32567
-	DataSetClasses_PubSubConfiguration_ReserveIDs                                                                                                 = 32569
-	DataSetClasses_PubSubConfiguration_CloseAndUpdate                                                                                             = 32572
-	DataSetClasses_Status_Enable                                                                                                                  = 32577
-	DataSetClasses_Status_Disable                                                                                                                 = 32578
-	DataSetClasses_Diagnostics_Reset                                                                                                              = 32591
+	ProgramStateMachineType_Start                                                                                                                            = 2426
+	ProgramStateMachineType_Suspend                                                                                                                          = 2427
+	ProgramStateMachineType_Resume                                                                                                                           = 2428
+	ProgramStateMachineType_Halt                                                                                                                             = 2429
+	ProgramStateMachineType_Reset                                                                                                                            = 2430
+	ShelvedStateMachineType_Unshelve                                                                                                                         = 2947
+	ShelvedStateMachineType_OneShotShelve                                                                                                                    = 2948
+	ShelvedStateMachineType_TimedShelve                                                                                                                      = 2949
+	AddCommentMethodType                                                                                                                                     = 3863
+	ConditionType_ConditionRefresh                                                                                                                           = 3875
+	TimedShelveMethodType                                                                                                                                    = 6102
+	ConditionRefreshMethodType                                                                                                                               = 9007
+	ConditionType_Enable                                                                                                                                     = 9027
+	ConditionType_Disable                                                                                                                                    = 9028
+	ConditionType_AddComment                                                                                                                                 = 9029
+	DialogResponseMethodType                                                                                                                                 = 9031
+	DialogConditionType_Respond                                                                                                                              = 9069
+	AcknowledgeableConditionType_Acknowledge                                                                                                                 = 9111
+	AcknowledgeableConditionType_Confirm                                                                                                                     = 9113
+	AlarmConditionType_ShelvingState_Unshelve                                                                                                                = 9211
+	AlarmConditionType_ShelvingState_OneShotShelve                                                                                                           = 9212
+	AlarmConditionType_ShelvingState_TimedShelve                                                                                                             = 9213
+	ServerType_GetMonitoredItems                                                                                                                             = 11489
+	Server_GetMonitoredItems                                                                                                                                 = 11492
+	GetMonitoredItemsMethodType                                                                                                                              = 11495
+	FileType_Open                                                                                                                                            = 11580
+	FileType_Close                                                                                                                                           = 11583
+	FileType_Read                                                                                                                                            = 11585
+	FileType_Write                                                                                                                                           = 11588
+	FileType_GetPosition                                                                                                                                     = 11590
+	FileType_SetPosition                                                                                                                                     = 11593
+	AddressSpaceFileType_ExportNamespace                                                                                                                     = 11615
+	NamespaceMetadataType_NamespaceFile_Open                                                                                                                 = 11629
+	NamespaceMetadataType_NamespaceFile_Close                                                                                                                = 11632
+	NamespaceMetadataType_NamespaceFile_Read                                                                                                                 = 11634
+	NamespaceMetadataType_NamespaceFile_Write                                                                                                                = 11637
+	NamespaceMetadataType_NamespaceFile_GetPosition                                                                                                          = 11639
+	NamespaceMetadataType_NamespaceFile_SetPosition                                                                                                          = 11642
+	NamespaceMetadataType_NamespaceFile_ExportNamespace                                                                                                      = 11644
+	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_Open                                                                                        = 11659
+	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_Close                                                                                       = 11662
+	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_Read                                                                                        = 11664
+	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_Write                                                                                       = 11667
+	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_GetPosition                                                                                 = 11669
+	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_SetPosition                                                                                 = 11672
+	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile_ExportNamespace                                                                             = 11674
+	OpenMethodType                                                                                                                                           = 11738
+	CloseMethodType                                                                                                                                          = 11741
+	ReadMethodType                                                                                                                                           = 11743
+	WriteMethodType                                                                                                                                          = 11746
+	GetPositionMethodType                                                                                                                                    = 11748
+	SetPositionMethodType                                                                                                                                    = 11751
+	OpenWithMasksMethodType                                                                                                                                  = 12513
+	CloseAndUpdateMethodType                                                                                                                                 = 12516
+	AddCertificateMethodType                                                                                                                                 = 12518
+	RemoveCertificateMethodType                                                                                                                              = 12520
+	TrustListType_OpenWithMasks                                                                                                                              = 12543
+	TrustListType_CloseAndUpdate                                                                                                                             = 12546
+	TrustListType_AddCertificate                                                                                                                             = 12548
+	TrustListType_RemoveCertificate                                                                                                                          = 12550
+	UpdateCertificateMethodType                                                                                                                              = 12578
+	ServerConfigurationType_UpdateCertificate                                                                                                                = 12616
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Open                                                                             = 12647
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Close                                                                            = 12650
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Read                                                                             = 12652
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Write                                                                            = 12655
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition                                                                      = 12657
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition                                                                      = 12660
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks                                                                    = 12663
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate                                                                   = 12666
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate                                                                   = 12668
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate                                                                = 12670
+	ServerConfigurationType_CreateSigningRequest                                                                                                             = 12731
+	ServerConfigurationType_ApplyChanges                                                                                                                     = 12734
+	ServerConfiguration_CreateSigningRequest                                                                                                                 = 12737
+	ServerConfiguration_ApplyChanges                                                                                                                         = 12740
+	CreateSigningRequestMethodType                                                                                                                           = 12741
+	ServerType_SetSubscriptionDurable                                                                                                                        = 12746
+	Server_SetSubscriptionDurable                                                                                                                            = 12749
+	SetSubscriptionDurableMethodType                                                                                                                         = 12752
+	GetRejectedListMethodType                                                                                                                                = 12773
+	ServerConfigurationType_GetRejectedList                                                                                                                  = 12775
+	ServerConfiguration_GetRejectedList                                                                                                                      = 12777
+	ServerType_ResendData                                                                                                                                    = 12871
+	Server_ResendData                                                                                                                                        = 12873
+	ResendDataMethodType                                                                                                                                     = 12875
+	ServerType_RequestServerStateChange                                                                                                                      = 12883
+	Server_RequestServerStateChange                                                                                                                          = 12886
+	RequestServerStateChangeMethodType                                                                                                                       = 12888
+	ConditionType_ConditionRefresh2                                                                                                                          = 12912
+	ConditionRefresh2MethodType                                                                                                                              = 12914
+	CreateDirectoryMethodType                                                                                                                                = 13342
+	CreateFileMethodType                                                                                                                                     = 13345
+	DeleteFileMethodType                                                                                                                                     = 13348
+	MoveOrCopyMethodType                                                                                                                                     = 13350
+	FileDirectoryType_FileDirectoryName_Placeholder_CreateDirectory                                                                                          = 13355
+	FileDirectoryType_FileDirectoryName_Placeholder_CreateFile                                                                                               = 13358
+	FileDirectoryType_FileDirectoryName_Placeholder_MoveOrCopy                                                                                               = 13363
+	FileDirectoryType_FileName_Placeholder_Open                                                                                                              = 13372
+	FileDirectoryType_FileName_Placeholder_Close                                                                                                             = 13375
+	FileDirectoryType_FileName_Placeholder_Read                                                                                                              = 13377
+	FileDirectoryType_FileName_Placeholder_Write                                                                                                             = 13380
+	FileDirectoryType_FileName_Placeholder_GetPosition                                                                                                       = 13382
+	FileDirectoryType_FileName_Placeholder_SetPosition                                                                                                       = 13385
+	FileDirectoryType_CreateDirectory                                                                                                                        = 13387
+	FileDirectoryType_CreateFile                                                                                                                             = 13390
+	FileDirectoryType_DeleteFileSystemObject                                                                                                                 = 13393
+	FileDirectoryType_MoveOrCopy                                                                                                                             = 13395
+	CertificateGroupType_TrustList_Open                                                                                                                      = 13605
+	CertificateGroupType_TrustList_Close                                                                                                                     = 13608
+	CertificateGroupType_TrustList_Read                                                                                                                      = 13610
+	CertificateGroupType_TrustList_Write                                                                                                                     = 13613
+	CertificateGroupType_TrustList_GetPosition                                                                                                               = 13615
+	CertificateGroupType_TrustList_SetPosition                                                                                                               = 13618
+	CertificateGroupType_TrustList_OpenWithMasks                                                                                                             = 13621
+	CertificateGroupType_TrustList_CloseAndUpdate                                                                                                            = 13624
+	CertificateGroupType_TrustList_AddCertificate                                                                                                            = 13627
+	CertificateGroupType_TrustList_RemoveCertificate                                                                                                         = 13629
+	ServerConfiguration_UpdateCertificate                                                                                                                    = 13737
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_Open                                                                                        = 13821
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_Close                                                                                       = 13824
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_Read                                                                                        = 13826
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_Write                                                                                       = 13829
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_GetPosition                                                                                 = 13831
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_SetPosition                                                                                 = 13834
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_OpenWithMasks                                                                               = 13837
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_CloseAndUpdate                                                                              = 13840
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_AddCertificate                                                                              = 13843
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList_RemoveCertificate                                                                           = 13845
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_Open                                                                                              = 13855
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_Close                                                                                             = 13858
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_Read                                                                                              = 13860
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_Write                                                                                             = 13863
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_GetPosition                                                                                       = 13865
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_SetPosition                                                                                       = 13868
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_OpenWithMasks                                                                                     = 13871
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_CloseAndUpdate                                                                                    = 13874
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_AddCertificate                                                                                    = 13877
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList_RemoveCertificate                                                                                 = 13879
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_Open                                                                                          = 13889
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_Close                                                                                         = 13892
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_Read                                                                                          = 13894
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_Write                                                                                         = 13897
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_GetPosition                                                                                   = 13899
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_SetPosition                                                                                   = 13902
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_OpenWithMasks                                                                                 = 13905
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_CloseAndUpdate                                                                                = 13908
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_AddCertificate                                                                                = 13911
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList_RemoveCertificate                                                                             = 13913
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_Open                                                                                    = 13923
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_Close                                                                                   = 13926
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_Read                                                                                    = 13928
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_Write                                                                                   = 13931
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_GetPosition                                                                             = 13933
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_SetPosition                                                                             = 13936
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_OpenWithMasks                                                                           = 13939
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_CloseAndUpdate                                                                          = 13942
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_AddCertificate                                                                          = 13945
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList_RemoveCertificate                                                                       = 13947
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Open                                                                         = 13958
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Close                                                                        = 13961
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Read                                                                         = 13963
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Write                                                                        = 13966
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition                                                                  = 13968
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition                                                                  = 13971
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks                                                                = 13974
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate                                                               = 13977
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate                                                               = 13980
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate                                                            = 13982
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Open                                                                               = 13992
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Close                                                                              = 13995
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Read                                                                               = 13997
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Write                                                                              = 14000
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition                                                                        = 14002
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition                                                                        = 14005
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks                                                                      = 14008
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate                                                                     = 14011
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate                                                                     = 14014
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate                                                                  = 14016
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Open                                                                           = 14026
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Close                                                                          = 14029
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Read                                                                           = 14031
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Write                                                                          = 14034
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition                                                                    = 14036
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition                                                                    = 14039
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks                                                                  = 14042
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate                                                                 = 14045
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate                                                                 = 14048
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate                                                              = 14050
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Open                                                                                   = 14095
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Close                                                                                  = 14098
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Read                                                                                   = 14100
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_Write                                                                                  = 14103
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition                                                                            = 14105
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition                                                                            = 14108
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks                                                                          = 14111
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate                                                                         = 14114
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate                                                                         = 14117
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate                                                                      = 14119
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Open                                                                               = 14129
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Close                                                                              = 14132
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Read                                                                               = 14134
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Write                                                                              = 14137
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition                                                                        = 14139
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition                                                                        = 14142
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks                                                                      = 14145
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate                                                                     = 14148
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate                                                                     = 14151
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate                                                                  = 14153
+	RemoveConnectionMethodType                                                                                                                               = 14183
+	PubSubConnectionType_RemoveGroup                                                                                                                         = 14225
+	PublishSubscribeType_ConnectionName_Placeholder_Status_Enable                                                                                            = 14421
+	PublishSubscribeType_ConnectionName_Placeholder_Status_Disable                                                                                           = 14422
+	PublishSubscribeType_ConnectionName_Placeholder_RemoveGroup                                                                                              = 14424
+	PublishSubscribeType_RemoveConnection                                                                                                                    = 14432
+	PublishSubscribeType_PublishedDataSets_AddPublishedDataItems                                                                                             = 14435
+	PublishSubscribeType_PublishedDataSets_AddPublishedEvents                                                                                                = 14438
+	PublishSubscribeType_PublishedDataSets_RemovePublishedDataSet                                                                                            = 14441
+	DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedDataItems                                                                                    = 14479
+	DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedEvents                                                                                       = 14482
+	DataSetFolderType_DataSetFolderName_Placeholder_RemovePublishedDataSet                                                                                   = 14485
+	DataSetFolderType_AddPublishedDataItems                                                                                                                  = 14493
+	DataSetFolderType_AddPublishedEvents                                                                                                                     = 14496
+	DataSetFolderType_RemovePublishedDataSet                                                                                                                 = 14499
+	AddPublishedDataItemsMethodType                                                                                                                          = 14501
+	AddPublishedEventsMethodType                                                                                                                             = 14504
+	RemovePublishedDataSetMethodType                                                                                                                         = 14507
+	PublishedDataItemsType_AddVariables                                                                                                                      = 14555
+	PublishedDataItemsType_RemoveVariables                                                                                                                   = 14558
+	PublishedDataItemsAddVariablesMethodType                                                                                                                 = 14564
+	PublishedDataItemsRemoveVariablesMethodType                                                                                                              = 14567
+	PubSubConnectionType_Status_Enable                                                                                                                       = 14602
+	PubSubConnectionType_Status_Disable                                                                                                                      = 14603
+	PubSubConnectionTypeRemoveGroupMethodType                                                                                                                = 14604
+	PubSubGroupTypeRemoveWriterMethodType                                                                                                                    = 14623
+	PubSubGroupTypeRemoveReaderMethodType                                                                                                                    = 14625
+	PubSubStatusType_Enable                                                                                                                                  = 14645
+	PubSubStatusType_Disable                                                                                                                                 = 14646
+	PublishedEventsType_ModifyFieldSelection                                                                                                                 = 15052
+	PublishedEventsTypeModifyFieldSelectionMethodType                                                                                                        = 15054
+	TargetVariablesType_AddTargetVariables                                                                                                                   = 15115
+	TargetVariablesType_RemoveTargetVariables                                                                                                                = 15118
+	TargetVariablesTypeAddTargetVariablesMethodType                                                                                                          = 15121
+	TargetVariablesTypeRemoveTargetVariablesMethodType                                                                                                       = 15124
+	PublishSubscribe_GetSecurityKeys                                                                                                                         = 15215
+	GetSecurityKeysMethodType                                                                                                                                = 15218
+	PublishedDataSetType_DataSetWriterName_Placeholder_Status_Enable                                                                                         = 15225
+	PublishedDataSetType_DataSetWriterName_Placeholder_Status_Disable                                                                                        = 15226
+	CreateCredentialMethodType                                                                                                                               = 15248
+	PubSubGroupType_Status_Enable                                                                                                                            = 15267
+	PubSubGroupType_Status_Disable                                                                                                                           = 15268
+	DataSetWriterType_Status_Enable                                                                                                                          = 15301
+	DataSetWriterType_Status_Disable                                                                                                                         = 15302
+	DataSetReaderType_Status_Enable                                                                                                                          = 15309
+	DataSetReaderType_Status_Disable                                                                                                                         = 15310
+	PublishSubscribe_GetSecurityGroup                                                                                                                        = 15440
+	PublishSubscribe_SecurityGroups_AddSecurityGroup                                                                                                         = 15444
+	PublishSubscribe_SecurityGroups_RemoveSecurityGroup                                                                                                      = 15447
+	GetSecurityGroupMethodType                                                                                                                               = 15449
+	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder_AddSecurityGroup                                                                             = 15454
+	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder_RemoveSecurityGroup                                                                          = 15457
+	SecurityGroupFolderType_AddSecurityGroup                                                                                                                 = 15461
+	SecurityGroupFolderType_RemoveSecurityGroup                                                                                                              = 15464
+	AddSecurityGroupMethodType                                                                                                                               = 15466
+	RemoveSecurityGroupMethodType                                                                                                                            = 15469
+	DataSetFolderType_PublishedDataSetName_Placeholder_ExtensionFields_AddExtensionField                                                                     = 15474
+	DataSetFolderType_PublishedDataSetName_Placeholder_ExtensionFields_RemoveExtensionField                                                                  = 15477
+	PublishedDataSetType_ExtensionFields_AddExtensionField                                                                                                   = 15482
+	PublishedDataSetType_ExtensionFields_RemoveExtensionField                                                                                                = 15485
+	ExtensionFieldsType_AddExtensionField                                                                                                                    = 15491
+	ExtensionFieldsType_RemoveExtensionField                                                                                                                 = 15494
+	AddExtensionFieldMethodType                                                                                                                              = 15496
+	RemoveExtensionFieldMethodType                                                                                                                           = 15499
+	ConfigurationFileType_CloseAndUpdate                                                                                                                     = 15505
+	ConfigurationFileType_ConfirmUpdate                                                                                                                      = 15508
+	ConfigurationFileCloseAndUpdateMethodType                                                                                                                = 15513
+	ConfigurationFileConfirmUpdateMethodType                                                                                                                 = 15516
+	ServerConfigurationType_ConfigurationFile_Open                                                                                                           = 15572
+	ServerConfigurationType_ConfigurationFile_Close                                                                                                          = 15575
+	RoleSetType_RoleName_Placeholder_AddIdentity                                                                                                             = 15612
+	RoleSetType_RoleName_Placeholder_RemoveIdentity                                                                                                          = 15614
+	RoleType_AddIdentity                                                                                                                                     = 15624
+	RoleType_RemoveIdentity                                                                                                                                  = 15626
+	AddIdentityMethodType                                                                                                                                    = 15636
+	RemoveIdentityMethodType                                                                                                                                 = 15638
+	WellKnownRole_Anonymous_AddIdentity                                                                                                                      = 15648
+	WellKnownRole_Anonymous_RemoveIdentity                                                                                                                   = 15650
+	WellKnownRole_AuthenticatedUser_AddIdentity                                                                                                              = 15660
+	WellKnownRole_AuthenticatedUser_RemoveIdentity                                                                                                           = 15662
+	WellKnownRole_Observer_AddIdentity                                                                                                                       = 15672
+	WellKnownRole_Observer_RemoveIdentity                                                                                                                    = 15674
+	WellKnownRole_Operator_AddIdentity                                                                                                                       = 15684
+	WellKnownRole_Operator_RemoveIdentity                                                                                                                    = 15686
+	WellKnownRole_Supervisor_AddIdentity                                                                                                                     = 15696
+	WellKnownRole_Supervisor_RemoveIdentity                                                                                                                  = 15698
+	WellKnownRole_SecurityAdmin_AddIdentity                                                                                                                  = 15708
+	WellKnownRole_SecurityAdmin_RemoveIdentity                                                                                                               = 15710
+	WellKnownRole_ConfigureAdmin_AddIdentity                                                                                                                 = 15720
+	WellKnownRole_ConfigureAdmin_RemoveIdentity                                                                                                              = 15722
+	TemporaryFileTransferType_GenerateFileForRead                                                                                                            = 15746
+	TemporaryFileTransferType_GenerateFileForWrite                                                                                                           = 15749
+	TemporaryFileTransferType_CloseAndCommit                                                                                                                 = 15751
+	ServerConfigurationType_ConfigurationFile_Read                                                                                                           = 15791
+	TemporaryFileTransferType_TransferState_Placeholder_Reset                                                                                                = 15794
+	GenerateFileForReadMethodType                                                                                                                            = 15795
+	GenerateFileForWriteMethodType                                                                                                                           = 15798
+	CloseAndCommitMethodType                                                                                                                                 = 15800
+	ServerConfigurationType_ConfigurationFile_Write                                                                                                          = 15805
+	ServerConfigurationType_ConfigurationFile_GetPosition                                                                                                    = 15807
+	ServerConfigurationType_ConfigurationFile_SetPosition                                                                                                    = 15810
+	FileTransferStateMachineType_Reset                                                                                                                       = 15843
+	PublishSubscribeType_Status_Enable                                                                                                                       = 15846
+	PublishSubscribeType_Status_Disable                                                                                                                      = 15847
+	ServerConfigurationType_ConfigurationFile_CloseAndUpdate                                                                                                 = 15849
+	ServerConfigurationType_ConfigurationFile_ConfirmUpdate                                                                                                  = 15863
+	PubSubKeyServiceType_GetSecurityKeys                                                                                                                     = 15907
+	PubSubKeyServiceType_GetSecurityGroup                                                                                                                    = 15910
+	PubSubKeyServiceType_SecurityGroups_AddSecurityGroup                                                                                                     = 15914
+	PubSubKeyServiceType_SecurityGroups_RemoveSecurityGroup                                                                                                  = 15917
+	OPCUANamespaceMetadata_NamespaceFile_Open                                                                                                                = 15971
+	OPCUANamespaceMetadata_NamespaceFile_Close                                                                                                               = 15974
+	OPCUANamespaceMetadata_NamespaceFile_Read                                                                                                                = 15976
+	OPCUANamespaceMetadata_NamespaceFile_Write                                                                                                               = 15979
+	OPCUANamespaceMetadata_NamespaceFile_GetPosition                                                                                                         = 15981
+	OPCUANamespaceMetadata_NamespaceFile_SetPosition                                                                                                         = 15984
+	OPCUANamespaceMetadata_NamespaceFile_ExportNamespace                                                                                                     = 15986
+	RoleSetType_AddRole                                                                                                                                      = 15997
+	RoleSetType_RemoveRole                                                                                                                                   = 16000
+	AddRoleMethodType                                                                                                                                        = 16002
+	RemoveRoleMethodType                                                                                                                                     = 16005
+	ServerConfiguration_ConfigurationFile_Open                                                                                                               = 16013
+	WellKnownRole_Engineer_AddIdentity                                                                                                                       = 16041
+	WellKnownRole_Engineer_RemoveIdentity                                                                                                                    = 16043
+	ServerConfiguration_ConfigurationFile_Close                                                                                                              = 16060
+	ServerConfiguration_ConfigurationFile_Read                                                                                                               = 16074
+	ServerConfiguration_ConfigurationFile_Write                                                                                                              = 16101
+	ServerConfiguration_ConfigurationFile_GetPosition                                                                                                        = 16103
+	ServerConfiguration_ConfigurationFile_SetPosition                                                                                                        = 16124
+	RoleSetType_RoleName_Placeholder_AddApplication                                                                                                          = 16165
+	RoleSetType_RoleName_Placeholder_RemoveApplication                                                                                                       = 16167
+	RoleSetType_RoleName_Placeholder_AddEndpoint                                                                                                             = 16169
+	RoleSetType_RoleName_Placeholder_RemoveEndpoint                                                                                                          = 16171
+	RoleType_AddApplication                                                                                                                                  = 16176
+	RoleType_RemoveApplication                                                                                                                               = 16178
+	RoleType_AddEndpoint                                                                                                                                     = 16180
+	RoleType_RemoveEndpoint                                                                                                                                  = 16182
+	AddApplicationMethodType                                                                                                                                 = 16184
+	RemoveApplicationMethodType                                                                                                                              = 16186
+	AddEndpointMethodType                                                                                                                                    = 16188
+	RemoveEndpointMethodType                                                                                                                                 = 16190
+	WellKnownRole_Anonymous_AddApplication                                                                                                                   = 16195
+	WellKnownRole_Anonymous_RemoveApplication                                                                                                                = 16197
+	WellKnownRole_Anonymous_AddEndpoint                                                                                                                      = 16199
+	WellKnownRole_Anonymous_RemoveEndpoint                                                                                                                   = 16201
+	WellKnownRole_AuthenticatedUser_AddApplication                                                                                                           = 16206
+	WellKnownRole_AuthenticatedUser_RemoveApplication                                                                                                        = 16208
+	WellKnownRole_AuthenticatedUser_AddEndpoint                                                                                                              = 16210
+	WellKnownRole_AuthenticatedUser_RemoveEndpoint                                                                                                           = 16212
+	WellKnownRole_Observer_AddApplication                                                                                                                    = 16217
+	WellKnownRole_Observer_RemoveApplication                                                                                                                 = 16219
+	WellKnownRole_Observer_AddEndpoint                                                                                                                       = 16221
+	WellKnownRole_Observer_RemoveEndpoint                                                                                                                    = 16223
+	WellKnownRole_Operator_AddApplication                                                                                                                    = 16228
+	WellKnownRole_Operator_RemoveApplication                                                                                                                 = 16230
+	WellKnownRole_Operator_AddEndpoint                                                                                                                       = 16232
+	WellKnownRole_Operator_RemoveEndpoint                                                                                                                    = 16234
+	WellKnownRole_Engineer_AddApplication                                                                                                                    = 16239
+	WellKnownRole_Engineer_RemoveApplication                                                                                                                 = 16241
+	WellKnownRole_Engineer_AddEndpoint                                                                                                                       = 16243
+	WellKnownRole_Engineer_RemoveEndpoint                                                                                                                    = 16245
+	WellKnownRole_Supervisor_AddApplication                                                                                                                  = 16250
+	WellKnownRole_Supervisor_RemoveApplication                                                                                                               = 16252
+	WellKnownRole_Supervisor_AddEndpoint                                                                                                                     = 16254
+	WellKnownRole_Supervisor_RemoveEndpoint                                                                                                                  = 16256
+	WellKnownRole_SecurityAdmin_AddApplication                                                                                                               = 16261
+	WellKnownRole_SecurityAdmin_RemoveApplication                                                                                                            = 16263
+	WellKnownRole_SecurityAdmin_AddEndpoint                                                                                                                  = 16265
+	WellKnownRole_SecurityAdmin_RemoveEndpoint                                                                                                               = 16267
+	WellKnownRole_ConfigureAdmin_AddApplication                                                                                                              = 16272
+	WellKnownRole_ConfigureAdmin_RemoveApplication                                                                                                           = 16274
+	WellKnownRole_ConfigureAdmin_AddEndpoint                                                                                                                 = 16276
+	WellKnownRole_ConfigureAdmin_RemoveEndpoint                                                                                                              = 16278
+	ServerType_ServerCapabilities_RoleSet_AddRole                                                                                                            = 16290
+	ServerType_ServerCapabilities_RoleSet_RemoveRole                                                                                                         = 16293
+	ServerCapabilitiesType_RoleSet_AddRole                                                                                                                   = 16296
+	ServerCapabilitiesType_RoleSet_RemoveRole                                                                                                                = 16299
+	Server_ServerCapabilities_RoleSet_AddRole                                                                                                                = 16301
+	Server_ServerCapabilities_RoleSet_RemoveRole                                                                                                             = 16304
+	ServerConfiguration_ConfigurationFile_CloseAndUpdate                                                                                                     = 16317
+	ServerConfiguration_ConfigurationFile_ConfirmUpdate                                                                                                      = 16320
+	ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_Open                                                                               = 16332
+	ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_Close                                                                              = 16335
+	ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_Read                                                                               = 16337
+	ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_Write                                                                              = 16340
+	ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_GetPosition                                                                        = 16342
+	ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_SetPosition                                                                        = 16345
+	FileSystem_CreateDirectory                                                                                                                               = 16348
+	FileSystem_CreateFile                                                                                                                                    = 16351
+	FileSystem_DeleteFileSystemObject                                                                                                                        = 16354
+	FileSystem_MoveOrCopy                                                                                                                                    = 16356
+	ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_CloseAndUpdate                                                                     = 16368
+	AlarmConditionType_Silence                                                                                                                               = 16402
+	AlarmConditionType_Suppress                                                                                                                              = 16403
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Disable                                                                                                = 16439
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Enable                                                                                                 = 16440
+	AlarmGroupType_AlarmConditionInstance_Placeholder_AddComment                                                                                             = 16441
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Acknowledge                                                                                            = 16461
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Confirm                                                                                                = 16463
+	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_Unshelve                                                                                 = 16515
+	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_OneShotShelve                                                                            = 16516
+	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_TimedShelve                                                                              = 16517
+	ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_ConfirmUpdate                                                                      = 16523
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Silence                                                                                                = 16533
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Suppress                                                                                               = 16534
+	PublishSubscribeType_ConnectionName_Placeholder_AddWriterGroup                                                                                           = 16535
+	PublishSubscribeType_ConnectionName_Placeholder_AddReaderGroup                                                                                           = 16560
+	PublishSubscribeType_AddConnection                                                                                                                       = 16598
+	PublishSubscribeType_PublishedDataSets_AddPublishedDataItemsTemplate                                                                                     = 16601
+	PublishSubscribeType_PublishedDataSets_AddPublishedEventsTemplate                                                                                        = 16639
+	PublishSubscribeType_PublishedDataSets_AddDataSetFolder                                                                                                  = 16651
+	PublishSubscribeType_PublishedDataSets_RemoveDataSetFolder                                                                                               = 16680
+	AddConnectionMethodType                                                                                                                                  = 16691
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Open                                  = 16717
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Close                                 = 16724
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Read                                  = 16726
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Write                                 = 16729
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition                           = 16732
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition                           = 16735
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks                         = 16741
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate                        = 16744
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate                        = 16747
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate                     = 16749
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_GetRejectedList                                 = 16752
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable                      = 16790
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable                       = 16791
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment                   = 16792
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge                  = 16812
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm                      = 16814
+	DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedDataItemsTemplate                                                                            = 16842
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve    = 16864
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2   = 16866
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve       = 16868
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2      = 16869
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve  = 16871
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2 = 16872
+	DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedEventsTemplate                                                                               = 16881
+	DataSetFolderType_DataSetFolderName_Placeholder_AddDataSetFolder                                                                                         = 16884
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence                      = 16911
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress                     = 16912
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2                    = 16913
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress                   = 16915
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2                  = 16916
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService            = 16918
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2           = 16919
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService               = 16921
+	DataSetFolderType_DataSetFolderName_Placeholder_RemoveDataSetFolder                                                                                      = 16923
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2              = 16926
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset                        = 16928
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2                       = 16929
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships          = 16931
+	DataSetFolderType_AddPublishedDataItemsTemplate                                                                                                          = 16935
+	DataSetFolderType_AddPublishedEventsTemplate                                                                                                             = 16960
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable                      = 16977
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable                       = 16978
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment                   = 16979
+	DataSetFolderType_AddDataSetFolder                                                                                                                       = 16994
+	DataSetFolderType_RemoveDataSetFolder                                                                                                                    = 16997
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                  = 17003
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm                      = 17005
+	AddPublishedDataItemsTemplateMethodType                                                                                                                  = 17030
+	AddPublishedEventsTemplateMethodType                                                                                                                     = 17033
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve    = 17056
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2   = 17058
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve       = 17060
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2      = 17061
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve  = 17063
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2 = 17064
+	AddDataSetFolderMethodType                                                                                                                               = 17067
+	RemoveDataSetFolderMethodType                                                                                                                            = 17079
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence                      = 17103
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress                     = 17104
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                    = 17105
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                   = 17107
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                  = 17108
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService            = 17110
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2           = 17111
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService               = 17113
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2              = 17114
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset                        = 17116
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2                       = 17117
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships          = 17119
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Open                                        = 17134
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Close                                       = 17137
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Read                                        = 17139
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Write                                       = 17142
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition                                 = 17144
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition                                 = 17147
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks                               = 17153
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate                              = 17156
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate                              = 17159
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate                           = 17161
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_GetRejectedList                                       = 17164
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable                            = 17199
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable                             = 17200
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment                         = 17205
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge                        = 17237
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm                            = 17239
+	PubSubConnectionType_WriterGroupName_Placeholder_AddDataSetWriter                                                                                        = 17293
+	PublishSubscribeType_SetSecurityKeys                                                                                                                     = 17296
+	SetSecurityKeysMethodType                                                                                                                                = 17298
+	PubSubConnectionType_WriterGroupName_Placeholder_Status_Enable                                                                                           = 17316
+	PubSubConnectionType_WriterGroupName_Placeholder_Status_Disable                                                                                          = 17317
+	PubSubConnectionType_WriterGroupName_Placeholder_RemoveDataSetWriter                                                                                     = 17323
+	PubSubConnectionType_ReaderGroupName_Placeholder_Status_Enable                                                                                           = 17331
+	PubSubConnectionType_ReaderGroupName_Placeholder_Status_Disable                                                                                          = 17332
+	PubSubConnectionType_ReaderGroupName_Placeholder_RemoveDataSetReader                                                                                     = 17333
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve          = 17340
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2         = 17342
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve             = 17344
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2            = 17345
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve        = 17347
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2       = 17348
+	PubSubConnectionType_ReaderGroupName_Placeholder_AddDataSetReader                                                                                        = 17355
+	PublishSubscribe_SetSecurityKeys                                                                                                                         = 17364
+	PublishSubscribe_AddConnection                                                                                                                           = 17366
+	PublishSubscribe_RemoveConnection                                                                                                                        = 17369
+	PublishSubscribe_PublishedDataSets_AddPublishedDataItems                                                                                                 = 17372
+	PublishSubscribe_PublishedDataSets_AddPublishedEvents                                                                                                    = 17375
+	PublishSubscribe_PublishedDataSets_AddPublishedDataItemsTemplate                                                                                         = 17378
+	PublishSubscribe_PublishedDataSets_AddPublishedEventsTemplate                                                                                            = 17381
+	PublishSubscribe_PublishedDataSets_RemovePublishedDataSet                                                                                                = 17384
+	DataSetReaderType_CreateTargetVariables                                                                                                                  = 17386
+	DataSetReaderType_CreateDataSetMirror                                                                                                                    = 17389
+	DataSetReaderTypeCreateTargetVariablesMethodType                                                                                                         = 17392
+	DataSetReaderTypeCreateDataSetMirrorMethodType                                                                                                           = 17395
+	PublishSubscribe_PublishedDataSets_AddDataSetFolder                                                                                                      = 17398
+	PublishSubscribe_PublishedDataSets_RemoveDataSetFolder                                                                                                   = 17403
+	PublishSubscribe_Status_Enable                                                                                                                           = 17407
+	PublishSubscribe_Status_Disable                                                                                                                          = 17408
+	PublishSubscribe_Diagnostics_Reset                                                                                                                       = 17421
+	PubSubConnectionType_AddWriterGroup                                                                                                                      = 17427
+	PubSubConnectionType_AddReaderGroup                                                                                                                      = 17465
+	KeyCredentialConfigurationFolderType_ServiceName_Placeholder_GetEncryptingKey                                                                            = 17516
+	KeyCredentialConfigurationFolderType_ServiceName_Placeholder_UpdateCredential                                                                            = 17519
+	KeyCredentialConfigurationFolderType_ServiceName_Placeholder_DeleteCredential                                                                            = 17521
+	KeyCredentialConfigurationFolderType_CreateCredential                                                                                                    = 17522
+	KeyCredentialConfiguration_CreateCredential                                                                                                              = 17528
+	GetEncryptingKeyMethodType                                                                                                                               = 17531
+	KeyCredentialConfigurationType_GetEncryptingKey                                                                                                          = 17534
+	PubSubConnectionTypeAddWriterGroupMethodType                                                                                                             = 17561
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence                            = 17572
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress                           = 17573
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2                          = 17574
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress                         = 17586
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2                        = 17587
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService                  = 17596
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                 = 17599
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService                     = 17616
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2                    = 17617
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset                              = 17619
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2                             = 17620
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                = 17622
+	PubSubConnectionAddReaderGroupGroupMethodType                                                                                                            = 17630
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable                            = 17678
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable                             = 17679
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment                         = 17680
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                        = 17700
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm                            = 17702
+	FileDirectoryType_FileDirectoryName_Placeholder_DeleteFileSystemObject                                                                                   = 17718
+	WriterGroupType_DataSetWriterName_Placeholder_Status_Enable                                                                                              = 17751
+	WriterGroupType_DataSetWriterName_Placeholder_Status_Disable                                                                                             = 17752
+	WriterGroupType_DataSetWriterName_Placeholder_Diagnostics_Reset                                                                                          = 17765
+	WriterGroupType_Diagnostics_Reset                                                                                                                        = 17824
+	AlarmConditionType_Unsuppress                                                                                                                            = 17868
+	AlarmConditionType_RemoveFromService                                                                                                                     = 17869
+	AlarmConditionType_PlaceInService                                                                                                                        = 17870
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Unsuppress                                                                                             = 17875
+	AlarmGroupType_AlarmConditionInstance_Placeholder_RemoveFromService                                                                                      = 17876
+	AlarmGroupType_AlarmConditionInstance_Placeholder_PlaceInService                                                                                         = 17877
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve          = 17917
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2         = 17919
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve             = 17922
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2            = 17923
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve        = 17925
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2       = 17926
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence                            = 17965
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress                           = 17966
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                          = 17967
+	WriterGroupType_AddDataSetWriter                                                                                                                         = 17969
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                         = 17970
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                        = 17971
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                  = 17973
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                 = 17974
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                     = 17977
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                    = 17978
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset                              = 17980
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2                             = 17981
+	WriterGroupType_RemoveDataSetWriter                                                                                                                      = 17992
+	PubSubGroupTypeAddWriterMethodType                                                                                                                       = 17994
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                = 18000
+	KeyCredentialConfigurationType_UpdateCredential                                                                                                          = 18006
+	KeyCredentialConfigurationType_DeleteCredential                                                                                                          = 18008
+	KeyCredentialUpdateMethodType                                                                                                                            = 18009
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Open                                    = 18024
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Close                                   = 18027
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Read                                    = 18031
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Write                                   = 18034
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition                             = 18036
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition                             = 18039
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks                           = 18045
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate                          = 18049
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate                          = 18052
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate                       = 18054
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_GetRejectedList                                   = 18057
+	ReaderGroupType_DataSetReaderName_Placeholder_Status_Enable                                                                                              = 18090
+	ReaderGroupType_DataSetReaderName_Placeholder_Status_Disable                                                                                             = 18091
+	ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics_Reset                                                                                          = 18104
+	AlarmConditionType_Reset                                                                                                                                 = 18199
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Reset                                                                                                  = 18212
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable                        = 18225
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable                         = 18226
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment                     = 18227
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge                    = 18247
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm                        = 18249
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve      = 18294
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2     = 18296
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve         = 18298
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2        = 18299
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve    = 18301
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2   = 18302
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence                        = 18335
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress                       = 18336
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2                      = 18337
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress                     = 18339
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                    = 18340
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService              = 18342
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2             = 18343
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService                 = 18345
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                = 18346
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset                          = 18349
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2                         = 18350
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships            = 18352
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable                        = 18392
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable                         = 18393
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                     = 18394
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                    = 18414
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                        = 18416
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve      = 18461
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2     = 18463
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve         = 18465
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2        = 18466
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve    = 18468
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2   = 18469
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence                        = 18503
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                       = 18504
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                      = 18505
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                     = 18507
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                    = 18508
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService              = 18510
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2             = 18511
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                 = 18513
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                = 18514
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset                          = 18516
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                         = 18517
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships            = 18519
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_UpdateCertificate                                                                         = 18533
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_GetCertificates                                                                           = 18536
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ApplyChanges                                                                              = 18539
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CancelChanges                                                                             = 18540
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CreateSigningRequest                                                                      = 18541
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_GetRejectedList                                                                           = 18544
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ResetToServerDefaults                                                                     = 18546
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_Open                                                                    = 18562
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_Close                                                                   = 18565
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_Read                                                                    = 18567
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_Write                                                                   = 18570
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_GetPosition                                                             = 18572
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_SetPosition                                                             = 18575
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_CloseAndUpdate                                                          = 18581
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_ConfirmUpdate                                                           = 18584
+	WellKnownRole_TrustedApplication_AddIdentity                                                                                                             = 18632
+	WellKnownRole_TrustedApplication_RemoveIdentity                                                                                                          = 18634
+	WellKnownRole_TrustedApplication_AddApplication                                                                                                          = 18636
+	WellKnownRole_TrustedApplication_RemoveApplication                                                                                                       = 18638
+	WellKnownRole_TrustedApplication_AddEndpoint                                                                                                             = 18640
+	WellKnownRole_TrustedApplication_RemoveEndpoint                                                                                                          = 18642
+	AlarmMetricsType_Reset                                                                                                                                   = 18666
+	PublishSubscribeType_ConnectionName_Placeholder_Diagnostics_Reset                                                                                        = 18679
+	PublishSubscribeType_Diagnostics_Reset                                                                                                                   = 18727
+	PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics_Reset                                                                                     = 18883
+	PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics_Reset                                                                                       = 19119
+	PubSubConnectionType_ReaderGroupName_Placeholder_Diagnostics_Reset                                                                                       = 19188
+	PubSubConnectionType_Diagnostics_Reset                                                                                                                   = 19253
+	CreateSelfSignedCertificateMethodType                                                                                                                    = 19327
+	DeleteCertificateMethodType                                                                                                                              = 19330
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CreateSelfSignedCertificate                                                               = 19332
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_DeleteCertificate                                                                         = 19335
+	ServerConfigurationType_CreateSelfSignedCertificate                                                                                                      = 19337
+	ServerConfigurationType_DeleteCertificate                                                                                                                = 19340
+	ServerConfiguration_CreateSelfSignedCertificate                                                                                                          = 19342
+	ServerConfiguration_DeleteCertificate                                                                                                                    = 19345
+	ProvisionableDeviceType_ApplicationName_Placeholder_CreateSelfSignedCertificate                                                                          = 19347
+	ProvisionableDeviceType_ApplicationName_Placeholder_DeleteCertificate                                                                                    = 19350
+	LogObjectType_GetRecords                                                                                                                                 = 19353
+	GetRecordsMethodType                                                                                                                                     = 19358
+	ServerLog_GetRecords                                                                                                                                     = 19373
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_KeyCredentials_CreateCredential                                                           = 19410
+	ApplicationConfigurationType_KeyCredentials_CreateCredential                                                                                             = 19424
+	CertificateGroupType_CertificateExpired_Disable                                                                                                          = 19483
+	CertificateGroupType_CertificateExpired_Enable                                                                                                           = 19484
+	CertificateGroupType_CertificateExpired_AddComment                                                                                                       = 19485
+	CertificateGroupType_CertificateExpired_Acknowledge                                                                                                      = 19505
+	CertificateGroupType_CertificateExpired_Confirm                                                                                                          = 19507
+	DataSetWriterType_Diagnostics_Reset                                                                                                                      = 19562
+	DataSetReaderType_Diagnostics_Reset                                                                                                                      = 19621
+	PubSubDiagnosticsType_Reset                                                                                                                              = 19689
+	ProvisionableDeviceType_ApplicationName_Placeholder_KeyCredentials_CreateCredential                                                                      = 19740
+	SerializationEntityType_ConfigureSerialization                                                                                                           = 19839
+	ConfigureSerializationMethodType                                                                                                                         = 19842
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Disable                                                                                             = 20034
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Enable                                                                                              = 20035
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_AddComment                                                                                          = 20036
+	CertificateGroupType_CertificateExpired_ShelvingState_TimedShelve                                                                                        = 20097
+	CertificateGroupType_CertificateExpired_ShelvingState_Unshelve                                                                                           = 20099
+	CertificateGroupType_CertificateExpired_ShelvingState_OneShotShelve                                                                                      = 20100
+	CertificateGroupType_CertificateExpired_Silence                                                                                                          = 20132
+	CertificateGroupType_CertificateExpired_Suppress                                                                                                         = 20133
+	CertificateGroupType_CertificateExpired_Unsuppress                                                                                                       = 20134
+	CertificateGroupType_CertificateExpired_RemoveFromService                                                                                                = 20135
+	CertificateGroupType_CertificateExpired_PlaceInService                                                                                                   = 20136
+	CertificateGroupType_CertificateExpired_Reset                                                                                                            = 20137
+	CertificateGroupType_TrustListOutOfDate_Disable                                                                                                          = 20176
+	CertificateGroupType_TrustListOutOfDate_Enable                                                                                                           = 20177
+	CertificateGroupType_TrustListOutOfDate_AddComment                                                                                                       = 20178
+	CertificateGroupType_TrustListOutOfDate_Acknowledge                                                                                                      = 20198
+	CertificateGroupType_TrustListOutOfDate_Confirm                                                                                                          = 20200
+	CertificateGroupType_TrustListOutOfDate_ShelvingState_TimedShelve                                                                                        = 20245
+	CertificateGroupType_TrustListOutOfDate_ShelvingState_Unshelve                                                                                           = 20247
+	CertificateGroupType_TrustListOutOfDate_ShelvingState_OneShotShelve                                                                                      = 20248
+	CertificateGroupType_TrustListOutOfDate_Silence                                                                                                          = 20280
+	CertificateGroupType_TrustListOutOfDate_Suppress                                                                                                         = 20281
+	CertificateGroupType_TrustListOutOfDate_Unsuppress                                                                                                       = 20282
+	CertificateGroupType_TrustListOutOfDate_RemoveFromService                                                                                                = 20283
+	CertificateGroupType_TrustListOutOfDate_PlaceInService                                                                                                   = 20284
+	CertificateGroupType_TrustListOutOfDate_Reset                                                                                                            = 20285
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Disable                                                                            = 20324
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Enable                                                                             = 20325
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_AddComment                                                                         = 20326
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Acknowledge                                                                        = 20346
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Confirm                                                                            = 20348
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve                                                          = 20393
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve                                                             = 20395
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve                                                        = 20396
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Silence                                                                            = 20430
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Suppress                                                                           = 20431
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Unsuppress                                                                         = 20432
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_RemoveFromService                                                                  = 20433
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_PlaceInService                                                                     = 20434
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Reset                                                                              = 20435
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Disable                                                                            = 20474
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Enable                                                                             = 20475
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_AddComment                                                                         = 20476
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                                                                        = 20496
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Confirm                                                                            = 20498
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                                          = 20543
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                             = 20545
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                                        = 20546
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Silence                                                                            = 20578
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Suppress                                                                           = 20579
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                                                                         = 20580
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService                                                                  = 20581
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService                                                                     = 20582
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Reset                                                                              = 20583
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Disable                                                                                  = 20622
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Enable                                                                                   = 20623
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_AddComment                                                                               = 20624
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Acknowledge                                                                              = 20644
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Confirm                                                                                  = 20646
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve                                                                = 20691
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve                                                                   = 20693
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve                                                              = 20694
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Silence                                                                                  = 20726
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Suppress                                                                                 = 20727
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Unsuppress                                                                               = 20728
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_RemoveFromService                                                                        = 20729
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_PlaceInService                                                                           = 20730
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Reset                                                                                    = 20731
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Disable                                                                                  = 20770
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Enable                                                                                   = 20771
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_AddComment                                                                               = 20772
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                                                                              = 20792
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Confirm                                                                                  = 20794
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                                                = 20839
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                                   = 20841
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                                              = 20842
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Silence                                                                                  = 20874
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Suppress                                                                                 = 20875
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                                                                               = 20876
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                                                                        = 20877
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                                                                           = 20878
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Reset                                                                                    = 20879
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Disable                                                                              = 20918
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Enable                                                                               = 20919
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_AddComment                                                                           = 20920
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Acknowledge                                                                          = 20940
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Confirm                                                                              = 20942
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve                                                            = 20987
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve                                                               = 20989
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve                                                          = 20990
+	ReaderGroupType_DataSetReaderName_Placeholder_CreateTargetVariables                                                                                      = 21009
+	ReaderGroupType_DataSetReaderName_Placeholder_CreateDataSetMirror                                                                                        = 21012
+	ReaderGroupType_Diagnostics_Reset                                                                                                                        = 21027
+	ReaderGroupType_AddDataSetReader                                                                                                                         = 21082
+	ReaderGroupType_RemoveDataSetReader                                                                                                                      = 21085
+	PubSubGroupTypeAddReaderMethodType                                                                                                                       = 21087
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Silence                                                                              = 21225
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Suppress                                                                             = 21226
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Unsuppress                                                                           = 21227
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_RemoveFromService                                                                    = 21228
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_PlaceInService                                                                       = 21229
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Reset                                                                                = 21230
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Disable                                                                              = 21269
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Enable                                                                               = 21270
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                                                                           = 21271
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                                                                          = 21291
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                                                                              = 21293
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                                            = 21338
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                               = 21340
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                                          = 21341
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Silence                                                                              = 21373
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                                                                             = 21374
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                                                                           = 21375
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService                                                                    = 21376
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                                                                       = 21377
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Reset                                                                                = 21378
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Disable                                                                        = 21417
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Enable                                                                         = 21418
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_AddComment                                                                     = 21419
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Acknowledge                                                                    = 21439
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Confirm                                                                        = 21441
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_TimedShelve                                                      = 21486
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_Unshelve                                                         = 21488
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_OneShotShelve                                                    = 21489
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Silence                                                                        = 21521
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Suppress                                                                       = 21522
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Unsuppress                                                                     = 21523
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_RemoveFromService                                                              = 21524
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_PlaceInService                                                                 = 21525
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Reset                                                                          = 21526
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Disable                                                                        = 21565
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Enable                                                                         = 21566
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_AddComment                                                                     = 21567
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Acknowledge                                                                    = 21587
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Confirm                                                                        = 21589
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_TimedShelve                                                      = 21634
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_Unshelve                                                         = 21636
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_OneShotShelve                                                    = 21637
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Silence                                                                        = 21669
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Suppress                                                                       = 21670
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Unsuppress                                                                     = 21671
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_RemoveFromService                                                              = 21672
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_PlaceInService                                                                 = 21673
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Reset                                                                          = 21674
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable                                                             = 21713
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable                                                              = 21714
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment                                                          = 21715
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge                                                         = 21735
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm                                                             = 21737
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve                                           = 21782
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve                                              = 21784
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve                                         = 21785
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence                                                             = 21817
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress                                                            = 21818
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress                                                          = 21819
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService                                                   = 21820
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService                                                      = 21821
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset                                                               = 21822
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable                                                             = 21861
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable                                                              = 21862
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment                                                          = 21863
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                                                         = 21883
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm                                                             = 21885
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                           = 21930
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve                                              = 21932
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                         = 21933
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence                                                             = 21965
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress                                                            = 21966
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                                                          = 21967
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService                                                   = 21968
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService                                                      = 21969
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset                                                               = 21970
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable                                                                   = 22009
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable                                                                    = 22010
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment                                                                = 22011
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge                                                               = 22031
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm                                                                   = 22033
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve                                                 = 22078
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve                                                    = 22080
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve                                               = 22081
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence                                                                   = 22113
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress                                                                  = 22114
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress                                                                = 22115
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService                                                         = 22116
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService                                                            = 22117
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset                                                                     = 22118
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable                                                                   = 22157
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable                                                                    = 22158
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment                                                                = 22159
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                                                               = 22179
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm                                                                   = 22181
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                                 = 22226
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                    = 22228
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                               = 22229
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence                                                                   = 22261
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress                                                                  = 22262
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                                                                = 22263
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                                                         = 22264
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                                                            = 22265
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset                                                                     = 22266
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable                                                               = 22305
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable                                                                = 22306
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment                                                            = 22307
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge                                                           = 22327
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm                                                               = 22329
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve                                             = 22374
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve                                                = 22376
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve                                           = 22377
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence                                                               = 22409
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress                                                              = 22410
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress                                                            = 22411
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService                                                     = 22412
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService                                                        = 22413
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset                                                                 = 22414
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable                                                               = 22453
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable                                                                = 22454
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                                                            = 22455
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                                                           = 22475
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                                                               = 22477
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                             = 22522
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                = 22524
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                           = 22525
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence                                                               = 22557
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                                                              = 22558
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                                                            = 22559
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService                                                     = 22560
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                                                        = 22561
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset                                                                 = 22562
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable                                                                 = 22601
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable                                                                  = 22602
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment                                                              = 22603
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge                                                             = 22623
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm                                                                 = 22625
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve                                               = 22670
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve                                                  = 22672
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve                                             = 22673
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence                                                                 = 22705
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress                                                                = 22706
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress                                                              = 22707
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService                                                       = 22708
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService                                                          = 22709
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset                                                                   = 22710
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable                                                                 = 22749
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable                                                                  = 22750
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment                                                              = 22751
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                                                             = 22771
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm                                                                 = 22773
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                               = 22818
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                  = 22820
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                             = 22821
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence                                                                 = 22853
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress                                                                = 22854
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                                                              = 22855
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService                                                       = 22856
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService                                                          = 22857
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset                                                                   = 22858
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable                                                                       = 22897
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable                                                                        = 22898
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment                                                                    = 22899
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge                                                                   = 22919
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm                                                                       = 22921
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve                                                     = 22966
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve                                                        = 22968
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve                                                   = 22969
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence                                                                       = 23001
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress                                                                      = 23002
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress                                                                    = 23003
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService                                                             = 23004
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService                                                                = 23005
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset                                                                         = 23006
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable                                                                       = 23045
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable                                                                        = 23046
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment                                                                    = 23047
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                                                                   = 23067
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm                                                                       = 23069
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                                     = 23114
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                        = 23116
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                                   = 23117
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence                                                                       = 23149
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress                                                                      = 23150
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                                                                    = 23151
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                                                             = 23152
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                                                                = 23153
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset                                                                         = 23154
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable                                                                   = 23193
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable                                                                    = 23194
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment                                                                = 23195
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge                                                               = 23215
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm                                                                   = 23217
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve                                                 = 23262
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve                                                    = 23264
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve                                               = 23265
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence                                                                   = 23297
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress                                                                  = 23298
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress                                                                = 23299
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService                                                         = 23300
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService                                                            = 23301
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset                                                                     = 23302
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable                                                                   = 23341
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable                                                                    = 23342
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                                                                = 23343
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                                                               = 23363
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                                                                   = 23365
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve                                                 = 23410
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve                                                    = 23412
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                                               = 23413
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence                                                                   = 23445
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                                                                  = 23446
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                                                                = 23447
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService                                                         = 23448
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                                                            = 23449
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset                                                                     = 23450
+	AliasNameCategoryType_SubAliasNameCategories_Placeholder_FindAlias                                                                                       = 23459
+	AliasNameCategoryType_FindAlias                                                                                                                          = 23462
+	FindAliasMethodType                                                                                                                                      = 23465
+	Aliases_FindAlias                                                                                                                                        = 23476
+	TagVariables_FindAlias                                                                                                                                   = 23485
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Acknowledge                                                                                         = 23493
+	Topics_FindAlias                                                                                                                                         = 23494
+	CertificateGroupType_GetRejectedList                                                                                                                     = 23526
+	CertificateGroupFolderType_DefaultApplicationGroup_GetRejectedList                                                                                       = 23529
+	CertificateGroupFolderType_DefaultHttpsGroup_GetRejectedList                                                                                             = 23531
+	CertificateGroupFolderType_DefaultUserTokenGroup_GetRejectedList                                                                                         = 23533
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_GetRejectedList                                                                                   = 23535
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_GetRejectedList                                                                        = 23544
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_GetRejectedList                                                                              = 23546
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_GetRejectedList                                                                          = 23548
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_GetRejectedList                                                                            = 23550
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_GetRejectedList                                                                                  = 23552
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_GetRejectedList                                                                              = 23554
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Confirm                                                                                             = 23577
+	PublishSubscribeType_SubscribedDataSets_AddDataSetFolder                                                                                                 = 23637
+	PublishSubscribeType_SubscribedDataSets_RemoveDataSetFolder                                                                                              = 23640
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_TimedShelve                                                                           = 23651
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_TimedShelve2                                                                          = 23653
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_Unshelve                                                                              = 23655
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_Unshelve2                                                                             = 23656
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_OneShotShelve                                                                         = 23659
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_OneShotShelve2                                                                        = 23660
+	PublishSubscribe_SubscribedDataSets_AddDataSetFolder                                                                                                     = 23673
+	PublishSubscribe_SubscribedDataSets_RemoveDataSetFolder                                                                                                  = 23676
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Silence                                                                                             = 23706
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Suppress                                                                                            = 23707
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Suppress2                                                                                           = 23708
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Unsuppress                                                                                          = 23710
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Unsuppress2                                                                                         = 23711
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_RemoveFromService                                                                                   = 23713
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_RemoveFromService2                                                                                  = 23714
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_PlaceInService                                                                                      = 23716
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_PlaceInService2                                                                                     = 23717
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Reset                                                                                               = 23719
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_Reset2                                                                                              = 23720
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_GetGroupMemberships                                                                                 = 23722
+	GetConnectionMethodType                                                                                                                                  = 23726
+	ModifyConnectionMethodType                                                                                                                               = 23729
+	GetWriterGroupMethodType                                                                                                                                 = 23745
+	ModifyWriterGroupMethodType                                                                                                                              = 23748
+	GetReaderGroupMethodType                                                                                                                                 = 23767
+	ModifyReaderGroupMethodType                                                                                                                              = 23770
+	GetDataSetWriterMethodType                                                                                                                               = 23779
+	ModifyDataSetWriterMethodType                                                                                                                            = 23781
+	GetDataSetReaderMethodType                                                                                                                               = 23790
+	ModifyDataSetReaderMethodType                                                                                                                            = 23792
+	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder_AddSubscribedDataSet                                                                 = 23797
+	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder_RemoveSubscribedDataSet                                                              = 23800
+	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder_AddDataSetFolder                                                                     = 23802
+	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder_RemoveDataSetFolder                                                                  = 23805
+	SubscribedDataSetFolderType_AddSubscribedDataSet                                                                                                         = 23811
+	SubscribedDataSetFolderType_RemoveSubscribedDataSet                                                                                                      = 23814
+	SubscribedDataSetFolderType_AddDataSetFolder                                                                                                             = 23816
+	SubscribedDataSetFolderType_RemoveDataSetFolder                                                                                                          = 23819
+	AddSubscribedDataSetMethodType                                                                                                                           = 23821
+	RemoveSubscribedDataSetMethodType                                                                                                                        = 23824
+	PublishSubscribeType_SubscribedDataSets_AddSubscribedDataSet                                                                                             = 24004
+	PublishSubscribeType_SubscribedDataSets_RemoveSubscribedDataSet                                                                                          = 24007
+	PublishSubscribe_SubscribedDataSets_AddSubscribedDataSet                                                                                                 = 24010
+	PublishSubscribe_SubscribedDataSets_RemoveSubscribedDataSet                                                                                              = 24013
+	UserManagementType_AddUser                                                                                                                               = 24269
+	UserManagementType_ModifyUser                                                                                                                            = 24271
+	UserManagementType_RemoveUser                                                                                                                            = 24273
+	UserManagementType_ChangePassword                                                                                                                        = 24275
+	AddUserMethodType                                                                                                                                        = 24282
+	ModifyUserMethodType                                                                                                                                     = 24284
+	RemoveUserMethodType                                                                                                                                     = 24286
+	ChangePasswordMethodType                                                                                                                                 = 24288
+	UserManagement_AddUser                                                                                                                                   = 24304
+	UserManagement_ModifyUser                                                                                                                                = 24306
+	UserManagement_RemoveUser                                                                                                                                = 24308
+	UserManagement_ChangePassword                                                                                                                            = 24310
+	DialogConditionType_Respond2                                                                                                                             = 24312
+	DialogResponse2MethodType                                                                                                                                = 24314
+	AlarmConditionType_Suppress2                                                                                                                             = 24316
+	AlarmConditionType_Unsuppress2                                                                                                                           = 24318
+	AlarmConditionType_RemoveFromService2                                                                                                                    = 24320
+	AlarmConditionType_PlaceInService2                                                                                                                       = 24322
+	AlarmConditionType_Reset2                                                                                                                                = 24324
+	WithCommentMethodType                                                                                                                                    = 24326
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Suppress2                                                                                              = 24328
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Unsuppress2                                                                                            = 24330
+	AlarmGroupType_AlarmConditionInstance_Placeholder_RemoveFromService2                                                                                     = 24332
+	AlarmGroupType_AlarmConditionInstance_Placeholder_PlaceInService2                                                                                        = 24334
+	AlarmGroupType_AlarmConditionInstance_Placeholder_Reset2                                                                                                 = 24336
+	CertificateGroupType_CertificateExpired_Suppress2                                                                                                        = 24518
+	CertificateGroupType_CertificateExpired_Unsuppress2                                                                                                      = 24520
+	CertificateGroupType_CertificateExpired_RemoveFromService2                                                                                               = 24522
+	CertificateGroupType_CertificateExpired_PlaceInService2                                                                                                  = 24524
+	CertificateGroupType_CertificateExpired_Reset2                                                                                                           = 24526
+	CertificateGroupType_TrustListOutOfDate_Suppress2                                                                                                        = 24528
+	CertificateGroupType_TrustListOutOfDate_Unsuppress2                                                                                                      = 24530
+	CertificateGroupType_TrustListOutOfDate_RemoveFromService2                                                                                               = 24532
+	CertificateGroupType_TrustListOutOfDate_PlaceInService2                                                                                                  = 24534
+	CertificateGroupType_TrustListOutOfDate_Reset2                                                                                                           = 24536
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Suppress2                                                                          = 24538
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Unsuppress2                                                                        = 24540
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_RemoveFromService2                                                                 = 24542
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_PlaceInService2                                                                    = 24544
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_Reset2                                                                             = 24546
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                                                                          = 24548
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                                                                        = 24550
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2                                                                 = 24552
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2                                                                    = 24554
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_Reset2                                                                             = 24556
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Suppress2                                                                                = 24558
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Unsuppress2                                                                              = 24560
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                                                                       = 24562
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_PlaceInService2                                                                          = 24564
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_Reset2                                                                                   = 24566
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                                                                                = 24568
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                                                                              = 24570
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                                                                       = 24572
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                                                                          = 24574
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_Reset2                                                                                   = 24576
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Suppress2                                                                            = 24578
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                                                                          = 24580
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2                                                                   = 24582
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                                                                      = 24584
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_Reset2                                                                               = 24586
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                                                                            = 24588
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                                                                          = 24590
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2                                                                   = 24592
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                                                                      = 24594
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                                                                               = 24596
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Suppress2                                                                      = 24598
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Unsuppress2                                                                    = 24600
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_RemoveFromService2                                                             = 24602
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_PlaceInService2                                                                = 24604
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_Reset2                                                                         = 24606
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Suppress2                                                                      = 24608
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Unsuppress2                                                                    = 24610
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_RemoveFromService2                                                             = 24612
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_PlaceInService2                                                                = 24614
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_Reset2                                                                         = 24616
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2                                                           = 24618
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2                                                         = 24620
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2                                                  = 24622
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2                                                     = 24624
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2                                                              = 24626
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                                                           = 24628
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                                                         = 24630
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2                                                  = 24632
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2                                                     = 24634
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2                                                              = 24636
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2                                                                 = 24638
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2                                                               = 24640
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                                                        = 24642
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2                                                           = 24644
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2                                                                    = 24646
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                                                                 = 24648
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                                                               = 24650
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                                                        = 24652
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                                                           = 24654
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2                                                                    = 24656
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2                                                             = 24658
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                                                           = 24660
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2                                                    = 24662
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                                                       = 24664
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2                                                                = 24666
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                                                             = 24668
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                                                           = 24670
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2                                                    = 24672
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                                                       = 24674
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                                                                = 24676
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2                                                               = 24678
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2                                                             = 24680
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2                                                      = 24682
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2                                                         = 24684
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2                                                                  = 24686
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                                                               = 24688
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                                                             = 24690
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2                                                      = 24692
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2                                                         = 24694
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2                                                                  = 24696
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2                                                                     = 24698
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2                                                                   = 24700
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                                                            = 24702
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2                                                               = 24704
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2                                                                        = 24706
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                                                                     = 24708
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                                                                   = 24710
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                                                            = 24712
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                                                               = 24714
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2                                                                        = 24716
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2                                                                 = 24718
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                                                               = 24720
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2                                                        = 24722
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                                                           = 24724
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2                                                                    = 24726
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                                                                 = 24728
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                                                               = 24730
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2                                                        = 24732
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                                                           = 24734
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                                                                    = 24736
+	AlarmConditionType_ShelvingState_TimedShelve2                                                                                                            = 24738
+	AlarmConditionType_ShelvingState_Unshelve2                                                                                                               = 24740
+	AlarmConditionType_ShelvingState_OneShotShelve2                                                                                                          = 24742
+	AlarmConditionType_GetGroupMemberships                                                                                                                   = 24744
+	GetGroupMembershipsMethodType                                                                                                                            = 24746
+	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_TimedShelve2                                                                             = 24748
+	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_Unshelve2                                                                                = 24750
+	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_OneShotShelve2                                                                           = 24752
+	AlarmGroupType_AlarmConditionInstance_Placeholder_GetGroupMemberships                                                                                    = 24754
+	ShelvedStateMachineType_TimedShelve2                                                                                                                     = 24756
+	ShelvedStateMachineType_Unshelve2                                                                                                                        = 24758
+	ShelvedStateMachineType_OneShotShelve2                                                                                                                   = 24760
+	CertificateGroupType_CertificateExpired_ShelvingState_TimedShelve2                                                                                       = 24978
+	CertificateGroupType_CertificateExpired_ShelvingState_Unshelve2                                                                                          = 24980
+	CertificateGroupType_CertificateExpired_ShelvingState_OneShotShelve2                                                                                     = 24982
+	CertificateGroupType_CertificateExpired_GetGroupMemberships                                                                                              = 24984
+	CertificateGroupType_TrustListOutOfDate_ShelvingState_TimedShelve2                                                                                       = 24986
+	CertificateGroupType_TrustListOutOfDate_ShelvingState_Unshelve2                                                                                          = 24988
+	CertificateGroupType_TrustListOutOfDate_ShelvingState_OneShotShelve2                                                                                     = 24990
+	CertificateGroupType_TrustListOutOfDate_GetGroupMemberships                                                                                              = 24992
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2                                                         = 24994
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2                                                            = 24996
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2                                                       = 24998
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships                                                                = 25000
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                                         = 25002
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                            = 25004
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                                       = 25006
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships                                                                = 25008
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2                                                               = 25010
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2                                                                  = 25012
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2                                                             = 25014
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                                                                      = 25016
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                                               = 25018
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                                  = 25020
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                                             = 25022
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                                                                      = 25024
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2                                                           = 25026
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2                                                              = 25028
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2                                                         = 25030
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships                                                                  = 25032
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                                           = 25034
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                              = 25036
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                                         = 25038
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships                                                                  = 25040
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_TimedShelve2                                                     = 25042
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_Unshelve2                                                        = 25044
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState_OneShotShelve2                                                   = 25046
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_GetGroupMemberships                                                            = 25048
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_TimedShelve2                                                     = 25050
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_Unshelve2                                                        = 25052
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState_OneShotShelve2                                                   = 25054
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_GetGroupMemberships                                                            = 25056
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2                                          = 25058
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2                                             = 25060
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2                                        = 25062
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships                                                 = 25064
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                          = 25066
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                             = 25068
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                        = 25070
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships                                                 = 25072
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2                                                = 25074
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2                                                   = 25076
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2                                              = 25078
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                                                       = 25080
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                                = 25082
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                   = 25084
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                              = 25086
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                                                       = 25088
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2                                            = 25090
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2                                               = 25092
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2                                          = 25094
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships                                                   = 25096
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                            = 25098
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                               = 25100
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                          = 25102
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships                                                   = 25104
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2                                              = 25106
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2                                                 = 25108
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2                                            = 25110
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships                                                     = 25112
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                              = 25114
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                 = 25116
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                            = 25118
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships                                                     = 25120
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2                                                    = 25122
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2                                                       = 25124
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2                                                  = 25126
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                                                           = 25128
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                                    = 25130
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                       = 25132
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                                  = 25134
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                                                           = 25136
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2                                                = 25138
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2                                                   = 25140
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2                                              = 25142
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships                                                       = 25144
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                                                = 25146
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2                                                   = 25148
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                                              = 25150
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships                                                       = 25152
+	TimedShelve2MethodType                                                                                                                                   = 25157
+	PriorityMappingTableType_AddPriorityMappingEntry                                                                                                         = 25229
+	PriorityMappingTableType_DeletePriorityMappingEntry                                                                                                      = 25231
+	AddPriorityMappingEntryMethodType                                                                                                                        = 25233
+	DeletePriorityMappingEntryMethodType                                                                                                                     = 25235
+	PubSubKeyServiceType_SecurityGroups_AddSecurityGroupFolder                                                                                               = 25271
+	PubSubKeyServiceType_SecurityGroups_RemoveSecurityGroupFolder                                                                                            = 25274
+	PubSubKeyServiceType_KeyPushTargets_AddPushTarget                                                                                                        = 25278
+	PubSubKeyServiceType_KeyPushTargets_RemovePushTarget                                                                                                     = 25281
+	PubSubKeyServiceType_KeyPushTargets_AddPushTargetFolder                                                                                                  = 25283
+	PubSubKeyServiceType_KeyPushTargets_RemovePushTargetFolder                                                                                               = 25286
+	AddSecurityGroupFolderMethodType                                                                                                                         = 25288
+	RemoveSecurityGroupFolderMethodType                                                                                                                      = 25291
+	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder_AddSecurityGroupFolder                                                                       = 25293
+	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder_RemoveSecurityGroupFolder                                                                    = 25296
+	SecurityGroupFolderType_AddSecurityGroupFolder                                                                                                           = 25312
+	SecurityGroupFolderType_RemoveSecurityGroupFolder                                                                                                        = 25315
+	ConnectSecurityGroupsMethodType                                                                                                                          = 25331
+	DisconnectSecurityGroupsMethodType                                                                                                                       = 25334
+	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder_AddPushTarget                                                                             = 25348
+	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder_RemovePushTarget                                                                          = 25351
+	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder_AddPushTargetFolder                                                                       = 25353
+	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder_RemovePushTargetFolder                                                                    = 25356
+	PubSubKeyPushTargetFolderType_AddPushTarget                                                                                                              = 25366
+	PubSubKeyPushTargetFolderType_RemovePushTarget                                                                                                           = 25369
+	PubSubKeyPushTargetFolderType_AddPushTargetFolder                                                                                                        = 25371
+	PubSubKeyPushTargetFolderType_RemovePushTargetFolder                                                                                                     = 25374
+	AddPushTargetMethodType                                                                                                                                  = 25376
+	RemovePushTargetMethodType                                                                                                                               = 25379
+	AddPushTargetFolderMethodType                                                                                                                            = 25381
+	RemovePushTargetFolderMethodType                                                                                                                         = 25384
+	PublishSubscribeType_PubSubConfiguration_Open                                                                                                            = 25411
+	PublishSubscribeType_PubSubConfiguration_Close                                                                                                           = 25414
+	PublishSubscribeType_PubSubConfiguration_Read                                                                                                            = 25416
+	PublishSubscribeType_PubSubConfiguration_Write                                                                                                           = 25419
+	PublishSubscribeType_PubSubConfiguration_GetPosition                                                                                                     = 25421
+	PublishSubscribeType_PubSubConfiguration_SetPosition                                                                                                     = 25424
+	PublishSubscribeType_PubSubConfiguration_ReserveIDs                                                                                                      = 25426
+	PublishSubscribeType_PubSubConfiguration_CloseAndUpdate                                                                                                  = 25429
+	PublishSubscribe_SecurityGroups_AddSecurityGroupFolder                                                                                                   = 25434
+	PublishSubscribe_SecurityGroups_RemoveSecurityGroupFolder                                                                                                = 25437
+	PublishSubscribe_KeyPushTargets_AddPushTarget                                                                                                            = 25441
+	PublishSubscribe_KeyPushTargets_RemovePushTarget                                                                                                         = 25444
+	PublishSubscribe_KeyPushTargets_AddPushTargetFolder                                                                                                      = 25446
+	PublishSubscribe_KeyPushTargets_RemovePushTargetFolder                                                                                                   = 25449
+	PublishSubscribe_PubSubConfiguration_Open                                                                                                                = 25459
+	PublishSubscribe_PubSubConfiguration_Close                                                                                                               = 25462
+	PublishSubscribe_PubSubConfiguration_Read                                                                                                                = 25464
+	PublishSubscribe_PubSubConfiguration_Write                                                                                                               = 25467
+	PublishSubscribe_PubSubConfiguration_GetPosition                                                                                                         = 25469
+	PublishSubscribe_PubSubConfiguration_SetPosition                                                                                                         = 25472
+	PublishSubscribe_PubSubConfiguration_ReserveIDs                                                                                                          = 25474
+	PublishSubscribe_PubSubConfiguration_CloseAndUpdate                                                                                                      = 25477
+	PubSubConfigurationType_ReserveIDs                                                                                                                       = 25505
+	PubSubConfigurationType_CloseAndUpdate                                                                                                                   = 25508
+	PubSubConfigurationTypeReserveIDsMethodType                                                                                                              = 25511
+	PubSubConfigurationTypeCloseAndUpdateMethodType                                                                                                          = 25514
+	WellKnownRole_SecurityKeyServerAdmin_AddIdentity                                                                                                         = 25572
+	WellKnownRole_SecurityKeyServerAdmin_RemoveIdentity                                                                                                      = 25574
+	WellKnownRole_SecurityKeyServerAdmin_AddApplication                                                                                                      = 25576
+	WellKnownRole_SecurityKeyServerAdmin_RemoveApplication                                                                                                   = 25578
+	WellKnownRole_SecurityKeyServerAdmin_AddEndpoint                                                                                                         = 25580
+	WellKnownRole_SecurityKeyServerAdmin_RemoveEndpoint                                                                                                      = 25582
+	WellKnownRole_SecurityKeyServerPush_AddIdentity                                                                                                          = 25591
+	WellKnownRole_SecurityKeyServerPush_RemoveIdentity                                                                                                       = 25593
+	WellKnownRole_SecurityKeyServerPush_AddApplication                                                                                                       = 25595
+	WellKnownRole_SecurityKeyServerPush_RemoveApplication                                                                                                    = 25597
+	WellKnownRole_SecurityKeyServerPush_AddEndpoint                                                                                                          = 25599
+	WellKnownRole_SecurityKeyServerPush_RemoveEndpoint                                                                                                       = 25601
+	WellKnownRole_SecurityKeyServerAccess_AddIdentity                                                                                                        = 25610
+	WellKnownRole_SecurityKeyServerAccess_RemoveIdentity                                                                                                     = 25612
+	WellKnownRole_SecurityKeyServerAccess_AddApplication                                                                                                     = 25614
+	WellKnownRole_SecurityKeyServerAccess_RemoveApplication                                                                                                  = 25616
+	WellKnownRole_SecurityKeyServerAccess_AddEndpoint                                                                                                        = 25618
+	WellKnownRole_SecurityKeyServerAccess_RemoveEndpoint                                                                                                     = 25620
+	SecurityGroupFolderType_SecurityGroupName_Placeholder_InvalidateKeys                                                                                     = 25622
+	SecurityGroupFolderType_SecurityGroupName_Placeholder_ForceKeyRotation                                                                                   = 25623
+	SecurityGroupType_InvalidateKeys                                                                                                                         = 25624
+	SecurityGroupType_ForceKeyRotation                                                                                                                       = 25625
+	PubSubKeyPushTargetType_SecurityGroupName_Placeholder_InvalidateKeys                                                                                     = 25632
+	PubSubKeyPushTargetType_SecurityGroupName_Placeholder_ForceKeyRotation                                                                                   = 25633
+	PubSubKeyPushTargetType_ConnectSecurityGroups                                                                                                            = 25641
+	PubSubKeyPushTargetType_DisconnectSecurityGroups                                                                                                         = 25644
+	PubSubKeyPushTargetType_TriggerKeyUpdate                                                                                                                 = 25647
+	PubSubKeyPushTargetFolderType_PushTargetName_Placeholder_ConnectSecurityGroups                                                                           = 25655
+	PubSubKeyPushTargetFolderType_PushTargetName_Placeholder_DisconnectSecurityGroups                                                                        = 25658
+	PubSubKeyPushTargetFolderType_PushTargetName_Placeholder_TriggerKeyUpdate                                                                                = 25661
+	ServerConfigurationType_CancelChanges                                                                                                                    = 25698
+	ServerConfigurationType_ResetToServerDefaults                                                                                                            = 25699
+	ServerConfiguration_CancelChanges                                                                                                                        = 25708
+	ServerConfiguration_ResetToServerDefaults                                                                                                                = 25709
+	RequestTicketsMethodType                                                                                                                                 = 25727
+	SetRegistrarEndpointsMethodType                                                                                                                          = 25729
+	ProvisionableDeviceType_RequestTickets                                                                                                                   = 26873
+	ProvisionableDeviceType_SetRegistrarEndpoints                                                                                                            = 26875
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Open                                             = 26889
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Close                                            = 26892
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Read                                             = 26894
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Write                                            = 26897
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition                                      = 26899
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition                                      = 26902
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks                                    = 26907
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate                                   = 26910
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate                                   = 26913
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate                                = 26915
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_GetRejectedList                                            = 26919
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable                                 = 26954
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable                                  = 26955
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment                              = 26956
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge                             = 26976
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm                                 = 26978
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve               = 27023
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2              = 27025
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve                  = 27027
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2                 = 27028
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve             = 27030
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2            = 27031
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence                                 = 27064
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress                                = 27065
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2                               = 27066
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress                              = 27068
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2                             = 27069
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService                       = 27071
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2                      = 27072
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService                          = 27074
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2                         = 27075
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset                                   = 27077
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2                                  = 27078
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships                     = 27080
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable                                 = 27120
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable                                  = 27121
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment                              = 27122
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge                             = 27142
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm                                 = 27144
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve               = 27189
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2              = 27191
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve                  = 27193
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2                 = 27194
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve             = 27196
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2            = 27197
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence                                 = 27230
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress                                = 27231
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2                               = 27232
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress                              = 27234
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2                             = 27235
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService                       = 27237
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2                      = 27238
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService                          = 27240
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2                         = 27241
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset                                   = 27243
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2                                  = 27244
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships                     = 27246
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Open                                                   = 27261
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Close                                                  = 27264
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Read                                                   = 27266
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Write                                                  = 27269
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition                                            = 27271
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition                                            = 27274
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks                                          = 27279
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate                                         = 27282
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate                                         = 27285
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate                                      = 27287
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_GetRejectedList                                                  = 27291
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable                                       = 27326
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable                                        = 27327
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment                                    = 27328
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge                                   = 27348
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm                                       = 27350
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve                     = 27395
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2                    = 27397
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve                        = 27399
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2                       = 27400
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve                   = 27402
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2                  = 27403
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence                                       = 27436
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress                                      = 27437
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2                                     = 27438
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress                                    = 27440
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2                                   = 27441
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService                             = 27443
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2                            = 27444
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService                                = 27446
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2                               = 27447
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset                                         = 27449
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2                                        = 27450
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships                           = 27452
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable                                       = 27492
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable                                        = 27493
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment                                    = 27494
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge                                   = 27514
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm                                       = 27516
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve                     = 27561
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                    = 27563
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve                        = 27565
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2                       = 27566
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve                   = 27568
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2                  = 27569
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence                                       = 27602
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress                                      = 27603
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2                                     = 27604
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress                                    = 27606
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2                                   = 27607
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService                             = 27609
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2                            = 27610
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService                                = 27612
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2                               = 27613
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset                                         = 27615
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2                                        = 27616
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships                           = 27618
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Open                                               = 27633
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Close                                              = 27636
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Read                                               = 27638
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Write                                              = 27641
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition                                        = 27643
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition                                        = 27646
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks                                      = 27651
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate                                     = 27654
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate                                     = 27657
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate                                  = 27659
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_GetRejectedList                                              = 27663
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable                                   = 27698
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable                                    = 27699
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment                                = 27700
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge                               = 27720
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm                                   = 27722
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve                 = 27767
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2                = 27769
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve                    = 27771
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2                   = 27772
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve               = 27774
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2              = 27775
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence                                   = 27808
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress                                  = 27809
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2                                 = 27810
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress                                = 27812
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2                               = 27813
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService                         = 27815
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2                        = 27816
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService                            = 27818
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2                           = 27819
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset                                     = 27821
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2                                    = 27822
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships                       = 27824
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable                                   = 27864
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable                                    = 27865
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment                                = 27866
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge                               = 27886
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm                                   = 27888
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve                 = 27933
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2                = 27935
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve                    = 27937
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2                   = 27938
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve               = 27940
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2              = 27941
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence                                   = 27974
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress                                  = 27975
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2                                 = 27976
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress                                = 27978
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2                               = 27979
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService                         = 27981
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2                        = 27982
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService                            = 27984
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2                           = 27985
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset                                     = 27987
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2                                    = 27988
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships                       = 27990
+	ProvisionableDeviceType_ApplicationName_Placeholder_UpdateCertificate                                                                                    = 28005
+	ProvisionableDeviceType_ApplicationName_Placeholder_ApplyChanges                                                                                         = 28008
+	ProvisionableDeviceType_ApplicationName_Placeholder_CancelChanges                                                                                        = 28009
+	ProvisionableDeviceType_ApplicationName_Placeholder_CreateSigningRequest                                                                                 = 28010
+	ProvisionableDeviceType_ApplicationName_Placeholder_GetRejectedList                                                                                      = 28013
+	ProvisionableDeviceType_ApplicationName_Placeholder_ResetToServerDefaults                                                                                = 28015
+	ProvisionableDevice_RequestTickets                                                                                                                       = 29880
+	ProvisionableDevice_SetRegistrarEndpoints                                                                                                                = 29882
+	GetCertificatesMethodType                                                                                                                                = 32282
+	ServerConfigurationType_GetCertificates                                                                                                                  = 32296
+	ServerConfiguration_GetCertificates                                                                                                                      = 32333
+	ProvisionableDeviceType_ApplicationName_Placeholder_GetCertificates                                                                                      = 32359
+	NonTransparentBackupRedundancyType_Failover                                                                                                              = 32416
 )
 
 var nameMethod = map[uint32]string{
@@ -2326,140 +1630,18 @@ var nameMethod = map[uint32]string{
 	2949:  "ShelvedStateMachineType_TimedShelve",
 	3863:  "AddCommentMethodType",
 	3875:  "ConditionType_ConditionRefresh",
-	4198:  "DialogConditionType_ConditionRefresh",
-	5123:  "AcknowledgeableConditionType_ConditionRefresh",
-	5550:  "AlarmConditionType_ConditionRefresh",
 	6102:  "TimedShelveMethodType",
-	6126:  "LimitAlarmType_ConditionRefresh",
 	9007:  "ConditionRefreshMethodType",
 	9027:  "ConditionType_Enable",
 	9028:  "ConditionType_Disable",
 	9029:  "ConditionType_AddComment",
 	9031:  "DialogResponseMethodType",
-	9051:  "DialogConditionType_Enable",
-	9052:  "DialogConditionType_Disable",
-	9053:  "DialogConditionType_AddComment",
 	9069:  "DialogConditionType_Respond",
-	9089:  "AcknowledgeableConditionType_Enable",
-	9090:  "AcknowledgeableConditionType_Disable",
-	9091:  "AcknowledgeableConditionType_AddComment",
 	9111:  "AcknowledgeableConditionType_Acknowledge",
 	9113:  "AcknowledgeableConditionType_Confirm",
-	9134:  "AlarmConditionType_Enable",
-	9135:  "AlarmConditionType_Disable",
-	9136:  "AlarmConditionType_AddComment",
-	9156:  "AlarmConditionType_Acknowledge",
-	9158:  "AlarmConditionType_Confirm",
 	9211:  "AlarmConditionType_ShelvingState_Unshelve",
 	9212:  "AlarmConditionType_ShelvingState_OneShotShelve",
 	9213:  "AlarmConditionType_ShelvingState_TimedShelve",
-	9235:  "LimitAlarmType_Enable",
-	9236:  "LimitAlarmType_Disable",
-	9237:  "LimitAlarmType_AddComment",
-	9257:  "LimitAlarmType_Acknowledge",
-	9259:  "LimitAlarmType_Confirm",
-	9312:  "LimitAlarmType_ShelvingState_Unshelve",
-	9313:  "LimitAlarmType_ShelvingState_OneShotShelve",
-	9314:  "LimitAlarmType_ShelvingState_TimedShelve",
-	9370:  "ExclusiveLimitAlarmType_Enable",
-	9371:  "ExclusiveLimitAlarmType_Disable",
-	9372:  "ExclusiveLimitAlarmType_AddComment",
-	9374:  "ExclusiveLimitAlarmType_ConditionRefresh",
-	9394:  "ExclusiveLimitAlarmType_Acknowledge",
-	9396:  "ExclusiveLimitAlarmType_Confirm",
-	9449:  "ExclusiveLimitAlarmType_ShelvingState_Unshelve",
-	9450:  "ExclusiveLimitAlarmType_ShelvingState_OneShotShelve",
-	9451:  "ExclusiveLimitAlarmType_ShelvingState_TimedShelve",
-	9511:  "ExclusiveLevelAlarmType_Enable",
-	9512:  "ExclusiveLevelAlarmType_Disable",
-	9513:  "ExclusiveLevelAlarmType_AddComment",
-	9515:  "ExclusiveLevelAlarmType_ConditionRefresh",
-	9535:  "ExclusiveLevelAlarmType_Acknowledge",
-	9537:  "ExclusiveLevelAlarmType_Confirm",
-	9590:  "ExclusiveLevelAlarmType_ShelvingState_Unshelve",
-	9591:  "ExclusiveLevelAlarmType_ShelvingState_OneShotShelve",
-	9592:  "ExclusiveLevelAlarmType_ShelvingState_TimedShelve",
-	9652:  "ExclusiveRateOfChangeAlarmType_Enable",
-	9653:  "ExclusiveRateOfChangeAlarmType_Disable",
-	9654:  "ExclusiveRateOfChangeAlarmType_AddComment",
-	9656:  "ExclusiveRateOfChangeAlarmType_ConditionRefresh",
-	9676:  "ExclusiveRateOfChangeAlarmType_Acknowledge",
-	9678:  "ExclusiveRateOfChangeAlarmType_Confirm",
-	9731:  "ExclusiveRateOfChangeAlarmType_ShelvingState_Unshelve",
-	9732:  "ExclusiveRateOfChangeAlarmType_ShelvingState_OneShotShelve",
-	9733:  "ExclusiveRateOfChangeAlarmType_ShelvingState_TimedShelve",
-	9793:  "ExclusiveDeviationAlarmType_Enable",
-	9794:  "ExclusiveDeviationAlarmType_Disable",
-	9795:  "ExclusiveDeviationAlarmType_AddComment",
-	9797:  "ExclusiveDeviationAlarmType_ConditionRefresh",
-	9817:  "ExclusiveDeviationAlarmType_Acknowledge",
-	9819:  "ExclusiveDeviationAlarmType_Confirm",
-	9872:  "ExclusiveDeviationAlarmType_ShelvingState_Unshelve",
-	9873:  "ExclusiveDeviationAlarmType_ShelvingState_OneShotShelve",
-	9874:  "ExclusiveDeviationAlarmType_ShelvingState_TimedShelve",
-	9935:  "NonExclusiveLimitAlarmType_Enable",
-	9936:  "NonExclusiveLimitAlarmType_Disable",
-	9937:  "NonExclusiveLimitAlarmType_AddComment",
-	9939:  "NonExclusiveLimitAlarmType_ConditionRefresh",
-	9959:  "NonExclusiveLimitAlarmType_Acknowledge",
-	9961:  "NonExclusiveLimitAlarmType_Confirm",
-	10014: "NonExclusiveLimitAlarmType_ShelvingState_Unshelve",
-	10015: "NonExclusiveLimitAlarmType_ShelvingState_OneShotShelve",
-	10016: "NonExclusiveLimitAlarmType_ShelvingState_TimedShelve",
-	10089: "NonExclusiveLevelAlarmType_Enable",
-	10090: "NonExclusiveLevelAlarmType_Disable",
-	10091: "NonExclusiveLevelAlarmType_AddComment",
-	10093: "NonExclusiveLevelAlarmType_ConditionRefresh",
-	10113: "NonExclusiveLevelAlarmType_Acknowledge",
-	10115: "NonExclusiveLevelAlarmType_Confirm",
-	10168: "NonExclusiveLevelAlarmType_ShelvingState_Unshelve",
-	10169: "NonExclusiveLevelAlarmType_ShelvingState_OneShotShelve",
-	10170: "NonExclusiveLevelAlarmType_ShelvingState_TimedShelve",
-	10243: "NonExclusiveRateOfChangeAlarmType_Enable",
-	10244: "NonExclusiveRateOfChangeAlarmType_Disable",
-	10245: "NonExclusiveRateOfChangeAlarmType_AddComment",
-	10247: "NonExclusiveRateOfChangeAlarmType_ConditionRefresh",
-	10267: "NonExclusiveRateOfChangeAlarmType_Acknowledge",
-	10269: "NonExclusiveRateOfChangeAlarmType_Confirm",
-	10322: "NonExclusiveRateOfChangeAlarmType_ShelvingState_Unshelve",
-	10323: "NonExclusiveRateOfChangeAlarmType_ShelvingState_OneShotShelve",
-	10324: "NonExclusiveRateOfChangeAlarmType_ShelvingState_TimedShelve",
-	10397: "NonExclusiveDeviationAlarmType_Enable",
-	10398: "NonExclusiveDeviationAlarmType_Disable",
-	10399: "NonExclusiveDeviationAlarmType_AddComment",
-	10401: "NonExclusiveDeviationAlarmType_ConditionRefresh",
-	10421: "NonExclusiveDeviationAlarmType_Acknowledge",
-	10423: "NonExclusiveDeviationAlarmType_Confirm",
-	10476: "NonExclusiveDeviationAlarmType_ShelvingState_Unshelve",
-	10477: "NonExclusiveDeviationAlarmType_ShelvingState_OneShotShelve",
-	10478: "NonExclusiveDeviationAlarmType_ShelvingState_TimedShelve",
-	10552: "DiscreteAlarmType_Enable",
-	10553: "DiscreteAlarmType_Disable",
-	10554: "DiscreteAlarmType_AddComment",
-	10556: "DiscreteAlarmType_ConditionRefresh",
-	10576: "DiscreteAlarmType_Acknowledge",
-	10578: "DiscreteAlarmType_Confirm",
-	10631: "DiscreteAlarmType_ShelvingState_Unshelve",
-	10632: "DiscreteAlarmType_ShelvingState_OneShotShelve",
-	10633: "DiscreteAlarmType_ShelvingState_TimedShelve",
-	10666: "OffNormalAlarmType_Enable",
-	10667: "OffNormalAlarmType_Disable",
-	10668: "OffNormalAlarmType_AddComment",
-	10670: "OffNormalAlarmType_ConditionRefresh",
-	10690: "OffNormalAlarmType_Acknowledge",
-	10692: "OffNormalAlarmType_Confirm",
-	10745: "OffNormalAlarmType_ShelvingState_Unshelve",
-	10746: "OffNormalAlarmType_ShelvingState_OneShotShelve",
-	10747: "OffNormalAlarmType_ShelvingState_TimedShelve",
-	10780: "TripAlarmType_Enable",
-	10781: "TripAlarmType_Disable",
-	10782: "TripAlarmType_AddComment",
-	10784: "TripAlarmType_ConditionRefresh",
-	10804: "TripAlarmType_Acknowledge",
-	10806: "TripAlarmType_Confirm",
-	10859: "TripAlarmType_ShelvingState_Unshelve",
-	10860: "TripAlarmType_ShelvingState_OneShotShelve",
-	10861: "TripAlarmType_ShelvingState_TimedShelve",
 	11489: "ServerType_GetMonitoredItems",
 	11492: "Server_GetMonitoredItems",
 	11495: "GetMonitoredItemsMethodType",
@@ -2469,12 +1651,6 @@ var nameMethod = map[uint32]string{
 	11588: "FileType_Write",
 	11590: "FileType_GetPosition",
 	11593: "FileType_SetPosition",
-	11600: "AddressSpaceFileType_Open",
-	11603: "AddressSpaceFileType_Close",
-	11605: "AddressSpaceFileType_Read",
-	11608: "AddressSpaceFileType_Write",
-	11610: "AddressSpaceFileType_GetPosition",
-	11613: "AddressSpaceFileType_SetPosition",
 	11615: "AddressSpaceFileType_ExportNamespace",
 	11629: "NamespaceMetadataType_NamespaceFile_Open",
 	11632: "NamespaceMetadataType_NamespaceFile_Close",
@@ -2496,25 +1672,10 @@ var nameMethod = map[uint32]string{
 	11746: "WriteMethodType",
 	11748: "GetPositionMethodType",
 	11751: "SetPositionMethodType",
-	11784: "SystemOffNormalAlarmType_Disable",
-	11785: "SystemOffNormalAlarmType_Enable",
-	11786: "SystemOffNormalAlarmType_AddComment",
-	11788: "SystemOffNormalAlarmType_ConditionRefresh",
-	11808: "SystemOffNormalAlarmType_Acknowledge",
-	11810: "SystemOffNormalAlarmType_Confirm",
-	11844: "SystemOffNormalAlarmType_ShelvingState_Unshelve",
-	11845: "SystemOffNormalAlarmType_ShelvingState_OneShotShelve",
-	11846: "SystemOffNormalAlarmType_ShelvingState_TimedShelve",
 	12513: "OpenWithMasksMethodType",
 	12516: "CloseAndUpdateMethodType",
 	12518: "AddCertificateMethodType",
 	12520: "RemoveCertificateMethodType",
-	12527: "TrustListType_Open",
-	12530: "TrustListType_Close",
-	12532: "TrustListType_Read",
-	12535: "TrustListType_Write",
-	12537: "TrustListType_GetPosition",
-	12540: "TrustListType_SetPosition",
 	12543: "TrustListType_OpenWithMasks",
 	12546: "TrustListType_CloseAndUpdate",
 	12548: "TrustListType_AddCertificate",
@@ -2550,32 +1711,6 @@ var nameMethod = map[uint32]string{
 	12888: "RequestServerStateChangeMethodType",
 	12912: "ConditionType_ConditionRefresh2",
 	12914: "ConditionRefresh2MethodType",
-	12916: "DialogConditionType_ConditionRefresh2",
-	12918: "AcknowledgeableConditionType_ConditionRefresh2",
-	12984: "AlarmConditionType_ConditionRefresh2",
-	12986: "LimitAlarmType_ConditionRefresh2",
-	12988: "ExclusiveLimitAlarmType_ConditionRefresh2",
-	12990: "NonExclusiveLimitAlarmType_ConditionRefresh2",
-	12992: "NonExclusiveLevelAlarmType_ConditionRefresh2",
-	12994: "ExclusiveLevelAlarmType_ConditionRefresh2",
-	12996: "NonExclusiveDeviationAlarmType_ConditionRefresh2",
-	12998: "ExclusiveDeviationAlarmType_ConditionRefresh2",
-	13000: "NonExclusiveRateOfChangeAlarmType_ConditionRefresh2",
-	13002: "ExclusiveRateOfChangeAlarmType_ConditionRefresh2",
-	13004: "DiscreteAlarmType_ConditionRefresh2",
-	13006: "OffNormalAlarmType_ConditionRefresh2",
-	13008: "SystemOffNormalAlarmType_ConditionRefresh2",
-	13010: "TripAlarmType_ConditionRefresh2",
-	13256: "CertificateExpirationAlarmType_Disable",
-	13257: "CertificateExpirationAlarmType_Enable",
-	13258: "CertificateExpirationAlarmType_AddComment",
-	13260: "CertificateExpirationAlarmType_ConditionRefresh",
-	13262: "CertificateExpirationAlarmType_ConditionRefresh2",
-	13282: "CertificateExpirationAlarmType_Acknowledge",
-	13284: "CertificateExpirationAlarmType_Confirm",
-	13318: "CertificateExpirationAlarmType_ShelvingState_Unshelve",
-	13319: "CertificateExpirationAlarmType_ShelvingState_OneShotShelve",
-	13320: "CertificateExpirationAlarmType_ShelvingState_TimedShelve",
 	13342: "CreateDirectoryMethodType",
 	13345: "CreateFileMethodType",
 	13348: "DeleteFileMethodType",
@@ -2729,15 +1864,10 @@ var nameMethod = map[uint32]string{
 	15118: "TargetVariablesType_RemoveTargetVariables",
 	15121: "TargetVariablesTypeAddTargetVariablesMethodType",
 	15124: "TargetVariablesTypeRemoveTargetVariablesMethodType",
-	15212: "PublishSubscribeType_GetSecurityKeys",
 	15215: "PublishSubscribe_GetSecurityKeys",
 	15218: "GetSecurityKeysMethodType",
 	15225: "PublishedDataSetType_DataSetWriterName_Placeholder_Status_Enable",
 	15226: "PublishedDataSetType_DataSetWriterName_Placeholder_Status_Disable",
-	15233: "PublishedDataItemsType_DataSetWriterName_Placeholder_Status_Enable",
-	15234: "PublishedDataItemsType_DataSetWriterName_Placeholder_Status_Disable",
-	15241: "PublishedEventsType_DataSetWriterName_Placeholder_Status_Enable",
-	15242: "PublishedEventsType_DataSetWriterName_Placeholder_Status_Disable",
 	15248: "CreateCredentialMethodType",
 	15267: "PubSubGroupType_Status_Enable",
 	15268: "PubSubGroupType_Status_Disable",
@@ -2745,9 +1875,6 @@ var nameMethod = map[uint32]string{
 	15302: "DataSetWriterType_Status_Disable",
 	15309: "DataSetReaderType_Status_Enable",
 	15310: "DataSetReaderType_Status_Disable",
-	15431: "PublishSubscribeType_GetSecurityGroup",
-	15435: "PublishSubscribeType_SecurityGroups_AddSecurityGroup",
-	15438: "PublishSubscribeType_SecurityGroups_RemoveSecurityGroup",
 	15440: "PublishSubscribe_GetSecurityGroup",
 	15444: "PublishSubscribe_SecurityGroups_AddSecurityGroup",
 	15447: "PublishSubscribe_SecurityGroups_RemoveSecurityGroup",
@@ -2766,10 +1893,12 @@ var nameMethod = map[uint32]string{
 	15494: "ExtensionFieldsType_RemoveExtensionField",
 	15496: "AddExtensionFieldMethodType",
 	15499: "RemoveExtensionFieldMethodType",
-	15504: "PublishedDataItemsType_ExtensionFields_AddExtensionField",
-	15507: "PublishedDataItemsType_ExtensionFields_RemoveExtensionField",
-	15512: "PublishedEventsType_ExtensionFields_AddExtensionField",
-	15515: "PublishedEventsType_ExtensionFields_RemoveExtensionField",
+	15505: "ConfigurationFileType_CloseAndUpdate",
+	15508: "ConfigurationFileType_ConfirmUpdate",
+	15513: "ConfigurationFileCloseAndUpdateMethodType",
+	15516: "ConfigurationFileConfirmUpdateMethodType",
+	15572: "ServerConfigurationType_ConfigurationFile_Open",
+	15575: "ServerConfigurationType_ConfigurationFile_Close",
 	15612: "RoleSetType_RoleName_Placeholder_AddIdentity",
 	15614: "RoleSetType_RoleName_Placeholder_RemoveIdentity",
 	15624: "RoleType_AddIdentity",
@@ -2793,15 +1922,19 @@ var nameMethod = map[uint32]string{
 	15746: "TemporaryFileTransferType_GenerateFileForRead",
 	15749: "TemporaryFileTransferType_GenerateFileForWrite",
 	15751: "TemporaryFileTransferType_CloseAndCommit",
+	15791: "ServerConfigurationType_ConfigurationFile_Read",
 	15794: "TemporaryFileTransferType_TransferState_Placeholder_Reset",
 	15795: "GenerateFileForReadMethodType",
 	15798: "GenerateFileForWriteMethodType",
 	15800: "CloseAndCommitMethodType",
+	15805: "ServerConfigurationType_ConfigurationFile_Write",
+	15807: "ServerConfigurationType_ConfigurationFile_GetPosition",
+	15810: "ServerConfigurationType_ConfigurationFile_SetPosition",
 	15843: "FileTransferStateMachineType_Reset",
 	15846: "PublishSubscribeType_Status_Enable",
 	15847: "PublishSubscribeType_Status_Disable",
-	15893: "PublishSubscribe_ConnectionName_Placeholder_Status_Enable",
-	15894: "PublishSubscribe_ConnectionName_Placeholder_Status_Disable",
+	15849: "ServerConfigurationType_ConfigurationFile_CloseAndUpdate",
+	15863: "ServerConfigurationType_ConfigurationFile_ConfirmUpdate",
 	15907: "PubSubKeyServiceType_GetSecurityKeys",
 	15910: "PubSubKeyServiceType_GetSecurityGroup",
 	15914: "PubSubKeyServiceType_SecurityGroups_AddSecurityGroup",
@@ -2817,9 +1950,14 @@ var nameMethod = map[uint32]string{
 	16000: "RoleSetType_RemoveRole",
 	16002: "AddRoleMethodType",
 	16005: "RemoveRoleMethodType",
+	16013: "ServerConfiguration_ConfigurationFile_Open",
 	16041: "WellKnownRole_Engineer_AddIdentity",
 	16043: "WellKnownRole_Engineer_RemoveIdentity",
-	16076: "PublishSubscribe_ConnectionName_Placeholder_Diagnostics_Reset",
+	16060: "ServerConfiguration_ConfigurationFile_Close",
+	16074: "ServerConfiguration_ConfigurationFile_Read",
+	16101: "ServerConfiguration_ConfigurationFile_Write",
+	16103: "ServerConfiguration_ConfigurationFile_GetPosition",
+	16124: "ServerConfiguration_ConfigurationFile_SetPosition",
 	16165: "RoleSetType_RoleName_Placeholder_AddApplication",
 	16167: "RoleSetType_RoleName_Placeholder_RemoveApplication",
 	16169: "RoleSetType_RoleName_Placeholder_AddEndpoint",
@@ -2870,19 +2008,19 @@ var nameMethod = map[uint32]string{
 	16299: "ServerCapabilitiesType_RoleSet_RemoveRole",
 	16301: "Server_ServerCapabilities_RoleSet_AddRole",
 	16304: "Server_ServerCapabilities_RoleSet_RemoveRole",
-	16316: "FileSystem_FileDirectoryName_Placeholder_CreateDirectory",
-	16319: "FileSystem_FileDirectoryName_Placeholder_CreateFile",
-	16324: "FileSystem_FileDirectoryName_Placeholder_MoveOrCopy",
-	16333: "FileSystem_FileName_Placeholder_Open",
-	16336: "FileSystem_FileName_Placeholder_Close",
-	16338: "FileSystem_FileName_Placeholder_Read",
-	16341: "FileSystem_FileName_Placeholder_Write",
-	16343: "FileSystem_FileName_Placeholder_GetPosition",
-	16346: "FileSystem_FileName_Placeholder_SetPosition",
+	16317: "ServerConfiguration_ConfigurationFile_CloseAndUpdate",
+	16320: "ServerConfiguration_ConfigurationFile_ConfirmUpdate",
+	16332: "ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_Open",
+	16335: "ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_Close",
+	16337: "ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_Read",
+	16340: "ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_Write",
+	16342: "ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_GetPosition",
+	16345: "ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_SetPosition",
 	16348: "FileSystem_CreateDirectory",
 	16351: "FileSystem_CreateFile",
 	16354: "FileSystem_DeleteFileSystemObject",
 	16356: "FileSystem_MoveOrCopy",
+	16368: "ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_CloseAndUpdate",
 	16402: "AlarmConditionType_Silence",
 	16403: "AlarmConditionType_Suppress",
 	16439: "AlarmGroupType_AlarmConditionInstance_Placeholder_Disable",
@@ -2893,68 +2031,102 @@ var nameMethod = map[uint32]string{
 	16515: "AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_Unshelve",
 	16516: "AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_OneShotShelve",
 	16517: "AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState_TimedShelve",
+	16523: "ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile_ConfirmUpdate",
 	16533: "AlarmGroupType_AlarmConditionInstance_Placeholder_Silence",
 	16534: "AlarmGroupType_AlarmConditionInstance_Placeholder_Suppress",
 	16535: "PublishSubscribeType_ConnectionName_Placeholder_AddWriterGroup",
 	16560: "PublishSubscribeType_ConnectionName_Placeholder_AddReaderGroup",
-	16569: "LimitAlarmType_Silence",
-	16570: "LimitAlarmType_Suppress",
 	16598: "PublishSubscribeType_AddConnection",
 	16601: "PublishSubscribeType_PublishedDataSets_AddPublishedDataItemsTemplate",
-	16609: "ExclusiveLimitAlarmType_Silence",
-	16610: "ExclusiveLimitAlarmType_Suppress",
 	16639: "PublishSubscribeType_PublishedDataSets_AddPublishedEventsTemplate",
-	16649: "NonExclusiveLimitAlarmType_Silence",
-	16650: "NonExclusiveLimitAlarmType_Suppress",
 	16651: "PublishSubscribeType_PublishedDataSets_AddDataSetFolder",
 	16680: "PublishSubscribeType_PublishedDataSets_RemoveDataSetFolder",
-	16689: "NonExclusiveLevelAlarmType_Silence",
-	16690: "NonExclusiveLevelAlarmType_Suppress",
 	16691: "AddConnectionMethodType",
-	16729: "ExclusiveLevelAlarmType_Silence",
-	16730: "ExclusiveLevelAlarmType_Suppress",
-	16769: "NonExclusiveDeviationAlarmType_Silence",
-	16770: "NonExclusiveDeviationAlarmType_Suppress",
-	16810: "ExclusiveDeviationAlarmType_Silence",
-	16811: "ExclusiveDeviationAlarmType_Suppress",
+	16717: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Open",
+	16724: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Close",
+	16726: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Read",
+	16729: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Write",
+	16732: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition",
+	16735: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition",
+	16741: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks",
+	16744: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate",
+	16747: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate",
+	16749: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate",
+	16752: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_GetRejectedList",
+	16790: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable",
+	16791: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable",
+	16792: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment",
+	16812: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge",
+	16814: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm",
 	16842: "DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedDataItemsTemplate",
-	16851: "NonExclusiveRateOfChangeAlarmType_Silence",
-	16852: "NonExclusiveRateOfChangeAlarmType_Suppress",
+	16864: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve",
+	16866: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2",
+	16868: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve",
+	16869: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2",
+	16871: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve",
+	16872: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2",
 	16881: "DataSetFolderType_DataSetFolderName_Placeholder_AddPublishedEventsTemplate",
 	16884: "DataSetFolderType_DataSetFolderName_Placeholder_AddDataSetFolder",
-	16892: "ExclusiveRateOfChangeAlarmType_Silence",
-	16893: "ExclusiveRateOfChangeAlarmType_Suppress",
+	16911: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence",
+	16912: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress",
+	16913: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2",
+	16915: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress",
+	16916: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2",
+	16918: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService",
+	16919: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2",
+	16921: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService",
 	16923: "DataSetFolderType_DataSetFolderName_Placeholder_RemoveDataSetFolder",
-	16933: "DiscreteAlarmType_Silence",
-	16934: "DiscreteAlarmType_Suppress",
+	16926: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2",
+	16928: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset",
+	16929: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2",
+	16931: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships",
 	16935: "DataSetFolderType_AddPublishedDataItemsTemplate",
 	16960: "DataSetFolderType_AddPublishedEventsTemplate",
-	16969: "OffNormalAlarmType_Silence",
-	16970: "OffNormalAlarmType_Suppress",
+	16977: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable",
+	16978: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable",
+	16979: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment",
 	16994: "DataSetFolderType_AddDataSetFolder",
 	16997: "DataSetFolderType_RemoveDataSetFolder",
-	17005: "SystemOffNormalAlarmType_Silence",
-	17006: "SystemOffNormalAlarmType_Suppress",
+	17003: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge",
+	17005: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm",
 	17030: "AddPublishedDataItemsTemplateMethodType",
 	17033: "AddPublishedEventsTemplateMethodType",
-	17041: "TripAlarmType_Silence",
-	17042: "TripAlarmType_Suppress",
+	17056: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve",
+	17058: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2",
+	17060: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve",
+	17061: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2",
+	17063: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve",
+	17064: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2",
 	17067: "AddDataSetFolderMethodType",
-	17077: "CertificateExpirationAlarmType_Silence",
-	17078: "CertificateExpirationAlarmType_Suppress",
 	17079: "RemoveDataSetFolderMethodType",
-	17113: "DiscrepancyAlarmType_Disable",
-	17114: "DiscrepancyAlarmType_Enable",
-	17115: "DiscrepancyAlarmType_AddComment",
-	17117: "DiscrepancyAlarmType_ConditionRefresh",
-	17119: "DiscrepancyAlarmType_ConditionRefresh2",
-	17139: "DiscrepancyAlarmType_Acknowledge",
-	17141: "DiscrepancyAlarmType_Confirm",
-	17193: "DiscrepancyAlarmType_ShelvingState_Unshelve",
-	17194: "DiscrepancyAlarmType_ShelvingState_OneShotShelve",
-	17195: "DiscrepancyAlarmType_ShelvingState_TimedShelve",
-	17212: "DiscrepancyAlarmType_Silence",
-	17213: "DiscrepancyAlarmType_Suppress",
+	17103: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence",
+	17104: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress",
+	17105: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2",
+	17107: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress",
+	17108: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2",
+	17110: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService",
+	17111: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2",
+	17113: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService",
+	17114: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2",
+	17116: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset",
+	17117: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2",
+	17119: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships",
+	17134: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Open",
+	17137: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Close",
+	17139: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Read",
+	17142: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Write",
+	17144: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition",
+	17147: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition",
+	17153: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks",
+	17156: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate",
+	17159: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate",
+	17161: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate",
+	17164: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_GetRejectedList",
+	17199: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable",
+	17200: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable",
+	17205: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment",
+	17237: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge",
+	17239: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm",
 	17293: "PubSubConnectionType_WriterGroupName_Placeholder_AddDataSetWriter",
 	17296: "PublishSubscribeType_SetSecurityKeys",
 	17298: "SetSecurityKeysMethodType",
@@ -2964,10 +2136,13 @@ var nameMethod = map[uint32]string{
 	17331: "PubSubConnectionType_ReaderGroupName_Placeholder_Status_Enable",
 	17332: "PubSubConnectionType_ReaderGroupName_Placeholder_Status_Disable",
 	17333: "PubSubConnectionType_ReaderGroupName_Placeholder_RemoveDataSetReader",
+	17340: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve",
+	17342: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2",
+	17344: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve",
+	17345: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2",
+	17347: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve",
+	17348: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2",
 	17355: "PubSubConnectionType_ReaderGroupName_Placeholder_AddDataSetReader",
-	17356: "PublishSubscribe_ConnectionName_Placeholder_AddWriterGroup",
-	17359: "PublishSubscribe_ConnectionName_Placeholder_AddReaderGroup",
-	17362: "PublishSubscribe_ConnectionName_Placeholder_RemoveGroup",
 	17364: "PublishSubscribe_SetSecurityKeys",
 	17366: "PublishSubscribe_AddConnection",
 	17369: "PublishSubscribe_RemoveConnection",
@@ -2991,16 +2166,29 @@ var nameMethod = map[uint32]string{
 	17519: "KeyCredentialConfigurationFolderType_ServiceName_Placeholder_UpdateCredential",
 	17521: "KeyCredentialConfigurationFolderType_ServiceName_Placeholder_DeleteCredential",
 	17522: "KeyCredentialConfigurationFolderType_CreateCredential",
-	17525: "KeyCredentialConfiguration_ServiceName_Placeholder_GetEncryptingKey",
 	17528: "KeyCredentialConfiguration_CreateCredential",
 	17531: "GetEncryptingKeyMethodType",
 	17534: "KeyCredentialConfigurationType_GetEncryptingKey",
 	17561: "PubSubConnectionTypeAddWriterGroupMethodType",
+	17572: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence",
+	17573: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress",
+	17574: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2",
+	17586: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress",
+	17587: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2",
+	17596: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService",
+	17599: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2",
+	17616: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService",
+	17617: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2",
+	17619: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset",
+	17620: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2",
+	17622: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships",
 	17630: "PubSubConnectionAddReaderGroupGroupMethodType",
+	17678: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable",
+	17679: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable",
+	17680: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment",
+	17700: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge",
+	17702: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm",
 	17718: "FileDirectoryType_FileDirectoryName_Placeholder_DeleteFileSystemObject",
-	17722: "FileSystem_FileDirectoryName_Placeholder_DeleteFileSystemObject",
-	17734: "WriterGroupType_Status_Enable",
-	17735: "WriterGroupType_Status_Disable",
 	17751: "WriterGroupType_DataSetWriterName_Placeholder_Status_Enable",
 	17752: "WriterGroupType_DataSetWriterName_Placeholder_Status_Disable",
 	17765: "WriterGroupType_DataSetWriterName_Placeholder_Diagnostics_Reset",
@@ -3011,138 +2199,135 @@ var nameMethod = map[uint32]string{
 	17875: "AlarmGroupType_AlarmConditionInstance_Placeholder_Unsuppress",
 	17876: "AlarmGroupType_AlarmConditionInstance_Placeholder_RemoveFromService",
 	17877: "AlarmGroupType_AlarmConditionInstance_Placeholder_PlaceInService",
-	17882: "LimitAlarmType_Unsuppress",
-	17883: "LimitAlarmType_RemoveFromService",
-	17884: "LimitAlarmType_PlaceInService",
-	17889: "ExclusiveLimitAlarmType_Unsuppress",
-	17890: "ExclusiveLimitAlarmType_RemoveFromService",
-	17891: "ExclusiveLimitAlarmType_PlaceInService",
-	17896: "NonExclusiveLimitAlarmType_Unsuppress",
-	17897: "NonExclusiveLimitAlarmType_RemoveFromService",
-	17898: "NonExclusiveLimitAlarmType_PlaceInService",
-	17904: "NonExclusiveLevelAlarmType_RemoveFromService",
-	17905: "NonExclusiveLevelAlarmType_PlaceInService",
-	17910: "ExclusiveLevelAlarmType_Unsuppress",
-	17911: "ExclusiveLevelAlarmType_RemoveFromService",
-	17912: "ExclusiveLevelAlarmType_PlaceInService",
-	17917: "NonExclusiveDeviationAlarmType_Unsuppress",
-	17918: "NonExclusiveDeviationAlarmType_RemoveFromService",
-	17919: "NonExclusiveDeviationAlarmType_PlaceInService",
-	17924: "NonExclusiveRateOfChangeAlarmType_Unsuppress",
-	17925: "NonExclusiveRateOfChangeAlarmType_RemoveFromService",
-	17926: "NonExclusiveRateOfChangeAlarmType_PlaceInService",
-	17931: "ExclusiveDeviationAlarmType_Unsuppress",
-	17932: "ExclusiveDeviationAlarmType_RemoveFromService",
-	17933: "ExclusiveDeviationAlarmType_PlaceInService",
-	17938: "ExclusiveRateOfChangeAlarmType_Unsuppress",
-	17939: "ExclusiveRateOfChangeAlarmType_RemoveFromService",
-	17940: "ExclusiveRateOfChangeAlarmType_PlaceInService",
-	17945: "DiscreteAlarmType_Unsuppress",
-	17946: "DiscreteAlarmType_RemoveFromService",
-	17947: "DiscreteAlarmType_PlaceInService",
-	17952: "OffNormalAlarmType_Unsuppress",
-	17953: "OffNormalAlarmType_RemoveFromService",
-	17954: "OffNormalAlarmType_PlaceInService",
-	17959: "SystemOffNormalAlarmType_Unsuppress",
-	17960: "SystemOffNormalAlarmType_RemoveFromService",
-	17961: "SystemOffNormalAlarmType_PlaceInService",
-	17966: "TripAlarmType_Unsuppress",
-	17967: "TripAlarmType_RemoveFromService",
-	17968: "TripAlarmType_PlaceInService",
+	17917: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve",
+	17919: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2",
+	17922: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve",
+	17923: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2",
+	17925: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve",
+	17926: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2",
+	17965: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence",
+	17966: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress",
+	17967: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2",
 	17969: "WriterGroupType_AddDataSetWriter",
-	17973: "CertificateExpirationAlarmType_Unsuppress",
-	17974: "CertificateExpirationAlarmType_RemoveFromService",
-	17975: "CertificateExpirationAlarmType_PlaceInService",
-	17980: "DiscrepancyAlarmType_Unsuppress",
-	17981: "DiscrepancyAlarmType_RemoveFromService",
-	17982: "DiscrepancyAlarmType_PlaceInService",
+	17970: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress",
+	17971: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2",
+	17973: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService",
+	17974: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2",
+	17977: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService",
+	17978: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2",
+	17980: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset",
+	17981: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2",
 	17992: "WriterGroupType_RemoveDataSetWriter",
 	17994: "PubSubGroupTypeAddWriterMethodType",
+	18000: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships",
 	18006: "KeyCredentialConfigurationType_UpdateCredential",
 	18008: "KeyCredentialConfigurationType_DeleteCredential",
 	18009: "KeyCredentialUpdateMethodType",
-	18074: "ReaderGroupType_Status_Enable",
-	18075: "ReaderGroupType_Status_Disable",
+	18024: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Open",
+	18027: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Close",
+	18031: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Read",
+	18034: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Write",
+	18036: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition",
+	18039: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition",
+	18045: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks",
+	18049: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate",
+	18052: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate",
+	18054: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate",
+	18057: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_GetRejectedList",
 	18090: "ReaderGroupType_DataSetReaderName_Placeholder_Status_Enable",
 	18091: "ReaderGroupType_DataSetReaderName_Placeholder_Status_Disable",
 	18104: "ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics_Reset",
-	18161: "KeyCredentialConfiguration_ServiceName_Placeholder_UpdateCredential",
-	18163: "KeyCredentialConfiguration_ServiceName_Placeholder_DeleteCredential",
 	18199: "AlarmConditionType_Reset",
 	18212: "AlarmGroupType_AlarmConditionInstance_Placeholder_Reset",
-	18222: "LimitAlarmType_Reset",
-	18232: "ExclusiveLimitAlarmType_Reset",
-	18242: "NonExclusiveLimitAlarmType_Reset",
-	18255: "NonExclusiveLevelAlarmType_Unsuppress",
-	18256: "NonExclusiveLevelAlarmType_Reset",
-	18266: "ExclusiveLevelAlarmType_Reset",
-	18276: "NonExclusiveDeviationAlarmType_Reset",
-	18286: "NonExclusiveRateOfChangeAlarmType_Reset",
-	18296: "ExclusiveDeviationAlarmType_Reset",
-	18306: "ExclusiveRateOfChangeAlarmType_Reset",
-	18316: "DiscreteAlarmType_Reset",
-	18326: "OffNormalAlarmType_Reset",
-	18336: "SystemOffNormalAlarmType_Reset",
-	18346: "TripAlarmType_Reset",
-	18380: "InstrumentDiagnosticAlarmType_Disable",
-	18381: "InstrumentDiagnosticAlarmType_Enable",
-	18382: "InstrumentDiagnosticAlarmType_AddComment",
-	18384: "InstrumentDiagnosticAlarmType_ConditionRefresh",
-	18386: "InstrumentDiagnosticAlarmType_ConditionRefresh2",
-	18406: "InstrumentDiagnosticAlarmType_Acknowledge",
-	18408: "InstrumentDiagnosticAlarmType_Confirm",
-	18453: "InstrumentDiagnosticAlarmType_ShelvingState_TimedShelve",
-	18455: "InstrumentDiagnosticAlarmType_ShelvingState_Unshelve",
-	18456: "InstrumentDiagnosticAlarmType_ShelvingState_OneShotShelve",
-	18489: "InstrumentDiagnosticAlarmType_Silence",
-	18490: "InstrumentDiagnosticAlarmType_Suppress",
-	18491: "InstrumentDiagnosticAlarmType_Unsuppress",
-	18492: "InstrumentDiagnosticAlarmType_RemoveFromService",
-	18493: "InstrumentDiagnosticAlarmType_PlaceInService",
-	18494: "InstrumentDiagnosticAlarmType_Reset",
-	18529: "SystemDiagnosticAlarmType_Disable",
-	18530: "SystemDiagnosticAlarmType_Enable",
-	18531: "SystemDiagnosticAlarmType_AddComment",
-	18533: "SystemDiagnosticAlarmType_ConditionRefresh",
-	18535: "SystemDiagnosticAlarmType_ConditionRefresh2",
-	18555: "SystemDiagnosticAlarmType_Acknowledge",
-	18557: "SystemDiagnosticAlarmType_Confirm",
-	18602: "SystemDiagnosticAlarmType_ShelvingState_TimedShelve",
-	18604: "SystemDiagnosticAlarmType_ShelvingState_Unshelve",
-	18605: "SystemDiagnosticAlarmType_ShelvingState_OneShotShelve",
-	18638: "SystemDiagnosticAlarmType_Silence",
-	18639: "SystemDiagnosticAlarmType_Suppress",
-	18640: "SystemDiagnosticAlarmType_Unsuppress",
-	18641: "SystemDiagnosticAlarmType_RemoveFromService",
-	18642: "SystemDiagnosticAlarmType_PlaceInService",
-	18643: "SystemDiagnosticAlarmType_Reset",
-	18654: "CertificateExpirationAlarmType_Reset",
-	18664: "DiscrepancyAlarmType_Reset",
+	18225: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable",
+	18226: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable",
+	18227: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment",
+	18247: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge",
+	18249: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm",
+	18294: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve",
+	18296: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2",
+	18298: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve",
+	18299: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2",
+	18301: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve",
+	18302: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2",
+	18335: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence",
+	18336: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress",
+	18337: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2",
+	18339: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress",
+	18340: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2",
+	18342: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService",
+	18343: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2",
+	18345: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService",
+	18346: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2",
+	18349: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset",
+	18350: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2",
+	18352: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships",
+	18392: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable",
+	18393: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable",
+	18394: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment",
+	18414: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge",
+	18416: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm",
+	18461: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve",
+	18463: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2",
+	18465: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve",
+	18466: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2",
+	18468: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve",
+	18469: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2",
+	18503: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence",
+	18504: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress",
+	18505: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2",
+	18507: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress",
+	18508: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2",
+	18510: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService",
+	18511: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2",
+	18513: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService",
+	18514: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2",
+	18516: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset",
+	18517: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2",
+	18519: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships",
+	18533: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_UpdateCertificate",
+	18536: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_GetCertificates",
+	18539: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ApplyChanges",
+	18540: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CancelChanges",
+	18541: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CreateSigningRequest",
+	18544: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_GetRejectedList",
+	18546: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ResetToServerDefaults",
+	18562: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_Open",
+	18565: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_Close",
+	18567: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_Read",
+	18570: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_Write",
+	18572: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_GetPosition",
+	18575: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_SetPosition",
+	18581: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_CloseAndUpdate",
+	18584: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile_ConfirmUpdate",
+	18632: "WellKnownRole_TrustedApplication_AddIdentity",
+	18634: "WellKnownRole_TrustedApplication_RemoveIdentity",
+	18636: "WellKnownRole_TrustedApplication_AddApplication",
+	18638: "WellKnownRole_TrustedApplication_RemoveApplication",
+	18640: "WellKnownRole_TrustedApplication_AddEndpoint",
+	18642: "WellKnownRole_TrustedApplication_RemoveEndpoint",
 	18666: "AlarmMetricsType_Reset",
 	18679: "PublishSubscribeType_ConnectionName_Placeholder_Diagnostics_Reset",
 	18727: "PublishSubscribeType_Diagnostics_Reset",
 	18883: "PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics_Reset",
-	18942: "PublishedDataItemsType_DataSetWriterName_Placeholder_Diagnostics_Reset",
-	19001: "PublishedEventsType_DataSetWriterName_Placeholder_Diagnostics_Reset",
 	19119: "PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics_Reset",
 	19188: "PubSubConnectionType_ReaderGroupName_Placeholder_Diagnostics_Reset",
 	19253: "PubSubConnectionType_Diagnostics_Reset",
-	19330: "TrustListOutOfDateAlarmType_Disable",
-	19331: "TrustListOutOfDateAlarmType_Enable",
-	19332: "TrustListOutOfDateAlarmType_AddComment",
-	19334: "TrustListOutOfDateAlarmType_ConditionRefresh",
-	19336: "TrustListOutOfDateAlarmType_ConditionRefresh2",
-	19356: "TrustListOutOfDateAlarmType_Acknowledge",
-	19358: "TrustListOutOfDateAlarmType_Confirm",
-	19403: "TrustListOutOfDateAlarmType_ShelvingState_TimedShelve",
-	19405: "TrustListOutOfDateAlarmType_ShelvingState_Unshelve",
-	19406: "TrustListOutOfDateAlarmType_ShelvingState_OneShotShelve",
-	19439: "TrustListOutOfDateAlarmType_Silence",
-	19440: "TrustListOutOfDateAlarmType_Suppress",
-	19441: "TrustListOutOfDateAlarmType_Unsuppress",
-	19442: "TrustListOutOfDateAlarmType_RemoveFromService",
-	19443: "TrustListOutOfDateAlarmType_PlaceInService",
-	19444: "TrustListOutOfDateAlarmType_Reset",
+	19327: "CreateSelfSignedCertificateMethodType",
+	19330: "DeleteCertificateMethodType",
+	19332: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CreateSelfSignedCertificate",
+	19335: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_DeleteCertificate",
+	19337: "ServerConfigurationType_CreateSelfSignedCertificate",
+	19340: "ServerConfigurationType_DeleteCertificate",
+	19342: "ServerConfiguration_CreateSelfSignedCertificate",
+	19345: "ServerConfiguration_DeleteCertificate",
+	19347: "ProvisionableDeviceType_ApplicationName_Placeholder_CreateSelfSignedCertificate",
+	19350: "ProvisionableDeviceType_ApplicationName_Placeholder_DeleteCertificate",
+	19353: "LogObjectType_GetRecords",
+	19358: "GetRecordsMethodType",
+	19373: "ServerLog_GetRecords",
+	19410: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_KeyCredentials_CreateCredential",
+	19424: "ApplicationConfigurationType_KeyCredentials_CreateCredential",
 	19483: "CertificateGroupType_CertificateExpired_Disable",
 	19484: "CertificateGroupType_CertificateExpired_Enable",
 	19485: "CertificateGroupType_CertificateExpired_AddComment",
@@ -3151,12 +2336,12 @@ var nameMethod = map[uint32]string{
 	19562: "DataSetWriterType_Diagnostics_Reset",
 	19621: "DataSetReaderType_Diagnostics_Reset",
 	19689: "PubSubDiagnosticsType_Reset",
-	19744: "PubSubDiagnosticsRootType_Reset",
-	19798: "PubSubDiagnosticsConnectionType_Reset",
-	19846: "PubSubDiagnosticsWriterGroupType_Reset",
-	19915: "PubSubDiagnosticsReaderGroupType_Reset",
-	19980: "PubSubDiagnosticsDataSetWriterType_Reset",
-	20039: "PubSubDiagnosticsDataSetReaderType_Reset",
+	19740: "ProvisionableDeviceType_ApplicationName_Placeholder_KeyCredentials_CreateCredential",
+	19839: "SerializationEntityType_ConfigureSerialization",
+	19842: "ConfigureSerializationMethodType",
+	20034: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Disable",
+	20035: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Enable",
+	20036: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_AddComment",
 	20097: "CertificateGroupType_CertificateExpired_ShelvingState_TimedShelve",
 	20099: "CertificateGroupType_CertificateExpired_ShelvingState_Unshelve",
 	20100: "CertificateGroupType_CertificateExpired_ShelvingState_OneShotShelve",
@@ -3469,11 +2654,9 @@ var nameMethod = map[uint32]string{
 	23459: "AliasNameCategoryType_SubAliasNameCategories_Placeholder_FindAlias",
 	23462: "AliasNameCategoryType_FindAlias",
 	23465: "FindAliasMethodType",
-	23473: "Aliases_SubAliasNameCategories_Placeholder_FindAlias",
 	23476: "Aliases_FindAlias",
-	23482: "TagVariables_SubAliasNameCategories_Placeholder_FindAlias",
 	23485: "TagVariables_FindAlias",
-	23491: "Topics_SubAliasNameCategories_Placeholder_FindAlias",
+	23493: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Acknowledge",
 	23494: "Topics_FindAlias",
 	23526: "CertificateGroupType_GetRejectedList",
 	23529: "CertificateGroupFolderType_DefaultApplicationGroup_GetRejectedList",
@@ -3486,10 +2669,29 @@ var nameMethod = map[uint32]string{
 	23550: "ServerConfiguration_CertificateGroups_DefaultApplicationGroup_GetRejectedList",
 	23552: "ServerConfiguration_CertificateGroups_DefaultHttpsGroup_GetRejectedList",
 	23554: "ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_GetRejectedList",
+	23577: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Confirm",
 	23637: "PublishSubscribeType_SubscribedDataSets_AddDataSetFolder",
 	23640: "PublishSubscribeType_SubscribedDataSets_RemoveDataSetFolder",
+	23651: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_TimedShelve",
+	23653: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_TimedShelve2",
+	23655: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_Unshelve",
+	23656: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_Unshelve2",
+	23659: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_OneShotShelve",
+	23660: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState_OneShotShelve2",
 	23673: "PublishSubscribe_SubscribedDataSets_AddDataSetFolder",
 	23676: "PublishSubscribe_SubscribedDataSets_RemoveDataSetFolder",
+	23706: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Silence",
+	23707: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Suppress",
+	23708: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Suppress2",
+	23710: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Unsuppress",
+	23711: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Unsuppress2",
+	23713: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_RemoveFromService",
+	23714: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_RemoveFromService2",
+	23716: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_PlaceInService",
+	23717: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_PlaceInService2",
+	23719: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Reset",
+	23720: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_Reset2",
+	23722: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_GetGroupMemberships",
 	23726: "GetConnectionMethodType",
 	23729: "ModifyConnectionMethodType",
 	23745: "GetWriterGroupMethodType",
@@ -3539,96 +2741,6 @@ var nameMethod = map[uint32]string{
 	24332: "AlarmGroupType_AlarmConditionInstance_Placeholder_RemoveFromService2",
 	24334: "AlarmGroupType_AlarmConditionInstance_Placeholder_PlaceInService2",
 	24336: "AlarmGroupType_AlarmConditionInstance_Placeholder_Reset2",
-	24338: "LimitAlarmType_Suppress2",
-	24340: "LimitAlarmType_Unsuppress2",
-	24342: "LimitAlarmType_RemoveFromService2",
-	24344: "LimitAlarmType_PlaceInService2",
-	24346: "LimitAlarmType_Reset2",
-	24348: "ExclusiveLimitAlarmType_Suppress2",
-	24350: "ExclusiveLimitAlarmType_Unsuppress2",
-	24352: "ExclusiveLimitAlarmType_RemoveFromService2",
-	24354: "ExclusiveLimitAlarmType_PlaceInService2",
-	24356: "ExclusiveLimitAlarmType_Reset2",
-	24358: "NonExclusiveLimitAlarmType_Suppress2",
-	24360: "NonExclusiveLimitAlarmType_Unsuppress2",
-	24362: "NonExclusiveLimitAlarmType_RemoveFromService2",
-	24364: "NonExclusiveLimitAlarmType_PlaceInService2",
-	24366: "NonExclusiveLimitAlarmType_Reset2",
-	24368: "NonExclusiveLevelAlarmType_Suppress2",
-	24370: "NonExclusiveLevelAlarmType_Unsuppress2",
-	24372: "NonExclusiveLevelAlarmType_RemoveFromService2",
-	24374: "NonExclusiveLevelAlarmType_PlaceInService2",
-	24376: "NonExclusiveLevelAlarmType_Reset2",
-	24378: "ExclusiveLevelAlarmType_Suppress2",
-	24380: "ExclusiveLevelAlarmType_Unsuppress2",
-	24382: "ExclusiveLevelAlarmType_RemoveFromService2",
-	24384: "ExclusiveLevelAlarmType_PlaceInService2",
-	24386: "ExclusiveLevelAlarmType_Reset2",
-	24388: "NonExclusiveDeviationAlarmType_Suppress2",
-	24390: "NonExclusiveDeviationAlarmType_Unsuppress2",
-	24392: "NonExclusiveDeviationAlarmType_RemoveFromService2",
-	24394: "NonExclusiveDeviationAlarmType_PlaceInService2",
-	24396: "NonExclusiveDeviationAlarmType_Reset2",
-	24398: "NonExclusiveRateOfChangeAlarmType_Suppress2",
-	24400: "NonExclusiveRateOfChangeAlarmType_Unsuppress2",
-	24402: "NonExclusiveRateOfChangeAlarmType_RemoveFromService2",
-	24404: "NonExclusiveRateOfChangeAlarmType_PlaceInService2",
-	24406: "NonExclusiveRateOfChangeAlarmType_Reset2",
-	24408: "ExclusiveDeviationAlarmType_Suppress2",
-	24410: "ExclusiveDeviationAlarmType_Unsuppress2",
-	24412: "ExclusiveDeviationAlarmType_RemoveFromService2",
-	24414: "ExclusiveDeviationAlarmType_PlaceInService2",
-	24416: "ExclusiveDeviationAlarmType_Reset2",
-	24418: "ExclusiveRateOfChangeAlarmType_Suppress2",
-	24420: "ExclusiveRateOfChangeAlarmType_Unsuppress2",
-	24422: "ExclusiveRateOfChangeAlarmType_RemoveFromService2",
-	24424: "ExclusiveRateOfChangeAlarmType_PlaceInService2",
-	24426: "ExclusiveRateOfChangeAlarmType_Reset2",
-	24428: "DiscreteAlarmType_Suppress2",
-	24430: "DiscreteAlarmType_Unsuppress2",
-	24432: "DiscreteAlarmType_RemoveFromService2",
-	24434: "DiscreteAlarmType_PlaceInService2",
-	24436: "DiscreteAlarmType_Reset2",
-	24438: "OffNormalAlarmType_Suppress2",
-	24440: "OffNormalAlarmType_Unsuppress2",
-	24442: "OffNormalAlarmType_RemoveFromService2",
-	24444: "OffNormalAlarmType_PlaceInService2",
-	24446: "OffNormalAlarmType_Reset2",
-	24448: "SystemOffNormalAlarmType_Suppress2",
-	24450: "SystemOffNormalAlarmType_Unsuppress2",
-	24452: "SystemOffNormalAlarmType_RemoveFromService2",
-	24454: "SystemOffNormalAlarmType_PlaceInService2",
-	24456: "SystemOffNormalAlarmType_Reset2",
-	24458: "TripAlarmType_Suppress2",
-	24460: "TripAlarmType_Unsuppress2",
-	24462: "TripAlarmType_RemoveFromService2",
-	24464: "TripAlarmType_PlaceInService2",
-	24466: "TripAlarmType_Reset2",
-	24468: "InstrumentDiagnosticAlarmType_Suppress2",
-	24470: "InstrumentDiagnosticAlarmType_Unsuppress2",
-	24472: "InstrumentDiagnosticAlarmType_RemoveFromService2",
-	24474: "InstrumentDiagnosticAlarmType_PlaceInService2",
-	24476: "InstrumentDiagnosticAlarmType_Reset2",
-	24478: "SystemDiagnosticAlarmType_Suppress2",
-	24480: "SystemDiagnosticAlarmType_Unsuppress2",
-	24482: "SystemDiagnosticAlarmType_RemoveFromService2",
-	24484: "SystemDiagnosticAlarmType_PlaceInService2",
-	24486: "SystemDiagnosticAlarmType_Reset2",
-	24488: "CertificateExpirationAlarmType_Suppress2",
-	24490: "CertificateExpirationAlarmType_Unsuppress2",
-	24492: "CertificateExpirationAlarmType_RemoveFromService2",
-	24494: "CertificateExpirationAlarmType_PlaceInService2",
-	24496: "CertificateExpirationAlarmType_Reset2",
-	24498: "DiscrepancyAlarmType_Suppress2",
-	24500: "DiscrepancyAlarmType_Unsuppress2",
-	24502: "DiscrepancyAlarmType_RemoveFromService2",
-	24504: "DiscrepancyAlarmType_PlaceInService2",
-	24506: "DiscrepancyAlarmType_Reset2",
-	24508: "TrustListOutOfDateAlarmType_Suppress2",
-	24510: "TrustListOutOfDateAlarmType_Unsuppress2",
-	24512: "TrustListOutOfDateAlarmType_RemoveFromService2",
-	24514: "TrustListOutOfDateAlarmType_PlaceInService2",
-	24516: "TrustListOutOfDateAlarmType_Reset2",
 	24518: "CertificateGroupType_CertificateExpired_Suppress2",
 	24520: "CertificateGroupType_CertificateExpired_Unsuppress2",
 	24522: "CertificateGroupType_CertificateExpired_RemoveFromService2",
@@ -3751,78 +2863,6 @@ var nameMethod = map[uint32]string{
 	24756: "ShelvedStateMachineType_TimedShelve2",
 	24758: "ShelvedStateMachineType_Unshelve2",
 	24760: "ShelvedStateMachineType_OneShotShelve2",
-	24762: "LimitAlarmType_ShelvingState_TimedShelve2",
-	24764: "LimitAlarmType_ShelvingState_Unshelve2",
-	24766: "LimitAlarmType_ShelvingState_OneShotShelve2",
-	24768: "LimitAlarmType_GetGroupMemberships",
-	24778: "ExclusiveLimitAlarmType_ShelvingState_TimedShelve2",
-	24780: "ExclusiveLimitAlarmType_ShelvingState_Unshelve2",
-	24782: "ExclusiveLimitAlarmType_ShelvingState_OneShotShelve2",
-	24784: "ExclusiveLimitAlarmType_GetGroupMemberships",
-	24794: "NonExclusiveLimitAlarmType_ShelvingState_TimedShelve2",
-	24796: "NonExclusiveLimitAlarmType_ShelvingState_Unshelve2",
-	24798: "NonExclusiveLimitAlarmType_ShelvingState_OneShotShelve2",
-	24800: "NonExclusiveLimitAlarmType_GetGroupMemberships",
-	24810: "NonExclusiveLevelAlarmType_ShelvingState_TimedShelve2",
-	24812: "NonExclusiveLevelAlarmType_ShelvingState_Unshelve2",
-	24814: "NonExclusiveLevelAlarmType_ShelvingState_OneShotShelve2",
-	24816: "NonExclusiveLevelAlarmType_GetGroupMemberships",
-	24826: "ExclusiveLevelAlarmType_ShelvingState_TimedShelve2",
-	24828: "ExclusiveLevelAlarmType_ShelvingState_Unshelve2",
-	24830: "ExclusiveLevelAlarmType_ShelvingState_OneShotShelve2",
-	24832: "ExclusiveLevelAlarmType_GetGroupMemberships",
-	24842: "NonExclusiveDeviationAlarmType_ShelvingState_TimedShelve2",
-	24844: "NonExclusiveDeviationAlarmType_ShelvingState_Unshelve2",
-	24846: "NonExclusiveDeviationAlarmType_ShelvingState_OneShotShelve2",
-	24848: "NonExclusiveDeviationAlarmType_GetGroupMemberships",
-	24858: "NonExclusiveRateOfChangeAlarmType_ShelvingState_TimedShelve2",
-	24860: "NonExclusiveRateOfChangeAlarmType_ShelvingState_Unshelve2",
-	24862: "NonExclusiveRateOfChangeAlarmType_ShelvingState_OneShotShelve2",
-	24864: "NonExclusiveRateOfChangeAlarmType_GetGroupMemberships",
-	24874: "ExclusiveDeviationAlarmType_ShelvingState_TimedShelve2",
-	24876: "ExclusiveDeviationAlarmType_ShelvingState_Unshelve2",
-	24878: "ExclusiveDeviationAlarmType_ShelvingState_OneShotShelve2",
-	24880: "ExclusiveDeviationAlarmType_GetGroupMemberships",
-	24890: "ExclusiveRateOfChangeAlarmType_ShelvingState_TimedShelve2",
-	24892: "ExclusiveRateOfChangeAlarmType_ShelvingState_Unshelve2",
-	24894: "ExclusiveRateOfChangeAlarmType_ShelvingState_OneShotShelve2",
-	24896: "ExclusiveRateOfChangeAlarmType_GetGroupMemberships",
-	24906: "DiscreteAlarmType_ShelvingState_TimedShelve2",
-	24908: "DiscreteAlarmType_ShelvingState_Unshelve2",
-	24910: "DiscreteAlarmType_ShelvingState_OneShotShelve2",
-	24912: "DiscreteAlarmType_GetGroupMemberships",
-	24914: "OffNormalAlarmType_ShelvingState_TimedShelve2",
-	24916: "OffNormalAlarmType_ShelvingState_Unshelve2",
-	24918: "OffNormalAlarmType_ShelvingState_OneShotShelve2",
-	24920: "OffNormalAlarmType_GetGroupMemberships",
-	24922: "SystemOffNormalAlarmType_ShelvingState_TimedShelve2",
-	24924: "SystemOffNormalAlarmType_ShelvingState_Unshelve2",
-	24926: "SystemOffNormalAlarmType_ShelvingState_OneShotShelve2",
-	24928: "SystemOffNormalAlarmType_GetGroupMemberships",
-	24930: "TripAlarmType_ShelvingState_TimedShelve2",
-	24932: "TripAlarmType_ShelvingState_Unshelve2",
-	24934: "TripAlarmType_ShelvingState_OneShotShelve2",
-	24936: "TripAlarmType_GetGroupMemberships",
-	24938: "InstrumentDiagnosticAlarmType_ShelvingState_TimedShelve2",
-	24940: "InstrumentDiagnosticAlarmType_ShelvingState_Unshelve2",
-	24942: "InstrumentDiagnosticAlarmType_ShelvingState_OneShotShelve2",
-	24944: "InstrumentDiagnosticAlarmType_GetGroupMemberships",
-	24946: "SystemDiagnosticAlarmType_ShelvingState_TimedShelve2",
-	24948: "SystemDiagnosticAlarmType_ShelvingState_Unshelve2",
-	24950: "SystemDiagnosticAlarmType_ShelvingState_OneShotShelve2",
-	24952: "SystemDiagnosticAlarmType_GetGroupMemberships",
-	24954: "CertificateExpirationAlarmType_ShelvingState_TimedShelve2",
-	24956: "CertificateExpirationAlarmType_ShelvingState_Unshelve2",
-	24958: "CertificateExpirationAlarmType_ShelvingState_OneShotShelve2",
-	24960: "CertificateExpirationAlarmType_GetGroupMemberships",
-	24962: "DiscrepancyAlarmType_ShelvingState_TimedShelve2",
-	24964: "DiscrepancyAlarmType_ShelvingState_Unshelve2",
-	24966: "DiscrepancyAlarmType_ShelvingState_OneShotShelve2",
-	24968: "DiscrepancyAlarmType_GetGroupMemberships",
-	24970: "TrustListOutOfDateAlarmType_ShelvingState_TimedShelve2",
-	24972: "TrustListOutOfDateAlarmType_ShelvingState_Unshelve2",
-	24974: "TrustListOutOfDateAlarmType_ShelvingState_OneShotShelve2",
-	24976: "TrustListOutOfDateAlarmType_GetGroupMemberships",
 	24978: "CertificateGroupType_CertificateExpired_ShelvingState_TimedShelve2",
 	24980: "CertificateGroupType_CertificateExpired_ShelvingState_Unshelve2",
 	24982: "CertificateGroupType_CertificateExpired_ShelvingState_OneShotShelve2",
@@ -3942,12 +2982,6 @@ var nameMethod = map[uint32]string{
 	25379: "RemovePushTargetMethodType",
 	25381: "AddPushTargetFolderMethodType",
 	25384: "RemovePushTargetFolderMethodType",
-	25386: "PublishSubscribeType_SecurityGroups_AddSecurityGroupFolder",
-	25389: "PublishSubscribeType_SecurityGroups_RemoveSecurityGroupFolder",
-	25393: "PublishSubscribeType_KeyPushTargets_AddPushTarget",
-	25396: "PublishSubscribeType_KeyPushTargets_RemovePushTarget",
-	25398: "PublishSubscribeType_KeyPushTargets_AddPushTargetFolder",
-	25401: "PublishSubscribeType_KeyPushTargets_RemovePushTargetFolder",
 	25411: "PublishSubscribeType_PubSubConfiguration_Open",
 	25414: "PublishSubscribeType_PubSubConfiguration_Close",
 	25416: "PublishSubscribeType_PubSubConfiguration_Read",
@@ -3970,12 +3004,6 @@ var nameMethod = map[uint32]string{
 	25472: "PublishSubscribe_PubSubConfiguration_SetPosition",
 	25474: "PublishSubscribe_PubSubConfiguration_ReserveIDs",
 	25477: "PublishSubscribe_PubSubConfiguration_CloseAndUpdate",
-	25490: "PubSubConfigurationType_Open",
-	25493: "PubSubConfigurationType_Close",
-	25495: "PubSubConfigurationType_Read",
-	25498: "PubSubConfigurationType_Write",
-	25500: "PubSubConfigurationType_GetPosition",
-	25503: "PubSubConfigurationType_SetPosition",
 	25505: "PubSubConfigurationType_ReserveIDs",
 	25508: "PubSubConfigurationType_CloseAndUpdate",
 	25511: "PubSubConfigurationTypeReserveIDsMethodType",
@@ -4014,186 +3042,8 @@ var nameMethod = map[uint32]string{
 	25699: "ServerConfigurationType_ResetToServerDefaults",
 	25708: "ServerConfiguration_CancelChanges",
 	25709: "ServerConfiguration_ResetToServerDefaults",
-	25710: "ServerConfiguration_SetAdminPassword",
 	25727: "RequestTicketsMethodType",
 	25729: "SetRegistrarEndpointsMethodType",
-	25742: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Open",
-	25745: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Close",
-	25747: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Read",
-	25750: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_Write",
-	25752: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition",
-	25755: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition",
-	25760: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks",
-	25763: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate",
-	25766: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate",
-	25768: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate",
-	25772: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_GetRejectedList",
-	25807: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable",
-	25808: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable",
-	25809: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment",
-	25829: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge",
-	25831: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm",
-	25876: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve",
-	25878: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2",
-	25880: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve",
-	25881: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2",
-	25883: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve",
-	25884: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2",
-	25917: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence",
-	25918: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress",
-	25919: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2",
-	25921: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress",
-	25922: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2",
-	25924: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService",
-	25925: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2",
-	25927: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService",
-	25928: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2",
-	25930: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset",
-	25931: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2",
-	25933: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships",
-	25973: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable",
-	25974: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable",
-	25975: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment",
-	25995: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge",
-	25997: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm",
-	26042: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve",
-	26044: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2",
-	26046: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve",
-	26047: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2",
-	26049: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve",
-	26050: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2",
-	26083: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence",
-	26084: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress",
-	26085: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2",
-	26087: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress",
-	26088: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2",
-	26090: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService",
-	26091: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2",
-	26093: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService",
-	26094: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2",
-	26096: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset",
-	26097: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2",
-	26099: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships",
-	26114: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Open",
-	26117: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Close",
-	26119: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Read",
-	26122: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_Write",
-	26124: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition",
-	26127: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition",
-	26132: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks",
-	26135: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate",
-	26138: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate",
-	26140: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate",
-	26144: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_GetRejectedList",
-	26179: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable",
-	26180: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable",
-	26181: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment",
-	26201: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge",
-	26203: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm",
-	26248: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve",
-	26250: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2",
-	26252: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve",
-	26253: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2",
-	26255: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve",
-	26256: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2",
-	26289: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence",
-	26290: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress",
-	26291: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2",
-	26293: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress",
-	26294: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2",
-	26296: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService",
-	26297: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2",
-	26299: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService",
-	26300: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2",
-	26302: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset",
-	26303: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2",
-	26305: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships",
-	26345: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable",
-	26346: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable",
-	26347: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment",
-	26367: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge",
-	26369: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm",
-	26414: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve",
-	26416: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2",
-	26418: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve",
-	26419: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2",
-	26421: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve",
-	26422: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2",
-	26455: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence",
-	26456: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress",
-	26457: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2",
-	26459: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress",
-	26460: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2",
-	26462: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService",
-	26463: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2",
-	26465: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService",
-	26466: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2",
-	26468: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset",
-	26469: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2",
-	26471: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships",
-	26486: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Open",
-	26489: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Close",
-	26491: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Read",
-	26494: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_Write",
-	26496: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition",
-	26499: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition",
-	26504: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks",
-	26507: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate",
-	26510: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate",
-	26512: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate",
-	26516: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_GetRejectedList",
-	26551: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable",
-	26552: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable",
-	26553: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment",
-	26573: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge",
-	26575: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm",
-	26620: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve",
-	26622: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2",
-	26624: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve",
-	26625: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2",
-	26627: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve",
-	26628: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2",
-	26661: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence",
-	26662: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress",
-	26663: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2",
-	26665: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress",
-	26666: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2",
-	26668: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService",
-	26669: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2",
-	26671: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService",
-	26672: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2",
-	26674: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset",
-	26675: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2",
-	26677: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships",
-	26717: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable",
-	26718: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable",
-	26719: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment",
-	26739: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge",
-	26741: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm",
-	26786: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve",
-	26788: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2",
-	26790: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve",
-	26791: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2",
-	26793: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve",
-	26794: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2",
-	26827: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence",
-	26828: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress",
-	26829: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2",
-	26831: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress",
-	26832: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2",
-	26834: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService",
-	26835: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2",
-	26837: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService",
-	26838: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2",
-	26840: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset",
-	26841: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2",
-	26843: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships",
-	26858: "ApplicationConfigurationType_UpdateCertificate",
-	26861: "ApplicationConfigurationType_ApplyChanges",
-	26862: "ApplicationConfigurationType_CancelChanges",
-	26863: "ApplicationConfigurationType_CreateSigningRequest",
-	26866: "ApplicationConfigurationType_GetRejectedList",
-	26868: "ApplicationConfigurationType_ResetToServerDefaults",
 	26873: "ProvisionableDeviceType_RequestTickets",
 	26875: "ProvisionableDeviceType_SetRegistrarEndpoints",
 	26889: "ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Open",
@@ -4375,251 +3225,9 @@ var nameMethod = map[uint32]string{
 	28015: "ProvisionableDeviceType_ApplicationName_Placeholder_ResetToServerDefaults",
 	29880: "ProvisionableDevice_RequestTickets",
 	29882: "ProvisionableDevice_SetRegistrarEndpoints",
-	29896: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Open",
-	29899: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Close",
-	29901: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Read",
-	29904: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_Write",
-	29906: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition",
-	29909: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition",
-	29914: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks",
-	29917: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate",
-	29920: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate",
-	29922: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate",
-	29926: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_GetRejectedList",
-	29961: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Disable",
-	29962: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Enable",
-	29963: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_AddComment",
-	29983: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Acknowledge",
-	29985: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Confirm",
-	30030: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve",
-	30032: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_TimedShelve2",
-	30034: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve",
-	30035: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_Unshelve2",
-	30037: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve",
-	30038: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState_OneShotShelve2",
-	30071: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Silence",
-	30072: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress",
-	30073: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Suppress2",
-	30075: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress",
-	30076: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Unsuppress2",
-	30078: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService",
-	30079: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_RemoveFromService2",
-	30081: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService",
-	30082: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_PlaceInService2",
-	30084: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset",
-	30085: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_Reset2",
-	30087: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_GetGroupMemberships",
-	30127: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Disable",
-	30128: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Enable",
-	30129: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_AddComment",
-	30149: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Acknowledge",
-	30151: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Confirm",
-	30196: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve",
-	30198: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_TimedShelve2",
-	30200: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve",
-	30201: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_Unshelve2",
-	30203: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve",
-	30204: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2",
-	30237: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Silence",
-	30238: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress",
-	30239: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Suppress2",
-	30241: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress",
-	30242: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Unsuppress2",
-	30244: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService",
-	30245: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_RemoveFromService2",
-	30247: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService",
-	30248: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_PlaceInService2",
-	30250: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset",
-	30251: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_Reset2",
-	30253: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_GetGroupMemberships",
-	30268: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Open",
-	30271: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Close",
-	30273: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Read",
-	30276: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_Write",
-	30278: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_GetPosition",
-	30281: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_SetPosition",
-	30286: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_OpenWithMasks",
-	30289: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_CloseAndUpdate",
-	30292: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_AddCertificate",
-	30294: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList_RemoveCertificate",
-	30298: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_GetRejectedList",
-	30333: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Disable",
-	30334: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Enable",
-	30335: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_AddComment",
-	30355: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Acknowledge",
-	30357: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Confirm",
-	30402: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve",
-	30404: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_TimedShelve2",
-	30406: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve",
-	30407: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_Unshelve2",
-	30409: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve",
-	30410: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState_OneShotShelve2",
-	30443: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Silence",
-	30444: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress",
-	30445: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Suppress2",
-	30447: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress",
-	30448: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Unsuppress2",
-	30450: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService",
-	30451: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_RemoveFromService2",
-	30453: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService",
-	30454: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_PlaceInService2",
-	30456: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset",
-	30457: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_Reset2",
-	30459: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_GetGroupMemberships",
-	30499: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Disable",
-	30500: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Enable",
-	30501: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_AddComment",
-	30521: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Acknowledge",
-	30523: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Confirm",
-	30568: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve",
-	30570: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_TimedShelve2",
-	30572: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve",
-	30573: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_Unshelve2",
-	30575: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve",
-	30576: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2",
-	30609: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Silence",
-	30610: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress",
-	30611: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Suppress2",
-	30613: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress",
-	30614: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Unsuppress2",
-	30616: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService",
-	30617: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_RemoveFromService2",
-	30619: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService",
-	30620: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_PlaceInService2",
-	30622: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset",
-	30623: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_Reset2",
-	30625: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_GetGroupMemberships",
-	30640: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Open",
-	30643: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Close",
-	30645: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Read",
-	30648: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_Write",
-	30650: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition",
-	30653: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition",
-	30658: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks",
-	30661: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate",
-	30664: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate",
-	30666: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate",
-	30670: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_GetRejectedList",
-	30705: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Disable",
-	30706: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Enable",
-	30707: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_AddComment",
-	30727: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Acknowledge",
-	30729: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Confirm",
-	30774: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve",
-	30776: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_TimedShelve2",
-	30778: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve",
-	30779: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_Unshelve2",
-	30781: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve",
-	30782: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState_OneShotShelve2",
-	30815: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Silence",
-	30816: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress",
-	30817: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Suppress2",
-	30819: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress",
-	30820: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Unsuppress2",
-	30822: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService",
-	30823: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_RemoveFromService2",
-	30825: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService",
-	30826: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_PlaceInService2",
-	30828: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset",
-	30829: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_Reset2",
-	30831: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_GetGroupMemberships",
-	30871: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Disable",
-	30872: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Enable",
-	30873: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_AddComment",
-	30893: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Acknowledge",
-	30895: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Confirm",
-	30940: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve",
-	30942: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_TimedShelve2",
-	30944: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve",
-	30945: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_Unshelve2",
-	30947: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve",
-	30948: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState_OneShotShelve2",
-	30981: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Silence",
-	30982: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress",
-	30983: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Suppress2",
-	30985: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress",
-	30986: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Unsuppress2",
-	30988: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService",
-	30989: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_RemoveFromService2",
-	30991: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService",
-	30992: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_PlaceInService2",
-	30994: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset",
-	30995: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_Reset2",
-	30997: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_GetGroupMemberships",
-	31384: "ProvisionableDevice_ApplicationName_Placeholder_UpdateCertificate",
-	31387: "ProvisionableDevice_ApplicationName_Placeholder_ApplyChanges",
-	31388: "ProvisionableDevice_ApplicationName_Placeholder_CancelChanges",
-	31389: "ProvisionableDevice_ApplicationName_Placeholder_CreateSigningRequest",
-	31392: "ProvisionableDevice_ApplicationName_Placeholder_GetRejectedList",
-	31394: "ProvisionableDevice_ApplicationName_Placeholder_ResetToServerDefaults",
-	32098: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Disable",
-	32099: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Enable",
-	32100: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_AddComment",
-	32120: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Acknowledge",
-	32122: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Confirm",
-	32167: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_TimedShelve",
-	32169: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_TimedShelve2",
-	32171: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_Unshelve",
-	32172: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_Unshelve2",
-	32174: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_OneShotShelve",
-	32175: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState_OneShotShelve2",
-	32208: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Silence",
-	32209: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Suppress",
-	32210: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Suppress2",
-	32212: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Unsuppress",
-	32213: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Unsuppress2",
-	32215: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_RemoveFromService",
-	32216: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_RemoveFromService2",
-	32218: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_PlaceInService",
-	32219: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_PlaceInService2",
-	32221: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Reset",
-	32222: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_Reset2",
-	32224: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_GetGroupMemberships",
 	32282: "GetCertificatesMethodType",
 	32296: "ServerConfigurationType_GetCertificates",
 	32333: "ServerConfiguration_GetCertificates",
-	32346: "ApplicationConfigurationType_GetCertificates",
 	32359: "ProvisionableDeviceType_ApplicationName_Placeholder_GetCertificates",
-	32372: "ProvisionableDevice_ApplicationName_Placeholder_GetCertificates",
-	32406: "DataSetClasses_GetSecurityKeys",
-	32409: "DataSetClasses_GetSecurityGroup",
-	32413: "DataSetClasses_SecurityGroups_AddSecurityGroup",
-	32416: "DataSetClasses_SecurityGroups_RemoveSecurityGroup",
-	32418: "DataSetClasses_SecurityGroups_AddSecurityGroupFolder",
-	32421: "DataSetClasses_SecurityGroups_RemoveSecurityGroupFolder",
-	32425: "DataSetClasses_KeyPushTargets_AddPushTarget",
-	32428: "DataSetClasses_KeyPushTargets_RemovePushTarget",
-	32430: "DataSetClasses_KeyPushTargets_AddPushTargetFolder",
-	32433: "DataSetClasses_KeyPushTargets_RemovePushTargetFolder",
-	32450: "DataSetClasses_ConnectionName_Placeholder_Status_Enable",
-	32451: "DataSetClasses_ConnectionName_Placeholder_Status_Disable",
-	32464: "DataSetClasses_ConnectionName_Placeholder_Diagnostics_Reset",
-	32500: "DataSetClasses_ConnectionName_Placeholder_AddWriterGroup",
-	32503: "DataSetClasses_ConnectionName_Placeholder_AddReaderGroup",
-	32506: "DataSetClasses_ConnectionName_Placeholder_RemoveGroup",
-	32508: "DataSetClasses_SetSecurityKeys",
-	32510: "DataSetClasses_AddConnection",
-	32513: "DataSetClasses_RemoveConnection",
-	32516: "DataSetClasses_PublishedDataSets_AddPublishedDataItems",
-	32519: "DataSetClasses_PublishedDataSets_AddPublishedEvents",
-	32522: "DataSetClasses_PublishedDataSets_AddPublishedDataItemsTemplate",
-	32525: "DataSetClasses_PublishedDataSets_AddPublishedEventsTemplate",
-	32528: "DataSetClasses_PublishedDataSets_RemovePublishedDataSet",
-	32530: "DataSetClasses_PublishedDataSets_AddDataSetFolder",
-	32533: "DataSetClasses_PublishedDataSets_RemoveDataSetFolder",
-	32536: "DataSetClasses_SubscribedDataSets_AddSubscribedDataSet",
-	32539: "DataSetClasses_SubscribedDataSets_RemoveSubscribedDataSet",
-	32541: "DataSetClasses_SubscribedDataSets_AddDataSetFolder",
-	32544: "DataSetClasses_SubscribedDataSets_RemoveDataSetFolder",
-	32554: "DataSetClasses_PubSubConfiguration_Open",
-	32557: "DataSetClasses_PubSubConfiguration_Close",
-	32559: "DataSetClasses_PubSubConfiguration_Read",
-	32562: "DataSetClasses_PubSubConfiguration_Write",
-	32564: "DataSetClasses_PubSubConfiguration_GetPosition",
-	32567: "DataSetClasses_PubSubConfiguration_SetPosition",
-	32569: "DataSetClasses_PubSubConfiguration_ReserveIDs",
-	32572: "DataSetClasses_PubSubConfiguration_CloseAndUpdate",
-	32577: "DataSetClasses_Status_Enable",
-	32578: "DataSetClasses_Status_Disable",
-	32591: "DataSetClasses_Diagnostics_Reset",
+	32416: "NonTransparentBackupRedundancyType_Failover",
 }

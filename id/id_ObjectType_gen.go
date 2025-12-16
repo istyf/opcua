@@ -143,16 +143,18 @@ const (
 	TargetVariablesType                          = 15111
 	SubscribedDataSetMirrorType                  = 15127
 	BrokerConnectionTransportType                = 15155
-	UserCredentialCertificateType                = 15181
 	DataSetWriterType                            = 15298
 	DataSetWriterTransportType                   = 15305
 	DataSetReaderType                            = 15306
 	DataSetReaderTransportType                   = 15319
+	ConfigurationFileType                        = 15437
 	SecurityGroupFolderType                      = 15452
 	SecurityGroupType                            = 15471
 	ExtensionFieldsType                          = 15489
 	PubSubStatusEventType                        = 15535
+	ConfigurationUpdatedAuditEventType           = 15541
 	PubSubTransportLimitsExceedEventType         = 15548
+	ApplicationConfigurationFileType             = 15550
 	PubSubCommunicationFailureEventType          = 15563
 	RoleSetType                                  = 15607
 	RoleType                                     = 15620
@@ -160,6 +162,7 @@ const (
 	FileTransferStateMachineType                 = 15803
 	PubSubKeyServiceType                         = 15906
 	AlarmGroupType                               = 16405
+	ApplicationConfigurationFolderType           = 16662
 	DiscrepancyAlarmType                         = 17080
 	SafetyConditionClassType                     = 17218
 	HighlyManagedAlarmConditionClassType         = 17219
@@ -189,11 +192,27 @@ const (
 	InstrumentDiagnosticAlarmType                = 18347
 	SystemDiagnosticAlarmType                    = 18496
 	StatisticalConditionClassType                = 18665
+	LldpInformationType                          = 18973
+	LldpRemoteStatisticsType                     = 18996
+	LldpLocalSystemType                          = 19002
+	LldpPortInformationType                      = 19009
+	LldpRemoteSystemType                         = 19033
 	AuditHistoryAnnotationUpdateEventType        = 19095
 	TrustListOutOfDateAlarmType                  = 19297
+	UserCertificateType                          = 19323
+	TlsCertificateType                           = 19324
+	TlsServerCertificateType                     = 19325
+	TlsClientCertificateType                     = 19326
+	LogObjectType                                = 19352
+	BaseLogEventType                             = 19362
+	LogOverflowEventType                         = 19369
+	LogEntryConditionClassType                   = 19370
 	PubSubDiagnosticsType                        = 19677
 	PubSubDiagnosticsRootType                    = 19732
 	PubSubDiagnosticsConnectionType              = 19786
+	DataTypeRefinementType                       = 19820
+	SubtypeRestrictionType                       = 19822
+	SerializationEntityType                      = 19824
 	PubSubDiagnosticsWriterGroupType             = 19834
 	PubSubDiagnosticsReaderGroupType             = 19903
 	PubSubDiagnosticsDataSetWriterType           = 19968
@@ -259,6 +278,16 @@ const (
 	TrustListUpdateRequestedAuditEventType       = 32260
 	TransactionDiagnosticsType                   = 32286
 	CertificateUpdateRequestedAuditEventType     = 32306
+	NonTransparentBackupRedundancyType           = 32411
+	SyntaxReferenceEntryType                     = 32439
+	UnitType                                     = 32442
+	ServerUnitType                               = 32447
+	AlternativeUnitType                          = 32467
+	QuantityType                                 = 32475
+	HistoricalEventConfigurationType             = 32621
+	HistoricalExternalEventSourceType            = 32625
+	AuditHistoryConfigurationChangeEventType     = 32758
+	AuditHistoryBulkInsertEventType              = 32803
 )
 
 var nameObjectType = map[uint32]string{
@@ -398,16 +427,18 @@ var nameObjectType = map[uint32]string{
 	15111: "TargetVariablesType",
 	15127: "SubscribedDataSetMirrorType",
 	15155: "BrokerConnectionTransportType",
-	15181: "UserCredentialCertificateType",
 	15298: "DataSetWriterType",
 	15305: "DataSetWriterTransportType",
 	15306: "DataSetReaderType",
 	15319: "DataSetReaderTransportType",
+	15437: "ConfigurationFileType",
 	15452: "SecurityGroupFolderType",
 	15471: "SecurityGroupType",
 	15489: "ExtensionFieldsType",
 	15535: "PubSubStatusEventType",
+	15541: "ConfigurationUpdatedAuditEventType",
 	15548: "PubSubTransportLimitsExceedEventType",
+	15550: "ApplicationConfigurationFileType",
 	15563: "PubSubCommunicationFailureEventType",
 	15607: "RoleSetType",
 	15620: "RoleType",
@@ -415,6 +446,7 @@ var nameObjectType = map[uint32]string{
 	15803: "FileTransferStateMachineType",
 	15906: "PubSubKeyServiceType",
 	16405: "AlarmGroupType",
+	16662: "ApplicationConfigurationFolderType",
 	17080: "DiscrepancyAlarmType",
 	17218: "SafetyConditionClassType",
 	17219: "HighlyManagedAlarmConditionClassType",
@@ -444,11 +476,27 @@ var nameObjectType = map[uint32]string{
 	18347: "InstrumentDiagnosticAlarmType",
 	18496: "SystemDiagnosticAlarmType",
 	18665: "StatisticalConditionClassType",
+	18973: "LldpInformationType",
+	18996: "LldpRemoteStatisticsType",
+	19002: "LldpLocalSystemType",
+	19009: "LldpPortInformationType",
+	19033: "LldpRemoteSystemType",
 	19095: "AuditHistoryAnnotationUpdateEventType",
 	19297: "TrustListOutOfDateAlarmType",
+	19323: "UserCertificateType",
+	19324: "TlsCertificateType",
+	19325: "TlsServerCertificateType",
+	19326: "TlsClientCertificateType",
+	19352: "LogObjectType",
+	19362: "BaseLogEventType",
+	19369: "LogOverflowEventType",
+	19370: "LogEntryConditionClassType",
 	19677: "PubSubDiagnosticsType",
 	19732: "PubSubDiagnosticsRootType",
 	19786: "PubSubDiagnosticsConnectionType",
+	19820: "DataTypeRefinementType",
+	19822: "SubtypeRestrictionType",
+	19824: "SerializationEntityType",
 	19834: "PubSubDiagnosticsWriterGroupType",
 	19903: "PubSubDiagnosticsReaderGroupType",
 	19968: "PubSubDiagnosticsDataSetWriterType",
@@ -514,4 +562,14 @@ var nameObjectType = map[uint32]string{
 	32260: "TrustListUpdateRequestedAuditEventType",
 	32286: "TransactionDiagnosticsType",
 	32306: "CertificateUpdateRequestedAuditEventType",
+	32411: "NonTransparentBackupRedundancyType",
+	32439: "SyntaxReferenceEntryType",
+	32442: "UnitType",
+	32447: "ServerUnitType",
+	32467: "AlternativeUnitType",
+	32475: "QuantityType",
+	32621: "HistoricalEventConfigurationType",
+	32625: "HistoricalExternalEventSourceType",
+	32758: "AuditHistoryConfigurationChangeEventType",
+	32803: "AuditHistoryBulkInsertEventType",
 }

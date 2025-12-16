@@ -52,6 +52,14 @@ const (
 	HasEffectUnsuppressed               = 17985
 	HasWriterGroup                      = 18804
 	HasReaderGroup                      = 18805
+	UsesDataTypeRefinement              = 19814
+	HasFieldDescription                 = 19815
+	HasFieldDescriptionSetMandatory     = 19816
+	IsDisabledOptionalField             = 19817
+	UsesSubtypeRestriction              = 19818
+	AllowedSubtype                      = 19819
+	HasSerializationEntity              = 19845
+	HasDataTypeRefinement               = 19846
 	AliasFor                            = 23469
 	IsDeprecated                        = 23562
 	HasStructuredComponent              = 24136
@@ -73,6 +81,11 @@ const (
 	IsExecutingOn                       = 25265
 	HasPushedSecurityGroup              = 25345
 	AlarmSuppressionGroupMember         = 32059
+	HasKeyValueDescription              = 32407
+	HasEngineeringUnitDetails           = 32558
+	HasQuantity                         = 32559
+	HasCurrentData                      = 32633
+	HasCurrentEvent                     = 32634
 	HasReferenceDescription             = 32679
 )
 
@@ -122,6 +135,14 @@ var nameReferenceType = map[uint32]string{
 	17985: "HasEffectUnsuppressed",
 	18804: "HasWriterGroup",
 	18805: "HasReaderGroup",
+	19814: "UsesDataTypeRefinement",
+	19815: "HasFieldDescription",
+	19816: "HasFieldDescriptionSetMandatory",
+	19817: "IsDisabledOptionalField",
+	19818: "UsesSubtypeRestriction",
+	19819: "AllowedSubtype",
+	19845: "HasSerializationEntity",
+	19846: "HasDataTypeRefinement",
 	23469: "AliasFor",
 	23562: "IsDeprecated",
 	24136: "HasStructuredComponent",
@@ -143,5 +164,10 @@ var nameReferenceType = map[uint32]string{
 	25265: "IsExecutingOn",
 	25345: "HasPushedSecurityGroup",
 	32059: "AlarmSuppressionGroupMember",
+	32407: "HasKeyValueDescription",
+	32558: "HasEngineeringUnitDetails",
+	32559: "HasQuantity",
+	32633: "HasCurrentData",
+	32634: "HasCurrentEvent",
 	32679: "HasReferenceDescription",
 }
