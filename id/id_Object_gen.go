@@ -7,1575 +7,1569 @@
 package id
 
 const (
-	ModellingRule_Mandatory                                                                                                        = 78
-	ModellingRule_Optional                                                                                                         = 80
-	ModellingRule_ExposesItsArray                                                                                                  = 83
-	RootFolder                                                                                                                     = 84
-	ObjectsFolder                                                                                                                  = 85
-	TypesFolder                                                                                                                    = 86
-	ViewsFolder                                                                                                                    = 87
-	ObjectTypesFolder                                                                                                              = 88
-	VariableTypesFolder                                                                                                            = 89
-	DataTypesFolder                                                                                                                = 90
-	ReferenceTypesFolder                                                                                                           = 91
-	XMLSchema_TypeSystem                                                                                                           = 92
-	OPCBinarySchema_TypeSystem                                                                                                     = 93
-	DataTypeDefinition_Encoding_DefaultBinary                                                                                      = 121
-	StructureDefinition_Encoding_DefaultBinary                                                                                     = 122
-	EnumDefinition_Encoding_DefaultBinary                                                                                          = 123
-	DataSetMetaDataType_Encoding_DefaultBinary                                                                                     = 124
-	DataTypeDescription_Encoding_DefaultBinary                                                                                     = 125
-	StructureDescription_Encoding_DefaultBinary                                                                                    = 126
-	EnumDescription_Encoding_DefaultBinary                                                                                         = 127
-	RolePermissionType_Encoding_DefaultBinary                                                                                      = 128
-	Node_Encoding_DefaultXML                                                                                                       = 259
-	Node_Encoding_DefaultBinary                                                                                                    = 260
-	ObjectNode_Encoding_DefaultXML                                                                                                 = 262
-	ObjectNode_Encoding_DefaultBinary                                                                                              = 263
-	ObjectTypeNode_Encoding_DefaultXML                                                                                             = 265
-	ObjectTypeNode_Encoding_DefaultBinary                                                                                          = 266
-	VariableNode_Encoding_DefaultXML                                                                                               = 268
-	VariableNode_Encoding_DefaultBinary                                                                                            = 269
-	VariableTypeNode_Encoding_DefaultXML                                                                                           = 271
-	VariableTypeNode_Encoding_DefaultBinary                                                                                        = 272
-	ReferenceTypeNode_Encoding_DefaultXML                                                                                          = 274
-	ReferenceTypeNode_Encoding_DefaultBinary                                                                                       = 275
-	MethodNode_Encoding_DefaultXML                                                                                                 = 277
-	MethodNode_Encoding_DefaultBinary                                                                                              = 278
-	ViewNode_Encoding_DefaultXML                                                                                                   = 280
-	ViewNode_Encoding_DefaultBinary                                                                                                = 281
-	DataTypeNode_Encoding_DefaultXML                                                                                               = 283
-	DataTypeNode_Encoding_DefaultBinary                                                                                            = 284
-	ReferenceNode_Encoding_DefaultXML                                                                                              = 286
-	ReferenceNode_Encoding_DefaultBinary                                                                                           = 287
-	Argument_Encoding_DefaultXML                                                                                                   = 297
-	Argument_Encoding_DefaultBinary                                                                                                = 298
-	StatusResult_Encoding_DefaultXML                                                                                               = 300
-	StatusResult_Encoding_DefaultBinary                                                                                            = 301
-	UserTokenPolicy_Encoding_DefaultXML                                                                                            = 305
-	UserTokenPolicy_Encoding_DefaultBinary                                                                                         = 306
-	ApplicationDescription_Encoding_DefaultXML                                                                                     = 309
-	ApplicationDescription_Encoding_DefaultBinary                                                                                  = 310
-	EndpointDescription_Encoding_DefaultXML                                                                                        = 313
-	EndpointDescription_Encoding_DefaultBinary                                                                                     = 314
-	UserIdentityToken_Encoding_DefaultXML                                                                                          = 317
-	UserIdentityToken_Encoding_DefaultBinary                                                                                       = 318
-	AnonymousIdentityToken_Encoding_DefaultXML                                                                                     = 320
-	AnonymousIdentityToken_Encoding_DefaultBinary                                                                                  = 321
-	UserNameIdentityToken_Encoding_DefaultXML                                                                                      = 323
-	UserNameIdentityToken_Encoding_DefaultBinary                                                                                   = 324
-	X509IdentityToken_Encoding_DefaultXML                                                                                          = 326
-	X509IdentityToken_Encoding_DefaultBinary                                                                                       = 327
-	EndpointConfiguration_Encoding_DefaultXML                                                                                      = 332
-	EndpointConfiguration_Encoding_DefaultBinary                                                                                   = 333
-	BuildInfo_Encoding_DefaultXML                                                                                                  = 339
-	BuildInfo_Encoding_DefaultBinary                                                                                               = 340
-	SignedSoftwareCertificate_Encoding_DefaultXML                                                                                  = 345
-	SignedSoftwareCertificate_Encoding_DefaultBinary                                                                               = 346
-	NodeAttributes_Encoding_DefaultXML                                                                                             = 350
-	NodeAttributes_Encoding_DefaultBinary                                                                                          = 351
-	ObjectAttributes_Encoding_DefaultXML                                                                                           = 353
-	ObjectAttributes_Encoding_DefaultBinary                                                                                        = 354
-	VariableAttributes_Encoding_DefaultXML                                                                                         = 356
-	VariableAttributes_Encoding_DefaultBinary                                                                                      = 357
-	MethodAttributes_Encoding_DefaultXML                                                                                           = 359
-	MethodAttributes_Encoding_DefaultBinary                                                                                        = 360
-	ObjectTypeAttributes_Encoding_DefaultXML                                                                                       = 362
-	ObjectTypeAttributes_Encoding_DefaultBinary                                                                                    = 363
-	VariableTypeAttributes_Encoding_DefaultXML                                                                                     = 365
-	VariableTypeAttributes_Encoding_DefaultBinary                                                                                  = 366
-	ReferenceTypeAttributes_Encoding_DefaultXML                                                                                    = 368
-	ReferenceTypeAttributes_Encoding_DefaultBinary                                                                                 = 369
-	DataTypeAttributes_Encoding_DefaultXML                                                                                         = 371
-	DataTypeAttributes_Encoding_DefaultBinary                                                                                      = 372
-	ViewAttributes_Encoding_DefaultXML                                                                                             = 374
-	ViewAttributes_Encoding_DefaultBinary                                                                                          = 375
-	AddNodesItem_Encoding_DefaultXML                                                                                               = 377
-	AddNodesItem_Encoding_DefaultBinary                                                                                            = 378
-	AddReferencesItem_Encoding_DefaultXML                                                                                          = 380
-	AddReferencesItem_Encoding_DefaultBinary                                                                                       = 381
-	DeleteNodesItem_Encoding_DefaultXML                                                                                            = 383
-	DeleteNodesItem_Encoding_DefaultBinary                                                                                         = 384
-	DeleteReferencesItem_Encoding_DefaultXML                                                                                       = 386
-	DeleteReferencesItem_Encoding_DefaultBinary                                                                                    = 387
-	RequestHeader_Encoding_DefaultXML                                                                                              = 390
-	RequestHeader_Encoding_DefaultBinary                                                                                           = 391
-	ResponseHeader_Encoding_DefaultXML                                                                                             = 393
-	ResponseHeader_Encoding_DefaultBinary                                                                                          = 394
-	ServiceFault_Encoding_DefaultXML                                                                                               = 396
-	ServiceFault_Encoding_DefaultBinary                                                                                            = 397
-	FindServersRequest_Encoding_DefaultXML                                                                                         = 421
-	FindServersRequest_Encoding_DefaultBinary                                                                                      = 422
-	FindServersResponse_Encoding_DefaultXML                                                                                        = 424
-	FindServersResponse_Encoding_DefaultBinary                                                                                     = 425
-	GetEndpointsRequest_Encoding_DefaultXML                                                                                        = 427
-	GetEndpointsRequest_Encoding_DefaultBinary                                                                                     = 428
-	GetEndpointsResponse_Encoding_DefaultXML                                                                                       = 430
-	GetEndpointsResponse_Encoding_DefaultBinary                                                                                    = 431
-	RegisteredServer_Encoding_DefaultXML                                                                                           = 433
-	RegisteredServer_Encoding_DefaultBinary                                                                                        = 434
-	RegisterServerRequest_Encoding_DefaultXML                                                                                      = 436
-	RegisterServerRequest_Encoding_DefaultBinary                                                                                   = 437
-	RegisterServerResponse_Encoding_DefaultXML                                                                                     = 439
-	RegisterServerResponse_Encoding_DefaultBinary                                                                                  = 440
-	ChannelSecurityToken_Encoding_DefaultXML                                                                                       = 442
-	ChannelSecurityToken_Encoding_DefaultBinary                                                                                    = 443
-	OpenSecureChannelRequest_Encoding_DefaultXML                                                                                   = 445
-	OpenSecureChannelRequest_Encoding_DefaultBinary                                                                                = 446
-	OpenSecureChannelResponse_Encoding_DefaultXML                                                                                  = 448
-	OpenSecureChannelResponse_Encoding_DefaultBinary                                                                               = 449
-	CloseSecureChannelRequest_Encoding_DefaultXML                                                                                  = 451
-	CloseSecureChannelRequest_Encoding_DefaultBinary                                                                               = 452
-	CloseSecureChannelResponse_Encoding_DefaultXML                                                                                 = 454
-	CloseSecureChannelResponse_Encoding_DefaultBinary                                                                              = 455
-	SignatureData_Encoding_DefaultXML                                                                                              = 457
-	SignatureData_Encoding_DefaultBinary                                                                                           = 458
-	CreateSessionRequest_Encoding_DefaultXML                                                                                       = 460
-	CreateSessionRequest_Encoding_DefaultBinary                                                                                    = 461
-	CreateSessionResponse_Encoding_DefaultXML                                                                                      = 463
-	CreateSessionResponse_Encoding_DefaultBinary                                                                                   = 464
-	ActivateSessionRequest_Encoding_DefaultXML                                                                                     = 466
-	ActivateSessionRequest_Encoding_DefaultBinary                                                                                  = 467
-	ActivateSessionResponse_Encoding_DefaultXML                                                                                    = 469
-	ActivateSessionResponse_Encoding_DefaultBinary                                                                                 = 470
-	CloseSessionRequest_Encoding_DefaultXML                                                                                        = 472
-	CloseSessionRequest_Encoding_DefaultBinary                                                                                     = 473
-	CloseSessionResponse_Encoding_DefaultXML                                                                                       = 475
-	CloseSessionResponse_Encoding_DefaultBinary                                                                                    = 476
-	CancelRequest_Encoding_DefaultXML                                                                                              = 478
-	CancelRequest_Encoding_DefaultBinary                                                                                           = 479
-	CancelResponse_Encoding_DefaultXML                                                                                             = 481
-	CancelResponse_Encoding_DefaultBinary                                                                                          = 482
-	AddNodesResult_Encoding_DefaultXML                                                                                             = 484
-	AddNodesResult_Encoding_DefaultBinary                                                                                          = 485
-	AddNodesRequest_Encoding_DefaultXML                                                                                            = 487
-	AddNodesRequest_Encoding_DefaultBinary                                                                                         = 488
-	AddNodesResponse_Encoding_DefaultXML                                                                                           = 490
-	AddNodesResponse_Encoding_DefaultBinary                                                                                        = 491
-	AddReferencesRequest_Encoding_DefaultXML                                                                                       = 493
-	AddReferencesRequest_Encoding_DefaultBinary                                                                                    = 494
-	AddReferencesResponse_Encoding_DefaultXML                                                                                      = 496
-	AddReferencesResponse_Encoding_DefaultBinary                                                                                   = 497
-	DeleteNodesRequest_Encoding_DefaultXML                                                                                         = 499
-	DeleteNodesRequest_Encoding_DefaultBinary                                                                                      = 500
-	DeleteNodesResponse_Encoding_DefaultXML                                                                                        = 502
-	DeleteNodesResponse_Encoding_DefaultBinary                                                                                     = 503
-	DeleteReferencesRequest_Encoding_DefaultXML                                                                                    = 505
-	DeleteReferencesRequest_Encoding_DefaultBinary                                                                                 = 506
-	DeleteReferencesResponse_Encoding_DefaultXML                                                                                   = 508
-	DeleteReferencesResponse_Encoding_DefaultBinary                                                                                = 509
-	ViewDescription_Encoding_DefaultXML                                                                                            = 512
-	ViewDescription_Encoding_DefaultBinary                                                                                         = 513
-	BrowseDescription_Encoding_DefaultXML                                                                                          = 515
-	BrowseDescription_Encoding_DefaultBinary                                                                                       = 516
-	ReferenceDescription_Encoding_DefaultXML                                                                                       = 519
-	ReferenceDescription_Encoding_DefaultBinary                                                                                    = 520
-	BrowseResult_Encoding_DefaultXML                                                                                               = 523
-	BrowseResult_Encoding_DefaultBinary                                                                                            = 524
-	BrowseRequest_Encoding_DefaultXML                                                                                              = 526
-	BrowseRequest_Encoding_DefaultBinary                                                                                           = 527
-	BrowseResponse_Encoding_DefaultXML                                                                                             = 529
-	BrowseResponse_Encoding_DefaultBinary                                                                                          = 530
-	BrowseNextRequest_Encoding_DefaultXML                                                                                          = 532
-	BrowseNextRequest_Encoding_DefaultBinary                                                                                       = 533
-	BrowseNextResponse_Encoding_DefaultXML                                                                                         = 535
-	BrowseNextResponse_Encoding_DefaultBinary                                                                                      = 536
-	RelativePathElement_Encoding_DefaultXML                                                                                        = 538
-	RelativePathElement_Encoding_DefaultBinary                                                                                     = 539
-	RelativePath_Encoding_DefaultXML                                                                                               = 541
-	RelativePath_Encoding_DefaultBinary                                                                                            = 542
-	BrowsePath_Encoding_DefaultXML                                                                                                 = 544
-	BrowsePath_Encoding_DefaultBinary                                                                                              = 545
-	BrowsePathTarget_Encoding_DefaultXML                                                                                           = 547
-	BrowsePathTarget_Encoding_DefaultBinary                                                                                        = 548
-	BrowsePathResult_Encoding_DefaultXML                                                                                           = 550
-	BrowsePathResult_Encoding_DefaultBinary                                                                                        = 551
-	TranslateBrowsePathsToNodeIDsRequest_Encoding_DefaultXML                                                                       = 553
-	TranslateBrowsePathsToNodeIDsRequest_Encoding_DefaultBinary                                                                    = 554
-	TranslateBrowsePathsToNodeIDsResponse_Encoding_DefaultXML                                                                      = 556
-	TranslateBrowsePathsToNodeIDsResponse_Encoding_DefaultBinary                                                                   = 557
-	RegisterNodesRequest_Encoding_DefaultXML                                                                                       = 559
-	RegisterNodesRequest_Encoding_DefaultBinary                                                                                    = 560
-	RegisterNodesResponse_Encoding_DefaultXML                                                                                      = 562
-	RegisterNodesResponse_Encoding_DefaultBinary                                                                                   = 563
-	UnregisterNodesRequest_Encoding_DefaultXML                                                                                     = 565
-	UnregisterNodesRequest_Encoding_DefaultBinary                                                                                  = 566
-	UnregisterNodesResponse_Encoding_DefaultXML                                                                                    = 568
-	UnregisterNodesResponse_Encoding_DefaultBinary                                                                                 = 569
-	QueryDataDescription_Encoding_DefaultXML                                                                                       = 571
-	QueryDataDescription_Encoding_DefaultBinary                                                                                    = 572
-	NodeTypeDescription_Encoding_DefaultXML                                                                                        = 574
-	NodeTypeDescription_Encoding_DefaultBinary                                                                                     = 575
-	QueryDataSet_Encoding_DefaultXML                                                                                               = 578
-	QueryDataSet_Encoding_DefaultBinary                                                                                            = 579
-	NodeReference_Encoding_DefaultXML                                                                                              = 581
-	NodeReference_Encoding_DefaultBinary                                                                                           = 582
-	ContentFilterElement_Encoding_DefaultXML                                                                                       = 584
-	ContentFilterElement_Encoding_DefaultBinary                                                                                    = 585
-	ContentFilter_Encoding_DefaultXML                                                                                              = 587
-	ContentFilter_Encoding_DefaultBinary                                                                                           = 588
-	FilterOperand_Encoding_DefaultXML                                                                                              = 590
-	FilterOperand_Encoding_DefaultBinary                                                                                           = 591
-	ElementOperand_Encoding_DefaultXML                                                                                             = 593
-	ElementOperand_Encoding_DefaultBinary                                                                                          = 594
-	LiteralOperand_Encoding_DefaultXML                                                                                             = 596
-	LiteralOperand_Encoding_DefaultBinary                                                                                          = 597
-	AttributeOperand_Encoding_DefaultXML                                                                                           = 599
-	AttributeOperand_Encoding_DefaultBinary                                                                                        = 600
-	SimpleAttributeOperand_Encoding_DefaultXML                                                                                     = 602
-	SimpleAttributeOperand_Encoding_DefaultBinary                                                                                  = 603
-	ContentFilterElementResult_Encoding_DefaultXML                                                                                 = 605
-	ContentFilterElementResult_Encoding_DefaultBinary                                                                              = 606
-	ContentFilterResult_Encoding_DefaultXML                                                                                        = 608
-	ContentFilterResult_Encoding_DefaultBinary                                                                                     = 609
-	ParsingResult_Encoding_DefaultXML                                                                                              = 611
-	ParsingResult_Encoding_DefaultBinary                                                                                           = 612
-	QueryFirstRequest_Encoding_DefaultXML                                                                                          = 614
-	QueryFirstRequest_Encoding_DefaultBinary                                                                                       = 615
-	QueryFirstResponse_Encoding_DefaultXML                                                                                         = 617
-	QueryFirstResponse_Encoding_DefaultBinary                                                                                      = 618
-	QueryNextRequest_Encoding_DefaultXML                                                                                           = 620
-	QueryNextRequest_Encoding_DefaultBinary                                                                                        = 621
-	QueryNextResponse_Encoding_DefaultXML                                                                                          = 623
-	QueryNextResponse_Encoding_DefaultBinary                                                                                       = 624
-	ReadValueID_Encoding_DefaultXML                                                                                                = 627
-	ReadValueID_Encoding_DefaultBinary                                                                                             = 628
-	ReadRequest_Encoding_DefaultXML                                                                                                = 630
-	ReadRequest_Encoding_DefaultBinary                                                                                             = 631
-	ReadResponse_Encoding_DefaultXML                                                                                               = 633
-	ReadResponse_Encoding_DefaultBinary                                                                                            = 634
-	HistoryReadValueID_Encoding_DefaultXML                                                                                         = 636
-	HistoryReadValueID_Encoding_DefaultBinary                                                                                      = 637
-	HistoryReadResult_Encoding_DefaultXML                                                                                          = 639
-	HistoryReadResult_Encoding_DefaultBinary                                                                                       = 640
-	HistoryReadDetails_Encoding_DefaultXML                                                                                         = 642
-	HistoryReadDetails_Encoding_DefaultBinary                                                                                      = 643
-	ReadEventDetails_Encoding_DefaultXML                                                                                           = 645
-	ReadEventDetails_Encoding_DefaultBinary                                                                                        = 646
-	ReadRawModifiedDetails_Encoding_DefaultXML                                                                                     = 648
-	ReadRawModifiedDetails_Encoding_DefaultBinary                                                                                  = 649
-	ReadProcessedDetails_Encoding_DefaultXML                                                                                       = 651
-	ReadProcessedDetails_Encoding_DefaultBinary                                                                                    = 652
-	ReadAtTimeDetails_Encoding_DefaultXML                                                                                          = 654
-	ReadAtTimeDetails_Encoding_DefaultBinary                                                                                       = 655
-	HistoryData_Encoding_DefaultXML                                                                                                = 657
-	HistoryData_Encoding_DefaultBinary                                                                                             = 658
-	HistoryEvent_Encoding_DefaultXML                                                                                               = 660
-	HistoryEvent_Encoding_DefaultBinary                                                                                            = 661
-	HistoryReadRequest_Encoding_DefaultXML                                                                                         = 663
-	HistoryReadRequest_Encoding_DefaultBinary                                                                                      = 664
-	HistoryReadResponse_Encoding_DefaultXML                                                                                        = 666
-	HistoryReadResponse_Encoding_DefaultBinary                                                                                     = 667
-	WriteValue_Encoding_DefaultXML                                                                                                 = 669
-	WriteValue_Encoding_DefaultBinary                                                                                              = 670
-	WriteRequest_Encoding_DefaultXML                                                                                               = 672
-	WriteRequest_Encoding_DefaultBinary                                                                                            = 673
-	WriteResponse_Encoding_DefaultXML                                                                                              = 675
-	WriteResponse_Encoding_DefaultBinary                                                                                           = 676
-	HistoryUpdateDetails_Encoding_DefaultXML                                                                                       = 678
-	HistoryUpdateDetails_Encoding_DefaultBinary                                                                                    = 679
-	UpdateDataDetails_Encoding_DefaultXML                                                                                          = 681
-	UpdateDataDetails_Encoding_DefaultBinary                                                                                       = 682
-	UpdateEventDetails_Encoding_DefaultXML                                                                                         = 684
-	UpdateEventDetails_Encoding_DefaultBinary                                                                                      = 685
-	DeleteRawModifiedDetails_Encoding_DefaultXML                                                                                   = 687
-	DeleteRawModifiedDetails_Encoding_DefaultBinary                                                                                = 688
-	DeleteAtTimeDetails_Encoding_DefaultXML                                                                                        = 690
-	DeleteAtTimeDetails_Encoding_DefaultBinary                                                                                     = 691
-	DeleteEventDetails_Encoding_DefaultXML                                                                                         = 693
-	DeleteEventDetails_Encoding_DefaultBinary                                                                                      = 694
-	HistoryUpdateResult_Encoding_DefaultXML                                                                                        = 696
-	HistoryUpdateResult_Encoding_DefaultBinary                                                                                     = 697
-	HistoryUpdateRequest_Encoding_DefaultXML                                                                                       = 699
-	HistoryUpdateRequest_Encoding_DefaultBinary                                                                                    = 700
-	HistoryUpdateResponse_Encoding_DefaultXML                                                                                      = 702
-	HistoryUpdateResponse_Encoding_DefaultBinary                                                                                   = 703
-	CallMethodRequest_Encoding_DefaultXML                                                                                          = 705
-	CallMethodRequest_Encoding_DefaultBinary                                                                                       = 706
-	CallMethodResult_Encoding_DefaultXML                                                                                           = 708
-	CallMethodResult_Encoding_DefaultBinary                                                                                        = 709
-	CallRequest_Encoding_DefaultXML                                                                                                = 711
-	CallRequest_Encoding_DefaultBinary                                                                                             = 712
-	CallResponse_Encoding_DefaultXML                                                                                               = 714
-	CallResponse_Encoding_DefaultBinary                                                                                            = 715
-	MonitoringFilter_Encoding_DefaultXML                                                                                           = 720
-	MonitoringFilter_Encoding_DefaultBinary                                                                                        = 721
-	DataChangeFilter_Encoding_DefaultXML                                                                                           = 723
-	DataChangeFilter_Encoding_DefaultBinary                                                                                        = 724
-	EventFilter_Encoding_DefaultXML                                                                                                = 726
-	EventFilter_Encoding_DefaultBinary                                                                                             = 727
-	AggregateFilter_Encoding_DefaultXML                                                                                            = 729
-	AggregateFilter_Encoding_DefaultBinary                                                                                         = 730
-	MonitoringFilterResult_Encoding_DefaultXML                                                                                     = 732
-	MonitoringFilterResult_Encoding_DefaultBinary                                                                                  = 733
-	EventFilterResult_Encoding_DefaultXML                                                                                          = 735
-	EventFilterResult_Encoding_DefaultBinary                                                                                       = 736
-	AggregateFilterResult_Encoding_DefaultXML                                                                                      = 738
-	AggregateFilterResult_Encoding_DefaultBinary                                                                                   = 739
-	MonitoringParameters_Encoding_DefaultXML                                                                                       = 741
-	MonitoringParameters_Encoding_DefaultBinary                                                                                    = 742
-	MonitoredItemCreateRequest_Encoding_DefaultXML                                                                                 = 744
-	MonitoredItemCreateRequest_Encoding_DefaultBinary                                                                              = 745
-	MonitoredItemCreateResult_Encoding_DefaultXML                                                                                  = 747
-	MonitoredItemCreateResult_Encoding_DefaultBinary                                                                               = 748
-	CreateMonitoredItemsRequest_Encoding_DefaultXML                                                                                = 750
-	CreateMonitoredItemsRequest_Encoding_DefaultBinary                                                                             = 751
-	CreateMonitoredItemsResponse_Encoding_DefaultXML                                                                               = 753
-	CreateMonitoredItemsResponse_Encoding_DefaultBinary                                                                            = 754
-	MonitoredItemModifyRequest_Encoding_DefaultXML                                                                                 = 756
-	MonitoredItemModifyRequest_Encoding_DefaultBinary                                                                              = 757
-	MonitoredItemModifyResult_Encoding_DefaultXML                                                                                  = 759
-	MonitoredItemModifyResult_Encoding_DefaultBinary                                                                               = 760
-	ModifyMonitoredItemsRequest_Encoding_DefaultXML                                                                                = 762
-	ModifyMonitoredItemsRequest_Encoding_DefaultBinary                                                                             = 763
-	ModifyMonitoredItemsResponse_Encoding_DefaultXML                                                                               = 765
-	ModifyMonitoredItemsResponse_Encoding_DefaultBinary                                                                            = 766
-	SetMonitoringModeRequest_Encoding_DefaultXML                                                                                   = 768
-	SetMonitoringModeRequest_Encoding_DefaultBinary                                                                                = 769
-	SetMonitoringModeResponse_Encoding_DefaultXML                                                                                  = 771
-	SetMonitoringModeResponse_Encoding_DefaultBinary                                                                               = 772
-	SetTriggeringRequest_Encoding_DefaultXML                                                                                       = 774
-	SetTriggeringRequest_Encoding_DefaultBinary                                                                                    = 775
-	SetTriggeringResponse_Encoding_DefaultXML                                                                                      = 777
-	SetTriggeringResponse_Encoding_DefaultBinary                                                                                   = 778
-	DeleteMonitoredItemsRequest_Encoding_DefaultXML                                                                                = 780
-	DeleteMonitoredItemsRequest_Encoding_DefaultBinary                                                                             = 781
-	DeleteMonitoredItemsResponse_Encoding_DefaultXML                                                                               = 783
-	DeleteMonitoredItemsResponse_Encoding_DefaultBinary                                                                            = 784
-	CreateSubscriptionRequest_Encoding_DefaultXML                                                                                  = 786
-	CreateSubscriptionRequest_Encoding_DefaultBinary                                                                               = 787
-	CreateSubscriptionResponse_Encoding_DefaultXML                                                                                 = 789
-	CreateSubscriptionResponse_Encoding_DefaultBinary                                                                              = 790
-	ModifySubscriptionRequest_Encoding_DefaultXML                                                                                  = 792
-	ModifySubscriptionRequest_Encoding_DefaultBinary                                                                               = 793
-	ModifySubscriptionResponse_Encoding_DefaultXML                                                                                 = 795
-	ModifySubscriptionResponse_Encoding_DefaultBinary                                                                              = 796
-	SetPublishingModeRequest_Encoding_DefaultXML                                                                                   = 798
-	SetPublishingModeRequest_Encoding_DefaultBinary                                                                                = 799
-	SetPublishingModeResponse_Encoding_DefaultXML                                                                                  = 801
-	SetPublishingModeResponse_Encoding_DefaultBinary                                                                               = 802
-	NotificationMessage_Encoding_DefaultXML                                                                                        = 804
-	NotificationMessage_Encoding_DefaultBinary                                                                                     = 805
-	MonitoredItemNotification_Encoding_DefaultXML                                                                                  = 807
-	MonitoredItemNotification_Encoding_DefaultBinary                                                                               = 808
-	DataChangeNotification_Encoding_DefaultXML                                                                                     = 810
-	DataChangeNotification_Encoding_DefaultBinary                                                                                  = 811
-	StatusChangeNotification_Encoding_DefaultXML                                                                                   = 819
-	StatusChangeNotification_Encoding_DefaultBinary                                                                                = 820
-	SubscriptionAcknowledgement_Encoding_DefaultXML                                                                                = 822
-	SubscriptionAcknowledgement_Encoding_DefaultBinary                                                                             = 823
-	PublishRequest_Encoding_DefaultXML                                                                                             = 825
-	PublishRequest_Encoding_DefaultBinary                                                                                          = 826
-	PublishResponse_Encoding_DefaultXML                                                                                            = 828
-	PublishResponse_Encoding_DefaultBinary                                                                                         = 829
-	RepublishRequest_Encoding_DefaultXML                                                                                           = 831
-	RepublishRequest_Encoding_DefaultBinary                                                                                        = 832
-	RepublishResponse_Encoding_DefaultXML                                                                                          = 834
-	RepublishResponse_Encoding_DefaultBinary                                                                                       = 835
-	TransferResult_Encoding_DefaultXML                                                                                             = 837
-	TransferResult_Encoding_DefaultBinary                                                                                          = 838
-	TransferSubscriptionsRequest_Encoding_DefaultXML                                                                               = 840
-	TransferSubscriptionsRequest_Encoding_DefaultBinary                                                                            = 841
-	TransferSubscriptionsResponse_Encoding_DefaultXML                                                                              = 843
-	TransferSubscriptionsResponse_Encoding_DefaultBinary                                                                           = 844
-	DeleteSubscriptionsRequest_Encoding_DefaultXML                                                                                 = 846
-	DeleteSubscriptionsRequest_Encoding_DefaultBinary                                                                              = 847
-	DeleteSubscriptionsResponse_Encoding_DefaultXML                                                                                = 849
-	DeleteSubscriptionsResponse_Encoding_DefaultBinary                                                                             = 850
-	RedundantServerDataType_Encoding_DefaultXML                                                                                    = 854
-	RedundantServerDataType_Encoding_DefaultBinary                                                                                 = 855
-	SamplingIntervalDiagnosticsDataType_Encoding_DefaultXML                                                                        = 857
-	SamplingIntervalDiagnosticsDataType_Encoding_DefaultBinary                                                                     = 858
-	ServerDiagnosticsSummaryDataType_Encoding_DefaultXML                                                                           = 860
-	ServerDiagnosticsSummaryDataType_Encoding_DefaultBinary                                                                        = 861
-	ServerStatusDataType_Encoding_DefaultXML                                                                                       = 863
-	ServerStatusDataType_Encoding_DefaultBinary                                                                                    = 864
-	SessionDiagnosticsDataType_Encoding_DefaultXML                                                                                 = 866
-	SessionDiagnosticsDataType_Encoding_DefaultBinary                                                                              = 867
-	SessionSecurityDiagnosticsDataType_Encoding_DefaultXML                                                                         = 869
-	SessionSecurityDiagnosticsDataType_Encoding_DefaultBinary                                                                      = 870
-	ServiceCounterDataType_Encoding_DefaultXML                                                                                     = 872
-	ServiceCounterDataType_Encoding_DefaultBinary                                                                                  = 873
-	SubscriptionDiagnosticsDataType_Encoding_DefaultXML                                                                            = 875
-	SubscriptionDiagnosticsDataType_Encoding_DefaultBinary                                                                         = 876
-	ModelChangeStructureDataType_Encoding_DefaultXML                                                                               = 878
-	ModelChangeStructureDataType_Encoding_DefaultBinary                                                                            = 879
-	Range_Encoding_DefaultXML                                                                                                      = 885
-	Range_Encoding_DefaultBinary                                                                                                   = 886
-	EUInformation_Encoding_DefaultXML                                                                                              = 888
-	EUInformation_Encoding_DefaultBinary                                                                                           = 889
-	Annotation_Encoding_DefaultXML                                                                                                 = 892
-	Annotation_Encoding_DefaultBinary                                                                                              = 893
-	ProgramDiagnosticDataType_Encoding_DefaultXML                                                                                  = 895
-	ProgramDiagnosticDataType_Encoding_DefaultBinary                                                                               = 896
-	SemanticChangeStructureDataType_Encoding_DefaultXML                                                                            = 898
-	SemanticChangeStructureDataType_Encoding_DefaultBinary                                                                         = 899
-	EventNotificationList_Encoding_DefaultXML                                                                                      = 915
-	EventNotificationList_Encoding_DefaultBinary                                                                                   = 916
-	EventFieldList_Encoding_DefaultXML                                                                                             = 918
-	EventFieldList_Encoding_DefaultBinary                                                                                          = 919
-	HistoryEventFieldList_Encoding_DefaultXML                                                                                      = 921
-	HistoryEventFieldList_Encoding_DefaultBinary                                                                                   = 922
-	IssuedIdentityToken_Encoding_DefaultXML                                                                                        = 939
-	IssuedIdentityToken_Encoding_DefaultBinary                                                                                     = 940
-	NotificationData_Encoding_DefaultXML                                                                                           = 946
-	NotificationData_Encoding_DefaultBinary                                                                                        = 947
-	AggregateConfiguration_Encoding_DefaultXML                                                                                     = 949
-	AggregateConfiguration_Encoding_DefaultBinary                                                                                  = 950
-	ServerType_ServerCapabilities                                                                                                  = 2009
-	ServerType_ServerDiagnostics                                                                                                   = 2010
-	ServerType_VendorServerInfo                                                                                                    = 2011
-	ServerType_ServerRedundancy                                                                                                    = 2012
-	ServerCapabilitiesType_ModellingRules                                                                                          = 2019
-	Server                                                                                                                         = 2253
-	Server_ServerCapabilities                                                                                                      = 2268
-	Server_ServerDiagnostics                                                                                                       = 2274
-	Server_VendorServerInfo                                                                                                        = 2295
-	Server_ServerRedundancy                                                                                                        = 2296
-	AggregateFunction_Interpolative                                                                                                = 2341
-	AggregateFunction_Average                                                                                                      = 2342
-	AggregateFunction_TimeAverage                                                                                                  = 2343
-	AggregateFunction_Total                                                                                                        = 2344
-	AggregateFunction_Minimum                                                                                                      = 2346
-	AggregateFunction_Maximum                                                                                                      = 2347
-	AggregateFunction_MinimumActualTime                                                                                            = 2348
-	AggregateFunction_MaximumActualTime                                                                                            = 2349
-	AggregateFunction_Range                                                                                                        = 2350
-	AggregateFunction_AnnotationCount                                                                                              = 2351
-	AggregateFunction_Count                                                                                                        = 2352
-	AggregateFunction_NumberOfTransitions                                                                                          = 2355
-	AggregateFunction_Start                                                                                                        = 2357
-	AggregateFunction_End                                                                                                          = 2358
-	AggregateFunction_Delta                                                                                                        = 2359
-	AggregateFunction_DurationGood                                                                                                 = 2360
-	AggregateFunction_DurationBad                                                                                                  = 2361
-	AggregateFunction_PercentGood                                                                                                  = 2362
-	AggregateFunction_PercentBad                                                                                                   = 2363
-	AggregateFunction_WorstQuality                                                                                                 = 2364
-	ProgramStateMachineType_Ready                                                                                                  = 2400
-	ProgramStateMachineType_Running                                                                                                = 2402
-	ProgramStateMachineType_Suspended                                                                                              = 2404
-	ProgramStateMachineType_Halted                                                                                                 = 2406
-	ProgramStateMachineType_HaltedToReady                                                                                          = 2408
-	ProgramStateMachineType_ReadyToRunning                                                                                         = 2410
-	ProgramStateMachineType_RunningToHalted                                                                                        = 2412
-	ProgramStateMachineType_RunningToReady                                                                                         = 2414
-	ProgramStateMachineType_RunningToSuspended                                                                                     = 2416
-	ProgramStateMachineType_SuspendedToRunning                                                                                     = 2418
-	ProgramStateMachineType_SuspendedToHalted                                                                                      = 2420
-	ProgramStateMachineType_SuspendedToReady                                                                                       = 2422
-	ProgramStateMachineType_ReadyToHalted                                                                                          = 2424
-	ServerDiagnosticsType_SessionsDiagnosticsSummary                                                                               = 2744
-	ServerCapabilitiesType_AggregateFunctions                                                                                      = 2754
-	ShelvedStateMachineType_Unshelved                                                                                              = 2930
-	ShelvedStateMachineType_TimedShelved                                                                                           = 2932
-	ShelvedStateMachineType_OneShotShelved                                                                                         = 2933
-	ShelvedStateMachineType_UnshelvedToTimedShelved                                                                                = 2935
-	ShelvedStateMachineType_UnshelvedToOneShotShelved                                                                              = 2936
-	ShelvedStateMachineType_TimedShelvedToUnshelved                                                                                = 2940
-	ShelvedStateMachineType_TimedShelvedToOneShotShelved                                                                           = 2942
-	ShelvedStateMachineType_OneShotShelvedToUnshelved                                                                              = 2943
-	ShelvedStateMachineType_OneShotShelvedToTimedShelved                                                                           = 2945
-	Server_ServerCapabilities_ModellingRules                                                                                       = 2996
-	Server_ServerCapabilities_AggregateFunctions                                                                                   = 2997
-	EventTypesFolder                                                                                                               = 3048
-	HistoricalDataConfigurationType_AggregateConfiguration                                                                         = 3059
-	DefaultBinary                                                                                                                  = 3062
-	DefaultXML                                                                                                                     = 3063
-	ServerType_ServerCapabilities_ModellingRules                                                                                   = 3093
-	ServerType_ServerCapabilities_AggregateFunctions                                                                               = 3094
-	ServerType_ServerDiagnostics_SessionsDiagnosticsSummary                                                                        = 3111
-	Server_ServerDiagnostics_SessionsDiagnosticsSummary                                                                            = 3706
-	ProgramStateMachineType_FinalResultData                                                                                        = 3850
-	EnumValueType_Encoding_DefaultXML                                                                                              = 7616
-	EnumValueType_Encoding_DefaultBinary                                                                                           = 8251
-	TimeZoneDataType_Encoding_DefaultXML                                                                                           = 8913
-	TimeZoneDataType_Encoding_DefaultBinary                                                                                        = 8917
-	AlarmConditionType_ShelvingState                                                                                               = 9178
-	LimitAlarmType_ShelvingState                                                                                                   = 9279
-	ExclusiveLimitStateMachineType_HighHigh                                                                                        = 9329
-	ExclusiveLimitStateMachineType_High                                                                                            = 9331
-	ExclusiveLimitStateMachineType_Low                                                                                             = 9333
-	ExclusiveLimitStateMachineType_LowLow                                                                                          = 9335
-	ExclusiveLimitStateMachineType_LowLowToLow                                                                                     = 9337
-	ExclusiveLimitStateMachineType_LowToLowLow                                                                                     = 9338
-	ExclusiveLimitStateMachineType_HighHighToHigh                                                                                  = 9339
-	ExclusiveLimitStateMachineType_HighToHighHigh                                                                                  = 9340
-	ExclusiveLimitAlarmType_ShelvingState                                                                                          = 9416
-	ExclusiveLimitAlarmType_LimitState                                                                                             = 9455
-	ExclusiveLevelAlarmType_ShelvingState                                                                                          = 9557
-	ExclusiveLevelAlarmType_LimitState                                                                                             = 9596
-	ExclusiveRateOfChangeAlarmType_ShelvingState                                                                                   = 9698
-	ExclusiveRateOfChangeAlarmType_LimitState                                                                                      = 9737
-	ExclusiveDeviationAlarmType_ShelvingState                                                                                      = 9839
-	ExclusiveDeviationAlarmType_LimitState                                                                                         = 9878
-	NonExclusiveLimitAlarmType_ShelvingState                                                                                       = 9981
-	NonExclusiveLevelAlarmType_ShelvingState                                                                                       = 10135
-	NonExclusiveRateOfChangeAlarmType_ShelvingState                                                                                = 10289
-	NonExclusiveDeviationAlarmType_ShelvingState                                                                                   = 10443
-	DiscreteAlarmType_ShelvingState                                                                                                = 10598
-	OffNormalAlarmType_ShelvingState                                                                                               = 10712
-	TripAlarmType_ShelvingState                                                                                                    = 10826
-	HistoryServerCapabilitiesType_AggregateFunctions                                                                               = 11172
-	HistoryServerCapabilities                                                                                                      = 11192
-	HistoryServerCapabilities_AggregateFunctions                                                                                   = 11201
-	HAConfiguration                                                                                                                = 11202
-	HAConfiguration_AggregateConfiguration                                                                                         = 11203
-	ModificationInfo_Encoding_DefaultXML                                                                                           = 11218
-	HistoryModifiedData_Encoding_DefaultXML                                                                                        = 11219
-	ModificationInfo_Encoding_DefaultBinary                                                                                        = 11226
-	HistoryModifiedData_Encoding_DefaultBinary                                                                                     = 11227
-	AggregateFunction_TimeAverage2                                                                                                 = 11285
-	AggregateFunction_Minimum2                                                                                                     = 11286
-	AggregateFunction_Maximum2                                                                                                     = 11287
-	AggregateFunction_Range2                                                                                                       = 11288
-	AggregateFunction_WorstQuality2                                                                                                = 11292
-	UpdateStructureDataDetails_Encoding_DefaultXML                                                                                 = 11296
-	UpdateStructureDataDetails_Encoding_DefaultBinary                                                                              = 11300
-	AggregateFunction_Total2                                                                                                       = 11304
-	AggregateFunction_MinimumActualTime2                                                                                           = 11305
-	AggregateFunction_MaximumActualTime2                                                                                           = 11306
-	AggregateFunction_DurationInStateZero                                                                                          = 11307
-	AggregateFunction_DurationInStateNonZero                                                                                       = 11308
-	AggregateFunction_StandardDeviationSample                                                                                      = 11426
-	AggregateFunction_StandardDeviationPopulation                                                                                  = 11427
-	AggregateFunction_VarianceSample                                                                                               = 11428
-	AggregateFunction_VariancePopulation                                                                                           = 11429
-	AggregateFunction_StartBound                                                                                                   = 11505
-	AggregateFunction_EndBound                                                                                                     = 11506
-	AggregateFunction_DeltaBounds                                                                                                  = 11507
-	ModellingRule_OptionalPlaceholder                                                                                              = 11508
-	ModellingRule_MandatoryPlaceholder                                                                                             = 11510
-	ServerType_ServerCapabilities_OperationLimits                                                                                  = 11516
-	ServerType_Namespaces                                                                                                          = 11527
-	ServerCapabilitiesType_OperationLimits                                                                                         = 11551
-	NamespaceMetadataType_NamespaceFile                                                                                            = 11624
-	NamespacesType_NamespaceIDentifier_Placeholder                                                                                 = 11646
-	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile                                                                   = 11654
-	Server_ServerCapabilities_OperationLimits                                                                                      = 11704
-	Server_Namespaces                                                                                                              = 11715
-	SystemOffNormalAlarmType_ShelvingState                                                                                         = 11831
-	HistoricalDataConfigurationType_AggregateFunctions                                                                             = 11876
-	HAConfiguration_AggregateFunctions                                                                                             = 11877
-	InstanceNode_Encoding_DefaultXML                                                                                               = 11887
-	TypeNode_Encoding_DefaultXML                                                                                                   = 11888
-	InstanceNode_Encoding_DefaultBinary                                                                                            = 11889
-	TypeNode_Encoding_DefaultBinary                                                                                                = 11890
-	EndpointURLListDataType_Encoding_DefaultXML                                                                                    = 11949
-	NetworkGroupDataType_Encoding_DefaultXML                                                                                       = 11950
-	EndpointURLListDataType_Encoding_DefaultBinary                                                                                 = 11957
-	NetworkGroupDataType_Encoding_DefaultBinary                                                                                    = 11958
-	AxisInformation_Encoding_DefaultXML                                                                                            = 12081
-	XVType_Encoding_DefaultXML                                                                                                     = 12082
-	AxisInformation_Encoding_DefaultBinary                                                                                         = 12089
-	XVType_Encoding_DefaultBinary                                                                                                  = 12090
-	SessionsDiagnosticsSummaryType_ClientName_Placeholder                                                                          = 12097
-	ComplexNumberType_Encoding_DefaultXML                                                                                          = 12173
-	DoubleComplexNumberType_Encoding_DefaultXML                                                                                    = 12174
-	ComplexNumberType_Encoding_DefaultBinary                                                                                       = 12181
-	DoubleComplexNumberType_Encoding_DefaultBinary                                                                                 = 12182
-	ServerOnNetwork_Encoding_DefaultXML                                                                                            = 12195
-	FindServersOnNetworkRequest_Encoding_DefaultXML                                                                                = 12196
-	FindServersOnNetworkResponse_Encoding_DefaultXML                                                                               = 12197
-	RegisterServer2Request_Encoding_DefaultXML                                                                                     = 12199
-	RegisterServer2Response_Encoding_DefaultXML                                                                                    = 12200
-	ServerOnNetwork_Encoding_DefaultBinary                                                                                         = 12207
-	FindServersOnNetworkRequest_Encoding_DefaultBinary                                                                             = 12208
-	FindServersOnNetworkResponse_Encoding_DefaultBinary                                                                            = 12209
-	RegisterServer2Request_Encoding_DefaultBinary                                                                                  = 12211
-	RegisterServer2Response_Encoding_DefaultBinary                                                                                 = 12212
-	ServerConfiguration                                                                                                            = 12637
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList                                                        = 12642
-	TrustListDataType_Encoding_DefaultXML                                                                                          = 12676
-	TrustListDataType_Encoding_DefaultBinary                                                                                       = 12680
-	OptionSet_Encoding_DefaultXML                                                                                                  = 12757
-	Union_Encoding_DefaultXML                                                                                                      = 12758
-	OptionSet_Encoding_DefaultBinary                                                                                               = 12765
-	Union_Encoding_DefaultBinary                                                                                                   = 12766
-	DiscoveryConfiguration_Encoding_DefaultXML                                                                                     = 12892
-	MdnsDiscoveryConfiguration_Encoding_DefaultXML                                                                                 = 12893
-	DiscoveryConfiguration_Encoding_DefaultBinary                                                                                  = 12900
-	MdnsDiscoveryConfiguration_Encoding_DefaultBinary                                                                              = 12901
-	CertificateExpirationAlarmType_ShelvingState                                                                                   = 13305
-	FileDirectoryType_FileDirectoryName_Placeholder                                                                                = 13354
-	FileDirectoryType_FileName_Placeholder                                                                                         = 13366
-	CertificateGroupType_TrustList                                                                                                 = 13599
-	CertificateGroupFolderType_DefaultApplicationGroup                                                                             = 13814
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustList                                                                   = 13815
-	CertificateGroupFolderType_DefaultHttpsGroup                                                                                   = 13848
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustList                                                                         = 13849
-	CertificateGroupFolderType_DefaultUserTokenGroup                                                                               = 13882
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList                                                                     = 13883
-	CertificateGroupFolderType_AdditionalGroup_Placeholder                                                                         = 13916
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList                                                               = 13917
-	ServerConfigurationType_CertificateGroups                                                                                      = 13950
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup                                                              = 13951
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList                                                    = 13952
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup                                                                    = 13985
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList                                                          = 13986
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup                                                                = 14019
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList                                                      = 14020
-	ServerConfiguration_CertificateGroups                                                                                          = 14053
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup                                                                        = 14088
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList                                                              = 14089
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup                                                                    = 14122
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList                                                          = 14123
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup                                                                  = 14156
-	PubSubConnectionType_Address                                                                                                   = 14221
-	PublishedVariableDataType_Encoding_DefaultXML                                                                                  = 14319
-	PublishedVariableDataType_Encoding_DefaultBinary                                                                               = 14323
-	PublishSubscribeType_ConnectionName_Placeholder                                                                                = 14417
-	PublishSubscribeType_ConnectionName_Placeholder_Status                                                                         = 14419
-	PublishSubscribeType_ConnectionName_Placeholder_Address                                                                        = 14423
-	PublishSubscribeType_PublishedDataSets                                                                                         = 14434
-	PublishSubscribe                                                                                                               = 14443
-	DataSetFolderType_DataSetFolderName_Placeholder                                                                                = 14478
-	DataSetFolderType_PublishedDataSetName_Placeholder                                                                             = 14487
-	PubSubConnectionType_Status                                                                                                    = 14600
-	DataSetMetaDataType_Encoding_DefaultXML                                                                                        = 14794
-	FieldMetaData_Encoding_DefaultXML                                                                                              = 14795
-	DataTypeDescription_Encoding_DefaultXML                                                                                        = 14796
-	DataTypeDefinition_Encoding_DefaultXML                                                                                         = 14797
-	StructureDefinition_Encoding_DefaultXML                                                                                        = 14798
-	EnumDefinition_Encoding_DefaultXML                                                                                             = 14799
-	StructureField_Encoding_DefaultXML                                                                                             = 14800
-	EnumField_Encoding_DefaultXML                                                                                                  = 14801
-	KeyValuePair_Encoding_DefaultXML                                                                                               = 14802
-	ConfigurationVersionDataType_Encoding_DefaultXML                                                                               = 14803
-	FieldTargetDataType_Encoding_DefaultXML                                                                                        = 14804
-	FieldMetaData_Encoding_DefaultBinary                                                                                           = 14839
-	StructureField_Encoding_DefaultBinary                                                                                          = 14844
-	EnumField_Encoding_DefaultBinary                                                                                               = 14845
-	KeyValuePair_Encoding_DefaultBinary                                                                                            = 14846
-	ConfigurationVersionDataType_Encoding_DefaultBinary                                                                            = 14847
-	FieldTargetDataType_Encoding_DefaultBinary                                                                                     = 14848
-	KeyValuePair_Encoding_DefaultJSON                                                                                              = 15041
-	IdentityMappingRuleType_Encoding_DefaultJSON                                                                                   = 15042
-	TrustListDataType_Encoding_DefaultJSON                                                                                         = 15044
-	DecimalDataType_Encoding_DefaultJSON                                                                                           = 15045
-	ConfigurationVersionDataType_Encoding_DefaultJSON                                                                              = 15049
-	DataSetMetaDataType_Encoding_DefaultJSON                                                                                       = 15050
-	FieldMetaData_Encoding_DefaultJSON                                                                                             = 15051
-	DataTypeDescription_Encoding_DefaultJSON                                                                                       = 15057
-	StructureDescription_Encoding_DefaultJSON                                                                                      = 15058
-	EnumDescription_Encoding_DefaultJSON                                                                                           = 15059
-	PublishedVariableDataType_Encoding_DefaultJSON                                                                                 = 15060
-	FieldTargetDataType_Encoding_DefaultJSON                                                                                       = 15061
-	RolePermissionType_Encoding_DefaultJSON                                                                                        = 15062
-	DataTypeDefinition_Encoding_DefaultJSON                                                                                        = 15063
-	StructureField_Encoding_DefaultJSON                                                                                            = 15065
-	StructureDefinition_Encoding_DefaultJSON                                                                                       = 15066
-	EnumDefinition_Encoding_DefaultJSON                                                                                            = 15067
-	Node_Encoding_DefaultJSON                                                                                                      = 15068
-	InstanceNode_Encoding_DefaultJSON                                                                                              = 15069
-	TypeNode_Encoding_DefaultJSON                                                                                                  = 15070
-	ObjectNode_Encoding_DefaultJSON                                                                                                = 15071
-	DatagramConnectionTransportType_DiscoveryAddress                                                                               = 15072
-	ObjectTypeNode_Encoding_DefaultJSON                                                                                            = 15073
-	VariableNode_Encoding_DefaultJSON                                                                                              = 15074
-	VariableTypeNode_Encoding_DefaultJSON                                                                                          = 15075
-	ReferenceTypeNode_Encoding_DefaultJSON                                                                                         = 15076
-	MethodNode_Encoding_DefaultJSON                                                                                                = 15077
-	ViewNode_Encoding_DefaultJSON                                                                                                  = 15078
-	DataTypeNode_Encoding_DefaultJSON                                                                                              = 15079
-	ReferenceNode_Encoding_DefaultJSON                                                                                             = 15080
-	Argument_Encoding_DefaultJSON                                                                                                  = 15081
-	EnumValueType_Encoding_DefaultJSON                                                                                             = 15082
-	EnumField_Encoding_DefaultJSON                                                                                                 = 15083
-	OptionSet_Encoding_DefaultJSON                                                                                                 = 15084
-	Union_Encoding_DefaultJSON                                                                                                     = 15085
-	TimeZoneDataType_Encoding_DefaultJSON                                                                                          = 15086
-	ApplicationDescription_Encoding_DefaultJSON                                                                                    = 15087
-	RequestHeader_Encoding_DefaultJSON                                                                                             = 15088
-	ResponseHeader_Encoding_DefaultJSON                                                                                            = 15089
-	ServiceFault_Encoding_DefaultJSON                                                                                              = 15090
-	SessionlessInvokeRequestType_Encoding_DefaultJSON                                                                              = 15091
-	SessionlessInvokeResponseType_Encoding_DefaultJSON                                                                             = 15092
-	FindServersRequest_Encoding_DefaultJSON                                                                                        = 15093
-	FindServersResponse_Encoding_DefaultJSON                                                                                       = 15094
-	ServerOnNetwork_Encoding_DefaultJSON                                                                                           = 15095
-	FindServersOnNetworkRequest_Encoding_DefaultJSON                                                                               = 15096
-	FindServersOnNetworkResponse_Encoding_DefaultJSON                                                                              = 15097
-	UserTokenPolicy_Encoding_DefaultJSON                                                                                           = 15098
-	EndpointDescription_Encoding_DefaultJSON                                                                                       = 15099
-	GetEndpointsRequest_Encoding_DefaultJSON                                                                                       = 15100
-	GetEndpointsResponse_Encoding_DefaultJSON                                                                                      = 15101
-	RegisteredServer_Encoding_DefaultJSON                                                                                          = 15102
-	RegisterServerRequest_Encoding_DefaultJSON                                                                                     = 15103
-	RegisterServerResponse_Encoding_DefaultJSON                                                                                    = 15104
-	DiscoveryConfiguration_Encoding_DefaultJSON                                                                                    = 15105
-	MdnsDiscoveryConfiguration_Encoding_DefaultJSON                                                                                = 15106
-	RegisterServer2Request_Encoding_DefaultJSON                                                                                    = 15107
-	RegisterServer2Response_Encoding_DefaultJSON                                                                                   = 15130
-	ChannelSecurityToken_Encoding_DefaultJSON                                                                                      = 15131
-	OpenSecureChannelRequest_Encoding_DefaultJSON                                                                                  = 15132
-	OpenSecureChannelResponse_Encoding_DefaultJSON                                                                                 = 15133
-	CloseSecureChannelRequest_Encoding_DefaultJSON                                                                                 = 15134
-	CloseSecureChannelResponse_Encoding_DefaultJSON                                                                                = 15135
-	SignedSoftwareCertificate_Encoding_DefaultJSON                                                                                 = 15136
-	SignatureData_Encoding_DefaultJSON                                                                                             = 15137
-	CreateSessionRequest_Encoding_DefaultJSON                                                                                      = 15138
-	CreateSessionResponse_Encoding_DefaultJSON                                                                                     = 15139
-	UserIdentityToken_Encoding_DefaultJSON                                                                                         = 15140
-	AnonymousIdentityToken_Encoding_DefaultJSON                                                                                    = 15141
-	UserNameIdentityToken_Encoding_DefaultJSON                                                                                     = 15142
-	X509IdentityToken_Encoding_DefaultJSON                                                                                         = 15143
-	IssuedIdentityToken_Encoding_DefaultJSON                                                                                       = 15144
-	ActivateSessionRequest_Encoding_DefaultJSON                                                                                    = 15145
-	ActivateSessionResponse_Encoding_DefaultJSON                                                                                   = 15146
-	CloseSessionRequest_Encoding_DefaultJSON                                                                                       = 15147
-	CloseSessionResponse_Encoding_DefaultJSON                                                                                      = 15148
-	CancelRequest_Encoding_DefaultJSON                                                                                             = 15149
-	CancelResponse_Encoding_DefaultJSON                                                                                            = 15150
-	NodeAttributes_Encoding_DefaultJSON                                                                                            = 15151
-	ObjectAttributes_Encoding_DefaultJSON                                                                                          = 15152
-	VariableAttributes_Encoding_DefaultJSON                                                                                        = 15153
-	MethodAttributes_Encoding_DefaultJSON                                                                                          = 15157
-	ObjectTypeAttributes_Encoding_DefaultJSON                                                                                      = 15158
-	VariableTypeAttributes_Encoding_DefaultJSON                                                                                    = 15159
-	ReferenceTypeAttributes_Encoding_DefaultJSON                                                                                   = 15160
-	DataTypeAttributes_Encoding_DefaultJSON                                                                                        = 15161
-	ViewAttributes_Encoding_DefaultJSON                                                                                            = 15162
-	GenericAttributeValue_Encoding_DefaultJSON                                                                                     = 15163
-	GenericAttributes_Encoding_DefaultJSON                                                                                         = 15164
-	AddNodesItem_Encoding_DefaultJSON                                                                                              = 15165
-	AddNodesResult_Encoding_DefaultJSON                                                                                            = 15166
-	AddNodesRequest_Encoding_DefaultJSON                                                                                           = 15167
-	AddNodesResponse_Encoding_DefaultJSON                                                                                          = 15168
-	AddReferencesItem_Encoding_DefaultJSON                                                                                         = 15169
-	AddReferencesRequest_Encoding_DefaultJSON                                                                                      = 15170
-	AddReferencesResponse_Encoding_DefaultJSON                                                                                     = 15171
-	DeleteNodesItem_Encoding_DefaultJSON                                                                                           = 15172
-	DeleteNodesRequest_Encoding_DefaultJSON                                                                                        = 15173
-	DeleteNodesResponse_Encoding_DefaultJSON                                                                                       = 15174
-	DeleteReferencesItem_Encoding_DefaultJSON                                                                                      = 15175
-	DeleteReferencesRequest_Encoding_DefaultJSON                                                                                   = 15176
-	DeleteReferencesResponse_Encoding_DefaultJSON                                                                                  = 15177
-	ViewDescription_Encoding_DefaultJSON                                                                                           = 15179
-	BrowseDescription_Encoding_DefaultJSON                                                                                         = 15180
-	ReferenceDescription_Encoding_DefaultJSON                                                                                      = 15182
-	BrowseResult_Encoding_DefaultJSON                                                                                              = 15183
-	BrowseRequest_Encoding_DefaultJSON                                                                                             = 15184
-	BrowseResponse_Encoding_DefaultJSON                                                                                            = 15185
-	BrowseNextRequest_Encoding_DefaultJSON                                                                                         = 15186
-	BrowseNextResponse_Encoding_DefaultJSON                                                                                        = 15187
-	RelativePathElement_Encoding_DefaultJSON                                                                                       = 15188
-	RelativePath_Encoding_DefaultJSON                                                                                              = 15189
-	BrowsePath_Encoding_DefaultJSON                                                                                                = 15190
-	BrowsePathTarget_Encoding_DefaultJSON                                                                                          = 15191
-	BrowsePathResult_Encoding_DefaultJSON                                                                                          = 15192
-	TranslateBrowsePathsToNodeIDsRequest_Encoding_DefaultJSON                                                                      = 15193
-	TranslateBrowsePathsToNodeIDsResponse_Encoding_DefaultJSON                                                                     = 15194
-	RegisterNodesRequest_Encoding_DefaultJSON                                                                                      = 15195
-	RegisterNodesResponse_Encoding_DefaultJSON                                                                                     = 15196
-	UnregisterNodesRequest_Encoding_DefaultJSON                                                                                    = 15197
-	UnregisterNodesResponse_Encoding_DefaultJSON                                                                                   = 15198
-	EndpointConfiguration_Encoding_DefaultJSON                                                                                     = 15199
-	QueryDataDescription_Encoding_DefaultJSON                                                                                      = 15200
-	NodeTypeDescription_Encoding_DefaultJSON                                                                                       = 15201
-	QueryDataSet_Encoding_DefaultJSON                                                                                              = 15202
-	NodeReference_Encoding_DefaultJSON                                                                                             = 15203
-	ContentFilterElement_Encoding_DefaultJSON                                                                                      = 15204
-	ContentFilter_Encoding_DefaultJSON                                                                                             = 15205
-	FilterOperand_Encoding_DefaultJSON                                                                                             = 15206
-	ElementOperand_Encoding_DefaultJSON                                                                                            = 15207
-	LiteralOperand_Encoding_DefaultJSON                                                                                            = 15208
-	AttributeOperand_Encoding_DefaultJSON                                                                                          = 15209
-	SimpleAttributeOperand_Encoding_DefaultJSON                                                                                    = 15210
-	ContentFilterElementResult_Encoding_DefaultJSON                                                                                = 15211
-	PublishedDataSetType_DataSetWriterName_Placeholder                                                                             = 15222
-	PublishedDataSetType_DataSetWriterName_Placeholder_Status                                                                      = 15223
-	PublishedDataSetType_DataSetWriterName_Placeholder_TransportSettings                                                           = 15227
-	ContentFilterResult_Encoding_DefaultJSON                                                                                       = 15228
-	PublishedDataItemsType_DataSetWriterName_Placeholder                                                                           = 15230
-	PublishedDataItemsType_DataSetWriterName_Placeholder_Status                                                                    = 15231
-	PublishedDataItemsType_DataSetWriterName_Placeholder_TransportSettings                                                         = 15235
-	ParsingResult_Encoding_DefaultJSON                                                                                             = 15236
-	PublishedEventsType_DataSetWriterName_Placeholder                                                                              = 15238
-	PublishedEventsType_DataSetWriterName_Placeholder_Status                                                                       = 15239
-	PublishedEventsType_DataSetWriterName_Placeholder_TransportSettings                                                            = 15243
-	QueryFirstRequest_Encoding_DefaultJSON                                                                                         = 15244
-	QueryFirstResponse_Encoding_DefaultJSON                                                                                        = 15252
-	QueryNextRequest_Encoding_DefaultJSON                                                                                          = 15254
-	QueryNextResponse_Encoding_DefaultJSON                                                                                         = 15255
-	ReadValueID_Encoding_DefaultJSON                                                                                               = 15256
-	ReadRequest_Encoding_DefaultJSON                                                                                               = 15257
-	ReadResponse_Encoding_DefaultJSON                                                                                              = 15258
-	HistoryReadValueID_Encoding_DefaultJSON                                                                                        = 15259
-	HistoryReadResult_Encoding_DefaultJSON                                                                                         = 15260
-	HistoryReadDetails_Encoding_DefaultJSON                                                                                        = 15261
-	ReadEventDetails_Encoding_DefaultJSON                                                                                          = 15262
-	ReadRawModifiedDetails_Encoding_DefaultJSON                                                                                    = 15263
-	ReadProcessedDetails_Encoding_DefaultJSON                                                                                      = 15264
-	PubSubGroupType_Status                                                                                                         = 15265
-	ReadAtTimeDetails_Encoding_DefaultJSON                                                                                         = 15269
-	HistoryData_Encoding_DefaultJSON                                                                                               = 15270
-	ModificationInfo_Encoding_DefaultJSON                                                                                          = 15271
-	HistoryModifiedData_Encoding_DefaultJSON                                                                                       = 15272
-	HistoryEvent_Encoding_DefaultJSON                                                                                              = 15273
-	HistoryReadRequest_Encoding_DefaultJSON                                                                                        = 15274
-	HistoryReadResponse_Encoding_DefaultJSON                                                                                       = 15275
-	WriteValue_Encoding_DefaultJSON                                                                                                = 15276
-	WriteRequest_Encoding_DefaultJSON                                                                                              = 15277
-	WriteResponse_Encoding_DefaultJSON                                                                                             = 15278
-	HistoryUpdateDetails_Encoding_DefaultJSON                                                                                      = 15279
-	UpdateDataDetails_Encoding_DefaultJSON                                                                                         = 15280
-	UpdateStructureDataDetails_Encoding_DefaultJSON                                                                                = 15281
-	UpdateEventDetails_Encoding_DefaultJSON                                                                                        = 15282
-	DeleteRawModifiedDetails_Encoding_DefaultJSON                                                                                  = 15283
-	DeleteAtTimeDetails_Encoding_DefaultJSON                                                                                       = 15284
-	DeleteEventDetails_Encoding_DefaultJSON                                                                                        = 15285
-	HistoryUpdateResult_Encoding_DefaultJSON                                                                                       = 15286
-	HistoryUpdateRequest_Encoding_DefaultJSON                                                                                      = 15287
-	HistoryUpdateResponse_Encoding_DefaultJSON                                                                                     = 15288
-	CallMethodRequest_Encoding_DefaultJSON                                                                                         = 15289
-	CallMethodResult_Encoding_DefaultJSON                                                                                          = 15290
-	CallRequest_Encoding_DefaultJSON                                                                                               = 15291
-	CallResponse_Encoding_DefaultJSON                                                                                              = 15292
-	MonitoringFilter_Encoding_DefaultJSON                                                                                          = 15293
-	DataChangeFilter_Encoding_DefaultJSON                                                                                          = 15294
-	EventFilter_Encoding_DefaultJSON                                                                                               = 15295
-	DataSetWriterType_Status                                                                                                       = 15299
-	DataSetWriterType_TransportSettings                                                                                            = 15303
-	AggregateConfiguration_Encoding_DefaultJSON                                                                                    = 15304
-	DataSetReaderType_Status                                                                                                       = 15307
-	DataSetReaderType_TransportSettings                                                                                            = 15311
-	AggregateFilter_Encoding_DefaultJSON                                                                                           = 15312
-	MonitoringFilterResult_Encoding_DefaultJSON                                                                                    = 15313
-	EventFilterResult_Encoding_DefaultJSON                                                                                         = 15314
-	AggregateFilterResult_Encoding_DefaultJSON                                                                                     = 15315
-	DataSetReaderType_SubscribedDataSet                                                                                            = 15316
-	MonitoringParameters_Encoding_DefaultJSON                                                                                      = 15320
-	MonitoredItemCreateRequest_Encoding_DefaultJSON                                                                                = 15321
-	MonitoredItemCreateResult_Encoding_DefaultJSON                                                                                 = 15322
-	CreateMonitoredItemsRequest_Encoding_DefaultJSON                                                                               = 15323
-	CreateMonitoredItemsResponse_Encoding_DefaultJSON                                                                              = 15324
-	MonitoredItemModifyRequest_Encoding_DefaultJSON                                                                                = 15325
-	MonitoredItemModifyResult_Encoding_DefaultJSON                                                                                 = 15326
-	ModifyMonitoredItemsRequest_Encoding_DefaultJSON                                                                               = 15327
-	ModifyMonitoredItemsResponse_Encoding_DefaultJSON                                                                              = 15328
-	SetMonitoringModeRequest_Encoding_DefaultJSON                                                                                  = 15329
-	SetMonitoringModeResponse_Encoding_DefaultJSON                                                                                 = 15331
-	SetTriggeringRequest_Encoding_DefaultJSON                                                                                      = 15332
-	SetTriggeringResponse_Encoding_DefaultJSON                                                                                     = 15333
-	DeleteMonitoredItemsRequest_Encoding_DefaultJSON                                                                               = 15335
-	DeleteMonitoredItemsResponse_Encoding_DefaultJSON                                                                              = 15336
-	CreateSubscriptionRequest_Encoding_DefaultJSON                                                                                 = 15337
-	CreateSubscriptionResponse_Encoding_DefaultJSON                                                                                = 15338
-	ModifySubscriptionRequest_Encoding_DefaultJSON                                                                                 = 15339
-	ModifySubscriptionResponse_Encoding_DefaultJSON                                                                                = 15340
-	SetPublishingModeRequest_Encoding_DefaultJSON                                                                                  = 15341
-	SetPublishingModeResponse_Encoding_DefaultJSON                                                                                 = 15342
-	NotificationMessage_Encoding_DefaultJSON                                                                                       = 15343
-	NotificationData_Encoding_DefaultJSON                                                                                          = 15344
-	DataChangeNotification_Encoding_DefaultJSON                                                                                    = 15345
-	MonitoredItemNotification_Encoding_DefaultJSON                                                                                 = 15346
-	EventNotificationList_Encoding_DefaultJSON                                                                                     = 15347
-	EventFieldList_Encoding_DefaultJSON                                                                                            = 15348
-	HistoryEventFieldList_Encoding_DefaultJSON                                                                                     = 15349
-	StatusChangeNotification_Encoding_DefaultJSON                                                                                  = 15350
-	SubscriptionAcknowledgement_Encoding_DefaultJSON                                                                               = 15351
-	PublishRequest_Encoding_DefaultJSON                                                                                            = 15352
-	PublishResponse_Encoding_DefaultJSON                                                                                           = 15353
-	RepublishRequest_Encoding_DefaultJSON                                                                                          = 15354
-	RepublishResponse_Encoding_DefaultJSON                                                                                         = 15355
-	TransferResult_Encoding_DefaultJSON                                                                                            = 15356
-	TransferSubscriptionsRequest_Encoding_DefaultJSON                                                                              = 15357
-	TransferSubscriptionsResponse_Encoding_DefaultJSON                                                                             = 15358
-	DeleteSubscriptionsRequest_Encoding_DefaultJSON                                                                                = 15359
-	DeleteSubscriptionsResponse_Encoding_DefaultJSON                                                                               = 15360
-	BuildInfo_Encoding_DefaultJSON                                                                                                 = 15361
-	RedundantServerDataType_Encoding_DefaultJSON                                                                                   = 15362
-	EndpointURLListDataType_Encoding_DefaultJSON                                                                                   = 15363
-	NetworkGroupDataType_Encoding_DefaultJSON                                                                                      = 15364
-	SamplingIntervalDiagnosticsDataType_Encoding_DefaultJSON                                                                       = 15365
-	ServerDiagnosticsSummaryDataType_Encoding_DefaultJSON                                                                          = 15366
-	ServerStatusDataType_Encoding_DefaultJSON                                                                                      = 15367
-	SessionDiagnosticsDataType_Encoding_DefaultJSON                                                                                = 15368
-	SessionSecurityDiagnosticsDataType_Encoding_DefaultJSON                                                                        = 15369
-	ServiceCounterDataType_Encoding_DefaultJSON                                                                                    = 15370
-	StatusResult_Encoding_DefaultJSON                                                                                              = 15371
-	SubscriptionDiagnosticsDataType_Encoding_DefaultJSON                                                                           = 15372
-	ModelChangeStructureDataType_Encoding_DefaultJSON                                                                              = 15373
-	SemanticChangeStructureDataType_Encoding_DefaultJSON                                                                           = 15374
-	Range_Encoding_DefaultJSON                                                                                                     = 15375
-	EUInformation_Encoding_DefaultJSON                                                                                             = 15376
-	ComplexNumberType_Encoding_DefaultJSON                                                                                         = 15377
-	DoubleComplexNumberType_Encoding_DefaultJSON                                                                                   = 15378
-	AxisInformation_Encoding_DefaultJSON                                                                                           = 15379
-	XVType_Encoding_DefaultJSON                                                                                                    = 15380
-	ProgramDiagnosticDataType_Encoding_DefaultJSON                                                                                 = 15381
-	Annotation_Encoding_DefaultJSON                                                                                                = 15382
-	SimpleTypeDescription_Encoding_DefaultBinary                                                                                   = 15421
-	UABinaryFileDataType_Encoding_DefaultBinary                                                                                    = 15422
-	PublishSubscribeType_SecurityGroups                                                                                            = 15434
-	PublishSubscribe_SecurityGroups                                                                                                = 15443
-	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder                                                                    = 15453
-	SecurityGroupFolderType_SecurityGroupName_Placeholder                                                                          = 15459
-	DataSetFolderType_PublishedDataSetName_Placeholder_ExtensionFields                                                             = 15473
-	BrokerConnectionTransportDataType_Encoding_DefaultBinary                                                                       = 15479
-	PublishedDataSetType_ExtensionFields                                                                                           = 15481
-	PublishedDataItemsType_ExtensionFields                                                                                         = 15503
-	PublishedEventsType_ExtensionFields                                                                                            = 15511
-	SimpleTypeDescription_Encoding_DefaultXML                                                                                      = 15529
-	UABinaryFileDataType_Encoding_DefaultXML                                                                                       = 15531
-	BrokerConnectionTransportDataType_Encoding_DefaultXML                                                                          = 15579
-	StructureDescription_Encoding_DefaultXML                                                                                       = 15589
-	EnumDescription_Encoding_DefaultXML                                                                                            = 15590
-	Server_ServerCapabilities_RoleSet                                                                                              = 15606
-	RoleSetType_RoleName_Placeholder                                                                                               = 15608
-	WellKnownRole_Anonymous                                                                                                        = 15644
-	WellKnownRole_AuthenticatedUser                                                                                                = 15656
-	WellKnownRole_Observer                                                                                                         = 15668
-	EndpointType_Encoding_DefaultBinary                                                                                            = 15671
-	DataTypeSchemaHeader_Encoding_DefaultBinary                                                                                    = 15676
-	PublishedDataSetDataType_Encoding_DefaultBinary                                                                                = 15677
-	PublishedDataSetSourceDataType_Encoding_DefaultBinary                                                                          = 15678
-	PublishedDataItemsDataType_Encoding_DefaultBinary                                                                              = 15679
-	WellKnownRole_Operator                                                                                                         = 15680
-	PublishedEventsDataType_Encoding_DefaultBinary                                                                                 = 15681
-	DataSetWriterDataType_Encoding_DefaultBinary                                                                                   = 15682
-	DataSetWriterTransportDataType_Encoding_DefaultBinary                                                                          = 15683
-	DataSetWriterMessageDataType_Encoding_DefaultBinary                                                                            = 15688
-	PubSubGroupDataType_Encoding_DefaultBinary                                                                                     = 15689
-	WriterGroupTransportDataType_Encoding_DefaultBinary                                                                            = 15691
-	WellKnownRole_Supervisor                                                                                                       = 15692
-	WriterGroupMessageDataType_Encoding_DefaultBinary                                                                              = 15693
-	PubSubConnectionDataType_Encoding_DefaultBinary                                                                                = 15694
-	ConnectionTransportDataType_Encoding_DefaultBinary                                                                             = 15695
-	SimpleTypeDescription_Encoding_DefaultJSON                                                                                     = 15700
-	ReaderGroupTransportDataType_Encoding_DefaultBinary                                                                            = 15701
-	ReaderGroupMessageDataType_Encoding_DefaultBinary                                                                              = 15702
-	DataSetReaderDataType_Encoding_DefaultBinary                                                                                   = 15703
-	WellKnownRole_SecurityAdmin                                                                                                    = 15704
-	DataSetReaderTransportDataType_Encoding_DefaultBinary                                                                          = 15705
-	DataSetReaderMessageDataType_Encoding_DefaultBinary                                                                            = 15706
-	SubscribedDataSetDataType_Encoding_DefaultBinary                                                                               = 15707
-	TargetVariablesDataType_Encoding_DefaultBinary                                                                                 = 15712
-	SubscribedDataSetMirrorDataType_Encoding_DefaultBinary                                                                         = 15713
-	UABinaryFileDataType_Encoding_DefaultJSON                                                                                      = 15714
-	UADPWriterGroupMessageDataType_Encoding_DefaultBinary                                                                          = 15715
-	WellKnownRole_ConfigureAdmin                                                                                                   = 15716
-	UADPDataSetWriterMessageDataType_Encoding_DefaultBinary                                                                        = 15717
-	UADPDataSetReaderMessageDataType_Encoding_DefaultBinary                                                                        = 15718
-	JSONWriterGroupMessageDataType_Encoding_DefaultBinary                                                                          = 15719
-	JSONDataSetWriterMessageDataType_Encoding_DefaultBinary                                                                        = 15724
-	JSONDataSetReaderMessageDataType_Encoding_DefaultBinary                                                                        = 15725
-	BrokerConnectionTransportDataType_Encoding_DefaultJSON                                                                         = 15726
-	BrokerWriterGroupTransportDataType_Encoding_DefaultBinary                                                                      = 15727
-	IdentityMappingRuleType_Encoding_DefaultXML                                                                                    = 15728
-	BrokerDataSetWriterTransportDataType_Encoding_DefaultBinary                                                                    = 15729
-	BrokerDataSetReaderTransportDataType_Encoding_DefaultBinary                                                                    = 15733
-	IdentityMappingRuleType_Encoding_DefaultBinary                                                                                 = 15736
-	TemporaryFileTransferType_TransferState_Placeholder                                                                            = 15754
-	PublishSubscribe_ConnectionName_Placeholder                                                                                    = 15790
-	FileTransferStateMachineType_IDle                                                                                              = 15815
-	FileTransferStateMachineType_ReadPrepare                                                                                       = 15817
-	FileTransferStateMachineType_ReadTransfer                                                                                      = 15819
-	FileTransferStateMachineType_ApplyWrite                                                                                        = 15821
-	FileTransferStateMachineType_Error                                                                                             = 15823
-	FileTransferStateMachineType_IDleToReadPrepare                                                                                 = 15825
-	FileTransferStateMachineType_ReadPrepareToReadTransfer                                                                         = 15827
-	FileTransferStateMachineType_ReadTransferToIDle                                                                                = 15829
-	FileTransferStateMachineType_IDleToApplyWrite                                                                                  = 15831
-	FileTransferStateMachineType_ApplyWriteToIDle                                                                                  = 15833
-	FileTransferStateMachineType_ReadPrepareToError                                                                                = 15835
-	FileTransferStateMachineType_ReadTransferToError                                                                               = 15837
-	FileTransferStateMachineType_ApplyWriteToError                                                                                 = 15839
-	FileTransferStateMachineType_ErrorToIDle                                                                                       = 15841
-	PublishSubscribeType_Status                                                                                                    = 15844
-	PublishSubscribe_ConnectionName_Placeholder_Address                                                                            = 15851
-	PublishSubscribe_ConnectionName_Placeholder_TransportSettings                                                                  = 15864
-	PublishSubscribe_ConnectionName_Placeholder_Status                                                                             = 15865
-	SessionlessInvokeRequestType_Encoding_DefaultXML                                                                               = 15902
-	SessionlessInvokeRequestType_Encoding_DefaultBinary                                                                            = 15903
-	PublishSubscribeType_ConnectionName_Placeholder_TransportSettings                                                              = 15905
-	PubSubKeyServiceType_SecurityGroups                                                                                            = 15913
-	PublishSubscribe_ConnectionName_Placeholder_Diagnostics                                                                        = 15937
-	EndpointType_Encoding_DefaultXML                                                                                               = 15949
-	DataTypeSchemaHeader_Encoding_DefaultXML                                                                                       = 15950
-	PublishedDataSetDataType_Encoding_DefaultXML                                                                                   = 15951
-	PublishedDataSetSourceDataType_Encoding_DefaultXML                                                                             = 15952
-	PublishedDataItemsDataType_Encoding_DefaultXML                                                                                 = 15953
-	PublishedEventsDataType_Encoding_DefaultXML                                                                                    = 15954
-	DataSetWriterDataType_Encoding_DefaultXML                                                                                      = 15955
-	DataSetWriterTransportDataType_Encoding_DefaultXML                                                                             = 15956
-	OPCUANamespaceMetadata                                                                                                         = 15957
-	OPCUANamespaceMetadata_NamespaceFile                                                                                           = 15965
-	DataSetWriterMessageDataType_Encoding_DefaultXML                                                                               = 15987
-	PubSubGroupDataType_Encoding_DefaultXML                                                                                        = 15988
-	WriterGroupTransportDataType_Encoding_DefaultXML                                                                               = 15990
-	WriterGroupMessageDataType_Encoding_DefaultXML                                                                                 = 15991
-	PubSubConnectionDataType_Encoding_DefaultXML                                                                                   = 15992
-	ConnectionTransportDataType_Encoding_DefaultXML                                                                                = 15993
-	ReaderGroupTransportDataType_Encoding_DefaultXML                                                                               = 15995
-	ReaderGroupMessageDataType_Encoding_DefaultXML                                                                                 = 15996
-	DataSetReaderDataType_Encoding_DefaultXML                                                                                      = 16007
-	DataSetReaderTransportDataType_Encoding_DefaultXML                                                                             = 16008
-	DataSetReaderMessageDataType_Encoding_DefaultXML                                                                               = 16009
-	SubscribedDataSetDataType_Encoding_DefaultXML                                                                                  = 16010
-	TargetVariablesDataType_Encoding_DefaultXML                                                                                    = 16011
-	SubscribedDataSetMirrorDataType_Encoding_DefaultXML                                                                            = 16012
-	UADPWriterGroupMessageDataType_Encoding_DefaultXML                                                                             = 16014
-	UADPDataSetWriterMessageDataType_Encoding_DefaultXML                                                                           = 16015
-	UADPDataSetReaderMessageDataType_Encoding_DefaultXML                                                                           = 16016
-	JSONWriterGroupMessageDataType_Encoding_DefaultXML                                                                             = 16017
-	JSONDataSetWriterMessageDataType_Encoding_DefaultXML                                                                           = 16018
-	JSONDataSetReaderMessageDataType_Encoding_DefaultXML                                                                           = 16019
-	BrokerWriterGroupTransportDataType_Encoding_DefaultXML                                                                         = 16021
-	BrokerDataSetWriterTransportDataType_Encoding_DefaultXML                                                                       = 16022
-	BrokerDataSetReaderTransportDataType_Encoding_DefaultXML                                                                       = 16023
-	WellKnownRole_Engineer                                                                                                         = 16036
-	PublishSubscribe_ConnectionName_Placeholder_Diagnostics_Counters                                                               = 16102
-	RolePermissionType_Encoding_DefaultXML                                                                                         = 16126
-	EndpointType_Encoding_DefaultJSON                                                                                              = 16150
-	DataTypeSchemaHeader_Encoding_DefaultJSON                                                                                      = 16151
-	PublishedDataSetDataType_Encoding_DefaultJSON                                                                                  = 16152
-	PublishedDataSetSourceDataType_Encoding_DefaultJSON                                                                            = 16153
-	PublishedDataItemsDataType_Encoding_DefaultJSON                                                                                = 16154
-	PublishedEventsDataType_Encoding_DefaultJSON                                                                                   = 16155
-	DataSetWriterDataType_Encoding_DefaultJSON                                                                                     = 16156
-	DataSetWriterTransportDataType_Encoding_DefaultJSON                                                                            = 16157
-	DataSetWriterMessageDataType_Encoding_DefaultJSON                                                                              = 16158
-	PubSubGroupDataType_Encoding_DefaultJSON                                                                                       = 16159
-	WriterGroupTransportDataType_Encoding_DefaultJSON                                                                              = 16161
-	WriterGroupMessageDataType_Encoding_DefaultJSON                                                                                = 16280
-	PubSubConnectionDataType_Encoding_DefaultJSON                                                                                  = 16281
-	ConnectionTransportDataType_Encoding_DefaultJSON                                                                               = 16282
-	ReaderGroupTransportDataType_Encoding_DefaultJSON                                                                              = 16284
-	ReaderGroupMessageDataType_Encoding_DefaultJSON                                                                                = 16285
-	DataSetReaderDataType_Encoding_DefaultJSON                                                                                     = 16286
-	DataSetReaderTransportDataType_Encoding_DefaultJSON                                                                            = 16287
-	DataSetReaderMessageDataType_Encoding_DefaultJSON                                                                              = 16288
-	ServerType_ServerCapabilities_RoleSet                                                                                          = 16289
-	ServerCapabilitiesType_RoleSet                                                                                                 = 16295
-	SubscribedDataSetDataType_Encoding_DefaultJSON                                                                                 = 16308
-	TargetVariablesDataType_Encoding_DefaultJSON                                                                                   = 16310
-	SubscribedDataSetMirrorDataType_Encoding_DefaultJSON                                                                           = 16311
-	FileSystem                                                                                                                     = 16314
-	FileSystem_FileDirectoryName_Placeholder                                                                                       = 16315
-	UADPWriterGroupMessageDataType_Encoding_DefaultJSON                                                                            = 16323
-	FileSystem_FileName_Placeholder                                                                                                = 16327
-	UADPDataSetWriterMessageDataType_Encoding_DefaultJSON                                                                          = 16391
-	UADPDataSetReaderMessageDataType_Encoding_DefaultJSON                                                                          = 16392
-	JSONWriterGroupMessageDataType_Encoding_DefaultJSON                                                                            = 16393
-	JSONDataSetWriterMessageDataType_Encoding_DefaultJSON                                                                          = 16394
-	AlarmConditionType_FirstInGroup                                                                                                = 16398
-	AlarmConditionType_AlarmGroup_Placeholder                                                                                      = 16399
-	JSONDataSetReaderMessageDataType_Encoding_DefaultJSON                                                                          = 16404
-	AlarmGroupType_AlarmConditionInstance_Placeholder                                                                              = 16406
-	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState                                                                = 16502
-	BrokerWriterGroupTransportDataType_Encoding_DefaultJSON                                                                        = 16524
-	BrokerDataSetWriterTransportDataType_Encoding_DefaultJSON                                                                      = 16525
-	BrokerDataSetReaderTransportDataType_Encoding_DefaultJSON                                                                      = 16526
-	AlarmGroupType_AlarmConditionInstance_Placeholder_FirstInGroup                                                                 = 16530
-	LimitAlarmType_FirstInGroup                                                                                                    = 16565
-	LimitAlarmType_AlarmGroup_Placeholder                                                                                          = 16566
-	ExclusiveLimitAlarmType_FirstInGroup                                                                                           = 16605
-	ExclusiveLimitAlarmType_AlarmGroup_Placeholder                                                                                 = 16606
-	NonExclusiveLimitAlarmType_FirstInGroup                                                                                        = 16645
-	NonExclusiveLimitAlarmType_AlarmGroup_Placeholder                                                                              = 16646
-	NonExclusiveLevelAlarmType_FirstInGroup                                                                                        = 16685
-	NonExclusiveLevelAlarmType_AlarmGroup_Placeholder                                                                              = 16686
-	ExclusiveLevelAlarmType_FirstInGroup                                                                                           = 16725
-	ExclusiveLevelAlarmType_AlarmGroup_Placeholder                                                                                 = 16726
-	PublishedDataSetType_DataSetWriterName_Placeholder_MessageSettings                                                             = 16758
-	NonExclusiveDeviationAlarmType_FirstInGroup                                                                                    = 16765
-	NonExclusiveDeviationAlarmType_AlarmGroup_Placeholder                                                                          = 16766
-	PublishedDataItemsType_DataSetWriterName_Placeholder_MessageSettings                                                           = 16799
-	ExclusiveDeviationAlarmType_FirstInGroup                                                                                       = 16806
-	ExclusiveDeviationAlarmType_AlarmGroup_Placeholder                                                                             = 16807
-	PublishedEventsType_DataSetWriterName_Placeholder_MessageSettings                                                              = 16840
-	NonExclusiveRateOfChangeAlarmType_FirstInGroup                                                                                 = 16847
-	NonExclusiveRateOfChangeAlarmType_AlarmGroup_Placeholder                                                                       = 16848
-	ExclusiveRateOfChangeAlarmType_FirstInGroup                                                                                    = 16888
-	ExclusiveRateOfChangeAlarmType_AlarmGroup_Placeholder                                                                          = 16889
-	DiscreteAlarmType_FirstInGroup                                                                                                 = 16929
-	DiscreteAlarmType_AlarmGroup_Placeholder                                                                                       = 16930
-	OffNormalAlarmType_FirstInGroup                                                                                                = 16965
-	OffNormalAlarmType_AlarmGroup_Placeholder                                                                                      = 16966
-	SystemOffNormalAlarmType_FirstInGroup                                                                                          = 17001
-	SystemOffNormalAlarmType_AlarmGroup_Placeholder                                                                                = 17002
-	TripAlarmType_FirstInGroup                                                                                                     = 17037
-	TripAlarmType_AlarmGroup_Placeholder                                                                                           = 17038
-	CertificateExpirationAlarmType_FirstInGroup                                                                                    = 17073
-	CertificateExpirationAlarmType_AlarmGroup_Placeholder                                                                          = 17074
-	DiscrepancyAlarmType_ShelvingState                                                                                             = 17180
-	PubSubConnectionType_TransportSettings                                                                                         = 17203
-	DiscrepancyAlarmType_FirstInGroup                                                                                              = 17208
-	DiscrepancyAlarmType_AlarmGroup_Placeholder                                                                                    = 17209
-	PubSubConnectionType_WriterGroupName_Placeholder_TransportSettings                                                             = 17290
-	PubSubConnectionType_WriterGroupName_Placeholder_MessageSettings                                                               = 17291
-	PubSubConnectionType_ReaderGroupName_Placeholder_TransportSettings                                                             = 17307
-	PubSubConnectionType_ReaderGroupName_Placeholder_MessageSettings                                                               = 17308
-	PubSubConnectionType_WriterGroupName_Placeholder                                                                               = 17310
-	PubSubConnectionType_WriterGroupName_Placeholder_Status                                                                        = 17314
-	PubSubConnectionType_ReaderGroupName_Placeholder                                                                               = 17325
-	PubSubConnectionType_ReaderGroupName_Placeholder_Status                                                                        = 17329
-	PublishSubscribe_ConnectionName_Placeholder_Diagnostics_LiveValues                                                             = 17352
-	PublishSubscribe_PublishedDataSets                                                                                             = 17371
-	PublishSubscribe_Status                                                                                                        = 17405
-	PublishSubscribe_Diagnostics                                                                                                   = 17409
-	PublishSubscribe_Diagnostics_Counters                                                                                          = 17423
-	PublishSubscribe_Diagnostics_LiveValues                                                                                        = 17457
-	DatagramConnectionTransportDataType_Encoding_DefaultBinary                                                                     = 17468
-	DatagramConnectionTransportDataType_Encoding_DefaultXML                                                                        = 17472
-	DatagramConnectionTransportDataType_Encoding_DefaultJSON                                                                       = 17476
-	KeyCredentialConfigurationFolderType_ServiceName_Placeholder                                                                   = 17511
-	AdditionalParametersType_Encoding_DefaultBinary                                                                                = 17537
-	AdditionalParametersType_Encoding_DefaultXML                                                                                   = 17541
-	AdditionalParametersType_Encoding_DefaultJSON                                                                                  = 17547
-	EphemeralKeyType_Encoding_DefaultBinary                                                                                        = 17549
-	EphemeralKeyType_Encoding_DefaultXML                                                                                           = 17553
-	EphemeralKeyType_Encoding_DefaultJSON                                                                                          = 17557
-	DictionaryEntryType_DictionaryEntryName_Placeholder                                                                            = 17590
-	DictionaryFolderType_DictionaryFolderName_Placeholder                                                                          = 17592
-	DictionaryFolderType_DictionaryEntryName_Placeholder                                                                           = 17593
-	Dictionaries                                                                                                                   = 17594
-	Dictionaries_DictionaryFolderName_Placeholder                                                                                  = 17595
-	Dictionaries_DictionaryEntryName_Placeholder                                                                                   = 17596
-	IrdiDictionaryEntryType_DictionaryEntryName_Placeholder                                                                        = 17599
-	URIDictionaryEntryType_DictionaryEntryName_Placeholder                                                                         = 17601
-	GenericAttributeValue_Encoding_DefaultXML                                                                                      = 17608
-	GenericAttributes_Encoding_DefaultXML                                                                                          = 17609
-	GenericAttributeValue_Encoding_DefaultBinary                                                                                   = 17610
-	GenericAttributes_Encoding_DefaultBinary                                                                                       = 17611
-	InterfaceTypes                                                                                                                 = 17708
-	WriterGroupType_Status                                                                                                         = 17730
-	AuthorizationServices                                                                                                          = 17732
-	WriterGroupType_TransportSettings                                                                                              = 17741
-	WriterGroupType_MessageSettings                                                                                                = 17742
-	WriterGroupType_DataSetWriterName_Placeholder                                                                                  = 17743
-	WriterGroupType_DataSetWriterName_Placeholder_TransportSettings                                                                = 17747
-	WriterGroupType_DataSetWriterName_Placeholder_MessageSettings                                                                  = 17748
-	WriterGroupType_DataSetWriterName_Placeholder_Status                                                                           = 17749
-	WriterGroupType_DataSetWriterName_Placeholder_Diagnostics                                                                      = 17753
-	WriterGroupType_DataSetWriterName_Placeholder_Diagnostics_Counters                                                             = 17767
-	WriterGroupType_DataSetWriterName_Placeholder_Diagnostics_LiveValues                                                           = 17798
-	WriterGroupType_Diagnostics                                                                                                    = 17812
-	WriterGroupType_Diagnostics_Counters                                                                                           = 17826
-	WriterGroupType_Diagnostics_LiveValues                                                                                         = 17858
-	DecimalDataType_Encoding_DefaultXML                                                                                            = 17862
-	DecimalDataType_Encoding_DefaultBinary                                                                                         = 17863
-	ReaderGroupType_Status                                                                                                         = 18067
-	ReaderGroupType_DataSetReaderName_Placeholder                                                                                  = 18076
-	ReaderGroupType_DataSetReaderName_Placeholder_TransportSettings                                                                = 18086
-	ReaderGroupType_DataSetReaderName_Placeholder_MessageSettings                                                                  = 18087
-	ReaderGroupType_DataSetReaderName_Placeholder_Status                                                                           = 18088
-	ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics                                                                      = 18092
-	ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics_Counters                                                             = 18106
-	ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics_LiveValues                                                           = 18137
-	KeyCredentialConfiguration                                                                                                     = 18155
-	KeyCredentialConfiguration_ServiceName_Placeholder                                                                             = 18156
-	InstrumentDiagnosticAlarmType_ShelvingState                                                                                    = 18438
-	InstrumentDiagnosticAlarmType_FirstInGroup                                                                                     = 18476
-	InstrumentDiagnosticAlarmType_AlarmGroup_Placeholder                                                                           = 18486
-	SystemDiagnosticAlarmType_ShelvingState                                                                                        = 18587
-	SystemDiagnosticAlarmType_FirstInGroup                                                                                         = 18625
-	SystemDiagnosticAlarmType_AlarmGroup_Placeholder                                                                               = 18635
-	PublishSubscribeType_ConnectionName_Placeholder_Diagnostics                                                                    = 18667
-	PublishSubscribeType_ConnectionName_Placeholder_Diagnostics_Counters                                                           = 18681
-	PublishSubscribeType_ConnectionName_Placeholder_Diagnostics_LiveValues                                                         = 18712
-	PublishSubscribeType_Diagnostics                                                                                               = 18715
-	PublishSubscribeType_Diagnostics_Counters                                                                                      = 18729
-	PublishSubscribeType_Diagnostics_LiveValues                                                                                    = 18760
-	RationalNumber_Encoding_DefaultBinary                                                                                          = 18815
-	Vector_Encoding_DefaultBinary                                                                                                  = 18816
-	ThreeDVector_Encoding_DefaultBinary                                                                                            = 18817
-	CartesianCoordinates_Encoding_DefaultBinary                                                                                    = 18818
-	ThreeDCartesianCoordinates_Encoding_DefaultBinary                                                                              = 18819
-	Orientation_Encoding_DefaultBinary                                                                                             = 18820
-	ThreeDOrientation_Encoding_DefaultBinary                                                                                       = 18821
-	Frame_Encoding_DefaultBinary                                                                                                   = 18822
-	ThreeDFrame_Encoding_DefaultBinary                                                                                             = 18823
-	RationalNumber_Encoding_DefaultXML                                                                                             = 18851
-	Vector_Encoding_DefaultXML                                                                                                     = 18852
-	ThreeDVector_Encoding_DefaultXML                                                                                               = 18853
-	CartesianCoordinates_Encoding_DefaultXML                                                                                       = 18854
-	ThreeDCartesianCoordinates_Encoding_DefaultXML                                                                                 = 18855
-	Orientation_Encoding_DefaultXML                                                                                                = 18856
-	ThreeDOrientation_Encoding_DefaultXML                                                                                          = 18857
-	Frame_Encoding_DefaultXML                                                                                                      = 18858
-	ThreeDFrame_Encoding_DefaultXML                                                                                                = 18859
-	PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics                                                                 = 18871
-	PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics_Counters                                                        = 18885
-	PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics_LiveValues                                                      = 18916
-	PublishedDataItemsType_DataSetWriterName_Placeholder_Diagnostics                                                               = 18930
-	PublishedDataItemsType_DataSetWriterName_Placeholder_Diagnostics_Counters                                                      = 18944
-	PublishedDataItemsType_DataSetWriterName_Placeholder_Diagnostics_LiveValues                                                    = 18975
-	PublishedEventsType_DataSetWriterName_Placeholder_Diagnostics                                                                  = 18989
-	PublishedEventsType_DataSetWriterName_Placeholder_Diagnostics_Counters                                                         = 19003
-	PublishedEventsType_DataSetWriterName_Placeholder_Diagnostics_LiveValues                                                       = 19034
-	RationalNumber_Encoding_DefaultJSON                                                                                            = 19064
-	Vector_Encoding_DefaultJSON                                                                                                    = 19065
-	ThreeDVector_Encoding_DefaultJSON                                                                                              = 19066
-	CartesianCoordinates_Encoding_DefaultJSON                                                                                      = 19067
-	ThreeDCartesianCoordinates_Encoding_DefaultJSON                                                                                = 19068
-	Orientation_Encoding_DefaultJSON                                                                                               = 19069
-	ThreeDOrientation_Encoding_DefaultJSON                                                                                         = 19070
-	Frame_Encoding_DefaultJSON                                                                                                     = 19071
-	ThreeDFrame_Encoding_DefaultJSON                                                                                               = 19072
-	PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics                                                                   = 19107
-	PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics_Counters                                                          = 19121
-	PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics_LiveValues                                                        = 19152
-	PubSubConnectionType_ReaderGroupName_Placeholder_Diagnostics                                                                   = 19176
-	PubSubConnectionType_ReaderGroupName_Placeholder_Diagnostics_Counters                                                          = 19190
-	PubSubConnectionType_ReaderGroupName_Placeholder_Diagnostics_LiveValues                                                        = 19221
-	PubSubConnectionType_Diagnostics                                                                                               = 19241
-	PubSubConnectionType_Diagnostics_Counters                                                                                      = 19255
-	PubSubConnectionType_Diagnostics_LiveValues                                                                                    = 19286
-	TrustListOutOfDateAlarmType_ShelvingState                                                                                      = 19388
-	TrustListOutOfDateAlarmType_FirstInGroup                                                                                       = 19426
-	TrustListOutOfDateAlarmType_AlarmGroup_Placeholder                                                                             = 19436
-	CertificateGroupType_CertificateExpired                                                                                        = 19450
-	CertificateGroupType_CertificateExpired_ShelvingState                                                                          = 19537
-	DataSetWriterType_Diagnostics                                                                                                  = 19550
-	DataSetWriterType_Diagnostics_Counters                                                                                         = 19564
-	DataSetWriterType_Diagnostics_LiveValues                                                                                       = 19595
-	DataSetReaderType_Diagnostics                                                                                                  = 19609
-	DataSetReaderType_Diagnostics_Counters                                                                                         = 19623
-	DataSetReaderType_Diagnostics_LiveValues                                                                                       = 19654
-	PubSubDiagnosticsType_Counters                                                                                                 = 19691
-	PubSubDiagnosticsType_LiveValues                                                                                               = 19722
-	PubSubDiagnosticsRootType_Counters                                                                                             = 19746
-	PubSubDiagnosticsRootType_LiveValues                                                                                           = 19777
-	PubSubDiagnosticsConnectionType_Counters                                                                                       = 19800
-	PubSubDiagnosticsConnectionType_LiveValues                                                                                     = 19831
-	PubSubDiagnosticsWriterGroupType_Counters                                                                                      = 19848
-	PubSubDiagnosticsWriterGroupType_LiveValues                                                                                    = 19879
-	PubSubDiagnosticsReaderGroupType_Counters                                                                                      = 19917
-	PubSubDiagnosticsReaderGroupType_LiveValues                                                                                    = 19948
-	PubSubDiagnosticsDataSetWriterType_Counters                                                                                    = 19982
-	PubSubDiagnosticsDataSetWriterType_LiveValues                                                                                  = 20013
-	PubSubDiagnosticsDataSetReaderType_Counters                                                                                    = 20041
-	PubSubDiagnosticsDataSetReaderType_LiveValues                                                                                  = 20072
-	CertificateGroupType_CertificateExpired_FirstInGroup                                                                           = 20120
-	CertificateGroupType_TrustListOutOfDate                                                                                        = 20143
-	CertificateGroupType_TrustListOutOfDate_ShelvingState                                                                          = 20230
-	CertificateGroupType_TrustListOutOfDate_FirstInGroup                                                                           = 20268
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired                                                          = 20291
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState                                            = 20378
-	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_FirstInGroup                                             = 20418
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate                                                          = 20441
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState                                            = 20528
-	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup                                             = 20566
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired                                                                = 20589
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState                                                  = 20676
-	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_FirstInGroup                                                   = 20714
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate                                                                = 20737
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState                                                  = 20824
-	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup                                                   = 20862
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired                                                            = 20885
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState                                              = 20972
-	SessionlessInvokeResponseType_Encoding_DefaultXML                                                                              = 21000
-	SessionlessInvokeResponseType_Encoding_DefaultBinary                                                                           = 21001
-	ReaderGroupType_DataSetReaderName_Placeholder_SubscribedDataSet                                                                = 21006
-	ReaderGroupType_Diagnostics                                                                                                    = 21015
-	ReaderGroupType_Diagnostics_Counters                                                                                           = 21029
-	ReaderGroupType_Diagnostics_LiveValues                                                                                         = 21060
-	ReaderGroupType_TransportSettings                                                                                              = 21080
-	ReaderGroupType_MessageSettings                                                                                                = 21081
-	DataSetWriterType_MessageSettings                                                                                              = 21095
-	DataSetReaderType_MessageSettings                                                                                              = 21103
-	WriterGroupDataType_Encoding_DefaultBinary                                                                                     = 21150
-	NetworkAddressDataType_Encoding_DefaultBinary                                                                                  = 21151
-	NetworkAddressURLDataType_Encoding_DefaultBinary                                                                               = 21152
-	ReaderGroupDataType_Encoding_DefaultBinary                                                                                     = 21153
-	PubSubConfigurationDataType_Encoding_DefaultBinary                                                                             = 21154
-	DatagramWriterGroupTransportDataType_Encoding_DefaultBinary                                                                    = 21155
-	WriterGroupDataType_Encoding_DefaultXML                                                                                        = 21174
-	NetworkAddressDataType_Encoding_DefaultXML                                                                                     = 21175
-	NetworkAddressURLDataType_Encoding_DefaultXML                                                                                  = 21176
-	ReaderGroupDataType_Encoding_DefaultXML                                                                                        = 21177
-	PubSubConfigurationDataType_Encoding_DefaultXML                                                                                = 21178
-	DatagramWriterGroupTransportDataType_Encoding_DefaultXML                                                                       = 21179
-	WriterGroupDataType_Encoding_DefaultJSON                                                                                       = 21198
-	NetworkAddressDataType_Encoding_DefaultJSON                                                                                    = 21199
-	NetworkAddressURLDataType_Encoding_DefaultJSON                                                                                 = 21200
-	ReaderGroupDataType_Encoding_DefaultJSON                                                                                       = 21201
-	PubSubConfigurationDataType_Encoding_DefaultJSON                                                                               = 21202
-	DatagramWriterGroupTransportDataType_Encoding_DefaultJSON                                                                      = 21203
-	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_FirstInGroup                                               = 21213
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate                                                            = 21236
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState                                              = 21323
-	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup                                               = 21361
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired                                                      = 21384
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState                                        = 21471
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_FirstInGroup                                         = 21509
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate                                                      = 21532
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState                                        = 21619
-	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_FirstInGroup                                         = 21657
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired                                           = 21680
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState                             = 21767
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup                              = 21805
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate                                           = 21828
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState                             = 21915
-	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup                              = 21953
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired                                                 = 21976
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState                                   = 22063
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup                                    = 22101
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate                                                 = 22124
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState                                   = 22211
-	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup                                    = 22249
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired                                             = 22272
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState                               = 22359
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup                                = 22397
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate                                             = 22420
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState                               = 22507
-	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup                                = 22545
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired                                               = 22568
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState                                 = 22655
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup                                  = 22693
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate                                               = 22716
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState                                 = 22803
-	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup                                  = 22841
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired                                                     = 22864
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState                                       = 22951
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup                                        = 22989
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate                                                     = 23012
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState                                       = 23099
-	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup                                        = 23137
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired                                                 = 23160
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState                                   = 23247
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup                                    = 23285
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate                                                 = 23308
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState                                   = 23395
-	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup                                    = 23433
-	AliasNameCategoryType_Alias_Placeholder                                                                                        = 23457
-	AliasNameCategoryType_SubAliasNameCategories_Placeholder                                                                       = 23458
-	Aliases                                                                                                                        = 23470
-	Aliases_Alias_Placeholder                                                                                                      = 23471
-	Aliases_SubAliasNameCategories_Placeholder                                                                                     = 23472
-	TagVariables                                                                                                                   = 23479
-	TagVariables_Alias_Placeholder                                                                                                 = 23480
-	TagVariables_SubAliasNameCategories_Placeholder                                                                                = 23481
-	Topics                                                                                                                         = 23488
-	Topics_Alias_Placeholder                                                                                                       = 23489
-	Topics_SubAliasNameCategories_Placeholder                                                                                      = 23490
-	AliasNameDataType_Encoding_DefaultBinary                                                                                       = 23499
-	ReadAnnotationDataDetails_Encoding_DefaultBinary                                                                               = 23500
-	AliasNameDataType_Encoding_DefaultXML                                                                                          = 23505
-	ReadAnnotationDataDetails_Encoding_DefaultXML                                                                                  = 23506
-	CurrencyUnitType_Encoding_DefaultBinary                                                                                        = 23507
-	AliasNameDataType_Encoding_DefaultJSON                                                                                         = 23511
-	ReadAnnotationDataDetails_Encoding_DefaultJSON                                                                                 = 23512
-	OrderedListType_OrderedObject_Placeholder                                                                                      = 23519
-	CurrencyUnitType_Encoding_DefaultXML                                                                                           = 23520
-	CurrencyUnitType_Encoding_DefaultJSON                                                                                          = 23528
-	AuthorizationServicesConfigurationFolderType_ServiceName_Placeholder                                                           = 23557
-	PublishSubscribeType_SubscribedDataSets                                                                                        = 23622
-	PublishSubscribeType_PubSubCapablities                                                                                         = 23642
-	PublishSubscribeType_DataSetClasses                                                                                            = 23649
-	PublishSubscribe_SubscribedDataSets                                                                                            = 23658
-	PublishSubscribe_PubSubCapablities                                                                                             = 23678
-	PublishSubscribe_DataSetClasses                                                                                                = 23685
-	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder                                                            = 23796
-	SubscribedDataSetFolderType_StandaloneSubscribedDataSetName_Placeholder                                                        = 23807
-	SubscribedDataSetFolderType_StandaloneSubscribedDataSetName_Placeholder_SubscribedDataSet                                      = 23808
-	StandaloneSubscribedDataSetType_SubscribedDataSet                                                                              = 23829
-	DatagramWriterGroupTransportType_Address                                                                                       = 23842
-	StandaloneSubscribedDataSetRefDataType_Encoding_DefaultBinary                                                                  = 23851
-	StandaloneSubscribedDataSetDataType_Encoding_DefaultBinary                                                                     = 23852
-	SecurityGroupDataType_Encoding_DefaultBinary                                                                                   = 23853
-	PubSubConfiguration2DataType_Encoding_DefaultBinary                                                                            = 23854
-	QosDataType_Encoding_DefaultBinary                                                                                             = 23855
-	TransmitQosDataType_Encoding_DefaultBinary                                                                                     = 23856
-	TransmitQosPriorityDataType_Encoding_DefaultBinary                                                                             = 23857
-	ReceiveQosDataType_Encoding_DefaultBinary                                                                                      = 23860
-	ReceiveQosPriorityDataType_Encoding_DefaultBinary                                                                              = 23861
-	DatagramConnectionTransport2DataType_Encoding_DefaultBinary                                                                    = 23864
-	DatagramWriterGroupTransport2DataType_Encoding_DefaultBinary                                                                   = 23865
-	DatagramDataSetReaderTransportDataType_Encoding_DefaultBinary                                                                  = 23866
-	StandaloneSubscribedDataSetRefDataType_Encoding_DefaultXML                                                                     = 23919
-	StandaloneSubscribedDataSetDataType_Encoding_DefaultXML                                                                        = 23920
-	SecurityGroupDataType_Encoding_DefaultXML                                                                                      = 23921
-	PubSubConfiguration2DataType_Encoding_DefaultXML                                                                               = 23922
-	QosDataType_Encoding_DefaultXML                                                                                                = 23923
-	TransmitQosDataType_Encoding_DefaultXML                                                                                        = 23924
-	TransmitQosPriorityDataType_Encoding_DefaultXML                                                                                = 23925
-	ReceiveQosDataType_Encoding_DefaultXML                                                                                         = 23928
-	ReceiveQosPriorityDataType_Encoding_DefaultXML                                                                                 = 23929
-	DatagramConnectionTransport2DataType_Encoding_DefaultXML                                                                       = 23932
-	DatagramWriterGroupTransport2DataType_Encoding_DefaultXML                                                                      = 23933
-	DatagramDataSetReaderTransportDataType_Encoding_DefaultXML                                                                     = 23934
-	StandaloneSubscribedDataSetRefDataType_Encoding_DefaultJSON                                                                    = 23987
-	StandaloneSubscribedDataSetDataType_Encoding_DefaultJSON                                                                       = 23988
-	SecurityGroupDataType_Encoding_DefaultJSON                                                                                     = 23989
-	PubSubConfiguration2DataType_Encoding_DefaultJSON                                                                              = 23990
-	QosDataType_Encoding_DefaultJSON                                                                                               = 23991
-	TransmitQosDataType_Encoding_DefaultJSON                                                                                       = 23992
-	TransmitQosPriorityDataType_Encoding_DefaultJSON                                                                               = 23993
-	ReceiveQosDataType_Encoding_DefaultJSON                                                                                        = 23996
-	ReceiveQosPriorityDataType_Encoding_DefaultJSON                                                                                = 23997
-	DatagramConnectionTransport2DataType_Encoding_DefaultJSON                                                                      = 24000
-	DatagramWriterGroupTransport2DataType_Encoding_DefaultJSON                                                                     = 24001
-	DatagramDataSetReaderTransportDataType_Encoding_DefaultJSON                                                                    = 24002
-	DatagramDataSetReaderTransportType_Address                                                                                     = 24017
-	ProgramDiagnostic2DataType_Encoding_DefaultBinary                                                                              = 24034
-	ProgramDiagnostic2DataType_Encoding_DefaultXML                                                                                 = 24038
-	ProgramDiagnostic2DataType_Encoding_DefaultJSON                                                                                = 24042
-	PortableQualifiedName_Encoding_DefaultBinary                                                                                   = 24108
-	PortableNodeID_Encoding_DefaultBinary                                                                                          = 24109
-	UnsignedRationalNumber_Encoding_DefaultBinary                                                                                  = 24110
-	PortableQualifiedName_Encoding_DefaultXML                                                                                      = 24120
-	PortableNodeID_Encoding_DefaultXML                                                                                             = 24121
-	UnsignedRationalNumber_Encoding_DefaultXML                                                                                     = 24122
-	PortableQualifiedName_Encoding_DefaultJSON                                                                                     = 24132
-	PortableNodeID_Encoding_DefaultJSON                                                                                            = 24133
-	UnsignedRationalNumber_Encoding_DefaultJSON                                                                                    = 24134
-	Resources                                                                                                                      = 24226
-	Communication                                                                                                                  = 24227
-	MappingTables                                                                                                                  = 24228
-	NetworkInterfaces                                                                                                              = 24229
-	Streams                                                                                                                        = 24230
-	TalkerStreams                                                                                                                  = 24231
-	ListenerStreams                                                                                                                = 24232
-	UserManagement                                                                                                                 = 24290
-	UserManagementDataType_Encoding_DefaultBinary                                                                                  = 24292
-	UserManagementDataType_Encoding_DefaultXML                                                                                     = 24296
-	UserManagementDataType_Encoding_DefaultJSON                                                                                    = 24300
-	IetfBaseNetworkInterfaceType_InterfaceName_Placeholder                                                                         = 25226
-	PriorityMappingEntryType_Encoding_DefaultBinary                                                                                = 25239
-	PriorityMappingEntryType_Encoding_DefaultXML                                                                                   = 25243
-	PriorityMappingEntryType_Encoding_DefaultJSON                                                                                  = 25247
-	PubSubKeyServiceType_KeyPushTargets                                                                                            = 25277
-	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder                                                                 = 25347
-	PubSubKeyPushTargetFolderType_PushTargetName_Placeholder                                                                       = 25358
-	PublishSubscribeType_KeyPushTargets                                                                                            = 25392
-	PublishSubscribeType_PubSubConfiguration                                                                                       = 25403
-	PublishSubscribe_KeyPushTargets                                                                                                = 25440
-	PublishSubscribe_PubSubConfiguration                                                                                           = 25451
-	PublishedDataSetCustomSourceDataType_Encoding_DefaultBinary                                                                    = 25529
-	PubSubKeyPushTargetDataType_Encoding_DefaultBinary                                                                             = 25530
-	PubSubConfigurationRefDataType_Encoding_DefaultBinary                                                                          = 25531
-	PubSubConfigurationValueDataType_Encoding_DefaultBinary                                                                        = 25532
-	PublishedDataSetCustomSourceDataType_Encoding_DefaultXML                                                                       = 25545
-	PubSubKeyPushTargetDataType_Encoding_DefaultXML                                                                                = 25546
-	PubSubConfigurationRefDataType_Encoding_DefaultXML                                                                             = 25547
-	PubSubConfigurationValueDataType_Encoding_DefaultXML                                                                           = 25548
-	PublishedDataSetCustomSourceDataType_Encoding_DefaultJSON                                                                      = 25561
-	PubSubKeyPushTargetDataType_Encoding_DefaultJSON                                                                               = 25562
-	PubSubConfigurationRefDataType_Encoding_DefaultJSON                                                                            = 25563
-	PubSubConfigurationValueDataType_Encoding_DefaultJSON                                                                          = 25564
-	WellKnownRole_SecurityKeyServerAdmin                                                                                           = 25565
-	WellKnownRole_SecurityKeyServerPush                                                                                            = 25584
-	WellKnownRole_SecurityKeyServerAccess                                                                                          = 25603
-	PubSubKeyPushTargetType_SecurityGroupName_Placeholder                                                                          = 25626
-	ApplicationConfigurationType_CertificateGroups                                                                                 = 25732
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup                                                         = 25733
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList                                               = 25734
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired                                      = 25774
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState                        = 25861
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup                         = 25905
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate                                      = 25940
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState                        = 26027
-	ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup                         = 26071
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup                                                               = 26105
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList                                                     = 26106
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired                                            = 26146
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState                              = 26233
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup                               = 26277
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate                                            = 26312
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState                              = 26399
-	ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup                               = 26443
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup                                                           = 26477
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList                                                 = 26478
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired                                        = 26518
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState                          = 26605
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup                           = 26649
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate                                        = 26684
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState                          = 26771
-	ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup                           = 26815
-	ProvisionableDeviceType_ApplicationName_Placeholder                                                                            = 26878
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups                                                          = 26879
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup                                  = 26880
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList                        = 26881
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired               = 26921
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState = 27008
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup  = 27052
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate               = 27087
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState = 27174
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup  = 27218
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup                                        = 27252
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList                              = 27253
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired                     = 27293
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState       = 27380
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup        = 27424
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate                     = 27459
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState       = 27546
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup        = 27590
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup                                    = 27624
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList                          = 27625
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired                 = 27665
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState   = 27752
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup    = 27796
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate                 = 27831
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState   = 27918
-	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup    = 27962
-	ProvisionableDevice                                                                                                            = 29878
-	ProvisionableDevice_ApplicationName_Placeholder                                                                                = 29885
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups                                                              = 29886
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup                                      = 29887
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList                            = 29888
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired                   = 29928
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState     = 30015
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup      = 30059
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate                   = 30094
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState     = 30181
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup      = 30225
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup                                            = 30259
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList                                  = 30260
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired                         = 30300
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState           = 30387
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup            = 30431
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate                         = 30466
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState           = 30553
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup            = 30597
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup                                        = 30631
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList                              = 30632
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired                     = 30672
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState       = 30759
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup        = 30803
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate                     = 30838
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState       = 30925
-	ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup        = 30969
-	Locations                                                                                                                      = 31915
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder                                                                   = 32065
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState                                                     = 32152
-	AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_FirstInGroup                                                      = 32196
-	ServerConfigurationType_TransactionDiagnostics                                                                                 = 32299
-	ServerConfiguration_TransactionDiagnostics                                                                                     = 32336
-	ApplicationConfigurationType_TransactionDiagnostics                                                                            = 32349
-	ProvisionableDeviceType_ApplicationName_Placeholder_TransactionDiagnostics                                                     = 32362
-	ProvisionableDevice_ApplicationName_Placeholder_TransactionDiagnostics                                                         = 32375
-	TransactionErrorType_Encoding_DefaultBinary                                                                                    = 32382
-	TransactionErrorType_Encoding_DefaultXML                                                                                       = 32386
-	TransactionErrorType_Encoding_DefaultJSON                                                                                      = 32390
-	DataSetClasses                                                                                                                 = 32405
-	DataSetClasses_SecurityGroups                                                                                                  = 32412
-	DataSetClasses_KeyPushTargets                                                                                                  = 32424
-	DataSetClasses_ConnectionName_Placeholder                                                                                      = 32435
-	DataSetClasses_ConnectionName_Placeholder_Address                                                                              = 32442
-	DataSetClasses_ConnectionName_Placeholder_TransportSettings                                                                    = 32447
-	DataSetClasses_ConnectionName_Placeholder_Status                                                                               = 32448
-	DataSetClasses_ConnectionName_Placeholder_Diagnostics                                                                          = 32452
-	DataSetClasses_ConnectionName_Placeholder_Diagnostics_Counters                                                                 = 32466
-	DataSetClasses_ConnectionName_Placeholder_Diagnostics_LiveValues                                                               = 32497
-	DataSetClasses_PublishedDataSets                                                                                               = 32515
-	DataSetClasses_SubscribedDataSets                                                                                              = 32535
-	DataSetClasses_PubSubConfiguration                                                                                             = 32546
-	DataSetClasses_Status                                                                                                          = 32575
-	DataSetClasses_Diagnostics                                                                                                     = 32579
-	DataSetClasses_Diagnostics_Counters                                                                                            = 32593
-	DataSetClasses_Diagnostics_LiveValues                                                                                          = 32624
-	DataSetClasses_PubSubCapablities                                                                                               = 32633
-	DataSetClasses_DataSetClasses                                                                                                  = 32644
-	ReferenceDescriptionDataType_Encoding_DefaultBinary                                                                            = 32661
-	ReferenceListEntryDataType_Encoding_DefaultBinary                                                                              = 32662
-	ReferenceDescriptionDataType_Encoding_DefaultXML                                                                               = 32669
-	ReferenceListEntryDataType_Encoding_DefaultXML                                                                                 = 32670
-	ReferenceDescriptionDataType_Encoding_DefaultJSON                                                                              = 32677
-	ReferenceListEntryDataType_Encoding_DefaultJSON                                                                                = 32678
+	ModellingRule_Mandatory                                                                                                                   = 78
+	ModellingRule_Optional                                                                                                                    = 80
+	ModellingRule_ExposesItsArray                                                                                                             = 83
+	RootFolder                                                                                                                                = 84
+	ObjectsFolder                                                                                                                             = 85
+	TypesFolder                                                                                                                               = 86
+	ViewsFolder                                                                                                                               = 87
+	ObjectTypesFolder                                                                                                                         = 88
+	VariableTypesFolder                                                                                                                       = 89
+	DataTypesFolder                                                                                                                           = 90
+	ReferenceTypesFolder                                                                                                                      = 91
+	XMLSchema_TypeSystem                                                                                                                      = 92
+	OPCBinarySchema_TypeSystem                                                                                                                = 93
+	DataTypeDefinition_Encoding_DefaultBinary                                                                                                 = 121
+	StructureDefinition_Encoding_DefaultBinary                                                                                                = 122
+	EnumDefinition_Encoding_DefaultBinary                                                                                                     = 123
+	DataSetMetaDataType_Encoding_DefaultBinary                                                                                                = 124
+	DataTypeDescription_Encoding_DefaultBinary                                                                                                = 125
+	StructureDescription_Encoding_DefaultBinary                                                                                               = 126
+	EnumDescription_Encoding_DefaultBinary                                                                                                    = 127
+	RolePermissionType_Encoding_DefaultBinary                                                                                                 = 128
+	Node_Encoding_DefaultXML                                                                                                                  = 259
+	Node_Encoding_DefaultBinary                                                                                                               = 260
+	ObjectNode_Encoding_DefaultXML                                                                                                            = 262
+	ObjectNode_Encoding_DefaultBinary                                                                                                         = 263
+	ObjectTypeNode_Encoding_DefaultXML                                                                                                        = 265
+	ObjectTypeNode_Encoding_DefaultBinary                                                                                                     = 266
+	VariableNode_Encoding_DefaultXML                                                                                                          = 268
+	VariableNode_Encoding_DefaultBinary                                                                                                       = 269
+	VariableTypeNode_Encoding_DefaultXML                                                                                                      = 271
+	VariableTypeNode_Encoding_DefaultBinary                                                                                                   = 272
+	ReferenceTypeNode_Encoding_DefaultXML                                                                                                     = 274
+	ReferenceTypeNode_Encoding_DefaultBinary                                                                                                  = 275
+	MethodNode_Encoding_DefaultXML                                                                                                            = 277
+	MethodNode_Encoding_DefaultBinary                                                                                                         = 278
+	ViewNode_Encoding_DefaultXML                                                                                                              = 280
+	ViewNode_Encoding_DefaultBinary                                                                                                           = 281
+	DataTypeNode_Encoding_DefaultXML                                                                                                          = 283
+	DataTypeNode_Encoding_DefaultBinary                                                                                                       = 284
+	ReferenceNode_Encoding_DefaultXML                                                                                                         = 286
+	ReferenceNode_Encoding_DefaultBinary                                                                                                      = 287
+	Argument_Encoding_DefaultXML                                                                                                              = 297
+	Argument_Encoding_DefaultBinary                                                                                                           = 298
+	StatusResult_Encoding_DefaultXML                                                                                                          = 300
+	StatusResult_Encoding_DefaultBinary                                                                                                       = 301
+	UserTokenPolicy_Encoding_DefaultXML                                                                                                       = 305
+	UserTokenPolicy_Encoding_DefaultBinary                                                                                                    = 306
+	ApplicationDescription_Encoding_DefaultXML                                                                                                = 309
+	ApplicationDescription_Encoding_DefaultBinary                                                                                             = 310
+	EndpointDescription_Encoding_DefaultXML                                                                                                   = 313
+	EndpointDescription_Encoding_DefaultBinary                                                                                                = 314
+	UserIdentityToken_Encoding_DefaultXML                                                                                                     = 317
+	UserIdentityToken_Encoding_DefaultBinary                                                                                                  = 318
+	AnonymousIdentityToken_Encoding_DefaultXML                                                                                                = 320
+	AnonymousIdentityToken_Encoding_DefaultBinary                                                                                             = 321
+	UserNameIdentityToken_Encoding_DefaultXML                                                                                                 = 323
+	UserNameIdentityToken_Encoding_DefaultBinary                                                                                              = 324
+	X509IdentityToken_Encoding_DefaultXML                                                                                                     = 326
+	X509IdentityToken_Encoding_DefaultBinary                                                                                                  = 327
+	EndpointConfiguration_Encoding_DefaultXML                                                                                                 = 332
+	EndpointConfiguration_Encoding_DefaultBinary                                                                                              = 333
+	BuildInfo_Encoding_DefaultXML                                                                                                             = 339
+	BuildInfo_Encoding_DefaultBinary                                                                                                          = 340
+	SignedSoftwareCertificate_Encoding_DefaultXML                                                                                             = 345
+	SignedSoftwareCertificate_Encoding_DefaultBinary                                                                                          = 346
+	NodeAttributes_Encoding_DefaultXML                                                                                                        = 350
+	NodeAttributes_Encoding_DefaultBinary                                                                                                     = 351
+	ObjectAttributes_Encoding_DefaultXML                                                                                                      = 353
+	ObjectAttributes_Encoding_DefaultBinary                                                                                                   = 354
+	VariableAttributes_Encoding_DefaultXML                                                                                                    = 356
+	VariableAttributes_Encoding_DefaultBinary                                                                                                 = 357
+	MethodAttributes_Encoding_DefaultXML                                                                                                      = 359
+	MethodAttributes_Encoding_DefaultBinary                                                                                                   = 360
+	ObjectTypeAttributes_Encoding_DefaultXML                                                                                                  = 362
+	ObjectTypeAttributes_Encoding_DefaultBinary                                                                                               = 363
+	VariableTypeAttributes_Encoding_DefaultXML                                                                                                = 365
+	VariableTypeAttributes_Encoding_DefaultBinary                                                                                             = 366
+	ReferenceTypeAttributes_Encoding_DefaultXML                                                                                               = 368
+	ReferenceTypeAttributes_Encoding_DefaultBinary                                                                                            = 369
+	DataTypeAttributes_Encoding_DefaultXML                                                                                                    = 371
+	DataTypeAttributes_Encoding_DefaultBinary                                                                                                 = 372
+	ViewAttributes_Encoding_DefaultXML                                                                                                        = 374
+	ViewAttributes_Encoding_DefaultBinary                                                                                                     = 375
+	AddNodesItem_Encoding_DefaultXML                                                                                                          = 377
+	AddNodesItem_Encoding_DefaultBinary                                                                                                       = 378
+	AddReferencesItem_Encoding_DefaultXML                                                                                                     = 380
+	AddReferencesItem_Encoding_DefaultBinary                                                                                                  = 381
+	DeleteNodesItem_Encoding_DefaultXML                                                                                                       = 383
+	DeleteNodesItem_Encoding_DefaultBinary                                                                                                    = 384
+	DeleteReferencesItem_Encoding_DefaultXML                                                                                                  = 386
+	DeleteReferencesItem_Encoding_DefaultBinary                                                                                               = 387
+	RequestHeader_Encoding_DefaultXML                                                                                                         = 390
+	RequestHeader_Encoding_DefaultBinary                                                                                                      = 391
+	ResponseHeader_Encoding_DefaultXML                                                                                                        = 393
+	ResponseHeader_Encoding_DefaultBinary                                                                                                     = 394
+	ServiceFault_Encoding_DefaultXML                                                                                                          = 396
+	ServiceFault_Encoding_DefaultBinary                                                                                                       = 397
+	FindServersRequest_Encoding_DefaultXML                                                                                                    = 421
+	FindServersRequest_Encoding_DefaultBinary                                                                                                 = 422
+	FindServersResponse_Encoding_DefaultXML                                                                                                   = 424
+	FindServersResponse_Encoding_DefaultBinary                                                                                                = 425
+	GetEndpointsRequest_Encoding_DefaultXML                                                                                                   = 427
+	GetEndpointsRequest_Encoding_DefaultBinary                                                                                                = 428
+	GetEndpointsResponse_Encoding_DefaultXML                                                                                                  = 430
+	GetEndpointsResponse_Encoding_DefaultBinary                                                                                               = 431
+	RegisteredServer_Encoding_DefaultXML                                                                                                      = 433
+	RegisteredServer_Encoding_DefaultBinary                                                                                                   = 434
+	RegisterServerRequest_Encoding_DefaultXML                                                                                                 = 436
+	RegisterServerRequest_Encoding_DefaultBinary                                                                                              = 437
+	RegisterServerResponse_Encoding_DefaultXML                                                                                                = 439
+	RegisterServerResponse_Encoding_DefaultBinary                                                                                             = 440
+	ChannelSecurityToken_Encoding_DefaultXML                                                                                                  = 442
+	ChannelSecurityToken_Encoding_DefaultBinary                                                                                               = 443
+	OpenSecureChannelRequest_Encoding_DefaultXML                                                                                              = 445
+	OpenSecureChannelRequest_Encoding_DefaultBinary                                                                                           = 446
+	OpenSecureChannelResponse_Encoding_DefaultXML                                                                                             = 448
+	OpenSecureChannelResponse_Encoding_DefaultBinary                                                                                          = 449
+	CloseSecureChannelRequest_Encoding_DefaultXML                                                                                             = 451
+	CloseSecureChannelRequest_Encoding_DefaultBinary                                                                                          = 452
+	CloseSecureChannelResponse_Encoding_DefaultXML                                                                                            = 454
+	CloseSecureChannelResponse_Encoding_DefaultBinary                                                                                         = 455
+	SignatureData_Encoding_DefaultXML                                                                                                         = 457
+	SignatureData_Encoding_DefaultBinary                                                                                                      = 458
+	CreateSessionRequest_Encoding_DefaultXML                                                                                                  = 460
+	CreateSessionRequest_Encoding_DefaultBinary                                                                                               = 461
+	CreateSessionResponse_Encoding_DefaultXML                                                                                                 = 463
+	CreateSessionResponse_Encoding_DefaultBinary                                                                                              = 464
+	ActivateSessionRequest_Encoding_DefaultXML                                                                                                = 466
+	ActivateSessionRequest_Encoding_DefaultBinary                                                                                             = 467
+	ActivateSessionResponse_Encoding_DefaultXML                                                                                               = 469
+	ActivateSessionResponse_Encoding_DefaultBinary                                                                                            = 470
+	CloseSessionRequest_Encoding_DefaultXML                                                                                                   = 472
+	CloseSessionRequest_Encoding_DefaultBinary                                                                                                = 473
+	CloseSessionResponse_Encoding_DefaultXML                                                                                                  = 475
+	CloseSessionResponse_Encoding_DefaultBinary                                                                                               = 476
+	CancelRequest_Encoding_DefaultXML                                                                                                         = 478
+	CancelRequest_Encoding_DefaultBinary                                                                                                      = 479
+	CancelResponse_Encoding_DefaultXML                                                                                                        = 481
+	CancelResponse_Encoding_DefaultBinary                                                                                                     = 482
+	AddNodesResult_Encoding_DefaultXML                                                                                                        = 484
+	AddNodesResult_Encoding_DefaultBinary                                                                                                     = 485
+	AddNodesRequest_Encoding_DefaultXML                                                                                                       = 487
+	AddNodesRequest_Encoding_DefaultBinary                                                                                                    = 488
+	AddNodesResponse_Encoding_DefaultXML                                                                                                      = 490
+	AddNodesResponse_Encoding_DefaultBinary                                                                                                   = 491
+	AddReferencesRequest_Encoding_DefaultXML                                                                                                  = 493
+	AddReferencesRequest_Encoding_DefaultBinary                                                                                               = 494
+	AddReferencesResponse_Encoding_DefaultXML                                                                                                 = 496
+	AddReferencesResponse_Encoding_DefaultBinary                                                                                              = 497
+	DeleteNodesRequest_Encoding_DefaultXML                                                                                                    = 499
+	DeleteNodesRequest_Encoding_DefaultBinary                                                                                                 = 500
+	DeleteNodesResponse_Encoding_DefaultXML                                                                                                   = 502
+	DeleteNodesResponse_Encoding_DefaultBinary                                                                                                = 503
+	DeleteReferencesRequest_Encoding_DefaultXML                                                                                               = 505
+	DeleteReferencesRequest_Encoding_DefaultBinary                                                                                            = 506
+	DeleteReferencesResponse_Encoding_DefaultXML                                                                                              = 508
+	DeleteReferencesResponse_Encoding_DefaultBinary                                                                                           = 509
+	ViewDescription_Encoding_DefaultXML                                                                                                       = 512
+	ViewDescription_Encoding_DefaultBinary                                                                                                    = 513
+	BrowseDescription_Encoding_DefaultXML                                                                                                     = 515
+	BrowseDescription_Encoding_DefaultBinary                                                                                                  = 516
+	ReferenceDescription_Encoding_DefaultXML                                                                                                  = 519
+	ReferenceDescription_Encoding_DefaultBinary                                                                                               = 520
+	BrowseResult_Encoding_DefaultXML                                                                                                          = 523
+	BrowseResult_Encoding_DefaultBinary                                                                                                       = 524
+	BrowseRequest_Encoding_DefaultXML                                                                                                         = 526
+	BrowseRequest_Encoding_DefaultBinary                                                                                                      = 527
+	BrowseResponse_Encoding_DefaultXML                                                                                                        = 529
+	BrowseResponse_Encoding_DefaultBinary                                                                                                     = 530
+	BrowseNextRequest_Encoding_DefaultXML                                                                                                     = 532
+	BrowseNextRequest_Encoding_DefaultBinary                                                                                                  = 533
+	BrowseNextResponse_Encoding_DefaultXML                                                                                                    = 535
+	BrowseNextResponse_Encoding_DefaultBinary                                                                                                 = 536
+	RelativePathElement_Encoding_DefaultXML                                                                                                   = 538
+	RelativePathElement_Encoding_DefaultBinary                                                                                                = 539
+	RelativePath_Encoding_DefaultXML                                                                                                          = 541
+	RelativePath_Encoding_DefaultBinary                                                                                                       = 542
+	BrowsePath_Encoding_DefaultXML                                                                                                            = 544
+	BrowsePath_Encoding_DefaultBinary                                                                                                         = 545
+	BrowsePathTarget_Encoding_DefaultXML                                                                                                      = 547
+	BrowsePathTarget_Encoding_DefaultBinary                                                                                                   = 548
+	BrowsePathResult_Encoding_DefaultXML                                                                                                      = 550
+	BrowsePathResult_Encoding_DefaultBinary                                                                                                   = 551
+	TranslateBrowsePathsToNodeIDsRequest_Encoding_DefaultXML                                                                                  = 553
+	TranslateBrowsePathsToNodeIDsRequest_Encoding_DefaultBinary                                                                               = 554
+	TranslateBrowsePathsToNodeIDsResponse_Encoding_DefaultXML                                                                                 = 556
+	TranslateBrowsePathsToNodeIDsResponse_Encoding_DefaultBinary                                                                              = 557
+	RegisterNodesRequest_Encoding_DefaultXML                                                                                                  = 559
+	RegisterNodesRequest_Encoding_DefaultBinary                                                                                               = 560
+	RegisterNodesResponse_Encoding_DefaultXML                                                                                                 = 562
+	RegisterNodesResponse_Encoding_DefaultBinary                                                                                              = 563
+	UnregisterNodesRequest_Encoding_DefaultXML                                                                                                = 565
+	UnregisterNodesRequest_Encoding_DefaultBinary                                                                                             = 566
+	UnregisterNodesResponse_Encoding_DefaultXML                                                                                               = 568
+	UnregisterNodesResponse_Encoding_DefaultBinary                                                                                            = 569
+	QueryDataDescription_Encoding_DefaultXML                                                                                                  = 571
+	QueryDataDescription_Encoding_DefaultBinary                                                                                               = 572
+	NodeTypeDescription_Encoding_DefaultXML                                                                                                   = 574
+	NodeTypeDescription_Encoding_DefaultBinary                                                                                                = 575
+	QueryDataSet_Encoding_DefaultXML                                                                                                          = 578
+	QueryDataSet_Encoding_DefaultBinary                                                                                                       = 579
+	NodeReference_Encoding_DefaultXML                                                                                                         = 581
+	NodeReference_Encoding_DefaultBinary                                                                                                      = 582
+	ContentFilterElement_Encoding_DefaultXML                                                                                                  = 584
+	ContentFilterElement_Encoding_DefaultBinary                                                                                               = 585
+	ContentFilter_Encoding_DefaultXML                                                                                                         = 587
+	ContentFilter_Encoding_DefaultBinary                                                                                                      = 588
+	FilterOperand_Encoding_DefaultXML                                                                                                         = 590
+	FilterOperand_Encoding_DefaultBinary                                                                                                      = 591
+	ElementOperand_Encoding_DefaultXML                                                                                                        = 593
+	ElementOperand_Encoding_DefaultBinary                                                                                                     = 594
+	LiteralOperand_Encoding_DefaultXML                                                                                                        = 596
+	LiteralOperand_Encoding_DefaultBinary                                                                                                     = 597
+	AttributeOperand_Encoding_DefaultXML                                                                                                      = 599
+	AttributeOperand_Encoding_DefaultBinary                                                                                                   = 600
+	SimpleAttributeOperand_Encoding_DefaultXML                                                                                                = 602
+	SimpleAttributeOperand_Encoding_DefaultBinary                                                                                             = 603
+	ContentFilterElementResult_Encoding_DefaultXML                                                                                            = 605
+	ContentFilterElementResult_Encoding_DefaultBinary                                                                                         = 606
+	ContentFilterResult_Encoding_DefaultXML                                                                                                   = 608
+	ContentFilterResult_Encoding_DefaultBinary                                                                                                = 609
+	ParsingResult_Encoding_DefaultXML                                                                                                         = 611
+	ParsingResult_Encoding_DefaultBinary                                                                                                      = 612
+	QueryFirstRequest_Encoding_DefaultXML                                                                                                     = 614
+	QueryFirstRequest_Encoding_DefaultBinary                                                                                                  = 615
+	QueryFirstResponse_Encoding_DefaultXML                                                                                                    = 617
+	QueryFirstResponse_Encoding_DefaultBinary                                                                                                 = 618
+	QueryNextRequest_Encoding_DefaultXML                                                                                                      = 620
+	QueryNextRequest_Encoding_DefaultBinary                                                                                                   = 621
+	QueryNextResponse_Encoding_DefaultXML                                                                                                     = 623
+	QueryNextResponse_Encoding_DefaultBinary                                                                                                  = 624
+	ReadValueID_Encoding_DefaultXML                                                                                                           = 627
+	ReadValueID_Encoding_DefaultBinary                                                                                                        = 628
+	ReadRequest_Encoding_DefaultXML                                                                                                           = 630
+	ReadRequest_Encoding_DefaultBinary                                                                                                        = 631
+	ReadResponse_Encoding_DefaultXML                                                                                                          = 633
+	ReadResponse_Encoding_DefaultBinary                                                                                                       = 634
+	HistoryReadValueID_Encoding_DefaultXML                                                                                                    = 636
+	HistoryReadValueID_Encoding_DefaultBinary                                                                                                 = 637
+	HistoryReadResult_Encoding_DefaultXML                                                                                                     = 639
+	HistoryReadResult_Encoding_DefaultBinary                                                                                                  = 640
+	HistoryReadDetails_Encoding_DefaultXML                                                                                                    = 642
+	HistoryReadDetails_Encoding_DefaultBinary                                                                                                 = 643
+	ReadEventDetails_Encoding_DefaultXML                                                                                                      = 645
+	ReadEventDetails_Encoding_DefaultBinary                                                                                                   = 646
+	ReadRawModifiedDetails_Encoding_DefaultXML                                                                                                = 648
+	ReadRawModifiedDetails_Encoding_DefaultBinary                                                                                             = 649
+	ReadProcessedDetails_Encoding_DefaultXML                                                                                                  = 651
+	ReadProcessedDetails_Encoding_DefaultBinary                                                                                               = 652
+	ReadAtTimeDetails_Encoding_DefaultXML                                                                                                     = 654
+	ReadAtTimeDetails_Encoding_DefaultBinary                                                                                                  = 655
+	HistoryData_Encoding_DefaultXML                                                                                                           = 657
+	HistoryData_Encoding_DefaultBinary                                                                                                        = 658
+	HistoryEvent_Encoding_DefaultXML                                                                                                          = 660
+	HistoryEvent_Encoding_DefaultBinary                                                                                                       = 661
+	HistoryReadRequest_Encoding_DefaultXML                                                                                                    = 663
+	HistoryReadRequest_Encoding_DefaultBinary                                                                                                 = 664
+	HistoryReadResponse_Encoding_DefaultXML                                                                                                   = 666
+	HistoryReadResponse_Encoding_DefaultBinary                                                                                                = 667
+	WriteValue_Encoding_DefaultXML                                                                                                            = 669
+	WriteValue_Encoding_DefaultBinary                                                                                                         = 670
+	WriteRequest_Encoding_DefaultXML                                                                                                          = 672
+	WriteRequest_Encoding_DefaultBinary                                                                                                       = 673
+	WriteResponse_Encoding_DefaultXML                                                                                                         = 675
+	WriteResponse_Encoding_DefaultBinary                                                                                                      = 676
+	HistoryUpdateDetails_Encoding_DefaultXML                                                                                                  = 678
+	HistoryUpdateDetails_Encoding_DefaultBinary                                                                                               = 679
+	UpdateDataDetails_Encoding_DefaultXML                                                                                                     = 681
+	UpdateDataDetails_Encoding_DefaultBinary                                                                                                  = 682
+	UpdateEventDetails_Encoding_DefaultXML                                                                                                    = 684
+	UpdateEventDetails_Encoding_DefaultBinary                                                                                                 = 685
+	DeleteRawModifiedDetails_Encoding_DefaultXML                                                                                              = 687
+	DeleteRawModifiedDetails_Encoding_DefaultBinary                                                                                           = 688
+	DeleteAtTimeDetails_Encoding_DefaultXML                                                                                                   = 690
+	DeleteAtTimeDetails_Encoding_DefaultBinary                                                                                                = 691
+	DeleteEventDetails_Encoding_DefaultXML                                                                                                    = 693
+	DeleteEventDetails_Encoding_DefaultBinary                                                                                                 = 694
+	HistoryUpdateResult_Encoding_DefaultXML                                                                                                   = 696
+	HistoryUpdateResult_Encoding_DefaultBinary                                                                                                = 697
+	HistoryUpdateRequest_Encoding_DefaultXML                                                                                                  = 699
+	HistoryUpdateRequest_Encoding_DefaultBinary                                                                                               = 700
+	HistoryUpdateResponse_Encoding_DefaultXML                                                                                                 = 702
+	HistoryUpdateResponse_Encoding_DefaultBinary                                                                                              = 703
+	CallMethodRequest_Encoding_DefaultXML                                                                                                     = 705
+	CallMethodRequest_Encoding_DefaultBinary                                                                                                  = 706
+	CallMethodResult_Encoding_DefaultXML                                                                                                      = 708
+	CallMethodResult_Encoding_DefaultBinary                                                                                                   = 709
+	CallRequest_Encoding_DefaultXML                                                                                                           = 711
+	CallRequest_Encoding_DefaultBinary                                                                                                        = 712
+	CallResponse_Encoding_DefaultXML                                                                                                          = 714
+	CallResponse_Encoding_DefaultBinary                                                                                                       = 715
+	MonitoringFilter_Encoding_DefaultXML                                                                                                      = 720
+	MonitoringFilter_Encoding_DefaultBinary                                                                                                   = 721
+	DataChangeFilter_Encoding_DefaultXML                                                                                                      = 723
+	DataChangeFilter_Encoding_DefaultBinary                                                                                                   = 724
+	EventFilter_Encoding_DefaultXML                                                                                                           = 726
+	EventFilter_Encoding_DefaultBinary                                                                                                        = 727
+	AggregateFilter_Encoding_DefaultXML                                                                                                       = 729
+	AggregateFilter_Encoding_DefaultBinary                                                                                                    = 730
+	MonitoringFilterResult_Encoding_DefaultXML                                                                                                = 732
+	MonitoringFilterResult_Encoding_DefaultBinary                                                                                             = 733
+	EventFilterResult_Encoding_DefaultXML                                                                                                     = 735
+	EventFilterResult_Encoding_DefaultBinary                                                                                                  = 736
+	AggregateFilterResult_Encoding_DefaultXML                                                                                                 = 738
+	AggregateFilterResult_Encoding_DefaultBinary                                                                                              = 739
+	MonitoringParameters_Encoding_DefaultXML                                                                                                  = 741
+	MonitoringParameters_Encoding_DefaultBinary                                                                                               = 742
+	MonitoredItemCreateRequest_Encoding_DefaultXML                                                                                            = 744
+	MonitoredItemCreateRequest_Encoding_DefaultBinary                                                                                         = 745
+	MonitoredItemCreateResult_Encoding_DefaultXML                                                                                             = 747
+	MonitoredItemCreateResult_Encoding_DefaultBinary                                                                                          = 748
+	CreateMonitoredItemsRequest_Encoding_DefaultXML                                                                                           = 750
+	CreateMonitoredItemsRequest_Encoding_DefaultBinary                                                                                        = 751
+	CreateMonitoredItemsResponse_Encoding_DefaultXML                                                                                          = 753
+	CreateMonitoredItemsResponse_Encoding_DefaultBinary                                                                                       = 754
+	MonitoredItemModifyRequest_Encoding_DefaultXML                                                                                            = 756
+	MonitoredItemModifyRequest_Encoding_DefaultBinary                                                                                         = 757
+	MonitoredItemModifyResult_Encoding_DefaultXML                                                                                             = 759
+	MonitoredItemModifyResult_Encoding_DefaultBinary                                                                                          = 760
+	ModifyMonitoredItemsRequest_Encoding_DefaultXML                                                                                           = 762
+	ModifyMonitoredItemsRequest_Encoding_DefaultBinary                                                                                        = 763
+	ModifyMonitoredItemsResponse_Encoding_DefaultXML                                                                                          = 765
+	ModifyMonitoredItemsResponse_Encoding_DefaultBinary                                                                                       = 766
+	SetMonitoringModeRequest_Encoding_DefaultXML                                                                                              = 768
+	SetMonitoringModeRequest_Encoding_DefaultBinary                                                                                           = 769
+	SetMonitoringModeResponse_Encoding_DefaultXML                                                                                             = 771
+	SetMonitoringModeResponse_Encoding_DefaultBinary                                                                                          = 772
+	SetTriggeringRequest_Encoding_DefaultXML                                                                                                  = 774
+	SetTriggeringRequest_Encoding_DefaultBinary                                                                                               = 775
+	SetTriggeringResponse_Encoding_DefaultXML                                                                                                 = 777
+	SetTriggeringResponse_Encoding_DefaultBinary                                                                                              = 778
+	DeleteMonitoredItemsRequest_Encoding_DefaultXML                                                                                           = 780
+	DeleteMonitoredItemsRequest_Encoding_DefaultBinary                                                                                        = 781
+	DeleteMonitoredItemsResponse_Encoding_DefaultXML                                                                                          = 783
+	DeleteMonitoredItemsResponse_Encoding_DefaultBinary                                                                                       = 784
+	CreateSubscriptionRequest_Encoding_DefaultXML                                                                                             = 786
+	CreateSubscriptionRequest_Encoding_DefaultBinary                                                                                          = 787
+	CreateSubscriptionResponse_Encoding_DefaultXML                                                                                            = 789
+	CreateSubscriptionResponse_Encoding_DefaultBinary                                                                                         = 790
+	ModifySubscriptionRequest_Encoding_DefaultXML                                                                                             = 792
+	ModifySubscriptionRequest_Encoding_DefaultBinary                                                                                          = 793
+	ModifySubscriptionResponse_Encoding_DefaultXML                                                                                            = 795
+	ModifySubscriptionResponse_Encoding_DefaultBinary                                                                                         = 796
+	SetPublishingModeRequest_Encoding_DefaultXML                                                                                              = 798
+	SetPublishingModeRequest_Encoding_DefaultBinary                                                                                           = 799
+	SetPublishingModeResponse_Encoding_DefaultXML                                                                                             = 801
+	SetPublishingModeResponse_Encoding_DefaultBinary                                                                                          = 802
+	NotificationMessage_Encoding_DefaultXML                                                                                                   = 804
+	NotificationMessage_Encoding_DefaultBinary                                                                                                = 805
+	MonitoredItemNotification_Encoding_DefaultXML                                                                                             = 807
+	MonitoredItemNotification_Encoding_DefaultBinary                                                                                          = 808
+	DataChangeNotification_Encoding_DefaultXML                                                                                                = 810
+	DataChangeNotification_Encoding_DefaultBinary                                                                                             = 811
+	StatusChangeNotification_Encoding_DefaultXML                                                                                              = 819
+	StatusChangeNotification_Encoding_DefaultBinary                                                                                           = 820
+	SubscriptionAcknowledgement_Encoding_DefaultXML                                                                                           = 822
+	SubscriptionAcknowledgement_Encoding_DefaultBinary                                                                                        = 823
+	PublishRequest_Encoding_DefaultXML                                                                                                        = 825
+	PublishRequest_Encoding_DefaultBinary                                                                                                     = 826
+	PublishResponse_Encoding_DefaultXML                                                                                                       = 828
+	PublishResponse_Encoding_DefaultBinary                                                                                                    = 829
+	RepublishRequest_Encoding_DefaultXML                                                                                                      = 831
+	RepublishRequest_Encoding_DefaultBinary                                                                                                   = 832
+	RepublishResponse_Encoding_DefaultXML                                                                                                     = 834
+	RepublishResponse_Encoding_DefaultBinary                                                                                                  = 835
+	TransferResult_Encoding_DefaultXML                                                                                                        = 837
+	TransferResult_Encoding_DefaultBinary                                                                                                     = 838
+	TransferSubscriptionsRequest_Encoding_DefaultXML                                                                                          = 840
+	TransferSubscriptionsRequest_Encoding_DefaultBinary                                                                                       = 841
+	TransferSubscriptionsResponse_Encoding_DefaultXML                                                                                         = 843
+	TransferSubscriptionsResponse_Encoding_DefaultBinary                                                                                      = 844
+	DeleteSubscriptionsRequest_Encoding_DefaultXML                                                                                            = 846
+	DeleteSubscriptionsRequest_Encoding_DefaultBinary                                                                                         = 847
+	DeleteSubscriptionsResponse_Encoding_DefaultXML                                                                                           = 849
+	DeleteSubscriptionsResponse_Encoding_DefaultBinary                                                                                        = 850
+	RedundantServerDataType_Encoding_DefaultXML                                                                                               = 854
+	RedundantServerDataType_Encoding_DefaultBinary                                                                                            = 855
+	SamplingIntervalDiagnosticsDataType_Encoding_DefaultXML                                                                                   = 857
+	SamplingIntervalDiagnosticsDataType_Encoding_DefaultBinary                                                                                = 858
+	ServerDiagnosticsSummaryDataType_Encoding_DefaultXML                                                                                      = 860
+	ServerDiagnosticsSummaryDataType_Encoding_DefaultBinary                                                                                   = 861
+	ServerStatusDataType_Encoding_DefaultXML                                                                                                  = 863
+	ServerStatusDataType_Encoding_DefaultBinary                                                                                               = 864
+	SessionDiagnosticsDataType_Encoding_DefaultXML                                                                                            = 866
+	SessionDiagnosticsDataType_Encoding_DefaultBinary                                                                                         = 867
+	SessionSecurityDiagnosticsDataType_Encoding_DefaultXML                                                                                    = 869
+	SessionSecurityDiagnosticsDataType_Encoding_DefaultBinary                                                                                 = 870
+	ServiceCounterDataType_Encoding_DefaultXML                                                                                                = 872
+	ServiceCounterDataType_Encoding_DefaultBinary                                                                                             = 873
+	SubscriptionDiagnosticsDataType_Encoding_DefaultXML                                                                                       = 875
+	SubscriptionDiagnosticsDataType_Encoding_DefaultBinary                                                                                    = 876
+	ModelChangeStructureDataType_Encoding_DefaultXML                                                                                          = 878
+	ModelChangeStructureDataType_Encoding_DefaultBinary                                                                                       = 879
+	Range_Encoding_DefaultXML                                                                                                                 = 885
+	Range_Encoding_DefaultBinary                                                                                                              = 886
+	EUInformation_Encoding_DefaultXML                                                                                                         = 888
+	EUInformation_Encoding_DefaultBinary                                                                                                      = 889
+	Annotation_Encoding_DefaultXML                                                                                                            = 892
+	Annotation_Encoding_DefaultBinary                                                                                                         = 893
+	ProgramDiagnosticDataType_Encoding_DefaultXML                                                                                             = 895
+	ProgramDiagnosticDataType_Encoding_DefaultBinary                                                                                          = 896
+	SemanticChangeStructureDataType_Encoding_DefaultXML                                                                                       = 898
+	SemanticChangeStructureDataType_Encoding_DefaultBinary                                                                                    = 899
+	EventNotificationList_Encoding_DefaultXML                                                                                                 = 915
+	EventNotificationList_Encoding_DefaultBinary                                                                                              = 916
+	EventFieldList_Encoding_DefaultXML                                                                                                        = 918
+	EventFieldList_Encoding_DefaultBinary                                                                                                     = 919
+	HistoryEventFieldList_Encoding_DefaultXML                                                                                                 = 921
+	HistoryEventFieldList_Encoding_DefaultBinary                                                                                              = 922
+	IssuedIdentityToken_Encoding_DefaultXML                                                                                                   = 939
+	IssuedIdentityToken_Encoding_DefaultBinary                                                                                                = 940
+	NotificationData_Encoding_DefaultXML                                                                                                      = 946
+	NotificationData_Encoding_DefaultBinary                                                                                                   = 947
+	AggregateConfiguration_Encoding_DefaultXML                                                                                                = 949
+	AggregateConfiguration_Encoding_DefaultBinary                                                                                             = 950
+	ServerType_ServerCapabilities                                                                                                             = 2009
+	ServerType_ServerDiagnostics                                                                                                              = 2010
+	ServerType_VendorServerInfo                                                                                                               = 2011
+	ServerType_ServerRedundancy                                                                                                               = 2012
+	ServerCapabilitiesType_ModellingRules                                                                                                     = 2019
+	Server                                                                                                                                    = 2253
+	Server_ServerCapabilities                                                                                                                 = 2268
+	Server_ServerDiagnostics                                                                                                                  = 2274
+	Server_VendorServerInfo                                                                                                                   = 2295
+	Server_ServerRedundancy                                                                                                                   = 2296
+	AggregateFunction_Interpolative                                                                                                           = 2341
+	AggregateFunction_Average                                                                                                                 = 2342
+	AggregateFunction_TimeAverage                                                                                                             = 2343
+	AggregateFunction_Total                                                                                                                   = 2344
+	AggregateFunction_Minimum                                                                                                                 = 2346
+	AggregateFunction_Maximum                                                                                                                 = 2347
+	AggregateFunction_MinimumActualTime                                                                                                       = 2348
+	AggregateFunction_MaximumActualTime                                                                                                       = 2349
+	AggregateFunction_Range                                                                                                                   = 2350
+	AggregateFunction_AnnotationCount                                                                                                         = 2351
+	AggregateFunction_Count                                                                                                                   = 2352
+	AggregateFunction_NumberOfTransitions                                                                                                     = 2355
+	AggregateFunction_Start                                                                                                                   = 2357
+	AggregateFunction_End                                                                                                                     = 2358
+	AggregateFunction_Delta                                                                                                                   = 2359
+	AggregateFunction_DurationGood                                                                                                            = 2360
+	AggregateFunction_DurationBad                                                                                                             = 2361
+	AggregateFunction_PercentGood                                                                                                             = 2362
+	AggregateFunction_PercentBad                                                                                                              = 2363
+	AggregateFunction_WorstQuality                                                                                                            = 2364
+	ProgramStateMachineType_Ready                                                                                                             = 2400
+	ProgramStateMachineType_Running                                                                                                           = 2402
+	ProgramStateMachineType_Suspended                                                                                                         = 2404
+	ProgramStateMachineType_Halted                                                                                                            = 2406
+	ProgramStateMachineType_HaltedToReady                                                                                                     = 2408
+	ProgramStateMachineType_ReadyToRunning                                                                                                    = 2410
+	ProgramStateMachineType_RunningToHalted                                                                                                   = 2412
+	ProgramStateMachineType_RunningToReady                                                                                                    = 2414
+	ProgramStateMachineType_RunningToSuspended                                                                                                = 2416
+	ProgramStateMachineType_SuspendedToRunning                                                                                                = 2418
+	ProgramStateMachineType_SuspendedToHalted                                                                                                 = 2420
+	ProgramStateMachineType_SuspendedToReady                                                                                                  = 2422
+	ProgramStateMachineType_ReadyToHalted                                                                                                     = 2424
+	ServerDiagnosticsType_SessionsDiagnosticsSummary                                                                                          = 2744
+	ServerCapabilitiesType_AggregateFunctions                                                                                                 = 2754
+	ShelvedStateMachineType_Unshelved                                                                                                         = 2930
+	ShelvedStateMachineType_TimedShelved                                                                                                      = 2932
+	ShelvedStateMachineType_OneShotShelved                                                                                                    = 2933
+	ShelvedStateMachineType_UnshelvedToTimedShelved                                                                                           = 2935
+	ShelvedStateMachineType_UnshelvedToOneShotShelved                                                                                         = 2936
+	ShelvedStateMachineType_TimedShelvedToUnshelved                                                                                           = 2940
+	ShelvedStateMachineType_TimedShelvedToOneShotShelved                                                                                      = 2942
+	ShelvedStateMachineType_OneShotShelvedToUnshelved                                                                                         = 2943
+	ShelvedStateMachineType_OneShotShelvedToTimedShelved                                                                                      = 2945
+	Server_ServerCapabilities_ModellingRules                                                                                                  = 2996
+	Server_ServerCapabilities_AggregateFunctions                                                                                              = 2997
+	EventTypesFolder                                                                                                                          = 3048
+	HistoricalDataConfigurationType_AggregateConfiguration                                                                                    = 3059
+	DefaultBinary                                                                                                                             = 3062
+	DefaultXML                                                                                                                                = 3063
+	ServerType_ServerCapabilities_ModellingRules                                                                                              = 3093
+	ServerType_ServerCapabilities_AggregateFunctions                                                                                          = 3094
+	ServerType_ServerDiagnostics_SessionsDiagnosticsSummary                                                                                   = 3111
+	Server_ServerDiagnostics_SessionsDiagnosticsSummary                                                                                       = 3706
+	ProgramStateMachineType_FinalResultData                                                                                                   = 3850
+	EnumValueType_Encoding_DefaultXML                                                                                                         = 7616
+	EnumValueType_Encoding_DefaultBinary                                                                                                      = 8251
+	TimeZoneDataType_Encoding_DefaultXML                                                                                                      = 8913
+	TimeZoneDataType_Encoding_DefaultBinary                                                                                                   = 8917
+	AlarmConditionType_ShelvingState                                                                                                          = 9178
+	ExclusiveLimitStateMachineType_HighHigh                                                                                                   = 9329
+	ExclusiveLimitStateMachineType_High                                                                                                       = 9331
+	ExclusiveLimitStateMachineType_Low                                                                                                        = 9333
+	ExclusiveLimitStateMachineType_LowLow                                                                                                     = 9335
+	ExclusiveLimitStateMachineType_LowLowToLow                                                                                                = 9337
+	ExclusiveLimitStateMachineType_LowToLowLow                                                                                                = 9338
+	ExclusiveLimitStateMachineType_HighHighToHigh                                                                                             = 9339
+	ExclusiveLimitStateMachineType_HighToHighHigh                                                                                             = 9340
+	ExclusiveLimitAlarmType_LimitState                                                                                                        = 9455
+	HistoryServerCapabilitiesType_AggregateFunctions                                                                                          = 11172
+	HistoryServerCapabilities                                                                                                                 = 11192
+	HistoryServerCapabilities_AggregateFunctions                                                                                              = 11201
+	HAConfiguration                                                                                                                           = 11202
+	HAConfiguration_AggregateConfiguration                                                                                                    = 11203
+	ModificationInfo_Encoding_DefaultXML                                                                                                      = 11218
+	HistoryModifiedData_Encoding_DefaultXML                                                                                                   = 11219
+	ModificationInfo_Encoding_DefaultBinary                                                                                                   = 11226
+	HistoryModifiedData_Encoding_DefaultBinary                                                                                                = 11227
+	AggregateFunction_TimeAverage2                                                                                                            = 11285
+	AggregateFunction_Minimum2                                                                                                                = 11286
+	AggregateFunction_Maximum2                                                                                                                = 11287
+	AggregateFunction_Range2                                                                                                                  = 11288
+	AggregateFunction_WorstQuality2                                                                                                           = 11292
+	UpdateStructureDataDetails_Encoding_DefaultXML                                                                                            = 11296
+	UpdateStructureDataDetails_Encoding_DefaultBinary                                                                                         = 11300
+	AggregateFunction_Total2                                                                                                                  = 11304
+	AggregateFunction_MinimumActualTime2                                                                                                      = 11305
+	AggregateFunction_MaximumActualTime2                                                                                                      = 11306
+	AggregateFunction_DurationInStateZero                                                                                                     = 11307
+	AggregateFunction_DurationInStateNonZero                                                                                                  = 11308
+	AggregateFunction_StandardDeviationSample                                                                                                 = 11426
+	AggregateFunction_StandardDeviationPopulation                                                                                             = 11427
+	AggregateFunction_VarianceSample                                                                                                          = 11428
+	AggregateFunction_VariancePopulation                                                                                                      = 11429
+	AggregateFunction_StartBound                                                                                                              = 11505
+	AggregateFunction_EndBound                                                                                                                = 11506
+	AggregateFunction_DeltaBounds                                                                                                             = 11507
+	ModellingRule_OptionalPlaceholder                                                                                                         = 11508
+	ModellingRule_MandatoryPlaceholder                                                                                                        = 11510
+	ServerType_ServerCapabilities_OperationLimits                                                                                             = 11516
+	ServerType_Namespaces                                                                                                                     = 11527
+	ServerCapabilitiesType_OperationLimits                                                                                                    = 11551
+	NamespaceMetadataType_NamespaceFile                                                                                                       = 11624
+	NamespacesType_NamespaceIDentifier_Placeholder                                                                                            = 11646
+	NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile                                                                              = 11654
+	Server_ServerCapabilities_OperationLimits                                                                                                 = 11704
+	Server_Namespaces                                                                                                                         = 11715
+	HistoricalDataConfigurationType_AggregateFunctions                                                                                        = 11876
+	HAConfiguration_AggregateFunctions                                                                                                        = 11877
+	InstanceNode_Encoding_DefaultXML                                                                                                          = 11887
+	TypeNode_Encoding_DefaultXML                                                                                                              = 11888
+	InstanceNode_Encoding_DefaultBinary                                                                                                       = 11889
+	TypeNode_Encoding_DefaultBinary                                                                                                           = 11890
+	EndpointURLListDataType_Encoding_DefaultXML                                                                                               = 11949
+	NetworkGroupDataType_Encoding_DefaultXML                                                                                                  = 11950
+	EndpointURLListDataType_Encoding_DefaultBinary                                                                                            = 11957
+	NetworkGroupDataType_Encoding_DefaultBinary                                                                                               = 11958
+	AxisInformation_Encoding_DefaultXML                                                                                                       = 12081
+	XVType_Encoding_DefaultXML                                                                                                                = 12082
+	AxisInformation_Encoding_DefaultBinary                                                                                                    = 12089
+	XVType_Encoding_DefaultBinary                                                                                                             = 12090
+	SessionsDiagnosticsSummaryType_ClientName_Placeholder                                                                                     = 12097
+	ComplexNumberType_Encoding_DefaultXML                                                                                                     = 12173
+	DoubleComplexNumberType_Encoding_DefaultXML                                                                                               = 12174
+	ComplexNumberType_Encoding_DefaultBinary                                                                                                  = 12181
+	DoubleComplexNumberType_Encoding_DefaultBinary                                                                                            = 12182
+	ServerOnNetwork_Encoding_DefaultXML                                                                                                       = 12195
+	FindServersOnNetworkRequest_Encoding_DefaultXML                                                                                           = 12196
+	FindServersOnNetworkResponse_Encoding_DefaultXML                                                                                          = 12197
+	RegisterServer2Request_Encoding_DefaultXML                                                                                                = 12199
+	RegisterServer2Response_Encoding_DefaultXML                                                                                               = 12200
+	ServerOnNetwork_Encoding_DefaultBinary                                                                                                    = 12207
+	FindServersOnNetworkRequest_Encoding_DefaultBinary                                                                                        = 12208
+	FindServersOnNetworkResponse_Encoding_DefaultBinary                                                                                       = 12209
+	RegisterServer2Request_Encoding_DefaultBinary                                                                                             = 12211
+	RegisterServer2Response_Encoding_DefaultBinary                                                                                            = 12212
+	ServerConfiguration                                                                                                                       = 12637
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList                                                                   = 12642
+	TrustListDataType_Encoding_DefaultXML                                                                                                     = 12676
+	TrustListDataType_Encoding_DefaultBinary                                                                                                  = 12680
+	OptionSet_Encoding_DefaultXML                                                                                                             = 12757
+	Union_Encoding_DefaultXML                                                                                                                 = 12758
+	OptionSet_Encoding_DefaultBinary                                                                                                          = 12765
+	Union_Encoding_DefaultBinary                                                                                                              = 12766
+	DiscoveryConfiguration_Encoding_DefaultXML                                                                                                = 12892
+	MdnsDiscoveryConfiguration_Encoding_DefaultXML                                                                                            = 12893
+	DiscoveryConfiguration_Encoding_DefaultBinary                                                                                             = 12900
+	MdnsDiscoveryConfiguration_Encoding_DefaultBinary                                                                                         = 12901
+	FileDirectoryType_FileDirectoryName_Placeholder                                                                                           = 13354
+	FileDirectoryType_FileName_Placeholder                                                                                                    = 13366
+	CertificateGroupType_TrustList                                                                                                            = 13599
+	CertificateGroupFolderType_DefaultApplicationGroup                                                                                        = 13814
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustList                                                                              = 13815
+	CertificateGroupFolderType_DefaultHttpsGroup                                                                                              = 13848
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustList                                                                                    = 13849
+	CertificateGroupFolderType_DefaultUserTokenGroup                                                                                          = 13882
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustList                                                                                = 13883
+	CertificateGroupFolderType_AdditionalGroup_Placeholder                                                                                    = 13916
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustList                                                                          = 13917
+	ServerConfigurationType_CertificateGroups                                                                                                 = 13950
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup                                                                         = 13951
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList                                                               = 13952
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup                                                                               = 13985
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList                                                                     = 13986
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup                                                                           = 14019
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList                                                                 = 14020
+	ServerConfiguration_CertificateGroups                                                                                                     = 14053
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup                                                                                   = 14088
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustList                                                                         = 14089
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup                                                                               = 14122
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList                                                                     = 14123
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup                                                                             = 14156
+	PubSubConnectionType_Address                                                                                                              = 14221
+	PublishedVariableDataType_Encoding_DefaultXML                                                                                             = 14319
+	PublishedVariableDataType_Encoding_DefaultBinary                                                                                          = 14323
+	PublishSubscribeType_ConnectionName_Placeholder                                                                                           = 14417
+	PublishSubscribeType_ConnectionName_Placeholder_Status                                                                                    = 14419
+	PublishSubscribeType_ConnectionName_Placeholder_Address                                                                                   = 14423
+	PublishSubscribeType_PublishedDataSets                                                                                                    = 14434
+	PublishSubscribe                                                                                                                          = 14443
+	DataSetFolderType_DataSetFolderName_Placeholder                                                                                           = 14478
+	DataSetFolderType_PublishedDataSetName_Placeholder                                                                                        = 14487
+	PubSubConnectionType_Status                                                                                                               = 14600
+	DataSetMetaDataType_Encoding_DefaultXML                                                                                                   = 14794
+	FieldMetaData_Encoding_DefaultXML                                                                                                         = 14795
+	DataTypeDescription_Encoding_DefaultXML                                                                                                   = 14796
+	DataTypeDefinition_Encoding_DefaultXML                                                                                                    = 14797
+	StructureDefinition_Encoding_DefaultXML                                                                                                   = 14798
+	EnumDefinition_Encoding_DefaultXML                                                                                                        = 14799
+	StructureField_Encoding_DefaultXML                                                                                                        = 14800
+	EnumField_Encoding_DefaultXML                                                                                                             = 14801
+	KeyValuePair_Encoding_DefaultXML                                                                                                          = 14802
+	ConfigurationVersionDataType_Encoding_DefaultXML                                                                                          = 14803
+	FieldTargetDataType_Encoding_DefaultXML                                                                                                   = 14804
+	FieldMetaData_Encoding_DefaultBinary                                                                                                      = 14839
+	StructureField_Encoding_DefaultBinary                                                                                                     = 14844
+	EnumField_Encoding_DefaultBinary                                                                                                          = 14845
+	KeyValuePair_Encoding_DefaultBinary                                                                                                       = 14846
+	ConfigurationVersionDataType_Encoding_DefaultBinary                                                                                       = 14847
+	FieldTargetDataType_Encoding_DefaultBinary                                                                                                = 14848
+	KeyValuePair_Encoding_DefaultJSON                                                                                                         = 15041
+	IdentityMappingRuleType_Encoding_DefaultJSON                                                                                              = 15042
+	TrustListDataType_Encoding_DefaultJSON                                                                                                    = 15044
+	DecimalDataType_Encoding_DefaultJSON                                                                                                      = 15045
+	ConfigurationVersionDataType_Encoding_DefaultJSON                                                                                         = 15049
+	DataSetMetaDataType_Encoding_DefaultJSON                                                                                                  = 15050
+	FieldMetaData_Encoding_DefaultJSON                                                                                                        = 15051
+	DataTypeDescription_Encoding_DefaultJSON                                                                                                  = 15057
+	StructureDescription_Encoding_DefaultJSON                                                                                                 = 15058
+	EnumDescription_Encoding_DefaultJSON                                                                                                      = 15059
+	PublishedVariableDataType_Encoding_DefaultJSON                                                                                            = 15060
+	FieldTargetDataType_Encoding_DefaultJSON                                                                                                  = 15061
+	RolePermissionType_Encoding_DefaultJSON                                                                                                   = 15062
+	DataTypeDefinition_Encoding_DefaultJSON                                                                                                   = 15063
+	StructureField_Encoding_DefaultJSON                                                                                                       = 15065
+	StructureDefinition_Encoding_DefaultJSON                                                                                                  = 15066
+	EnumDefinition_Encoding_DefaultJSON                                                                                                       = 15067
+	Node_Encoding_DefaultJSON                                                                                                                 = 15068
+	InstanceNode_Encoding_DefaultJSON                                                                                                         = 15069
+	TypeNode_Encoding_DefaultJSON                                                                                                             = 15070
+	ObjectNode_Encoding_DefaultJSON                                                                                                           = 15071
+	DatagramConnectionTransportType_DiscoveryAddress                                                                                          = 15072
+	ObjectTypeNode_Encoding_DefaultJSON                                                                                                       = 15073
+	VariableNode_Encoding_DefaultJSON                                                                                                         = 15074
+	VariableTypeNode_Encoding_DefaultJSON                                                                                                     = 15075
+	ReferenceTypeNode_Encoding_DefaultJSON                                                                                                    = 15076
+	MethodNode_Encoding_DefaultJSON                                                                                                           = 15077
+	ViewNode_Encoding_DefaultJSON                                                                                                             = 15078
+	DataTypeNode_Encoding_DefaultJSON                                                                                                         = 15079
+	ReferenceNode_Encoding_DefaultJSON                                                                                                        = 15080
+	Argument_Encoding_DefaultJSON                                                                                                             = 15081
+	EnumValueType_Encoding_DefaultJSON                                                                                                        = 15082
+	EnumField_Encoding_DefaultJSON                                                                                                            = 15083
+	OptionSet_Encoding_DefaultJSON                                                                                                            = 15084
+	Union_Encoding_DefaultJSON                                                                                                                = 15085
+	TimeZoneDataType_Encoding_DefaultJSON                                                                                                     = 15086
+	ApplicationDescription_Encoding_DefaultJSON                                                                                               = 15087
+	RequestHeader_Encoding_DefaultJSON                                                                                                        = 15088
+	ResponseHeader_Encoding_DefaultJSON                                                                                                       = 15089
+	ServiceFault_Encoding_DefaultJSON                                                                                                         = 15090
+	SessionlessInvokeRequestType_Encoding_DefaultJSON                                                                                         = 15091
+	SessionlessInvokeResponseType_Encoding_DefaultJSON                                                                                        = 15092
+	FindServersRequest_Encoding_DefaultJSON                                                                                                   = 15093
+	FindServersResponse_Encoding_DefaultJSON                                                                                                  = 15094
+	ServerOnNetwork_Encoding_DefaultJSON                                                                                                      = 15095
+	FindServersOnNetworkRequest_Encoding_DefaultJSON                                                                                          = 15096
+	FindServersOnNetworkResponse_Encoding_DefaultJSON                                                                                         = 15097
+	UserTokenPolicy_Encoding_DefaultJSON                                                                                                      = 15098
+	EndpointDescription_Encoding_DefaultJSON                                                                                                  = 15099
+	GetEndpointsRequest_Encoding_DefaultJSON                                                                                                  = 15100
+	GetEndpointsResponse_Encoding_DefaultJSON                                                                                                 = 15101
+	RegisteredServer_Encoding_DefaultJSON                                                                                                     = 15102
+	RegisterServerRequest_Encoding_DefaultJSON                                                                                                = 15103
+	RegisterServerResponse_Encoding_DefaultJSON                                                                                               = 15104
+	DiscoveryConfiguration_Encoding_DefaultJSON                                                                                               = 15105
+	MdnsDiscoveryConfiguration_Encoding_DefaultJSON                                                                                           = 15106
+	RegisterServer2Request_Encoding_DefaultJSON                                                                                               = 15107
+	RegisterServer2Response_Encoding_DefaultJSON                                                                                              = 15130
+	ChannelSecurityToken_Encoding_DefaultJSON                                                                                                 = 15131
+	OpenSecureChannelRequest_Encoding_DefaultJSON                                                                                             = 15132
+	OpenSecureChannelResponse_Encoding_DefaultJSON                                                                                            = 15133
+	CloseSecureChannelRequest_Encoding_DefaultJSON                                                                                            = 15134
+	CloseSecureChannelResponse_Encoding_DefaultJSON                                                                                           = 15135
+	SignedSoftwareCertificate_Encoding_DefaultJSON                                                                                            = 15136
+	SignatureData_Encoding_DefaultJSON                                                                                                        = 15137
+	CreateSessionRequest_Encoding_DefaultJSON                                                                                                 = 15138
+	CreateSessionResponse_Encoding_DefaultJSON                                                                                                = 15139
+	UserIdentityToken_Encoding_DefaultJSON                                                                                                    = 15140
+	AnonymousIdentityToken_Encoding_DefaultJSON                                                                                               = 15141
+	UserNameIdentityToken_Encoding_DefaultJSON                                                                                                = 15142
+	X509IdentityToken_Encoding_DefaultJSON                                                                                                    = 15143
+	IssuedIdentityToken_Encoding_DefaultJSON                                                                                                  = 15144
+	ActivateSessionRequest_Encoding_DefaultJSON                                                                                               = 15145
+	ActivateSessionResponse_Encoding_DefaultJSON                                                                                              = 15146
+	CloseSessionRequest_Encoding_DefaultJSON                                                                                                  = 15147
+	CloseSessionResponse_Encoding_DefaultJSON                                                                                                 = 15148
+	CancelRequest_Encoding_DefaultJSON                                                                                                        = 15149
+	CancelResponse_Encoding_DefaultJSON                                                                                                       = 15150
+	NodeAttributes_Encoding_DefaultJSON                                                                                                       = 15151
+	ObjectAttributes_Encoding_DefaultJSON                                                                                                     = 15152
+	VariableAttributes_Encoding_DefaultJSON                                                                                                   = 15153
+	MethodAttributes_Encoding_DefaultJSON                                                                                                     = 15157
+	ObjectTypeAttributes_Encoding_DefaultJSON                                                                                                 = 15158
+	VariableTypeAttributes_Encoding_DefaultJSON                                                                                               = 15159
+	ReferenceTypeAttributes_Encoding_DefaultJSON                                                                                              = 15160
+	DataTypeAttributes_Encoding_DefaultJSON                                                                                                   = 15161
+	ViewAttributes_Encoding_DefaultJSON                                                                                                       = 15162
+	GenericAttributeValue_Encoding_DefaultJSON                                                                                                = 15163
+	GenericAttributes_Encoding_DefaultJSON                                                                                                    = 15164
+	AddNodesItem_Encoding_DefaultJSON                                                                                                         = 15165
+	AddNodesResult_Encoding_DefaultJSON                                                                                                       = 15166
+	AddNodesRequest_Encoding_DefaultJSON                                                                                                      = 15167
+	AddNodesResponse_Encoding_DefaultJSON                                                                                                     = 15168
+	AddReferencesItem_Encoding_DefaultJSON                                                                                                    = 15169
+	AddReferencesRequest_Encoding_DefaultJSON                                                                                                 = 15170
+	AddReferencesResponse_Encoding_DefaultJSON                                                                                                = 15171
+	DeleteNodesItem_Encoding_DefaultJSON                                                                                                      = 15172
+	DeleteNodesRequest_Encoding_DefaultJSON                                                                                                   = 15173
+	DeleteNodesResponse_Encoding_DefaultJSON                                                                                                  = 15174
+	DeleteReferencesItem_Encoding_DefaultJSON                                                                                                 = 15175
+	DeleteReferencesRequest_Encoding_DefaultJSON                                                                                              = 15176
+	DeleteReferencesResponse_Encoding_DefaultJSON                                                                                             = 15177
+	ViewDescription_Encoding_DefaultJSON                                                                                                      = 15179
+	BrowseDescription_Encoding_DefaultJSON                                                                                                    = 15180
+	ReferenceDescription_Encoding_DefaultJSON                                                                                                 = 15182
+	BrowseResult_Encoding_DefaultJSON                                                                                                         = 15183
+	BrowseRequest_Encoding_DefaultJSON                                                                                                        = 15184
+	BrowseResponse_Encoding_DefaultJSON                                                                                                       = 15185
+	BrowseNextRequest_Encoding_DefaultJSON                                                                                                    = 15186
+	BrowseNextResponse_Encoding_DefaultJSON                                                                                                   = 15187
+	RelativePathElement_Encoding_DefaultJSON                                                                                                  = 15188
+	RelativePath_Encoding_DefaultJSON                                                                                                         = 15189
+	BrowsePath_Encoding_DefaultJSON                                                                                                           = 15190
+	BrowsePathTarget_Encoding_DefaultJSON                                                                                                     = 15191
+	BrowsePathResult_Encoding_DefaultJSON                                                                                                     = 15192
+	TranslateBrowsePathsToNodeIDsRequest_Encoding_DefaultJSON                                                                                 = 15193
+	TranslateBrowsePathsToNodeIDsResponse_Encoding_DefaultJSON                                                                                = 15194
+	RegisterNodesRequest_Encoding_DefaultJSON                                                                                                 = 15195
+	RegisterNodesResponse_Encoding_DefaultJSON                                                                                                = 15196
+	UnregisterNodesRequest_Encoding_DefaultJSON                                                                                               = 15197
+	UnregisterNodesResponse_Encoding_DefaultJSON                                                                                              = 15198
+	EndpointConfiguration_Encoding_DefaultJSON                                                                                                = 15199
+	QueryDataDescription_Encoding_DefaultJSON                                                                                                 = 15200
+	NodeTypeDescription_Encoding_DefaultJSON                                                                                                  = 15201
+	QueryDataSet_Encoding_DefaultJSON                                                                                                         = 15202
+	NodeReference_Encoding_DefaultJSON                                                                                                        = 15203
+	ContentFilterElement_Encoding_DefaultJSON                                                                                                 = 15204
+	ContentFilter_Encoding_DefaultJSON                                                                                                        = 15205
+	FilterOperand_Encoding_DefaultJSON                                                                                                        = 15206
+	ElementOperand_Encoding_DefaultJSON                                                                                                       = 15207
+	LiteralOperand_Encoding_DefaultJSON                                                                                                       = 15208
+	AttributeOperand_Encoding_DefaultJSON                                                                                                     = 15209
+	SimpleAttributeOperand_Encoding_DefaultJSON                                                                                               = 15210
+	ContentFilterElementResult_Encoding_DefaultJSON                                                                                           = 15211
+	PublishedDataSetType_DataSetWriterName_Placeholder                                                                                        = 15222
+	PublishedDataSetType_DataSetWriterName_Placeholder_Status                                                                                 = 15223
+	PublishedDataSetType_DataSetWriterName_Placeholder_TransportSettings                                                                      = 15227
+	ContentFilterResult_Encoding_DefaultJSON                                                                                                  = 15228
+	ParsingResult_Encoding_DefaultJSON                                                                                                        = 15236
+	QueryFirstRequest_Encoding_DefaultJSON                                                                                                    = 15244
+	QueryFirstResponse_Encoding_DefaultJSON                                                                                                   = 15252
+	QueryNextRequest_Encoding_DefaultJSON                                                                                                     = 15254
+	QueryNextResponse_Encoding_DefaultJSON                                                                                                    = 15255
+	ReadValueID_Encoding_DefaultJSON                                                                                                          = 15256
+	ReadRequest_Encoding_DefaultJSON                                                                                                          = 15257
+	ReadResponse_Encoding_DefaultJSON                                                                                                         = 15258
+	HistoryReadValueID_Encoding_DefaultJSON                                                                                                   = 15259
+	HistoryReadResult_Encoding_DefaultJSON                                                                                                    = 15260
+	HistoryReadDetails_Encoding_DefaultJSON                                                                                                   = 15261
+	ReadEventDetails_Encoding_DefaultJSON                                                                                                     = 15262
+	ReadRawModifiedDetails_Encoding_DefaultJSON                                                                                               = 15263
+	ReadProcessedDetails_Encoding_DefaultJSON                                                                                                 = 15264
+	PubSubGroupType_Status                                                                                                                    = 15265
+	ReadAtTimeDetails_Encoding_DefaultJSON                                                                                                    = 15269
+	HistoryData_Encoding_DefaultJSON                                                                                                          = 15270
+	ModificationInfo_Encoding_DefaultJSON                                                                                                     = 15271
+	HistoryModifiedData_Encoding_DefaultJSON                                                                                                  = 15272
+	HistoryEvent_Encoding_DefaultJSON                                                                                                         = 15273
+	HistoryReadRequest_Encoding_DefaultJSON                                                                                                   = 15274
+	HistoryReadResponse_Encoding_DefaultJSON                                                                                                  = 15275
+	WriteValue_Encoding_DefaultJSON                                                                                                           = 15276
+	WriteRequest_Encoding_DefaultJSON                                                                                                         = 15277
+	WriteResponse_Encoding_DefaultJSON                                                                                                        = 15278
+	HistoryUpdateDetails_Encoding_DefaultJSON                                                                                                 = 15279
+	UpdateDataDetails_Encoding_DefaultJSON                                                                                                    = 15280
+	UpdateStructureDataDetails_Encoding_DefaultJSON                                                                                           = 15281
+	UpdateEventDetails_Encoding_DefaultJSON                                                                                                   = 15282
+	DeleteRawModifiedDetails_Encoding_DefaultJSON                                                                                             = 15283
+	DeleteAtTimeDetails_Encoding_DefaultJSON                                                                                                  = 15284
+	DeleteEventDetails_Encoding_DefaultJSON                                                                                                   = 15285
+	HistoryUpdateResult_Encoding_DefaultJSON                                                                                                  = 15286
+	HistoryUpdateRequest_Encoding_DefaultJSON                                                                                                 = 15287
+	HistoryUpdateResponse_Encoding_DefaultJSON                                                                                                = 15288
+	CallMethodRequest_Encoding_DefaultJSON                                                                                                    = 15289
+	CallMethodResult_Encoding_DefaultJSON                                                                                                     = 15290
+	CallRequest_Encoding_DefaultJSON                                                                                                          = 15291
+	CallResponse_Encoding_DefaultJSON                                                                                                         = 15292
+	MonitoringFilter_Encoding_DefaultJSON                                                                                                     = 15293
+	DataChangeFilter_Encoding_DefaultJSON                                                                                                     = 15294
+	EventFilter_Encoding_DefaultJSON                                                                                                          = 15295
+	DataSetWriterType_Status                                                                                                                  = 15299
+	DataSetWriterType_TransportSettings                                                                                                       = 15303
+	AggregateConfiguration_Encoding_DefaultJSON                                                                                               = 15304
+	DataSetReaderType_Status                                                                                                                  = 15307
+	DataSetReaderType_TransportSettings                                                                                                       = 15311
+	AggregateFilter_Encoding_DefaultJSON                                                                                                      = 15312
+	MonitoringFilterResult_Encoding_DefaultJSON                                                                                               = 15313
+	EventFilterResult_Encoding_DefaultJSON                                                                                                    = 15314
+	AggregateFilterResult_Encoding_DefaultJSON                                                                                                = 15315
+	DataSetReaderType_SubscribedDataSet                                                                                                       = 15316
+	MonitoringParameters_Encoding_DefaultJSON                                                                                                 = 15320
+	MonitoredItemCreateRequest_Encoding_DefaultJSON                                                                                           = 15321
+	MonitoredItemCreateResult_Encoding_DefaultJSON                                                                                            = 15322
+	CreateMonitoredItemsRequest_Encoding_DefaultJSON                                                                                          = 15323
+	CreateMonitoredItemsResponse_Encoding_DefaultJSON                                                                                         = 15324
+	MonitoredItemModifyRequest_Encoding_DefaultJSON                                                                                           = 15325
+	MonitoredItemModifyResult_Encoding_DefaultJSON                                                                                            = 15326
+	ModifyMonitoredItemsRequest_Encoding_DefaultJSON                                                                                          = 15327
+	ModifyMonitoredItemsResponse_Encoding_DefaultJSON                                                                                         = 15328
+	SetMonitoringModeRequest_Encoding_DefaultJSON                                                                                             = 15329
+	SetMonitoringModeResponse_Encoding_DefaultJSON                                                                                            = 15331
+	SetTriggeringRequest_Encoding_DefaultJSON                                                                                                 = 15332
+	SetTriggeringResponse_Encoding_DefaultJSON                                                                                                = 15333
+	DeleteMonitoredItemsRequest_Encoding_DefaultJSON                                                                                          = 15335
+	DeleteMonitoredItemsResponse_Encoding_DefaultJSON                                                                                         = 15336
+	CreateSubscriptionRequest_Encoding_DefaultJSON                                                                                            = 15337
+	CreateSubscriptionResponse_Encoding_DefaultJSON                                                                                           = 15338
+	ModifySubscriptionRequest_Encoding_DefaultJSON                                                                                            = 15339
+	ModifySubscriptionResponse_Encoding_DefaultJSON                                                                                           = 15340
+	SetPublishingModeRequest_Encoding_DefaultJSON                                                                                             = 15341
+	SetPublishingModeResponse_Encoding_DefaultJSON                                                                                            = 15342
+	NotificationMessage_Encoding_DefaultJSON                                                                                                  = 15343
+	NotificationData_Encoding_DefaultJSON                                                                                                     = 15344
+	DataChangeNotification_Encoding_DefaultJSON                                                                                               = 15345
+	MonitoredItemNotification_Encoding_DefaultJSON                                                                                            = 15346
+	EventNotificationList_Encoding_DefaultJSON                                                                                                = 15347
+	EventFieldList_Encoding_DefaultJSON                                                                                                       = 15348
+	HistoryEventFieldList_Encoding_DefaultJSON                                                                                                = 15349
+	StatusChangeNotification_Encoding_DefaultJSON                                                                                             = 15350
+	SubscriptionAcknowledgement_Encoding_DefaultJSON                                                                                          = 15351
+	PublishRequest_Encoding_DefaultJSON                                                                                                       = 15352
+	PublishResponse_Encoding_DefaultJSON                                                                                                      = 15353
+	RepublishRequest_Encoding_DefaultJSON                                                                                                     = 15354
+	RepublishResponse_Encoding_DefaultJSON                                                                                                    = 15355
+	TransferResult_Encoding_DefaultJSON                                                                                                       = 15356
+	TransferSubscriptionsRequest_Encoding_DefaultJSON                                                                                         = 15357
+	TransferSubscriptionsResponse_Encoding_DefaultJSON                                                                                        = 15358
+	DeleteSubscriptionsRequest_Encoding_DefaultJSON                                                                                           = 15359
+	DeleteSubscriptionsResponse_Encoding_DefaultJSON                                                                                          = 15360
+	BuildInfo_Encoding_DefaultJSON                                                                                                            = 15361
+	RedundantServerDataType_Encoding_DefaultJSON                                                                                              = 15362
+	EndpointURLListDataType_Encoding_DefaultJSON                                                                                              = 15363
+	NetworkGroupDataType_Encoding_DefaultJSON                                                                                                 = 15364
+	SamplingIntervalDiagnosticsDataType_Encoding_DefaultJSON                                                                                  = 15365
+	ServerDiagnosticsSummaryDataType_Encoding_DefaultJSON                                                                                     = 15366
+	ServerStatusDataType_Encoding_DefaultJSON                                                                                                 = 15367
+	SessionDiagnosticsDataType_Encoding_DefaultJSON                                                                                           = 15368
+	SessionSecurityDiagnosticsDataType_Encoding_DefaultJSON                                                                                   = 15369
+	ServiceCounterDataType_Encoding_DefaultJSON                                                                                               = 15370
+	StatusResult_Encoding_DefaultJSON                                                                                                         = 15371
+	SubscriptionDiagnosticsDataType_Encoding_DefaultJSON                                                                                      = 15372
+	ModelChangeStructureDataType_Encoding_DefaultJSON                                                                                         = 15373
+	SemanticChangeStructureDataType_Encoding_DefaultJSON                                                                                      = 15374
+	Range_Encoding_DefaultJSON                                                                                                                = 15375
+	EUInformation_Encoding_DefaultJSON                                                                                                        = 15376
+	ComplexNumberType_Encoding_DefaultJSON                                                                                                    = 15377
+	DoubleComplexNumberType_Encoding_DefaultJSON                                                                                              = 15378
+	AxisInformation_Encoding_DefaultJSON                                                                                                      = 15379
+	XVType_Encoding_DefaultJSON                                                                                                               = 15380
+	ProgramDiagnosticDataType_Encoding_DefaultJSON                                                                                            = 15381
+	Annotation_Encoding_DefaultJSON                                                                                                           = 15382
+	SimpleTypeDescription_Encoding_DefaultBinary                                                                                              = 15421
+	UABinaryFileDataType_Encoding_DefaultBinary                                                                                               = 15422
+	PublishSubscribe_SecurityGroups                                                                                                           = 15443
+	SecurityGroupFolderType_SecurityGroupFolderName_Placeholder                                                                               = 15453
+	SecurityGroupFolderType_SecurityGroupName_Placeholder                                                                                     = 15459
+	DataSetFolderType_PublishedDataSetName_Placeholder_ExtensionFields                                                                        = 15473
+	BrokerConnectionTransportDataType_Encoding_DefaultBinary                                                                                  = 15479
+	PublishedDataSetType_ExtensionFields                                                                                                      = 15481
+	SimpleTypeDescription_Encoding_DefaultXML                                                                                                 = 15529
+	UABinaryFileDataType_Encoding_DefaultXML                                                                                                  = 15531
+	ServerConfigurationType_ConfigurationFile                                                                                                 = 15564
+	BrokerConnectionTransportDataType_Encoding_DefaultXML                                                                                     = 15579
+	StructureDescription_Encoding_DefaultXML                                                                                                  = 15589
+	EnumDescription_Encoding_DefaultXML                                                                                                       = 15590
+	Server_ServerCapabilities_RoleSet                                                                                                         = 15606
+	RoleSetType_RoleName_Placeholder                                                                                                          = 15608
+	WellKnownRole_Anonymous                                                                                                                   = 15644
+	WellKnownRole_AuthenticatedUser                                                                                                           = 15656
+	WellKnownRole_Observer                                                                                                                    = 15668
+	EndpointType_Encoding_DefaultBinary                                                                                                       = 15671
+	DataTypeSchemaHeader_Encoding_DefaultBinary                                                                                               = 15676
+	PublishedDataSetDataType_Encoding_DefaultBinary                                                                                           = 15677
+	PublishedDataSetSourceDataType_Encoding_DefaultBinary                                                                                     = 15678
+	PublishedDataItemsDataType_Encoding_DefaultBinary                                                                                         = 15679
+	WellKnownRole_Operator                                                                                                                    = 15680
+	PublishedEventsDataType_Encoding_DefaultBinary                                                                                            = 15681
+	DataSetWriterDataType_Encoding_DefaultBinary                                                                                              = 15682
+	DataSetWriterTransportDataType_Encoding_DefaultBinary                                                                                     = 15683
+	DataSetWriterMessageDataType_Encoding_DefaultBinary                                                                                       = 15688
+	PubSubGroupDataType_Encoding_DefaultBinary                                                                                                = 15689
+	WriterGroupTransportDataType_Encoding_DefaultBinary                                                                                       = 15691
+	WellKnownRole_Supervisor                                                                                                                  = 15692
+	WriterGroupMessageDataType_Encoding_DefaultBinary                                                                                         = 15693
+	PubSubConnectionDataType_Encoding_DefaultBinary                                                                                           = 15694
+	ConnectionTransportDataType_Encoding_DefaultBinary                                                                                        = 15695
+	SimpleTypeDescription_Encoding_DefaultJSON                                                                                                = 15700
+	ReaderGroupTransportDataType_Encoding_DefaultBinary                                                                                       = 15701
+	ReaderGroupMessageDataType_Encoding_DefaultBinary                                                                                         = 15702
+	DataSetReaderDataType_Encoding_DefaultBinary                                                                                              = 15703
+	WellKnownRole_SecurityAdmin                                                                                                               = 15704
+	DataSetReaderTransportDataType_Encoding_DefaultBinary                                                                                     = 15705
+	DataSetReaderMessageDataType_Encoding_DefaultBinary                                                                                       = 15706
+	SubscribedDataSetDataType_Encoding_DefaultBinary                                                                                          = 15707
+	TargetVariablesDataType_Encoding_DefaultBinary                                                                                            = 15712
+	SubscribedDataSetMirrorDataType_Encoding_DefaultBinary                                                                                    = 15713
+	UABinaryFileDataType_Encoding_DefaultJSON                                                                                                 = 15714
+	UADPWriterGroupMessageDataType_Encoding_DefaultBinary                                                                                     = 15715
+	WellKnownRole_ConfigureAdmin                                                                                                              = 15716
+	UADPDataSetWriterMessageDataType_Encoding_DefaultBinary                                                                                   = 15717
+	UADPDataSetReaderMessageDataType_Encoding_DefaultBinary                                                                                   = 15718
+	JSONWriterGroupMessageDataType_Encoding_DefaultBinary                                                                                     = 15719
+	JSONDataSetWriterMessageDataType_Encoding_DefaultBinary                                                                                   = 15724
+	JSONDataSetReaderMessageDataType_Encoding_DefaultBinary                                                                                   = 15725
+	BrokerConnectionTransportDataType_Encoding_DefaultJSON                                                                                    = 15726
+	BrokerWriterGroupTransportDataType_Encoding_DefaultBinary                                                                                 = 15727
+	IdentityMappingRuleType_Encoding_DefaultXML                                                                                               = 15728
+	BrokerDataSetWriterTransportDataType_Encoding_DefaultBinary                                                                               = 15729
+	BrokerDataSetReaderTransportDataType_Encoding_DefaultBinary                                                                               = 15733
+	IdentityMappingRuleType_Encoding_DefaultBinary                                                                                            = 15736
+	TemporaryFileTransferType_TransferState_Placeholder                                                                                       = 15754
+	FileTransferStateMachineType_IDle                                                                                                         = 15815
+	FileTransferStateMachineType_ReadPrepare                                                                                                  = 15817
+	FileTransferStateMachineType_ReadTransfer                                                                                                 = 15819
+	FileTransferStateMachineType_ApplyWrite                                                                                                   = 15821
+	FileTransferStateMachineType_Error                                                                                                        = 15823
+	FileTransferStateMachineType_IDleToReadPrepare                                                                                            = 15825
+	FileTransferStateMachineType_ReadPrepareToReadTransfer                                                                                    = 15827
+	FileTransferStateMachineType_ReadTransferToIDle                                                                                           = 15829
+	FileTransferStateMachineType_IDleToApplyWrite                                                                                             = 15831
+	FileTransferStateMachineType_ApplyWriteToIDle                                                                                             = 15833
+	FileTransferStateMachineType_ReadPrepareToError                                                                                           = 15835
+	FileTransferStateMachineType_ReadTransferToError                                                                                          = 15837
+	FileTransferStateMachineType_ApplyWriteToError                                                                                            = 15839
+	FileTransferStateMachineType_ErrorToIDle                                                                                                  = 15841
+	PublishSubscribeType_Status                                                                                                               = 15844
+	ServerConfiguration_ConfigurationFile                                                                                                     = 15892
+	SessionlessInvokeRequestType_Encoding_DefaultXML                                                                                          = 15902
+	SessionlessInvokeRequestType_Encoding_DefaultBinary                                                                                       = 15903
+	PublishSubscribeType_ConnectionName_Placeholder_TransportSettings                                                                         = 15905
+	PubSubKeyServiceType_SecurityGroups                                                                                                       = 15913
+	EndpointType_Encoding_DefaultXML                                                                                                          = 15949
+	DataTypeSchemaHeader_Encoding_DefaultXML                                                                                                  = 15950
+	PublishedDataSetDataType_Encoding_DefaultXML                                                                                              = 15951
+	PublishedDataSetSourceDataType_Encoding_DefaultXML                                                                                        = 15952
+	PublishedDataItemsDataType_Encoding_DefaultXML                                                                                            = 15953
+	PublishedEventsDataType_Encoding_DefaultXML                                                                                               = 15954
+	DataSetWriterDataType_Encoding_DefaultXML                                                                                                 = 15955
+	DataSetWriterTransportDataType_Encoding_DefaultXML                                                                                        = 15956
+	OPCUANamespaceMetadata                                                                                                                    = 15957
+	OPCUANamespaceMetadata_NamespaceFile                                                                                                      = 15965
+	DataSetWriterMessageDataType_Encoding_DefaultXML                                                                                          = 15987
+	PubSubGroupDataType_Encoding_DefaultXML                                                                                                   = 15988
+	WriterGroupTransportDataType_Encoding_DefaultXML                                                                                          = 15990
+	WriterGroupMessageDataType_Encoding_DefaultXML                                                                                            = 15991
+	PubSubConnectionDataType_Encoding_DefaultXML                                                                                              = 15992
+	ConnectionTransportDataType_Encoding_DefaultXML                                                                                           = 15993
+	ReaderGroupTransportDataType_Encoding_DefaultXML                                                                                          = 15995
+	ReaderGroupMessageDataType_Encoding_DefaultXML                                                                                            = 15996
+	DataSetReaderDataType_Encoding_DefaultXML                                                                                                 = 16007
+	DataSetReaderTransportDataType_Encoding_DefaultXML                                                                                        = 16008
+	DataSetReaderMessageDataType_Encoding_DefaultXML                                                                                          = 16009
+	SubscribedDataSetDataType_Encoding_DefaultXML                                                                                             = 16010
+	TargetVariablesDataType_Encoding_DefaultXML                                                                                               = 16011
+	SubscribedDataSetMirrorDataType_Encoding_DefaultXML                                                                                       = 16012
+	UADPWriterGroupMessageDataType_Encoding_DefaultXML                                                                                        = 16014
+	UADPDataSetWriterMessageDataType_Encoding_DefaultXML                                                                                      = 16015
+	UADPDataSetReaderMessageDataType_Encoding_DefaultXML                                                                                      = 16016
+	JSONWriterGroupMessageDataType_Encoding_DefaultXML                                                                                        = 16017
+	JSONDataSetWriterMessageDataType_Encoding_DefaultXML                                                                                      = 16018
+	JSONDataSetReaderMessageDataType_Encoding_DefaultXML                                                                                      = 16019
+	BrokerWriterGroupTransportDataType_Encoding_DefaultXML                                                                                    = 16021
+	BrokerDataSetWriterTransportDataType_Encoding_DefaultXML                                                                                  = 16022
+	BrokerDataSetReaderTransportDataType_Encoding_DefaultXML                                                                                  = 16023
+	WellKnownRole_Engineer                                                                                                                    = 16036
+	RolePermissionType_Encoding_DefaultXML                                                                                                    = 16126
+	EndpointType_Encoding_DefaultJSON                                                                                                         = 16150
+	DataTypeSchemaHeader_Encoding_DefaultJSON                                                                                                 = 16151
+	PublishedDataSetDataType_Encoding_DefaultJSON                                                                                             = 16152
+	PublishedDataSetSourceDataType_Encoding_DefaultJSON                                                                                       = 16153
+	PublishedDataItemsDataType_Encoding_DefaultJSON                                                                                           = 16154
+	PublishedEventsDataType_Encoding_DefaultJSON                                                                                              = 16155
+	DataSetWriterDataType_Encoding_DefaultJSON                                                                                                = 16156
+	DataSetWriterTransportDataType_Encoding_DefaultJSON                                                                                       = 16157
+	DataSetWriterMessageDataType_Encoding_DefaultJSON                                                                                         = 16158
+	PubSubGroupDataType_Encoding_DefaultJSON                                                                                                  = 16159
+	WriterGroupTransportDataType_Encoding_DefaultJSON                                                                                         = 16161
+	WriterGroupMessageDataType_Encoding_DefaultJSON                                                                                           = 16280
+	PubSubConnectionDataType_Encoding_DefaultJSON                                                                                             = 16281
+	ConnectionTransportDataType_Encoding_DefaultJSON                                                                                          = 16282
+	ReaderGroupTransportDataType_Encoding_DefaultJSON                                                                                         = 16284
+	ReaderGroupMessageDataType_Encoding_DefaultJSON                                                                                           = 16285
+	DataSetReaderDataType_Encoding_DefaultJSON                                                                                                = 16286
+	DataSetReaderTransportDataType_Encoding_DefaultJSON                                                                                       = 16287
+	DataSetReaderMessageDataType_Encoding_DefaultJSON                                                                                         = 16288
+	ServerType_ServerCapabilities_RoleSet                                                                                                     = 16289
+	ServerCapabilitiesType_RoleSet                                                                                                            = 16295
+	SubscribedDataSetDataType_Encoding_DefaultJSON                                                                                            = 16308
+	TargetVariablesDataType_Encoding_DefaultJSON                                                                                              = 16310
+	SubscribedDataSetMirrorDataType_Encoding_DefaultJSON                                                                                      = 16311
+	FileSystem                                                                                                                                = 16314
+	UADPWriterGroupMessageDataType_Encoding_DefaultJSON                                                                                       = 16323
+	ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile                                                                     = 16324
+	UADPDataSetWriterMessageDataType_Encoding_DefaultJSON                                                                                     = 16391
+	UADPDataSetReaderMessageDataType_Encoding_DefaultJSON                                                                                     = 16392
+	JSONWriterGroupMessageDataType_Encoding_DefaultJSON                                                                                       = 16393
+	JSONDataSetWriterMessageDataType_Encoding_DefaultJSON                                                                                     = 16394
+	AlarmConditionType_FirstInGroup                                                                                                           = 16398
+	AlarmConditionType_AlarmGroup_Placeholder                                                                                                 = 16399
+	JSONDataSetReaderMessageDataType_Encoding_DefaultJSON                                                                                     = 16404
+	AlarmGroupType_AlarmConditionInstance_Placeholder                                                                                         = 16406
+	AlarmGroupType_AlarmConditionInstance_Placeholder_ShelvingState                                                                           = 16502
+	BrokerWriterGroupTransportDataType_Encoding_DefaultJSON                                                                                   = 16524
+	BrokerDataSetWriterTransportDataType_Encoding_DefaultJSON                                                                                 = 16525
+	BrokerDataSetReaderTransportDataType_Encoding_DefaultJSON                                                                                 = 16526
+	AlarmGroupType_AlarmConditionInstance_Placeholder_FirstInGroup                                                                            = 16530
+	BaseConfigurationDataType_Encoding_DefaultBinary                                                                                          = 16538
+	BaseConfigurationRecordDataType_Encoding_DefaultBinary                                                                                    = 16539
+	CertificateGroupDataType_Encoding_DefaultBinary                                                                                           = 16540
+	ConfigurationUpdateTargetType_Encoding_DefaultBinary                                                                                      = 16541
+	ApplicationIdentityDataType_Encoding_DefaultBinary                                                                                        = 16543
+	EndpointDataType_Encoding_DefaultBinary                                                                                                   = 16544
+	ServerEndpointDataType_Encoding_DefaultBinary                                                                                             = 16545
+	SecuritySettingsDataType_Encoding_DefaultBinary                                                                                           = 16546
+	UserTokenSettingsDataType_Encoding_DefaultBinary                                                                                          = 16547
+	BaseConfigurationDataType_Encoding_DefaultXML                                                                                             = 16587
+	BaseConfigurationRecordDataType_Encoding_DefaultXML                                                                                       = 16588
+	CertificateGroupDataType_Encoding_DefaultXML                                                                                              = 16589
+	ConfigurationUpdateTargetType_Encoding_DefaultXML                                                                                         = 16590
+	ApplicationIdentityDataType_Encoding_DefaultXML                                                                                           = 16592
+	EndpointDataType_Encoding_DefaultXML                                                                                                      = 16593
+	ServerEndpointDataType_Encoding_DefaultXML                                                                                                = 16594
+	SecuritySettingsDataType_Encoding_DefaultXML                                                                                              = 16595
+	UserTokenSettingsDataType_Encoding_DefaultXML                                                                                             = 16596
+	BaseConfigurationDataType_Encoding_DefaultJSON                                                                                            = 16632
+	BaseConfigurationRecordDataType_Encoding_DefaultJSON                                                                                      = 16633
+	CertificateGroupDataType_Encoding_DefaultJSON                                                                                             = 16634
+	ConfigurationUpdateTargetType_Encoding_DefaultJSON                                                                                        = 16635
+	ApplicationIdentityDataType_Encoding_DefaultJSON                                                                                          = 16637
+	EndpointDataType_Encoding_DefaultJSON                                                                                                     = 16642
+	ServerEndpointDataType_Encoding_DefaultJSON                                                                                               = 16643
+	SecuritySettingsDataType_Encoding_DefaultJSON                                                                                             = 16644
+	UserTokenSettingsDataType_Encoding_DefaultJSON                                                                                            = 16645
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder                                                                            = 16663
+	ManagedApplications                                                                                                                       = 16706
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups                                                          = 16707
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup                                  = 16708
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList                        = 16709
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired               = 16754
+	PublishedDataSetType_DataSetWriterName_Placeholder_MessageSettings                                                                        = 16758
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState = 16847
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup  = 16898
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate               = 16939
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState = 17040
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup  = 17091
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup                                        = 17125
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList                              = 17126
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired                     = 17166
+	PubSubConnectionType_TransportSettings                                                                                                    = 17203
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState       = 17271
+	PubSubConnectionType_WriterGroupName_Placeholder_TransportSettings                                                                        = 17290
+	PubSubConnectionType_WriterGroupName_Placeholder_MessageSettings                                                                          = 17291
+	PubSubConnectionType_ReaderGroupName_Placeholder_TransportSettings                                                                        = 17307
+	PubSubConnectionType_ReaderGroupName_Placeholder_MessageSettings                                                                          = 17308
+	PubSubConnectionType_WriterGroupName_Placeholder                                                                                          = 17310
+	PubSubConnectionType_WriterGroupName_Placeholder_Status                                                                                   = 17314
+	PubSubConnectionType_ReaderGroupName_Placeholder                                                                                          = 17325
+	PubSubConnectionType_ReaderGroupName_Placeholder_Status                                                                                   = 17329
+	PublishSubscribe_PublishedDataSets                                                                                                        = 17371
+	PublishSubscribe_Status                                                                                                                   = 17405
+	PublishSubscribe_Diagnostics                                                                                                              = 17409
+	PublishSubscribe_Diagnostics_Counters                                                                                                     = 17423
+	PublishSubscribe_Diagnostics_LiveValues                                                                                                   = 17457
+	DatagramConnectionTransportDataType_Encoding_DefaultBinary                                                                                = 17468
+	DatagramConnectionTransportDataType_Encoding_DefaultXML                                                                                   = 17472
+	DatagramConnectionTransportDataType_Encoding_DefaultJSON                                                                                  = 17476
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup        = 17499
+	KeyCredentialConfigurationFolderType_ServiceName_Placeholder                                                                              = 17511
+	AdditionalParametersType_Encoding_DefaultBinary                                                                                           = 17537
+	AdditionalParametersType_Encoding_DefaultXML                                                                                              = 17541
+	AdditionalParametersType_Encoding_DefaultJSON                                                                                             = 17547
+	EphemeralKeyType_Encoding_DefaultBinary                                                                                                   = 17549
+	EphemeralKeyType_Encoding_DefaultXML                                                                                                      = 17553
+	EphemeralKeyType_Encoding_DefaultJSON                                                                                                     = 17557
+	DictionaryEntryType_DictionaryEntryName_Placeholder                                                                                       = 17590
+	DictionaryFolderType_DictionaryFolderName_Placeholder                                                                                     = 17592
+	DictionaryFolderType_DictionaryEntryName_Placeholder                                                                                      = 17593
+	Dictionaries                                                                                                                              = 17594
+	GenericAttributeValue_Encoding_DefaultXML                                                                                                 = 17608
+	GenericAttributes_Encoding_DefaultXML                                                                                                     = 17609
+	GenericAttributeValue_Encoding_DefaultBinary                                                                                              = 17610
+	GenericAttributes_Encoding_DefaultBinary                                                                                                  = 17611
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate                     = 17629
+	InterfaceTypes                                                                                                                            = 17708
+	AuthorizationServices                                                                                                                     = 17732
+	WriterGroupType_TransportSettings                                                                                                         = 17741
+	WriterGroupType_MessageSettings                                                                                                           = 17742
+	WriterGroupType_DataSetWriterName_Placeholder                                                                                             = 17743
+	WriterGroupType_DataSetWriterName_Placeholder_TransportSettings                                                                           = 17747
+	WriterGroupType_DataSetWriterName_Placeholder_MessageSettings                                                                             = 17748
+	WriterGroupType_DataSetWriterName_Placeholder_Status                                                                                      = 17749
+	WriterGroupType_DataSetWriterName_Placeholder_Diagnostics                                                                                 = 17753
+	WriterGroupType_DataSetWriterName_Placeholder_Diagnostics_Counters                                                                        = 17767
+	WriterGroupType_DataSetWriterName_Placeholder_Diagnostics_LiveValues                                                                      = 17798
+	WriterGroupType_Diagnostics                                                                                                               = 17812
+	WriterGroupType_Diagnostics_Counters                                                                                                      = 17826
+	WriterGroupType_Diagnostics_LiveValues                                                                                                    = 17858
+	DecimalDataType_Encoding_DefaultXML                                                                                                       = 17862
+	DecimalDataType_Encoding_DefaultBinary                                                                                                    = 17863
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState       = 17895
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup        = 17951
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup                                    = 18015
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList                          = 18016
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired                 = 18059
+	ReaderGroupType_DataSetReaderName_Placeholder                                                                                             = 18076
+	ReaderGroupType_DataSetReaderName_Placeholder_TransportSettings                                                                           = 18086
+	ReaderGroupType_DataSetReaderName_Placeholder_MessageSettings                                                                             = 18087
+	ReaderGroupType_DataSetReaderName_Placeholder_Status                                                                                      = 18088
+	ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics                                                                                 = 18092
+	ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics_Counters                                                                        = 18106
+	ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics_LiveValues                                                                      = 18137
+	KeyCredentialConfiguration                                                                                                                = 18155
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState   = 18279
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup    = 18323
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate                 = 18359
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState   = 18446
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup    = 18490
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_TransactionDiagnostics                                                     = 18547
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile                                                          = 18554
+	ActionTargetDataType_Encoding_DefaultBinary                                                                                               = 18598
+	PublishedActionDataType_Encoding_DefaultBinary                                                                                            = 18599
+	ActionMethodDataType_Encoding_DefaultBinary                                                                                               = 18600
+	ActionTargetDataType_Encoding_DefaultXML                                                                                                  = 18610
+	PublishedActionDataType_Encoding_DefaultXML                                                                                               = 18611
+	ActionMethodDataType_Encoding_DefaultXML                                                                                                  = 18612
+	ActionTargetDataType_Encoding_DefaultJSON                                                                                                 = 18622
+	PublishedActionDataType_Encoding_DefaultJSON                                                                                              = 18623
+	ActionMethodDataType_Encoding_DefaultJSON                                                                                                 = 18624
+	WellKnownRole_TrustedApplication                                                                                                          = 18625
+	SortRuleElement_Encoding_DefaultBinary                                                                                                    = 18650
+	ReadEventDetailsSorted_Encoding_DefaultBinary                                                                                             = 18651
+	SortRuleElement_Encoding_DefaultXML                                                                                                       = 18652
+	ReadEventDetailsSorted_Encoding_DefaultXML                                                                                                = 18653
+	SortRuleElement_Encoding_DefaultJSON                                                                                                      = 18654
+	ReadEventDetailsSorted_Encoding_DefaultJSON                                                                                               = 18655
+	PublishSubscribeType_ConnectionName_Placeholder_Diagnostics                                                                               = 18667
+	PublishSubscribeType_ConnectionName_Placeholder_Diagnostics_Counters                                                                      = 18681
+	PublishSubscribeType_ConnectionName_Placeholder_Diagnostics_LiveValues                                                                    = 18712
+	PublishSubscribeType_Diagnostics                                                                                                          = 18715
+	PublishSubscribeType_Diagnostics_Counters                                                                                                 = 18729
+	PublishSubscribeType_Diagnostics_LiveValues                                                                                               = 18760
+	PublishedActionMethodDataType_Encoding_DefaultBinary                                                                                      = 18795
+	RationalNumber_Encoding_DefaultBinary                                                                                                     = 18815
+	Vector_Encoding_DefaultBinary                                                                                                             = 18816
+	ThreeDVector_Encoding_DefaultBinary                                                                                                       = 18817
+	CartesianCoordinates_Encoding_DefaultBinary                                                                                               = 18818
+	ThreeDCartesianCoordinates_Encoding_DefaultBinary                                                                                         = 18819
+	Orientation_Encoding_DefaultBinary                                                                                                        = 18820
+	ThreeDOrientation_Encoding_DefaultBinary                                                                                                  = 18821
+	Frame_Encoding_DefaultBinary                                                                                                              = 18822
+	ThreeDFrame_Encoding_DefaultBinary                                                                                                        = 18823
+	RationalNumber_Encoding_DefaultXML                                                                                                        = 18851
+	Vector_Encoding_DefaultXML                                                                                                                = 18852
+	ThreeDVector_Encoding_DefaultXML                                                                                                          = 18853
+	CartesianCoordinates_Encoding_DefaultXML                                                                                                  = 18854
+	ThreeDCartesianCoordinates_Encoding_DefaultXML                                                                                            = 18855
+	Orientation_Encoding_DefaultXML                                                                                                           = 18856
+	ThreeDOrientation_Encoding_DefaultXML                                                                                                     = 18857
+	Frame_Encoding_DefaultXML                                                                                                                 = 18858
+	ThreeDFrame_Encoding_DefaultXML                                                                                                           = 18859
+	PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics                                                                            = 18871
+	PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics_Counters                                                                   = 18885
+	PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics_LiveValues                                                                 = 18916
+	DtlsPubSubConnectionDataType_Encoding_DefaultBinary                                                                                       = 18930
+	PublishedActionMethodDataType_Encoding_DefaultXML                                                                                         = 18937
+	DtlsPubSubConnectionDataType_Encoding_DefaultXML                                                                                          = 18938
+	PublishedActionMethodDataType_Encoding_DefaultJSON                                                                                        = 18945
+	DtlsPubSubConnectionDataType_Encoding_DefaultJSON                                                                                         = 18946
+	LLDP                                                                                                                                      = 18958
+	LLDP_RemoteStatistics                                                                                                                     = 18959
+	LLDP_LocalSystemData                                                                                                                      = 18965
+	LLDP_Ports                                                                                                                                = 18972
+	LldpInformationType_RemoteStatistics                                                                                                      = 18974
+	LldpInformationType_LocalSystemData                                                                                                       = 18980
+	LldpInformationType_Ports                                                                                                                 = 18987
+	LldpInformationType_Ports_LldpPortInformation_Placeholder                                                                                 = 18988
+	LldpInformationType_Ports_LldpPortInformation_Placeholder_RemoteSystemsData                                                               = 18995
+	LldpPortInformationType_RemoteSystemsData                                                                                                 = 19016
+	LldpPortInformationType_RemoteSystemsData_LldpRemoteSystem_Placeholder                                                                    = 19017
+	RationalNumber_Encoding_DefaultJSON                                                                                                       = 19064
+	Vector_Encoding_DefaultJSON                                                                                                               = 19065
+	ThreeDVector_Encoding_DefaultJSON                                                                                                         = 19066
+	CartesianCoordinates_Encoding_DefaultJSON                                                                                                 = 19067
+	ThreeDCartesianCoordinates_Encoding_DefaultJSON                                                                                           = 19068
+	Orientation_Encoding_DefaultJSON                                                                                                          = 19069
+	ThreeDOrientation_Encoding_DefaultJSON                                                                                                    = 19070
+	Frame_Encoding_DefaultJSON                                                                                                                = 19071
+	ThreeDFrame_Encoding_DefaultJSON                                                                                                          = 19072
+	LldpManagementAddressTxPortType_Encoding_DefaultBinary                                                                                    = 19079
+	LldpManagementAddressType_Encoding_DefaultBinary                                                                                          = 19080
+	LldpTlvType_Encoding_DefaultBinary                                                                                                        = 19081
+	LldpManagementAddressTxPortType_Encoding_DefaultXML                                                                                       = 19100
+	LldpManagementAddressType_Encoding_DefaultXML                                                                                             = 19101
+	LldpTlvType_Encoding_DefaultXML                                                                                                           = 19102
+	PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics                                                                              = 19107
+	PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics_Counters                                                                     = 19121
+	PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics_LiveValues                                                                   = 19152
+	PubSubConnectionType_ReaderGroupName_Placeholder_Diagnostics                                                                              = 19176
+	PubSubConnectionType_ReaderGroupName_Placeholder_Diagnostics_Counters                                                                     = 19190
+	PubSubConnectionType_ReaderGroupName_Placeholder_Diagnostics_LiveValues                                                                   = 19221
+	PubSubConnectionType_Diagnostics                                                                                                          = 19241
+	PubSubConnectionType_Diagnostics_Counters                                                                                                 = 19255
+	PubSubConnectionType_Diagnostics_LiveValues                                                                                               = 19286
+	LldpManagementAddressTxPortType_Encoding_DefaultJSON                                                                                      = 19299
+	LldpManagementAddressType_Encoding_DefaultJSON                                                                                            = 19300
+	LldpTlvType_Encoding_DefaultJSON                                                                                                          = 19301
+	ServerLog                                                                                                                                 = 19372
+	Logs                                                                                                                                      = 19378
+	LogRecord_Encoding_DefaultBinary                                                                                                          = 19379
+	LogRecord_Encoding_DefaultXML                                                                                                             = 19383
+	LogRecord_Encoding_DefaultJSON                                                                                                            = 19387
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_KeyCredentials                                                             = 19409
+	ApplicationConfigurationFolderType_ApplicationName_Placeholder_AuthorizationServices                                                      = 19413
+	ApplicationConfigurationType_KeyCredentials                                                                                               = 19423
+	ApplicationConfigurationType_AuthorizationServices                                                                                        = 19427
+	CertificateGroupType_CertificateExpired                                                                                                   = 19450
+	CertificateGroupType_CertificateExpired_ShelvingState                                                                                     = 19537
+	DataSetWriterType_Diagnostics                                                                                                             = 19550
+	DataSetWriterType_Diagnostics_Counters                                                                                                    = 19564
+	DataSetWriterType_Diagnostics_LiveValues                                                                                                  = 19595
+	DataSetReaderType_Diagnostics                                                                                                             = 19609
+	DataSetReaderType_Diagnostics_Counters                                                                                                    = 19623
+	DataSetReaderType_Diagnostics_LiveValues                                                                                                  = 19654
+	PubSubDiagnosticsType_Counters                                                                                                            = 19691
+	PubSubDiagnosticsType_LiveValues                                                                                                          = 19722
+	ProvisionableDeviceType_ApplicationName_Placeholder_KeyCredentials                                                                        = 19739
+	ProvisionableDeviceType_ApplicationName_Placeholder_AuthorizationServices                                                                 = 19743
+	LogRecordsDataType_Encoding_DefaultBinary                                                                                                 = 19753
+	SpanContextDataType_Encoding_DefaultBinary                                                                                                = 19754
+	TraceContextDataType_Encoding_DefaultBinary                                                                                               = 19755
+	NameValuePair_Encoding_DefaultBinary                                                                                                      = 19756
+	LogRecordsDataType_Encoding_DefaultXML                                                                                                    = 19773
+	SpanContextDataType_Encoding_DefaultXML                                                                                                   = 19774
+	TraceContextDataType_Encoding_DefaultXML                                                                                                  = 19775
+	NameValuePair_Encoding_DefaultXML                                                                                                         = 19776
+	PubSubDiagnosticsRootType_LiveValues                                                                                                      = 19777
+	LogRecordsDataType_Encoding_DefaultJSON                                                                                                   = 19803
+	SpanContextDataType_Encoding_DefaultJSON                                                                                                  = 19804
+	TraceContextDataType_Encoding_DefaultJSON                                                                                                 = 19805
+	NameValuePair_Encoding_DefaultJSON                                                                                                        = 19806
+	PubSubDiagnosticsConnectionType_LiveValues                                                                                                = 19831
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder                                                                                      = 19847
+	PubSubDiagnosticsWriterGroupType_Counters                                                                                                 = 19848
+	PubSubDiagnosticsWriterGroupType_LiveValues                                                                                               = 19879
+	PubSubDiagnosticsReaderGroupType_Counters                                                                                                 = 19917
+	PubSubDiagnosticsReaderGroupType_LiveValues                                                                                               = 19948
+	PubSubDiagnosticsDataSetWriterType_Counters                                                                                               = 19982
+	PubSubDiagnosticsDataSetWriterType_LiveValues                                                                                             = 20013
+	PubSubDiagnosticsDataSetReaderType_Counters                                                                                               = 20041
+	PubSubDiagnosticsDataSetReaderType_LiveValues                                                                                             = 20072
+	CertificateGroupType_CertificateExpired_FirstInGroup                                                                                      = 20120
+	CertificateGroupType_TrustListOutOfDate                                                                                                   = 20143
+	CertificateGroupType_TrustListOutOfDate_ShelvingState                                                                                     = 20230
+	CertificateGroupType_TrustListOutOfDate_FirstInGroup                                                                                      = 20268
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired                                                                     = 20291
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_ShelvingState                                                       = 20378
+	CertificateGroupFolderType_DefaultApplicationGroup_CertificateExpired_FirstInGroup                                                        = 20418
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate                                                                     = 20441
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState                                                       = 20528
+	CertificateGroupFolderType_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup                                                        = 20566
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired                                                                           = 20589
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_ShelvingState                                                             = 20676
+	CertificateGroupFolderType_DefaultHttpsGroup_CertificateExpired_FirstInGroup                                                              = 20714
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate                                                                           = 20737
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState                                                             = 20824
+	CertificateGroupFolderType_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup                                                              = 20862
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired                                                                       = 20885
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_ShelvingState                                                         = 20972
+	SessionlessInvokeResponseType_Encoding_DefaultXML                                                                                         = 21000
+	SessionlessInvokeResponseType_Encoding_DefaultBinary                                                                                      = 21001
+	ReaderGroupType_DataSetReaderName_Placeholder_SubscribedDataSet                                                                           = 21006
+	ReaderGroupType_Diagnostics                                                                                                               = 21015
+	ReaderGroupType_Diagnostics_Counters                                                                                                      = 21029
+	ReaderGroupType_Diagnostics_LiveValues                                                                                                    = 21060
+	ReaderGroupType_TransportSettings                                                                                                         = 21080
+	ReaderGroupType_MessageSettings                                                                                                           = 21081
+	DataSetWriterType_MessageSettings                                                                                                         = 21095
+	DataSetReaderType_MessageSettings                                                                                                         = 21103
+	WriterGroupDataType_Encoding_DefaultBinary                                                                                                = 21150
+	NetworkAddressDataType_Encoding_DefaultBinary                                                                                             = 21151
+	NetworkAddressURLDataType_Encoding_DefaultBinary                                                                                          = 21152
+	ReaderGroupDataType_Encoding_DefaultBinary                                                                                                = 21153
+	PubSubConfigurationDataType_Encoding_DefaultBinary                                                                                        = 21154
+	DatagramWriterGroupTransportDataType_Encoding_DefaultBinary                                                                               = 21155
+	WriterGroupDataType_Encoding_DefaultXML                                                                                                   = 21174
+	NetworkAddressDataType_Encoding_DefaultXML                                                                                                = 21175
+	NetworkAddressURLDataType_Encoding_DefaultXML                                                                                             = 21176
+	ReaderGroupDataType_Encoding_DefaultXML                                                                                                   = 21177
+	PubSubConfigurationDataType_Encoding_DefaultXML                                                                                           = 21178
+	DatagramWriterGroupTransportDataType_Encoding_DefaultXML                                                                                  = 21179
+	WriterGroupDataType_Encoding_DefaultJSON                                                                                                  = 21198
+	NetworkAddressDataType_Encoding_DefaultJSON                                                                                               = 21199
+	NetworkAddressURLDataType_Encoding_DefaultJSON                                                                                            = 21200
+	ReaderGroupDataType_Encoding_DefaultJSON                                                                                                  = 21201
+	PubSubConfigurationDataType_Encoding_DefaultJSON                                                                                          = 21202
+	DatagramWriterGroupTransportDataType_Encoding_DefaultJSON                                                                                 = 21203
+	CertificateGroupFolderType_DefaultUserTokenGroup_CertificateExpired_FirstInGroup                                                          = 21213
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate                                                                       = 21236
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState                                                         = 21323
+	CertificateGroupFolderType_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup                                                          = 21361
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired                                                                 = 21384
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_ShelvingState                                                   = 21471
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_CertificateExpired_FirstInGroup                                                    = 21509
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate                                                                 = 21532
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_ShelvingState                                                   = 21619
+	CertificateGroupFolderType_AdditionalGroup_Placeholder_TrustListOutOfDate_FirstInGroup                                                    = 21657
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired                                                      = 21680
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState                                        = 21767
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup                                         = 21805
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate                                                      = 21828
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState                                        = 21915
+	ServerConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup                                         = 21953
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired                                                            = 21976
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState                                              = 22063
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup                                               = 22101
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate                                                            = 22124
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState                                              = 22211
+	ServerConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup                                               = 22249
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired                                                        = 22272
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState                                          = 22359
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup                                           = 22397
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate                                                        = 22420
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState                                          = 22507
+	ServerConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup                                           = 22545
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired                                                          = 22568
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState                                            = 22655
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup                                             = 22693
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate                                                          = 22716
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState                                            = 22803
+	ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup                                             = 22841
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired                                                                = 22864
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState                                                  = 22951
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup                                                   = 22989
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate                                                                = 23012
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState                                                  = 23099
+	ServerConfiguration_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup                                                   = 23137
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired                                                            = 23160
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState                                              = 23247
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup                                               = 23285
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate                                                            = 23308
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState                                              = 23395
+	ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup                                               = 23433
+	AliasNameCategoryType_Alias_Placeholder                                                                                                   = 23457
+	AliasNameCategoryType_SubAliasNameCategories_Placeholder                                                                                  = 23458
+	Aliases                                                                                                                                   = 23470
+	TagVariables                                                                                                                              = 23479
+	Topics                                                                                                                                    = 23488
+	AliasNameDataType_Encoding_DefaultBinary                                                                                                  = 23499
+	ReadAnnotationDataDetails_Encoding_DefaultBinary                                                                                          = 23500
+	AliasNameDataType_Encoding_DefaultXML                                                                                                     = 23505
+	ReadAnnotationDataDetails_Encoding_DefaultXML                                                                                             = 23506
+	CurrencyUnitType_Encoding_DefaultBinary                                                                                                   = 23507
+	AliasNameDataType_Encoding_DefaultJSON                                                                                                    = 23511
+	ReadAnnotationDataDetails_Encoding_DefaultJSON                                                                                            = 23512
+	OrderedListType_OrderedObject_Placeholder                                                                                                 = 23519
+	CurrencyUnitType_Encoding_DefaultXML                                                                                                      = 23520
+	CurrencyUnitType_Encoding_DefaultJSON                                                                                                     = 23528
+	AuthorizationServicesConfigurationFolderType_ServiceName_Placeholder                                                                      = 23557
+	PublishSubscribeType_SubscribedDataSets                                                                                                   = 23622
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState                                                                        = 23623
+	PublishSubscribeType_PubSubCapablities                                                                                                    = 23642
+	PublishSubscribeType_DataSetClasses                                                                                                       = 23649
+	PublishSubscribe_SubscribedDataSets                                                                                                       = 23658
+	PublishSubscribe_PubSubCapablities                                                                                                        = 23678
+	PublishSubscribe_DataSetClasses                                                                                                           = 23685
+	AlarmSuppressionGroupType_AlarmCondition_Placeholder_FirstInGroup                                                                         = 23694
+	ServiceCertificateDataType_Encoding_DefaultBinary                                                                                         = 23725
+	ServiceCertificateDataType_Encoding_DefaultXML                                                                                            = 23735
+	ServiceCertificateDataType_Encoding_DefaultJSON                                                                                           = 23739
+	ApplicationConfigurationDataType_Encoding_DefaultBinary                                                                                   = 23754
+	AuthorizationServiceConfigurationDataType_Encoding_DefaultBinary                                                                          = 23755
+	ApplicationConfigurationDataType_Encoding_DefaultXML                                                                                      = 23762
+	AuthorizationServiceConfigurationDataType_Encoding_DefaultXML                                                                             = 23763
+	ApplicationConfigurationDataType_Encoding_DefaultJSON                                                                                     = 23776
+	AuthorizationServiceConfigurationDataType_Encoding_DefaultJSON                                                                            = 23777
+	SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder                                                                       = 23796
+	SubscribedDataSetFolderType_StandaloneSubscribedDataSetName_Placeholder                                                                   = 23807
+	SubscribedDataSetFolderType_StandaloneSubscribedDataSetName_Placeholder_SubscribedDataSet                                                 = 23808
+	StandaloneSubscribedDataSetType_SubscribedDataSet                                                                                         = 23829
+	DatagramWriterGroupTransportType_Address                                                                                                  = 23842
+	StandaloneSubscribedDataSetRefDataType_Encoding_DefaultBinary                                                                             = 23851
+	StandaloneSubscribedDataSetDataType_Encoding_DefaultBinary                                                                                = 23852
+	SecurityGroupDataType_Encoding_DefaultBinary                                                                                              = 23853
+	PubSubConfiguration2DataType_Encoding_DefaultBinary                                                                                       = 23854
+	QosDataType_Encoding_DefaultBinary                                                                                                        = 23855
+	TransmitQosDataType_Encoding_DefaultBinary                                                                                                = 23856
+	TransmitQosPriorityDataType_Encoding_DefaultBinary                                                                                        = 23857
+	ReceiveQosDataType_Encoding_DefaultBinary                                                                                                 = 23860
+	ReceiveQosPriorityDataType_Encoding_DefaultBinary                                                                                         = 23861
+	DatagramConnectionTransport2DataType_Encoding_DefaultBinary                                                                               = 23864
+	DatagramWriterGroupTransport2DataType_Encoding_DefaultBinary                                                                              = 23865
+	DatagramDataSetReaderTransportDataType_Encoding_DefaultBinary                                                                             = 23866
+	StandaloneSubscribedDataSetRefDataType_Encoding_DefaultXML                                                                                = 23919
+	StandaloneSubscribedDataSetDataType_Encoding_DefaultXML                                                                                   = 23920
+	SecurityGroupDataType_Encoding_DefaultXML                                                                                                 = 23921
+	PubSubConfiguration2DataType_Encoding_DefaultXML                                                                                          = 23922
+	QosDataType_Encoding_DefaultXML                                                                                                           = 23923
+	TransmitQosDataType_Encoding_DefaultXML                                                                                                   = 23924
+	TransmitQosPriorityDataType_Encoding_DefaultXML                                                                                           = 23925
+	ReceiveQosDataType_Encoding_DefaultXML                                                                                                    = 23928
+	ReceiveQosPriorityDataType_Encoding_DefaultXML                                                                                            = 23929
+	DatagramConnectionTransport2DataType_Encoding_DefaultXML                                                                                  = 23932
+	DatagramWriterGroupTransport2DataType_Encoding_DefaultXML                                                                                 = 23933
+	DatagramDataSetReaderTransportDataType_Encoding_DefaultXML                                                                                = 23934
+	StandaloneSubscribedDataSetRefDataType_Encoding_DefaultJSON                                                                               = 23987
+	StandaloneSubscribedDataSetDataType_Encoding_DefaultJSON                                                                                  = 23988
+	SecurityGroupDataType_Encoding_DefaultJSON                                                                                                = 23989
+	PubSubConfiguration2DataType_Encoding_DefaultJSON                                                                                         = 23990
+	QosDataType_Encoding_DefaultJSON                                                                                                          = 23991
+	TransmitQosDataType_Encoding_DefaultJSON                                                                                                  = 23992
+	TransmitQosPriorityDataType_Encoding_DefaultJSON                                                                                          = 23993
+	ReceiveQosDataType_Encoding_DefaultJSON                                                                                                   = 23996
+	ReceiveQosPriorityDataType_Encoding_DefaultJSON                                                                                           = 23997
+	DatagramConnectionTransport2DataType_Encoding_DefaultJSON                                                                                 = 24000
+	DatagramWriterGroupTransport2DataType_Encoding_DefaultJSON                                                                                = 24001
+	DatagramDataSetReaderTransportDataType_Encoding_DefaultJSON                                                                               = 24002
+	DatagramDataSetReaderTransportType_Address                                                                                                = 24017
+	ProgramDiagnostic2DataType_Encoding_DefaultBinary                                                                                         = 24034
+	ProgramDiagnostic2DataType_Encoding_DefaultXML                                                                                            = 24038
+	ProgramDiagnostic2DataType_Encoding_DefaultJSON                                                                                           = 24042
+	PortableQualifiedName_Encoding_DefaultBinary                                                                                              = 24108
+	PortableNodeID_Encoding_DefaultBinary                                                                                                     = 24109
+	UnsignedRationalNumber_Encoding_DefaultBinary                                                                                             = 24110
+	PortableQualifiedName_Encoding_DefaultXML                                                                                                 = 24120
+	PortableNodeID_Encoding_DefaultXML                                                                                                        = 24121
+	UnsignedRationalNumber_Encoding_DefaultXML                                                                                                = 24122
+	PortableQualifiedName_Encoding_DefaultJSON                                                                                                = 24132
+	PortableNodeID_Encoding_DefaultJSON                                                                                                       = 24133
+	UnsignedRationalNumber_Encoding_DefaultJSON                                                                                               = 24134
+	Resources                                                                                                                                 = 24226
+	Communication                                                                                                                             = 24227
+	MappingTables                                                                                                                             = 24228
+	NetworkInterfaces                                                                                                                         = 24229
+	Streams                                                                                                                                   = 24230
+	TalkerStreams                                                                                                                             = 24231
+	ListenerStreams                                                                                                                           = 24232
+	UserManagement                                                                                                                            = 24290
+	UserManagementDataType_Encoding_DefaultBinary                                                                                             = 24292
+	UserManagementDataType_Encoding_DefaultXML                                                                                                = 24296
+	UserManagementDataType_Encoding_DefaultJSON                                                                                               = 24300
+	IetfBaseNetworkInterfaceType_InterfaceName_Placeholder                                                                                    = 25226
+	PriorityMappingEntryType_Encoding_DefaultBinary                                                                                           = 25239
+	PriorityMappingEntryType_Encoding_DefaultXML                                                                                              = 25243
+	PriorityMappingEntryType_Encoding_DefaultJSON                                                                                             = 25247
+	PubSubKeyServiceType_KeyPushTargets                                                                                                       = 25277
+	PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder                                                                            = 25347
+	PubSubKeyPushTargetFolderType_PushTargetName_Placeholder                                                                                  = 25358
+	PublishSubscribeType_PubSubConfiguration                                                                                                  = 25403
+	PublishSubscribe_KeyPushTargets                                                                                                           = 25440
+	PublishSubscribe_PubSubConfiguration                                                                                                      = 25451
+	PublishedDataSetCustomSourceDataType_Encoding_DefaultBinary                                                                               = 25529
+	PubSubKeyPushTargetDataType_Encoding_DefaultBinary                                                                                        = 25530
+	PubSubConfigurationRefDataType_Encoding_DefaultBinary                                                                                     = 25531
+	PubSubConfigurationValueDataType_Encoding_DefaultBinary                                                                                   = 25532
+	PublishedDataSetCustomSourceDataType_Encoding_DefaultXML                                                                                  = 25545
+	PubSubKeyPushTargetDataType_Encoding_DefaultXML                                                                                           = 25546
+	PubSubConfigurationRefDataType_Encoding_DefaultXML                                                                                        = 25547
+	PubSubConfigurationValueDataType_Encoding_DefaultXML                                                                                      = 25548
+	PublishedDataSetCustomSourceDataType_Encoding_DefaultJSON                                                                                 = 25561
+	PubSubKeyPushTargetDataType_Encoding_DefaultJSON                                                                                          = 25562
+	PubSubConfigurationRefDataType_Encoding_DefaultJSON                                                                                       = 25563
+	PubSubConfigurationValueDataType_Encoding_DefaultJSON                                                                                     = 25564
+	WellKnownRole_SecurityKeyServerAdmin                                                                                                      = 25565
+	WellKnownRole_SecurityKeyServerPush                                                                                                       = 25584
+	WellKnownRole_SecurityKeyServerAccess                                                                                                     = 25603
+	PubSubKeyPushTargetType_SecurityGroupName_Placeholder                                                                                     = 25626
+	ProvisionableDeviceType_ApplicationName_Placeholder                                                                                       = 26878
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups                                                                     = 26879
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup                                             = 26880
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList                                   = 26881
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired                          = 26921
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState            = 27008
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup             = 27052
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate                          = 27087
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState            = 27174
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup             = 27218
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup                                                   = 27252
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList                                         = 27253
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired                                = 27293
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState                  = 27380
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup                   = 27424
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate                                = 27459
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState                  = 27546
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup                   = 27590
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup                                               = 27624
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList                                     = 27625
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired                            = 27665
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState              = 27752
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup               = 27796
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate                            = 27831
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState              = 27918
+	ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup               = 27962
+	ProvisionableDevice                                                                                                                       = 29878
+	Locations                                                                                                                                 = 31915
+	ServerConfigurationType_TransactionDiagnostics                                                                                            = 32299
+	ServerConfiguration_TransactionDiagnostics                                                                                                = 32336
+	ProvisionableDeviceType_ApplicationName_Placeholder_TransactionDiagnostics                                                                = 32362
+	TransactionErrorType_Encoding_DefaultBinary                                                                                               = 32382
+	TransactionErrorType_Encoding_DefaultXML                                                                                                  = 32386
+	TransactionErrorType_Encoding_DefaultJSON                                                                                                 = 32390
+	BitFieldDefinition_Encoding_DefaultBinary                                                                                                 = 32422
+	BitFieldDefinition_Encoding_DefaultXML                                                                                                    = 32426
+	BitFieldDefinition_Encoding_DefaultJSON                                                                                                   = 32430
+	ServerUnitType_AlternativeUnits                                                                                                           = 32452
+	ServerUnitType_CoherentUnit                                                                                                               = 32462
+	QuantityType_ServerUnits                                                                                                                  = 32481
+	QuantityType_ServerUnits_ServerUnit_Placeholder                                                                                           = 32482
+	QuantityType_ServerUnits_ServerUnit_Placeholder_AlternativeUnits                                                                          = 32487
+	QuantityType_ServerUnits_ServerUnit_Placeholder_CoherentUnit                                                                              = 32497
+	Quantities                                                                                                                                = 32530
+	AnnotationDataType_Encoding_DefaultBinary                                                                                                 = 32560
+	LinearConversionDataType_Encoding_DefaultBinary                                                                                           = 32561
+	QuantityDimension_Encoding_DefaultBinary                                                                                                  = 32562
+	AnnotationDataType_Encoding_DefaultXML                                                                                                    = 32572
+	LinearConversionDataType_Encoding_DefaultXML                                                                                              = 32573
+	QuantityDimension_Encoding_DefaultXML                                                                                                     = 32574
+	AnnotationDataType_Encoding_DefaultJSON                                                                                                   = 32584
+	LinearConversionDataType_Encoding_DefaultJSON                                                                                             = 32585
+	QuantityDimension_Encoding_DefaultJSON                                                                                                    = 32586
+	ServerUnitType_AlternativeUnits_AlternativeUnit_Placeholder                                                                               = 32587
+	HistoricalEventConfigurationType_EventTypes                                                                                               = 32622
+	DefaultHAConfiguration                                                                                                                    = 32637
+	DefaultHAConfiguration_AggregateConfiguration                                                                                             = 32638
+	DefaultHAConfiguration_AggregateFunctions                                                                                                 = 32643
+	ReferenceDescriptionDataType_Encoding_DefaultBinary                                                                                       = 32661
+	ReferenceListEntryDataType_Encoding_DefaultBinary                                                                                         = 32662
+	ReferenceDescriptionDataType_Encoding_DefaultXML                                                                                          = 32669
+	ReferenceListEntryDataType_Encoding_DefaultXML                                                                                            = 32670
+	ReferenceDescriptionDataType_Encoding_DefaultJSON                                                                                         = 32677
+	ReferenceListEntryDataType_Encoding_DefaultJSON                                                                                           = 32678
+	DefaultHEConfiguration                                                                                                                    = 32754
+	DefaultHEConfiguration_EventTypes                                                                                                         = 32755
+	ReadEventDetails2_Encoding_DefaultBinary                                                                                                  = 32800
+	ReadEventDetails2_Encoding_DefaultXML                                                                                                     = 32801
+	ReadEventDetails2_Encoding_DefaultJSON                                                                                                    = 32802
+	HistoryModifiedEvent_Encoding_DefaultBinary                                                                                               = 32825
+	HistoryModifiedEvent_Encoding_DefaultXML                                                                                                  = 32829
+	HistoryModifiedEvent_Encoding_DefaultJSON                                                                                                 = 32833
 )
 
 var nameObject = map[uint32]string{
@@ -2064,7 +2058,6 @@ var nameObject = map[uint32]string{
 	8913:  "TimeZoneDataType_Encoding_DefaultXML",
 	8917:  "TimeZoneDataType_Encoding_DefaultBinary",
 	9178:  "AlarmConditionType_ShelvingState",
-	9279:  "LimitAlarmType_ShelvingState",
 	9329:  "ExclusiveLimitStateMachineType_HighHigh",
 	9331:  "ExclusiveLimitStateMachineType_High",
 	9333:  "ExclusiveLimitStateMachineType_Low",
@@ -2073,21 +2066,7 @@ var nameObject = map[uint32]string{
 	9338:  "ExclusiveLimitStateMachineType_LowToLowLow",
 	9339:  "ExclusiveLimitStateMachineType_HighHighToHigh",
 	9340:  "ExclusiveLimitStateMachineType_HighToHighHigh",
-	9416:  "ExclusiveLimitAlarmType_ShelvingState",
 	9455:  "ExclusiveLimitAlarmType_LimitState",
-	9557:  "ExclusiveLevelAlarmType_ShelvingState",
-	9596:  "ExclusiveLevelAlarmType_LimitState",
-	9698:  "ExclusiveRateOfChangeAlarmType_ShelvingState",
-	9737:  "ExclusiveRateOfChangeAlarmType_LimitState",
-	9839:  "ExclusiveDeviationAlarmType_ShelvingState",
-	9878:  "ExclusiveDeviationAlarmType_LimitState",
-	9981:  "NonExclusiveLimitAlarmType_ShelvingState",
-	10135: "NonExclusiveLevelAlarmType_ShelvingState",
-	10289: "NonExclusiveRateOfChangeAlarmType_ShelvingState",
-	10443: "NonExclusiveDeviationAlarmType_ShelvingState",
-	10598: "DiscreteAlarmType_ShelvingState",
-	10712: "OffNormalAlarmType_ShelvingState",
-	10826: "TripAlarmType_ShelvingState",
 	11172: "HistoryServerCapabilitiesType_AggregateFunctions",
 	11192: "HistoryServerCapabilities",
 	11201: "HistoryServerCapabilities_AggregateFunctions",
@@ -2126,7 +2105,6 @@ var nameObject = map[uint32]string{
 	11654: "NamespacesType_NamespaceIDentifier_Placeholder_NamespaceFile",
 	11704: "Server_ServerCapabilities_OperationLimits",
 	11715: "Server_Namespaces",
-	11831: "SystemOffNormalAlarmType_ShelvingState",
 	11876: "HistoricalDataConfigurationType_AggregateFunctions",
 	11877: "HAConfiguration_AggregateFunctions",
 	11887: "InstanceNode_Encoding_DefaultXML",
@@ -2168,7 +2146,6 @@ var nameObject = map[uint32]string{
 	12893: "MdnsDiscoveryConfiguration_Encoding_DefaultXML",
 	12900: "DiscoveryConfiguration_Encoding_DefaultBinary",
 	12901: "MdnsDiscoveryConfiguration_Encoding_DefaultBinary",
-	13305: "CertificateExpirationAlarmType_ShelvingState",
 	13354: "FileDirectoryType_FileDirectoryName_Placeholder",
 	13366: "FileDirectoryType_FileName_Placeholder",
 	13599: "CertificateGroupType_TrustList",
@@ -2359,13 +2336,7 @@ var nameObject = map[uint32]string{
 	15223: "PublishedDataSetType_DataSetWriterName_Placeholder_Status",
 	15227: "PublishedDataSetType_DataSetWriterName_Placeholder_TransportSettings",
 	15228: "ContentFilterResult_Encoding_DefaultJSON",
-	15230: "PublishedDataItemsType_DataSetWriterName_Placeholder",
-	15231: "PublishedDataItemsType_DataSetWriterName_Placeholder_Status",
-	15235: "PublishedDataItemsType_DataSetWriterName_Placeholder_TransportSettings",
 	15236: "ParsingResult_Encoding_DefaultJSON",
-	15238: "PublishedEventsType_DataSetWriterName_Placeholder",
-	15239: "PublishedEventsType_DataSetWriterName_Placeholder_Status",
-	15243: "PublishedEventsType_DataSetWriterName_Placeholder_TransportSettings",
 	15244: "QueryFirstRequest_Encoding_DefaultJSON",
 	15252: "QueryFirstResponse_Encoding_DefaultJSON",
 	15254: "QueryNextRequest_Encoding_DefaultJSON",
@@ -2480,17 +2451,15 @@ var nameObject = map[uint32]string{
 	15382: "Annotation_Encoding_DefaultJSON",
 	15421: "SimpleTypeDescription_Encoding_DefaultBinary",
 	15422: "UABinaryFileDataType_Encoding_DefaultBinary",
-	15434: "PublishSubscribeType_SecurityGroups",
 	15443: "PublishSubscribe_SecurityGroups",
 	15453: "SecurityGroupFolderType_SecurityGroupFolderName_Placeholder",
 	15459: "SecurityGroupFolderType_SecurityGroupName_Placeholder",
 	15473: "DataSetFolderType_PublishedDataSetName_Placeholder_ExtensionFields",
 	15479: "BrokerConnectionTransportDataType_Encoding_DefaultBinary",
 	15481: "PublishedDataSetType_ExtensionFields",
-	15503: "PublishedDataItemsType_ExtensionFields",
-	15511: "PublishedEventsType_ExtensionFields",
 	15529: "SimpleTypeDescription_Encoding_DefaultXML",
 	15531: "UABinaryFileDataType_Encoding_DefaultXML",
+	15564: "ServerConfigurationType_ConfigurationFile",
 	15579: "BrokerConnectionTransportDataType_Encoding_DefaultXML",
 	15589: "StructureDescription_Encoding_DefaultXML",
 	15590: "EnumDescription_Encoding_DefaultXML",
@@ -2540,7 +2509,6 @@ var nameObject = map[uint32]string{
 	15733: "BrokerDataSetReaderTransportDataType_Encoding_DefaultBinary",
 	15736: "IdentityMappingRuleType_Encoding_DefaultBinary",
 	15754: "TemporaryFileTransferType_TransferState_Placeholder",
-	15790: "PublishSubscribe_ConnectionName_Placeholder",
 	15815: "FileTransferStateMachineType_IDle",
 	15817: "FileTransferStateMachineType_ReadPrepare",
 	15819: "FileTransferStateMachineType_ReadTransfer",
@@ -2556,14 +2524,11 @@ var nameObject = map[uint32]string{
 	15839: "FileTransferStateMachineType_ApplyWriteToError",
 	15841: "FileTransferStateMachineType_ErrorToIDle",
 	15844: "PublishSubscribeType_Status",
-	15851: "PublishSubscribe_ConnectionName_Placeholder_Address",
-	15864: "PublishSubscribe_ConnectionName_Placeholder_TransportSettings",
-	15865: "PublishSubscribe_ConnectionName_Placeholder_Status",
+	15892: "ServerConfiguration_ConfigurationFile",
 	15902: "SessionlessInvokeRequestType_Encoding_DefaultXML",
 	15903: "SessionlessInvokeRequestType_Encoding_DefaultBinary",
 	15905: "PublishSubscribeType_ConnectionName_Placeholder_TransportSettings",
 	15913: "PubSubKeyServiceType_SecurityGroups",
-	15937: "PublishSubscribe_ConnectionName_Placeholder_Diagnostics",
 	15949: "EndpointType_Encoding_DefaultXML",
 	15950: "DataTypeSchemaHeader_Encoding_DefaultXML",
 	15951: "PublishedDataSetDataType_Encoding_DefaultXML",
@@ -2598,7 +2563,6 @@ var nameObject = map[uint32]string{
 	16022: "BrokerDataSetWriterTransportDataType_Encoding_DefaultXML",
 	16023: "BrokerDataSetReaderTransportDataType_Encoding_DefaultXML",
 	16036: "WellKnownRole_Engineer",
-	16102: "PublishSubscribe_ConnectionName_Placeholder_Diagnostics_Counters",
 	16126: "RolePermissionType_Encoding_DefaultXML",
 	16150: "EndpointType_Encoding_DefaultJSON",
 	16151: "DataTypeSchemaHeader_Encoding_DefaultJSON",
@@ -2625,9 +2589,8 @@ var nameObject = map[uint32]string{
 	16310: "TargetVariablesDataType_Encoding_DefaultJSON",
 	16311: "SubscribedDataSetMirrorDataType_Encoding_DefaultJSON",
 	16314: "FileSystem",
-	16315: "FileSystem_FileDirectoryName_Placeholder",
 	16323: "UADPWriterGroupMessageDataType_Encoding_DefaultJSON",
-	16327: "FileSystem_FileName_Placeholder",
+	16324: "ProvisionableDeviceType_ApplicationName_Placeholder_ConfigurationFile",
 	16391: "UADPDataSetWriterMessageDataType_Encoding_DefaultJSON",
 	16392: "UADPDataSetReaderMessageDataType_Encoding_DefaultJSON",
 	16393: "JSONWriterGroupMessageDataType_Encoding_DefaultJSON",
@@ -2641,41 +2604,50 @@ var nameObject = map[uint32]string{
 	16525: "BrokerDataSetWriterTransportDataType_Encoding_DefaultJSON",
 	16526: "BrokerDataSetReaderTransportDataType_Encoding_DefaultJSON",
 	16530: "AlarmGroupType_AlarmConditionInstance_Placeholder_FirstInGroup",
-	16565: "LimitAlarmType_FirstInGroup",
-	16566: "LimitAlarmType_AlarmGroup_Placeholder",
-	16605: "ExclusiveLimitAlarmType_FirstInGroup",
-	16606: "ExclusiveLimitAlarmType_AlarmGroup_Placeholder",
-	16645: "NonExclusiveLimitAlarmType_FirstInGroup",
-	16646: "NonExclusiveLimitAlarmType_AlarmGroup_Placeholder",
-	16685: "NonExclusiveLevelAlarmType_FirstInGroup",
-	16686: "NonExclusiveLevelAlarmType_AlarmGroup_Placeholder",
-	16725: "ExclusiveLevelAlarmType_FirstInGroup",
-	16726: "ExclusiveLevelAlarmType_AlarmGroup_Placeholder",
+	16538: "BaseConfigurationDataType_Encoding_DefaultBinary",
+	16539: "BaseConfigurationRecordDataType_Encoding_DefaultBinary",
+	16540: "CertificateGroupDataType_Encoding_DefaultBinary",
+	16541: "ConfigurationUpdateTargetType_Encoding_DefaultBinary",
+	16543: "ApplicationIdentityDataType_Encoding_DefaultBinary",
+	16544: "EndpointDataType_Encoding_DefaultBinary",
+	16545: "ServerEndpointDataType_Encoding_DefaultBinary",
+	16546: "SecuritySettingsDataType_Encoding_DefaultBinary",
+	16547: "UserTokenSettingsDataType_Encoding_DefaultBinary",
+	16587: "BaseConfigurationDataType_Encoding_DefaultXML",
+	16588: "BaseConfigurationRecordDataType_Encoding_DefaultXML",
+	16589: "CertificateGroupDataType_Encoding_DefaultXML",
+	16590: "ConfigurationUpdateTargetType_Encoding_DefaultXML",
+	16592: "ApplicationIdentityDataType_Encoding_DefaultXML",
+	16593: "EndpointDataType_Encoding_DefaultXML",
+	16594: "ServerEndpointDataType_Encoding_DefaultXML",
+	16595: "SecuritySettingsDataType_Encoding_DefaultXML",
+	16596: "UserTokenSettingsDataType_Encoding_DefaultXML",
+	16632: "BaseConfigurationDataType_Encoding_DefaultJSON",
+	16633: "BaseConfigurationRecordDataType_Encoding_DefaultJSON",
+	16634: "CertificateGroupDataType_Encoding_DefaultJSON",
+	16635: "ConfigurationUpdateTargetType_Encoding_DefaultJSON",
+	16637: "ApplicationIdentityDataType_Encoding_DefaultJSON",
+	16642: "EndpointDataType_Encoding_DefaultJSON",
+	16643: "ServerEndpointDataType_Encoding_DefaultJSON",
+	16644: "SecuritySettingsDataType_Encoding_DefaultJSON",
+	16645: "UserTokenSettingsDataType_Encoding_DefaultJSON",
+	16663: "ApplicationConfigurationFolderType_ApplicationName_Placeholder",
+	16706: "ManagedApplications",
+	16707: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups",
+	16708: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup",
+	16709: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList",
+	16754: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired",
 	16758: "PublishedDataSetType_DataSetWriterName_Placeholder_MessageSettings",
-	16765: "NonExclusiveDeviationAlarmType_FirstInGroup",
-	16766: "NonExclusiveDeviationAlarmType_AlarmGroup_Placeholder",
-	16799: "PublishedDataItemsType_DataSetWriterName_Placeholder_MessageSettings",
-	16806: "ExclusiveDeviationAlarmType_FirstInGroup",
-	16807: "ExclusiveDeviationAlarmType_AlarmGroup_Placeholder",
-	16840: "PublishedEventsType_DataSetWriterName_Placeholder_MessageSettings",
-	16847: "NonExclusiveRateOfChangeAlarmType_FirstInGroup",
-	16848: "NonExclusiveRateOfChangeAlarmType_AlarmGroup_Placeholder",
-	16888: "ExclusiveRateOfChangeAlarmType_FirstInGroup",
-	16889: "ExclusiveRateOfChangeAlarmType_AlarmGroup_Placeholder",
-	16929: "DiscreteAlarmType_FirstInGroup",
-	16930: "DiscreteAlarmType_AlarmGroup_Placeholder",
-	16965: "OffNormalAlarmType_FirstInGroup",
-	16966: "OffNormalAlarmType_AlarmGroup_Placeholder",
-	17001: "SystemOffNormalAlarmType_FirstInGroup",
-	17002: "SystemOffNormalAlarmType_AlarmGroup_Placeholder",
-	17037: "TripAlarmType_FirstInGroup",
-	17038: "TripAlarmType_AlarmGroup_Placeholder",
-	17073: "CertificateExpirationAlarmType_FirstInGroup",
-	17074: "CertificateExpirationAlarmType_AlarmGroup_Placeholder",
-	17180: "DiscrepancyAlarmType_ShelvingState",
+	16847: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState",
+	16898: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup",
+	16939: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate",
+	17040: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState",
+	17091: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup",
+	17125: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup",
+	17126: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList",
+	17166: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired",
 	17203: "PubSubConnectionType_TransportSettings",
-	17208: "DiscrepancyAlarmType_FirstInGroup",
-	17209: "DiscrepancyAlarmType_AlarmGroup_Placeholder",
+	17271: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState",
 	17290: "PubSubConnectionType_WriterGroupName_Placeholder_TransportSettings",
 	17291: "PubSubConnectionType_WriterGroupName_Placeholder_MessageSettings",
 	17307: "PubSubConnectionType_ReaderGroupName_Placeholder_TransportSettings",
@@ -2684,7 +2656,6 @@ var nameObject = map[uint32]string{
 	17314: "PubSubConnectionType_WriterGroupName_Placeholder_Status",
 	17325: "PubSubConnectionType_ReaderGroupName_Placeholder",
 	17329: "PubSubConnectionType_ReaderGroupName_Placeholder_Status",
-	17352: "PublishSubscribe_ConnectionName_Placeholder_Diagnostics_LiveValues",
 	17371: "PublishSubscribe_PublishedDataSets",
 	17405: "PublishSubscribe_Status",
 	17409: "PublishSubscribe_Diagnostics",
@@ -2693,6 +2664,7 @@ var nameObject = map[uint32]string{
 	17468: "DatagramConnectionTransportDataType_Encoding_DefaultBinary",
 	17472: "DatagramConnectionTransportDataType_Encoding_DefaultXML",
 	17476: "DatagramConnectionTransportDataType_Encoding_DefaultJSON",
+	17499: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup",
 	17511: "KeyCredentialConfigurationFolderType_ServiceName_Placeholder",
 	17537: "AdditionalParametersType_Encoding_DefaultBinary",
 	17541: "AdditionalParametersType_Encoding_DefaultXML",
@@ -2704,16 +2676,12 @@ var nameObject = map[uint32]string{
 	17592: "DictionaryFolderType_DictionaryFolderName_Placeholder",
 	17593: "DictionaryFolderType_DictionaryEntryName_Placeholder",
 	17594: "Dictionaries",
-	17595: "Dictionaries_DictionaryFolderName_Placeholder",
-	17596: "Dictionaries_DictionaryEntryName_Placeholder",
-	17599: "IrdiDictionaryEntryType_DictionaryEntryName_Placeholder",
-	17601: "URIDictionaryEntryType_DictionaryEntryName_Placeholder",
 	17608: "GenericAttributeValue_Encoding_DefaultXML",
 	17609: "GenericAttributes_Encoding_DefaultXML",
 	17610: "GenericAttributeValue_Encoding_DefaultBinary",
 	17611: "GenericAttributes_Encoding_DefaultBinary",
+	17629: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate",
 	17708: "InterfaceTypes",
-	17730: "WriterGroupType_Status",
 	17732: "AuthorizationServices",
 	17741: "WriterGroupType_TransportSettings",
 	17742: "WriterGroupType_MessageSettings",
@@ -2729,7 +2697,11 @@ var nameObject = map[uint32]string{
 	17858: "WriterGroupType_Diagnostics_LiveValues",
 	17862: "DecimalDataType_Encoding_DefaultXML",
 	17863: "DecimalDataType_Encoding_DefaultBinary",
-	18067: "ReaderGroupType_Status",
+	17895: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState",
+	17951: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup",
+	18015: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup",
+	18016: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList",
+	18059: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired",
 	18076: "ReaderGroupType_DataSetReaderName_Placeholder",
 	18086: "ReaderGroupType_DataSetReaderName_Placeholder_TransportSettings",
 	18087: "ReaderGroupType_DataSetReaderName_Placeholder_MessageSettings",
@@ -2738,19 +2710,36 @@ var nameObject = map[uint32]string{
 	18106: "ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics_Counters",
 	18137: "ReaderGroupType_DataSetReaderName_Placeholder_Diagnostics_LiveValues",
 	18155: "KeyCredentialConfiguration",
-	18156: "KeyCredentialConfiguration_ServiceName_Placeholder",
-	18438: "InstrumentDiagnosticAlarmType_ShelvingState",
-	18476: "InstrumentDiagnosticAlarmType_FirstInGroup",
-	18486: "InstrumentDiagnosticAlarmType_AlarmGroup_Placeholder",
-	18587: "SystemDiagnosticAlarmType_ShelvingState",
-	18625: "SystemDiagnosticAlarmType_FirstInGroup",
-	18635: "SystemDiagnosticAlarmType_AlarmGroup_Placeholder",
+	18279: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState",
+	18323: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup",
+	18359: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate",
+	18446: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState",
+	18490: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup",
+	18547: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_TransactionDiagnostics",
+	18554: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_ConfigurationFile",
+	18598: "ActionTargetDataType_Encoding_DefaultBinary",
+	18599: "PublishedActionDataType_Encoding_DefaultBinary",
+	18600: "ActionMethodDataType_Encoding_DefaultBinary",
+	18610: "ActionTargetDataType_Encoding_DefaultXML",
+	18611: "PublishedActionDataType_Encoding_DefaultXML",
+	18612: "ActionMethodDataType_Encoding_DefaultXML",
+	18622: "ActionTargetDataType_Encoding_DefaultJSON",
+	18623: "PublishedActionDataType_Encoding_DefaultJSON",
+	18624: "ActionMethodDataType_Encoding_DefaultJSON",
+	18625: "WellKnownRole_TrustedApplication",
+	18650: "SortRuleElement_Encoding_DefaultBinary",
+	18651: "ReadEventDetailsSorted_Encoding_DefaultBinary",
+	18652: "SortRuleElement_Encoding_DefaultXML",
+	18653: "ReadEventDetailsSorted_Encoding_DefaultXML",
+	18654: "SortRuleElement_Encoding_DefaultJSON",
+	18655: "ReadEventDetailsSorted_Encoding_DefaultJSON",
 	18667: "PublishSubscribeType_ConnectionName_Placeholder_Diagnostics",
 	18681: "PublishSubscribeType_ConnectionName_Placeholder_Diagnostics_Counters",
 	18712: "PublishSubscribeType_ConnectionName_Placeholder_Diagnostics_LiveValues",
 	18715: "PublishSubscribeType_Diagnostics",
 	18729: "PublishSubscribeType_Diagnostics_Counters",
 	18760: "PublishSubscribeType_Diagnostics_LiveValues",
+	18795: "PublishedActionMethodDataType_Encoding_DefaultBinary",
 	18815: "RationalNumber_Encoding_DefaultBinary",
 	18816: "Vector_Encoding_DefaultBinary",
 	18817: "ThreeDVector_Encoding_DefaultBinary",
@@ -2772,12 +2761,22 @@ var nameObject = map[uint32]string{
 	18871: "PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics",
 	18885: "PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics_Counters",
 	18916: "PublishedDataSetType_DataSetWriterName_Placeholder_Diagnostics_LiveValues",
-	18930: "PublishedDataItemsType_DataSetWriterName_Placeholder_Diagnostics",
-	18944: "PublishedDataItemsType_DataSetWriterName_Placeholder_Diagnostics_Counters",
-	18975: "PublishedDataItemsType_DataSetWriterName_Placeholder_Diagnostics_LiveValues",
-	18989: "PublishedEventsType_DataSetWriterName_Placeholder_Diagnostics",
-	19003: "PublishedEventsType_DataSetWriterName_Placeholder_Diagnostics_Counters",
-	19034: "PublishedEventsType_DataSetWriterName_Placeholder_Diagnostics_LiveValues",
+	18930: "DtlsPubSubConnectionDataType_Encoding_DefaultBinary",
+	18937: "PublishedActionMethodDataType_Encoding_DefaultXML",
+	18938: "DtlsPubSubConnectionDataType_Encoding_DefaultXML",
+	18945: "PublishedActionMethodDataType_Encoding_DefaultJSON",
+	18946: "DtlsPubSubConnectionDataType_Encoding_DefaultJSON",
+	18958: "LLDP",
+	18959: "LLDP_RemoteStatistics",
+	18965: "LLDP_LocalSystemData",
+	18972: "LLDP_Ports",
+	18974: "LldpInformationType_RemoteStatistics",
+	18980: "LldpInformationType_LocalSystemData",
+	18987: "LldpInformationType_Ports",
+	18988: "LldpInformationType_Ports_LldpPortInformation_Placeholder",
+	18995: "LldpInformationType_Ports_LldpPortInformation_Placeholder_RemoteSystemsData",
+	19016: "LldpPortInformationType_RemoteSystemsData",
+	19017: "LldpPortInformationType_RemoteSystemsData_LldpRemoteSystem_Placeholder",
 	19064: "RationalNumber_Encoding_DefaultJSON",
 	19065: "Vector_Encoding_DefaultJSON",
 	19066: "ThreeDVector_Encoding_DefaultJSON",
@@ -2787,6 +2786,12 @@ var nameObject = map[uint32]string{
 	19070: "ThreeDOrientation_Encoding_DefaultJSON",
 	19071: "Frame_Encoding_DefaultJSON",
 	19072: "ThreeDFrame_Encoding_DefaultJSON",
+	19079: "LldpManagementAddressTxPortType_Encoding_DefaultBinary",
+	19080: "LldpManagementAddressType_Encoding_DefaultBinary",
+	19081: "LldpTlvType_Encoding_DefaultBinary",
+	19100: "LldpManagementAddressTxPortType_Encoding_DefaultXML",
+	19101: "LldpManagementAddressType_Encoding_DefaultXML",
+	19102: "LldpTlvType_Encoding_DefaultXML",
 	19107: "PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics",
 	19121: "PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics_Counters",
 	19152: "PubSubConnectionType_WriterGroupName_Placeholder_Diagnostics_LiveValues",
@@ -2796,9 +2801,18 @@ var nameObject = map[uint32]string{
 	19241: "PubSubConnectionType_Diagnostics",
 	19255: "PubSubConnectionType_Diagnostics_Counters",
 	19286: "PubSubConnectionType_Diagnostics_LiveValues",
-	19388: "TrustListOutOfDateAlarmType_ShelvingState",
-	19426: "TrustListOutOfDateAlarmType_FirstInGroup",
-	19436: "TrustListOutOfDateAlarmType_AlarmGroup_Placeholder",
+	19299: "LldpManagementAddressTxPortType_Encoding_DefaultJSON",
+	19300: "LldpManagementAddressType_Encoding_DefaultJSON",
+	19301: "LldpTlvType_Encoding_DefaultJSON",
+	19372: "ServerLog",
+	19378: "Logs",
+	19379: "LogRecord_Encoding_DefaultBinary",
+	19383: "LogRecord_Encoding_DefaultXML",
+	19387: "LogRecord_Encoding_DefaultJSON",
+	19409: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_KeyCredentials",
+	19413: "ApplicationConfigurationFolderType_ApplicationName_Placeholder_AuthorizationServices",
+	19423: "ApplicationConfigurationType_KeyCredentials",
+	19427: "ApplicationConfigurationType_AuthorizationServices",
 	19450: "CertificateGroupType_CertificateExpired",
 	19537: "CertificateGroupType_CertificateExpired_ShelvingState",
 	19550: "DataSetWriterType_Diagnostics",
@@ -2809,10 +2823,23 @@ var nameObject = map[uint32]string{
 	19654: "DataSetReaderType_Diagnostics_LiveValues",
 	19691: "PubSubDiagnosticsType_Counters",
 	19722: "PubSubDiagnosticsType_LiveValues",
-	19746: "PubSubDiagnosticsRootType_Counters",
+	19739: "ProvisionableDeviceType_ApplicationName_Placeholder_KeyCredentials",
+	19743: "ProvisionableDeviceType_ApplicationName_Placeholder_AuthorizationServices",
+	19753: "LogRecordsDataType_Encoding_DefaultBinary",
+	19754: "SpanContextDataType_Encoding_DefaultBinary",
+	19755: "TraceContextDataType_Encoding_DefaultBinary",
+	19756: "NameValuePair_Encoding_DefaultBinary",
+	19773: "LogRecordsDataType_Encoding_DefaultXML",
+	19774: "SpanContextDataType_Encoding_DefaultXML",
+	19775: "TraceContextDataType_Encoding_DefaultXML",
+	19776: "NameValuePair_Encoding_DefaultXML",
 	19777: "PubSubDiagnosticsRootType_LiveValues",
-	19800: "PubSubDiagnosticsConnectionType_Counters",
+	19803: "LogRecordsDataType_Encoding_DefaultJSON",
+	19804: "SpanContextDataType_Encoding_DefaultJSON",
+	19805: "TraceContextDataType_Encoding_DefaultJSON",
+	19806: "NameValuePair_Encoding_DefaultJSON",
 	19831: "PubSubDiagnosticsConnectionType_LiveValues",
+	19847: "AlarmSuppressionGroupType_AlarmCondition_Placeholder",
 	19848: "PubSubDiagnosticsWriterGroupType_Counters",
 	19879: "PubSubDiagnosticsWriterGroupType_LiveValues",
 	19917: "PubSubDiagnosticsReaderGroupType_Counters",
@@ -2916,14 +2943,8 @@ var nameObject = map[uint32]string{
 	23457: "AliasNameCategoryType_Alias_Placeholder",
 	23458: "AliasNameCategoryType_SubAliasNameCategories_Placeholder",
 	23470: "Aliases",
-	23471: "Aliases_Alias_Placeholder",
-	23472: "Aliases_SubAliasNameCategories_Placeholder",
 	23479: "TagVariables",
-	23480: "TagVariables_Alias_Placeholder",
-	23481: "TagVariables_SubAliasNameCategories_Placeholder",
 	23488: "Topics",
-	23489: "Topics_Alias_Placeholder",
-	23490: "Topics_SubAliasNameCategories_Placeholder",
 	23499: "AliasNameDataType_Encoding_DefaultBinary",
 	23500: "ReadAnnotationDataDetails_Encoding_DefaultBinary",
 	23505: "AliasNameDataType_Encoding_DefaultXML",
@@ -2936,11 +2957,22 @@ var nameObject = map[uint32]string{
 	23528: "CurrencyUnitType_Encoding_DefaultJSON",
 	23557: "AuthorizationServicesConfigurationFolderType_ServiceName_Placeholder",
 	23622: "PublishSubscribeType_SubscribedDataSets",
+	23623: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_ShelvingState",
 	23642: "PublishSubscribeType_PubSubCapablities",
 	23649: "PublishSubscribeType_DataSetClasses",
 	23658: "PublishSubscribe_SubscribedDataSets",
 	23678: "PublishSubscribe_PubSubCapablities",
 	23685: "PublishSubscribe_DataSetClasses",
+	23694: "AlarmSuppressionGroupType_AlarmCondition_Placeholder_FirstInGroup",
+	23725: "ServiceCertificateDataType_Encoding_DefaultBinary",
+	23735: "ServiceCertificateDataType_Encoding_DefaultXML",
+	23739: "ServiceCertificateDataType_Encoding_DefaultJSON",
+	23754: "ApplicationConfigurationDataType_Encoding_DefaultBinary",
+	23755: "AuthorizationServiceConfigurationDataType_Encoding_DefaultBinary",
+	23762: "ApplicationConfigurationDataType_Encoding_DefaultXML",
+	23763: "AuthorizationServiceConfigurationDataType_Encoding_DefaultXML",
+	23776: "ApplicationConfigurationDataType_Encoding_DefaultJSON",
+	23777: "AuthorizationServiceConfigurationDataType_Encoding_DefaultJSON",
 	23796: "SubscribedDataSetFolderType_SubscribedDataSetFolderName_Placeholder",
 	23807: "SubscribedDataSetFolderType_StandaloneSubscribedDataSetName_Placeholder",
 	23808: "SubscribedDataSetFolderType_StandaloneSubscribedDataSetName_Placeholder_SubscribedDataSet",
@@ -3013,7 +3045,6 @@ var nameObject = map[uint32]string{
 	25277: "PubSubKeyServiceType_KeyPushTargets",
 	25347: "PubSubKeyPushTargetFolderType_PushTargetFolderName_Placeholder",
 	25358: "PubSubKeyPushTargetFolderType_PushTargetName_Placeholder",
-	25392: "PublishSubscribeType_KeyPushTargets",
 	25403: "PublishSubscribeType_PubSubConfiguration",
 	25440: "PublishSubscribe_KeyPushTargets",
 	25451: "PublishSubscribe_PubSubConfiguration",
@@ -3033,31 +3064,6 @@ var nameObject = map[uint32]string{
 	25584: "WellKnownRole_SecurityKeyServerPush",
 	25603: "WellKnownRole_SecurityKeyServerAccess",
 	25626: "PubSubKeyPushTargetType_SecurityGroupName_Placeholder",
-	25732: "ApplicationConfigurationType_CertificateGroups",
-	25733: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup",
-	25734: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustList",
-	25774: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired",
-	25861: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState",
-	25905: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup",
-	25940: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate",
-	26027: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState",
-	26071: "ApplicationConfigurationType_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup",
-	26105: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup",
-	26106: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustList",
-	26146: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired",
-	26233: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState",
-	26277: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup",
-	26312: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate",
-	26399: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState",
-	26443: "ApplicationConfigurationType_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup",
-	26477: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup",
-	26478: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustList",
-	26518: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired",
-	26605: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState",
-	26649: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup",
-	26684: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate",
-	26771: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState",
-	26815: "ApplicationConfigurationType_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup",
 	26878: "ProvisionableDeviceType_ApplicationName_Placeholder",
 	26879: "ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups",
 	26880: "ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup",
@@ -3085,67 +3091,49 @@ var nameObject = map[uint32]string{
 	27918: "ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState",
 	27962: "ProvisionableDeviceType_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup",
 	29878: "ProvisionableDevice",
-	29885: "ProvisionableDevice_ApplicationName_Placeholder",
-	29886: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups",
-	29887: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup",
-	29888: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustList",
-	29928: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired",
-	30015: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_ShelvingState",
-	30059: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_CertificateExpired_FirstInGroup",
-	30094: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate",
-	30181: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_ShelvingState",
-	30225: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultApplicationGroup_TrustListOutOfDate_FirstInGroup",
-	30259: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup",
-	30260: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustList",
-	30300: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired",
-	30387: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_ShelvingState",
-	30431: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_CertificateExpired_FirstInGroup",
-	30466: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate",
-	30553: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_ShelvingState",
-	30597: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultHttpsGroup_TrustListOutOfDate_FirstInGroup",
-	30631: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup",
-	30632: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustList",
-	30672: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired",
-	30759: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_ShelvingState",
-	30803: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_CertificateExpired_FirstInGroup",
-	30838: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate",
-	30925: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_ShelvingState",
-	30969: "ProvisionableDevice_ApplicationName_Placeholder_CertificateGroups_DefaultUserTokenGroup_TrustListOutOfDate_FirstInGroup",
 	31915: "Locations",
-	32065: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder",
-	32152: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_ShelvingState",
-	32196: "AlarmSuppressionGroupType_AlarmConditionInstance_Placeholder_FirstInGroup",
 	32299: "ServerConfigurationType_TransactionDiagnostics",
 	32336: "ServerConfiguration_TransactionDiagnostics",
-	32349: "ApplicationConfigurationType_TransactionDiagnostics",
 	32362: "ProvisionableDeviceType_ApplicationName_Placeholder_TransactionDiagnostics",
-	32375: "ProvisionableDevice_ApplicationName_Placeholder_TransactionDiagnostics",
 	32382: "TransactionErrorType_Encoding_DefaultBinary",
 	32386: "TransactionErrorType_Encoding_DefaultXML",
 	32390: "TransactionErrorType_Encoding_DefaultJSON",
-	32405: "DataSetClasses",
-	32412: "DataSetClasses_SecurityGroups",
-	32424: "DataSetClasses_KeyPushTargets",
-	32435: "DataSetClasses_ConnectionName_Placeholder",
-	32442: "DataSetClasses_ConnectionName_Placeholder_Address",
-	32447: "DataSetClasses_ConnectionName_Placeholder_TransportSettings",
-	32448: "DataSetClasses_ConnectionName_Placeholder_Status",
-	32452: "DataSetClasses_ConnectionName_Placeholder_Diagnostics",
-	32466: "DataSetClasses_ConnectionName_Placeholder_Diagnostics_Counters",
-	32497: "DataSetClasses_ConnectionName_Placeholder_Diagnostics_LiveValues",
-	32515: "DataSetClasses_PublishedDataSets",
-	32535: "DataSetClasses_SubscribedDataSets",
-	32546: "DataSetClasses_PubSubConfiguration",
-	32575: "DataSetClasses_Status",
-	32579: "DataSetClasses_Diagnostics",
-	32593: "DataSetClasses_Diagnostics_Counters",
-	32624: "DataSetClasses_Diagnostics_LiveValues",
-	32633: "DataSetClasses_PubSubCapablities",
-	32644: "DataSetClasses_DataSetClasses",
+	32422: "BitFieldDefinition_Encoding_DefaultBinary",
+	32426: "BitFieldDefinition_Encoding_DefaultXML",
+	32430: "BitFieldDefinition_Encoding_DefaultJSON",
+	32452: "ServerUnitType_AlternativeUnits",
+	32462: "ServerUnitType_CoherentUnit",
+	32481: "QuantityType_ServerUnits",
+	32482: "QuantityType_ServerUnits_ServerUnit_Placeholder",
+	32487: "QuantityType_ServerUnits_ServerUnit_Placeholder_AlternativeUnits",
+	32497: "QuantityType_ServerUnits_ServerUnit_Placeholder_CoherentUnit",
+	32530: "Quantities",
+	32560: "AnnotationDataType_Encoding_DefaultBinary",
+	32561: "LinearConversionDataType_Encoding_DefaultBinary",
+	32562: "QuantityDimension_Encoding_DefaultBinary",
+	32572: "AnnotationDataType_Encoding_DefaultXML",
+	32573: "LinearConversionDataType_Encoding_DefaultXML",
+	32574: "QuantityDimension_Encoding_DefaultXML",
+	32584: "AnnotationDataType_Encoding_DefaultJSON",
+	32585: "LinearConversionDataType_Encoding_DefaultJSON",
+	32586: "QuantityDimension_Encoding_DefaultJSON",
+	32587: "ServerUnitType_AlternativeUnits_AlternativeUnit_Placeholder",
+	32622: "HistoricalEventConfigurationType_EventTypes",
+	32637: "DefaultHAConfiguration",
+	32638: "DefaultHAConfiguration_AggregateConfiguration",
+	32643: "DefaultHAConfiguration_AggregateFunctions",
 	32661: "ReferenceDescriptionDataType_Encoding_DefaultBinary",
 	32662: "ReferenceListEntryDataType_Encoding_DefaultBinary",
 	32669: "ReferenceDescriptionDataType_Encoding_DefaultXML",
 	32670: "ReferenceListEntryDataType_Encoding_DefaultXML",
 	32677: "ReferenceDescriptionDataType_Encoding_DefaultJSON",
 	32678: "ReferenceListEntryDataType_Encoding_DefaultJSON",
+	32754: "DefaultHEConfiguration",
+	32755: "DefaultHEConfiguration_EventTypes",
+	32800: "ReadEventDetails2_Encoding_DefaultBinary",
+	32801: "ReadEventDetails2_Encoding_DefaultXML",
+	32802: "ReadEventDetails2_Encoding_DefaultJSON",
+	32825: "HistoryModifiedEvent_Encoding_DefaultBinary",
+	32829: "HistoryModifiedEvent_Encoding_DefaultXML",
+	32833: "HistoryModifiedEvent_Encoding_DefaultJSON",
 }
