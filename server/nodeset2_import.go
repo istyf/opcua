@@ -54,7 +54,7 @@ func (srv *Server) namespacesImportNodeSet(nodes *schema.UANodeSet) (*nsIDLookup
 			ns = NewNodeNameSpace(srv, name)
 		}
 
-		nameSpaceLookup[uint16(i)] = ns.ID()
+		nameSpaceLookup[uint16(i+1)] = ns.ID()
 	}
 
 	return &nameSpaceLookup, nil
