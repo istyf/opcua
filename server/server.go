@@ -117,14 +117,12 @@ func New(ctx context.Context, opts ...Option) *Server {
 	}
 
 	s := &Server{
-		url:      url,
-		cfg:      cfg,
-		cb:       newChannelBroker(),
-		sb:       newSessionBroker(),
-		handlers: make(map[uint16]Handler),
-		namespaces: []NameSpace{
-			NewNameSpace("http://opcfoundation.org/UA/"), // ns:0
-		},
+		url:        url,
+		cfg:        cfg,
+		cb:         newChannelBroker(),
+		sb:         newSessionBroker(),
+		handlers:   make(map[uint16]Handler),
+		namespaces: []NameSpace{},
 		status: &ua.ServerStatusDataType{
 			StartTime:   time.Now(),
 			CurrentTime: time.Now(),
@@ -152,19 +150,19 @@ func New(ctx context.Context, opts ...Option) *Server {
 	var nodes schema.UANodeSet
 	xml.Unmarshal(schema.OpcUaNodeSet2, &nodes)
 
-	n0, ok := s.namespaces[0].(*NodeNameSpace)
-	n0.srv = s
-	if !ok {
-		// this should never happen because we just set namespace 0 to be a node namespace
-		panic("namespace 0 is not a node namespace")
+	if len(nodes.NamespaceUris.Uri) == 0 {
+		nodes.NamespaceUris.Uri = []string{"http://opcfoundation.org/UA/"}
 	}
+
 	s.ImportNodeSet(ctx, &nodes)
 
 	s.namespaces[0].AddNode(CurrentTimeNode())
 	s.namespaces[0].AddNode(NamespacesNode(s))
+
 	for _, n := range ServerStatusNodes(s, s.namespaces[0].Node(ua.NewNumericNodeID(0, id.Server))) {
 		s.namespaces[0].AddNode(n)
 	}
+
 	for _, n := range ServerCapabilitiesNodes(s) {
 		s.namespaces[0].AddNode(n)
 	}
