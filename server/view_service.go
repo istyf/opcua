@@ -2,7 +2,9 @@ package server
 
 import (
 	"context"
+	"math"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/gopcua/opcua/id"
@@ -150,7 +152,7 @@ func (s *ViewService) BrowseNext(ctx context.Context, sc *uasc.SecureChannel, r 
 	return serviceUnsupported(req.RequestHeader), nil
 }
 
-// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.8.4
+// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9.4
 func (s *ViewService) TranslateBrowsePathsToNodeIDs(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
 	ctx = ualog.WithAttrs(ctx, newViewServiceLogAttribute("translate browse paths to node ids"))
 	logServiceRequest(ctx, r)
@@ -160,7 +162,53 @@ func (s *ViewService) TranslateBrowsePathsToNodeIDs(ctx context.Context, sc *uas
 		return nil, err
 	}
 
-	return serviceUnsupported(req.RequestHeader), nil
+	resp := &ua.TranslateBrowsePathsToNodeIDsResponse{
+		ResponseHeader: &ua.ResponseHeader{
+			Timestamp:          time.Now(),
+			RequestHandle:      req.RequestHeader.RequestHandle,
+			ServiceResult:      ua.StatusOK,
+			ServiceDiagnostics: &ua.DiagnosticInfo{},
+			StringTable:        []string{},
+			AdditionalHeader:   ua.NewExtensionObject(nil),
+		},
+		Results: make([]*ua.BrowsePathResult, len(req.BrowsePaths)),
+
+		DiagnosticInfos: []*ua.DiagnosticInfo{{}},
+	}
+
+	findTarget := func(n *Node, pathElements []*ua.RelativePathElement) (*ua.BrowsePathResult, error) {
+		for _, elem := range pathElements {
+			var e *ua.RelativePathElement = elem
+			for _, ref := range n.refs {
+				if ref.ReferenceTypeID.Equal(e.ReferenceTypeID) && ref.IsForward == !e.IsInverse {
+					referenceTarget := s.srv.Node(ref.NodeID.NodeID)
+					if strings.Compare(referenceTarget.DisplayName().Text, e.TargetName.Name) == 0 {
+						return &ua.BrowsePathResult{
+							StatusCode: ua.StatusOK,
+							Targets: []*ua.BrowsePathTarget{
+								{TargetID: ref.NodeID, RemainingPathIndex: math.MaxUint32},
+							},
+						}, nil
+					}
+				}
+			}
+		}
+
+		return &ua.BrowsePathResult{
+			StatusCode: ua.StatusBadNoMatch,
+			Targets:    []*ua.BrowsePathTarget{},
+		}, nil
+	}
+
+	for _, path := range req.BrowsePaths {
+		if n := s.srv.Node(path.StartingNode); n != nil && path.RelativePath != nil {
+			if bpr, err := findTarget(n, path.RelativePath.Elements); err == nil {
+				resp.Results = append(resp.Results, bpr)
+			}
+		}
+	}
+
+	return resp, nil
 }
 
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.8.5
