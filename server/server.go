@@ -150,8 +150,10 @@ func New(ctx context.Context, opts ...Option) *Server {
 	var nodes schema.UANodeSet
 	xml.Unmarshal(schema.OpcUaNodeSet2, &nodes)
 
-	if len(nodes.NamespaceUris.Uri) == 0 {
-		nodes.NamespaceUris.Uri = []string{"http://opcfoundation.org/UA/"}
+	if nodes.NamespaceUris == nil || len(nodes.NamespaceUris.Uri) == 0 {
+		nodes.NamespaceUris = &schema.UriTable{
+			Uri: []string{"http://opcfoundation.org/UA/"},
+		}
 	}
 
 	s.ImportNodeSet(ctx, &nodes)
