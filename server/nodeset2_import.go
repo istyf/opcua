@@ -32,11 +32,11 @@ func (srv *Server) ImportNodeSet(nodes *schema.UANodeSet) error {
 }
 
 func (srv *Server) namespacesImportNodeSet(nodes *schema.UANodeSet) (*nsIDLookup, error) {
-	if nodes.NamespaceUris == nil {
-		return &nsIDLookup{1: 1}, nil
-	}
-
 	nameSpaceLookup := nsIDLookup{}
+
+	if nodes.NamespaceUris == nil {
+		return &nameSpaceLookup, nil
+	}
 
 	for i := range nodes.NamespaceUris.Uri {
 		name := nodes.NamespaceUris.Uri[i]
@@ -53,7 +53,12 @@ func (srv *Server) namespacesImportNodeSet(nodes *schema.UANodeSet) (*nsIDLookup
 			ns = NewNodeNameSpace(srv, name)
 		}
 
-		nameSpaceLookup[uint16(i+1)] = ns.ID()
+		if ns.ID() != 0 || i != 0 {
+			lookupKey := uint16(i + 1)
+			if lookupKey != ns.ID() {
+				nameSpaceLookup[lookupKey] = ns.ID()
+			}
+		}
 	}
 
 	return &nameSpaceLookup, nil
