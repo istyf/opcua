@@ -125,7 +125,7 @@ func ServerStatusNodes(s *Server, ServerNode *Node) []*Node {
 	mName := NewNode(
 		ua.NewNumericNodeID(0, id.Server_ServerStatus_BuildInfo_ManufacturerName),
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDBrowseName: DataValueFromValue(attrs.BrowseName("ProductName")),
+			ua.AttributeIDBrowseName: DataValueFromValue(attrs.BrowseName("ManufacturerName")),
 			ua.AttributeIDNodeClass:  DataValueFromValue(uint32(ua.NodeClassVariable)),
 		},
 		nil,
