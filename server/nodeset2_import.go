@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"slices"
 	"strings"
@@ -284,9 +285,10 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 			} else if ot.Value.BoolAttr != nil {
 				valueFunc = newValueFuncFromData(ot.Value.BoolAttr.Data)
 			} else if ot.Value.ByteStringAttr != nil {
-				valueFunc = newValueFuncFromData(
-					strings.ReplaceAll(ot.Value.ByteStringAttr.Data, " ", ""),
-				)
+				bs := ot.Value.ByteStringAttr.Data
+				if b64b, err := base64.StdEncoding.DecodeString(bs); err == nil {
+					valueFunc = newValueFuncFromData(b64b)
+				}
 			} else if ot.Value.TextAttr != nil {
 				v := ua.NewLocalizedTextWithLocale(ot.Value.TextAttr.Text, ot.Value.TextAttr.Locale)
 				valueFunc = newValueFuncFromData(v)
