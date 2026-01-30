@@ -449,7 +449,13 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 
 	ualog.Info(ctx, "new node set", ualog.String("last_modified", nodes.LastModifiedAttr))
 
+	aliases := make(map[string]string)
+
 	mustParseAndConvertNodeID := func(nodeID string) *ua.NodeID {
+		if aliasedID, isAlias := aliases[nodeID]; isAlias {
+			nodeID = aliasedID
+		}
+
 		nid := ua.MustParseNodeID(nodeID)
 		if correctNS, ok := (*nsID)[nid.Namespace()]; ok {
 			nid.SetNamespace(uint16(correctNS))
@@ -465,7 +471,6 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 		reftypes[rt.NodeIdAttr] = rt     // sometimes they use node id
 	}
 
-	aliases := make(map[string]string)
 	for i := range nodes.Aliases.Alias {
 		alias := nodes.Aliases.Alias[i]
 		aliases[alias.AliasAttr] = alias.Value
