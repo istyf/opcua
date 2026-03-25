@@ -110,46 +110,32 @@ func NewFolderNode(nodeID *ua.NodeID, name string) *Node {
 	return n
 }
 
-func NewVariableNode(nodeID *ua.NodeID, name string, value any) *Node {
-	//eoid := ua.NewNumericExpandedNodeID(nodeID.Namespace(), nodeID.IntID())
-	vf, ok := value.(func() *ua.DataValue)
-	if !ok {
-		typedef := ua.NewNumericExpandedNodeID(0, id.VariableNode)
-		n := NewNode(
-			nodeID,
-			map[ua.AttributeID]*ua.DataValue{
-				ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassVariable)),
-				ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
-				ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, name)),
-				ua.AttributeIDDescription:   DataValueFromValue(uint32(ua.NodeClassVariable)),
-				ua.AttributeIDDataType:      DataValueFromValue(typedef),
-				ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
-			},
-			[]*ua.ReferenceDescription{},
-			func() *ua.DataValue {
-				return DataValueFromValue(value)
-			},
-		)
-		dvFunc, ok := value.(ValueFunc)
-		if ok {
-			n.val = dvFunc
-		}
-		return n
+func NewVariableNode(nodeID *ua.NodeID, name string, dataTypeNodeID *ua.NodeID, value any) *Node {
+	var valueFunc ValueFunc
+
+	if vf, ok := value.(ValueFunc); ok {
+		valueFunc = vf
+	} else {
+		_ = DataValueFromValue(value) // check if the type is supported
+		valueFunc = func() *ua.DataValue { return DataValueFromValue(value) }
 	}
-	typedef := ua.NewNumericExpandedNodeID(0, id.VariableNode)
+
 	n := NewNode(
 		nodeID,
 		map[ua.AttributeID]*ua.DataValue{
 			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassVariable)),
 			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
-			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, name)),
-			ua.AttributeIDDescription:   DataValueFromValue(uint32(ua.NodeClassVariable)),
-			ua.AttributeIDDataType:      DataValueFromValue(typedef),
+			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, "")),
 			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
 		},
 		[]*ua.ReferenceDescription{},
-		vf,
+		valueFunc,
 	)
+
+	if dataTypeNodeID != nil {
+		n.SetAttribute(ua.AttributeIDDataType, DataValueFromValue(dataTypeNodeID))
+	}
+
 	return n
 }
 

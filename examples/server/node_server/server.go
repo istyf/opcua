@@ -163,7 +163,7 @@ func main() {
 	nns_obj := nodeNS.Objects()
 	root_obj_node.AddRef(nns_obj, id.HasComponent, true)
 
-	// Create some nodes for it.  Here we are usin gthe AddNewVariableNode utility function to create a new variable node
+	// Create some nodes for it.  Here we are using the AddNewVariableNode utility function to create a new variable node
 	// with an integer node ID that is automatically assigned. (ns=<namespace id>,s=<auto assigned>)
 	// be sure to add the reference to the node somewhere if desired, or clients won't be able to browse it.
 	var1 := nodeNS.AddNewVariableNode("TestVar1", float32(123.45))
