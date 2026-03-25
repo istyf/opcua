@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -106,75 +105,14 @@ func (as *NodeNameSpace) AddNode(n *Node) *Node {
 	return n
 }
 
-var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
-	id.Boolean: ua.NewNumericNodeID(0, id.Boolean),
-	id.SByte:   ua.NewNumericNodeID(0, id.SByte),
-	id.Byte:    ua.NewNumericNodeID(0, id.Byte),
-	id.Int16:   ua.NewNumericNodeID(0, id.Int16),
-	id.UInt16:  ua.NewNumericNodeID(0, id.UInt16),
-	id.Int32:   ua.NewNumericNodeID(0, id.Int32),
-	id.UInt32:  ua.NewNumericNodeID(0, id.UInt32),
-	id.Int64:   ua.NewNumericNodeID(0, id.Int64),
-	id.UInt64:  ua.NewNumericNodeID(0, id.UInt64),
-	id.Float:   ua.NewNumericNodeID(0, id.Float),
-	id.Double:  ua.NewNumericNodeID(0, id.Double),
-}
-
-func lookupTypeNodeIDFromValue(value any) *ua.NodeID {
-	switch v := value.(type) {
-	case ValueFunc:
-		if dataValue := v(); dataValue != nil && dataValue.Value != nil {
-			return lookupTypeNodeIDFromValue(dataValue.Value.Value())
-		}
-	case bool:
-		return typeNodeIdFromDataType[id.Boolean]
-	case int8:
-		return typeNodeIdFromDataType[id.SByte]
-	case uint8:
-		return typeNodeIdFromDataType[id.Byte]
-	case int16:
-		return typeNodeIdFromDataType[id.Int16]
-	case uint16:
-		return typeNodeIdFromDataType[id.UInt16]
-	case int32:
-		return typeNodeIdFromDataType[id.Int32]
-	case uint32:
-		return typeNodeIdFromDataType[id.UInt32]
-	case int64:
-		return typeNodeIdFromDataType[id.Int64]
-	case uint64:
-		return typeNodeIdFromDataType[id.UInt64]
-	case int:
-		if strconv.IntSize == 64 {
-			return typeNodeIdFromDataType[id.Int64]
-		} else {
-			return typeNodeIdFromDataType[id.Int32]
-		}
-	case uint:
-		if strconv.IntSize == 64 {
-			return typeNodeIdFromDataType[id.UInt64]
-		} else {
-			return typeNodeIdFromDataType[id.UInt32]
-		}
-	case float32:
-		return typeNodeIdFromDataType[id.Float]
-	case float64:
-		return typeNodeIdFromDataType[id.Double]
-	}
-
-	return nil
-}
-
 func (as *NodeNameSpace) AddNewVariableNode(name string, value any) *Node {
-	dataTypeNodeID := lookupTypeNodeIDFromValue(value)
-	n := NewVariableNode(ua.NewNumericNodeID(as.id, as.GetNextNodeID()), name, dataTypeNodeID, value)
+	n := NewVariableNode(ua.NewNumericNodeID(as.id, as.GetNextNodeID()), name, value)
 	as.AddNode(n)
 	return n
 }
 
 func (as *NodeNameSpace) AddNewVariableStringNode(name string, value any) *Node {
-	dataTypeNodeID := lookupTypeNodeIDFromValue(value)
-	n := NewVariableNode(ua.NewStringNodeID(as.id, name), name, dataTypeNodeID, value)
+	n := NewVariableNode(ua.NewStringNodeID(as.id, name), name, value)
 	as.AddNode(n)
 	return n
 }
