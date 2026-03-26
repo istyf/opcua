@@ -152,13 +152,13 @@ func main() {
 		fatal(ctx, "unable to open nodeset file", err)
 	}
 
-	node_data, err := io.ReadAll(file)
+	nodeData, err := io.ReadAll(file)
 	if err != nil {
 		fatal(ctx, "unable to read nodeset file", err)
 	}
 
 	var nodes schema.UANodeSet
-	xml.Unmarshal(node_data, &nodes)
+	xml.Unmarshal(nodeData, &nodes)
 	s.ImportNodeSet(ctx, &nodes)
 
 	// At this point you can lookup any specific node by its nodeid to add references or modify it or whatever

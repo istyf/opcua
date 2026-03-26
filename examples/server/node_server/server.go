@@ -13,6 +13,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"sync/atomic"
 	"time"
 
 	"github.com/gopcua/opcua/debug"
@@ -143,8 +144,8 @@ func main() {
 	// here we are choosing to add the namespaces to the root/object folder
 	// to do this we first need to get the root namespace object folder so we
 	// get the object node
-	root_ns, _ := s.Namespace(0)
-	root_obj_node := root_ns.Objects()
+	rootNamespace, _ := s.Namespace(0)
+	rootObjects := rootNamespace.Objects()
 
 	// Start the server
 	// Note that you can add namespaces before or after starting the server.
@@ -160,21 +161,26 @@ func main() {
 
 	// add the reference for this namespace's root object folder to the server's root object folder
 	// but you can add a reference to whatever node(s) you need
-	nns_obj := nodeNS.Objects()
-	root_obj_node.AddRef(nns_obj, id.HasComponent, true)
+	nodeNSObjects := nodeNS.Objects()
+	rootObjects.AddRef(nodeNSObjects, id.HasComponent, true)
 
 	// Create some nodes for it.  Here we are using the AddNewVariableNode utility function to create a new variable node
 	// with an integer node ID that is automatically assigned. (ns=<namespace id>,s=<auto assigned>)
 	// be sure to add the reference to the node somewhere if desired, or clients won't be able to browse it.
 	var1 := nodeNS.AddNewVariableNode("TestVar1", float32(123.45))
-	nns_obj.AddRef(var1, id.HasComponent, true)
+	nodeNSObjects.AddRef(var1, id.HasComponent, true)
 
 	// This node will have a string node id (ns=<namespace id>,s=TestVar2)
 	// your variable node's value can also return a ua.Variant from a function if you want to update the value dynamically
 	// here we are just incrementing a counter every time the value is read.
-	var2Value := int32(0)
-	var2 := nodeNS.AddNewVariableStringNode("TestVar2", func() *ua.DataValue { var2Value++; return server.DataValueFromValue(var2Value) })
-	nns_obj.AddRef(var2, id.HasComponent, true)
+	var2 := nodeNS.AddNewVariableStringNode("TestVar2", func() func() *ua.DataValue {
+		var2Value := atomic.Int32{}
+
+		return func() *ua.DataValue {
+			return server.DataValueFromValue(var2Value.Add(1))
+		}
+	}())
+	nodeNSObjects.AddRef(var2, id.HasComponent, true)
 
 	// Now we'll add a node from scratch.  This is a more manual way to add nodes to the server and gives you full
 	// control, but you'll have to build the node up with the correct attributes and references and then reference it from
@@ -189,7 +195,7 @@ func main() {
 		func() *ua.DataValue { return server.DataValueFromValue(12.34) },
 	)
 	nodeNS.AddNode(var3)
-	nns_obj.AddRef(var3, id.HasComponent, true)
+	nodeNSObjects.AddRef(var3, id.HasComponent, true)
 
 	var4 := server.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 100), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -203,7 +209,7 @@ func main() {
 		func() *ua.DataValue { return server.DataValueFromValue(12.34) },
 	)
 	nodeNS.AddNode(var4)
-	nns_obj.AddRef(var4, id.HasComponent, true)
+	nodeNSObjects.AddRef(var4, id.HasComponent, true)
 
 	var5 := server.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 105), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -217,7 +223,7 @@ func main() {
 		func() *ua.DataValue { return server.DataValueFromValue(9.87) },
 	)
 	nodeNS.AddNode(var5)
-	nns_obj.AddRef(var5, id.HasComponent, true)
+	nodeNSObjects.AddRef(var5, id.HasComponent, true)
 
 	var6 := server.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 102), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -231,7 +237,7 @@ func main() {
 		func() *ua.DataValue { return server.DataValueFromValue(9.87) },
 	)
 	nodeNS.AddNode(var6)
-	nns_obj.AddRef(var6, id.HasComponent, true)
+	nodeNSObjects.AddRef(var6, id.HasComponent, true)
 
 	// simulate a background process updating the data in the namespace.
 	go func() {
@@ -243,17 +249,13 @@ func main() {
 			num++
 
 			// get the current value of the variable
-			last_value := var1.Value().Value.Value().(float32)
+			lastValue := var1.Value().Value.Value().(float32)
 			// and change it
-			last_value += 1
+			lastValue += 1
 
 			// wrap the new value in a DataValue and use that to update the Value attribute of the node
-			val := ua.DataValue{
-				Value:           ua.MustVariant(last_value),
-				SourceTimestamp: time.Now(),
-				EncodingMask:    ua.DataValueValue | ua.DataValueSourceTimestamp,
-			}
-			var1.SetAttribute(ua.AttributeIDValue, &val)
+			val := server.DataValueFromVariant(ua.MustVariant(lastValue))
+			var1.SetAttribute(ua.AttributeIDValue, val)
 
 			// we also need to let the node namespace know that the value has changed so it can trigger the change notification
 			// and send the updated value to any subscribed clients.
@@ -268,12 +270,12 @@ func main() {
 	// occurs through the opc ua server
 	go func() {
 		for {
-			changed_id := <-nodeNS.ExternalNotification
-			node := nodeNS.Node(changed_id)
+			changedID := <-nodeNS.ExternalNotification
+			node := nodeNS.Node(changedID)
 			value := node.Value().Value.Value()
 
 			ualog.Info(ctx, "value changed",
-				ualog.String("key", changed_id.String()),
+				ualog.String("key", changedID.String()),
 				ualog.Any("value", value),
 			)
 		}
