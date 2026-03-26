@@ -34,7 +34,7 @@ func NewAttrValue(v *ua.DataValue) *AttrValue {
 
 func DataValueFromVariant(v *ua.Variant) *ua.DataValue {
 	return &ua.DataValue{
-		EncodingMask:    ua.DataValueValue,
+		EncodingMask:    ua.DataValueValue | ua.DataValueSourceTimestamp,
 		Value:           v,
 		SourceTimestamp: time.Now(),
 	}
