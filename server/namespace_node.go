@@ -14,13 +14,13 @@ import (
 
 // the base "node-centric" namespace
 type NodeNameSpace struct {
-	srv             *Server
-	name            string
-	mu              sync.RWMutex
-	nodes           []*Node
-	m               map[string]*Node
-	id              uint16
-	nodeid_sequence uint32
+	srv                 *Server
+	name                string
+	mu                  sync.RWMutex
+	nodes               []*Node
+	m                   map[string]*Node
+	id                  uint16
+	nextAvailableNodeID atomic.Uint32
 
 	ExternalNotification chan *ua.NodeID
 
@@ -28,10 +28,7 @@ type NodeNameSpace struct {
 }
 
 func (ns *NodeNameSpace) GetNextNodeID() uint32 {
-	if ns.nodeid_sequence < 100 {
-		ns.nodeid_sequence = 100
-	}
-	return atomic.AddUint32(&(ns.nodeid_sequence), 1)
+	return ns.nextAvailableNodeID.Add(1)
 }
 
 func NewNodeNameSpace(srv *Server, name string) *NodeNameSpace {
@@ -40,23 +37,22 @@ func NewNodeNameSpace(srv *Server, name string) *NodeNameSpace {
 		name:                 name,
 		nodes:                make([]*Node, 0),
 		m:                    make(map[string]*Node),
+		nextAvailableNodeID:  atomic.Uint32{},
 		ExternalNotification: make(chan *ua.NodeID),
 		logAttributes:        ualog.GroupAttrs("namespace", ualog.String("name", name), ualog.String("type", "node")),
 	}
+	ns.nextAvailableNodeID.Store(100)
 	srv.AddNamespace(ns)
 
-	//objectsNode := NewFolderNode(ua.NewNumericNodeID(ns.id, id.ObjectsFolder), ns.name)
 	oid := ua.NewNumericNodeID(ns.ID(), id.ObjectsFolder)
-	//eoid := ua.NewNumericExpandedNodeID(ns.ID(), id.ObjectsFolder)
-	typedef := ua.NewNumericExpandedNodeID(0, id.ObjectsFolder)
-	//reftype := ua.NewTwoByteNodeID(uint8(id.HasComponent)) // folder
+	typedef := ua.NewNumericNodeID(0, id.ObjectsFolder)
+
 	objectsNode := NewNode(
 		oid,
 		map[ua.AttributeID]*ua.DataValue{
 			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassObject)),
 			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(ns.name)),
-			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(ns.name, ns.name)),
-			ua.AttributeIDDescription:   DataValueFromValue(uint32(ua.NodeClassObject)),
+			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(ns.name, "")),
 			ua.AttributeIDDataType:      DataValueFromValue(typedef),
 			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
 		},
@@ -79,23 +75,9 @@ func (ns *NodeNameSpace) Name() string {
 	return ns.name
 }
 
-func NewNameSpace(name string) *NodeNameSpace {
-	return &NodeNameSpace{name: name, m: map[string]*Node{}}
-}
-
 func (as *NodeNameSpace) AddNode(n *Node) *Node {
 	as.mu.Lock()
 	defer as.mu.Unlock()
-
-	/*
-		nn := &Node{
-			id:   n.id,
-			attr: maps.Clone(n.attr),
-			refs: slices.Clone(n.refs),
-			val:  n.val,
-			ns:   as,
-		}
-	*/
 
 	// todo(fs): this is wrong since this leaves the old node in the list.
 	as.nodes = append(as.nodes, n)
@@ -180,12 +162,13 @@ func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.A
 }
 
 func (as *NodeNameSpace) Node(id *ua.NodeID) *Node {
-	as.mu.RLock()
-	defer as.mu.RUnlock()
-
 	if id == nil {
 		return nil
 	}
+
+	as.mu.RLock()
+	defer as.mu.RUnlock()
+
 	k := id.String()
 
 	return as.m[k]

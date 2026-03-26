@@ -204,12 +204,7 @@ func NewLocalizedText(text string) *LocalizedText {
 // NewLocalizedTextWithLocale creates a new localized text with a locale.
 func NewLocalizedTextWithLocale(text, locale string) *LocalizedText {
 	l := &LocalizedText{Text: text, Locale: locale}
-	if text != "" {
-		l.EncodingMask |= LocalizedTextText
-	}
-	if locale != "" {
-		l.EncodingMask |= LocalizedTextLocale
-	}
+	l.UpdateMask()
 	return l
 }
 

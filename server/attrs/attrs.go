@@ -7,15 +7,11 @@ func BrowseName(name string) *ua.QualifiedName {
 }
 
 func DisplayName(name, locale string) *ua.LocalizedText {
-	lt := &ua.LocalizedText{Text: name, Locale: locale}
-	lt.UpdateMask()
-	return lt
+	return ua.NewLocalizedTextWithLocale(name, locale)
 }
 
 func InverseName(name, locale string) *ua.LocalizedText {
-	lt := &ua.LocalizedText{Text: name, Locale: locale}
-	lt.UpdateMask()
-	return lt
+	return ua.NewLocalizedTextWithLocale(name, locale)
 }
 
 func NodeClass(n ua.NodeClass) uint32 {

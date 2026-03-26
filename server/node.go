@@ -29,7 +29,15 @@ type AttrValue struct {
 }
 
 func NewAttrValue(v *ua.DataValue) *AttrValue {
-	return &AttrValue{Value: v}
+	return &AttrValue{Value: v, SourceTimestamp: time.Now()}
+}
+
+func DataValueFromVariant(v *ua.Variant) *ua.DataValue {
+	return &ua.DataValue{
+		EncodingMask:    ua.DataValueValue,
+		Value:           v,
+		SourceTimestamp: time.Now(),
+	}
 }
 
 func DataValueFromValue(val any) *ua.DataValue {
@@ -40,32 +48,14 @@ func DataValueFromValue(val any) *ua.DataValue {
 	case ua.DataValue:
 		return &v
 	case ua.Variant:
-		return &ua.DataValue{
-			EncodingMask:    ua.DataValueValue,
-			Value:           &v,
-			SourceTimestamp: time.Now(),
-		}
+		return DataValueFromVariant(&v)
 	case *ua.Variant:
-		return &ua.DataValue{
-			EncodingMask:    ua.DataValueValue,
-			Value:           v,
-			SourceTimestamp: time.Now(),
-		}
+		return DataValueFromVariant(v)
 	case int:
-		return &ua.DataValue{
-			EncodingMask:    ua.DataValueValue,
-			Value:           ua.MustVariant(int32(v)),
-			SourceTimestamp: time.Now(),
-		}
-
+		return DataValueFromVariant(ua.MustVariant(int32(v)))
 	}
 
-	v := ua.MustVariant(val)
-	return &ua.DataValue{
-		EncodingMask:    ua.DataValueValue,
-		Value:           v,
-		SourceTimestamp: time.Now(),
-	}
+	return DataValueFromVariant(ua.MustVariant(val))
 }
 
 type Node struct {
@@ -79,131 +69,17 @@ type Node struct {
 }
 
 func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) *Node {
-	n := &Node{id, attr, refs, val, nil, nil}
-	n.sanitize()
-	return n
-}
-
-func NewFolderNode(nodeID *ua.NodeID, name string) *Node {
-	reftype := ua.NewTwoByteNodeID(uint8(id.HasComponent)) // folder
-	eoid := ua.NewNumericExpandedNodeID(nodeID.Namespace(), id.ObjectsFolder)
-	typedef := ua.NewNumericExpandedNodeID(0, id.ObjectsFolder)
-	n := NewNode(
-		nodeID,
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
-			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, name)),
-			ua.AttributeIDDescription:   DataValueFromValue(uint32(ua.NodeClassObject)),
-			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
-		},
-		[]*ua.ReferenceDescription{{
-			ReferenceTypeID: reftype,
-			IsForward:       true,
-			NodeID:          eoid,
-			BrowseName:      &ua.QualifiedName{NamespaceIndex: nodeID.Namespace(), Name: name},
-			DisplayName:     &ua.LocalizedText{EncodingMask: ua.LocalizedTextText, Text: name},
-			NodeClass:       ua.NodeClassObject,
-			TypeDefinition:  typedef,
-		}},
-		nil,
-	)
-	return n
-}
-
-var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
-	id.Boolean: ua.NewNumericNodeID(0, id.Boolean),
-	id.SByte:   ua.NewNumericNodeID(0, id.SByte),
-	id.Byte:    ua.NewNumericNodeID(0, id.Byte),
-	id.Int16:   ua.NewNumericNodeID(0, id.Int16),
-	id.UInt16:  ua.NewNumericNodeID(0, id.UInt16),
-	id.Int32:   ua.NewNumericNodeID(0, id.Int32),
-	id.UInt32:  ua.NewNumericNodeID(0, id.UInt32),
-	id.Int64:   ua.NewNumericNodeID(0, id.Int64),
-	id.UInt64:  ua.NewNumericNodeID(0, id.UInt64),
-	id.Float:   ua.NewNumericNodeID(0, id.Float),
-	id.Double:  ua.NewNumericNodeID(0, id.Double),
-}
-
-func lookupTypeNodeIDFromValue(value any) *ua.NodeID {
-	switch v := value.(type) {
-	case ValueFunc:
-		if dataValue := v(); dataValue != nil && dataValue.Value != nil {
-			return lookupTypeNodeIDFromValue(dataValue.Value.Value())
-		}
-	case bool:
-		return typeNodeIdFromDataType[id.Boolean]
-	case int8:
-		return typeNodeIdFromDataType[id.SByte]
-	case uint8:
-		return typeNodeIdFromDataType[id.Byte]
-	case int16:
-		return typeNodeIdFromDataType[id.Int16]
-	case uint16:
-		return typeNodeIdFromDataType[id.UInt16]
-	case int32:
-		return typeNodeIdFromDataType[id.Int32]
-	case uint32:
-		return typeNodeIdFromDataType[id.UInt32]
-	case int64:
-		return typeNodeIdFromDataType[id.Int64]
-	case uint64:
-		return typeNodeIdFromDataType[id.UInt64]
-	case int:
-		if strconv.IntSize == 64 {
-			return typeNodeIdFromDataType[id.Int64]
-		} else {
-			return typeNodeIdFromDataType[id.Int32]
-		}
-	case uint:
-		if strconv.IntSize == 64 {
-			return typeNodeIdFromDataType[id.UInt64]
-		} else {
-			return typeNodeIdFromDataType[id.UInt32]
-		}
-	case float32:
-		return typeNodeIdFromDataType[id.Float]
-	case float64:
-		return typeNodeIdFromDataType[id.Double]
+	if attr == nil {
+		attr = Attributes{}
 	}
 
-	return nil
-}
-
-func NewVariableNode(nodeID *ua.NodeID, name string, value any) *Node {
-	dataTypeNodeID := lookupTypeNodeIDFromValue(value)
-
-	var valueFunc ValueFunc
-	if vf, ok := value.(ValueFunc); ok {
-		valueFunc = vf
-	} else {
-		_ = DataValueFromValue(value) // check if the type is supported
-		valueFunc = func() *ua.DataValue { return DataValueFromValue(value) }
+	n := &Node{
+		id:   id,
+		attr: maps.Clone(attr),
+		refs: slices.Clone(refs),
+		val:  val,
 	}
 
-	n := NewNode(
-		nodeID,
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassVariable)),
-			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
-			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, "")),
-			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
-		},
-		[]*ua.ReferenceDescription{},
-		valueFunc,
-	)
-
-	if dataTypeNodeID != nil {
-		n.SetAttribute(ua.AttributeIDDataType, DataValueFromValue(dataTypeNodeID))
-	}
-
-	return n
-}
-
-func (n *Node) sanitize() {
-	if n.attr == nil {
-		n.attr = Attributes{}
-	}
 	if n.attr[ua.AttributeIDBrowseName] == nil {
 		n.SetBrowseName("")
 	}
@@ -216,9 +92,138 @@ func (n *Node) sanitize() {
 	if n.attr[ua.AttributeIDDescription] == nil {
 		n.SetDescription("", "")
 	}
-	//if n.attr[ua.AttributeIDDataType] == nil {
-	//n.attr[ua.AttributeIDDataType] = ua.MustVariant(ua.NewTwoByteExpandedNodeID(0))
-	//}
+
+	return n
+}
+
+func NewFolderNode(nodeID *ua.NodeID, name string) *Node {
+	reftype := ua.NewNumericNodeID(0, id.HasComponent)
+
+	n := NewNode(
+		nodeID,
+		map[ua.AttributeID]*ua.DataValue{
+			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassObject)),
+			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
+			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, "")),
+			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
+		},
+		[]*ua.ReferenceDescription{{
+			ReferenceTypeID: reftype,
+			IsForward:       true,
+			NodeID:          ua.NewNumericExpandedNodeID(nodeID.Namespace(), id.ObjectsFolder),
+			BrowseName:      &ua.QualifiedName{NamespaceIndex: nodeID.Namespace(), Name: name},
+			DisplayName:     &ua.LocalizedText{EncodingMask: ua.LocalizedTextText, Text: name},
+			NodeClass:       ua.NodeClassObject,
+			TypeDefinition:  ua.NewNumericExpandedNodeID(0, id.ObjectsFolder),
+		}},
+		nil,
+	)
+
+	return n
+}
+
+var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
+	id.Boolean:    ua.NewNumericNodeID(0, id.Boolean),
+	id.SByte:      ua.NewNumericNodeID(0, id.SByte),
+	id.Byte:       ua.NewNumericNodeID(0, id.Byte),
+	id.Int16:      ua.NewNumericNodeID(0, id.Int16),
+	id.UInt16:     ua.NewNumericNodeID(0, id.UInt16),
+	id.Int32:      ua.NewNumericNodeID(0, id.Int32),
+	id.UInt32:     ua.NewNumericNodeID(0, id.UInt32),
+	id.Int64:      ua.NewNumericNodeID(0, id.Int64),
+	id.UInt64:     ua.NewNumericNodeID(0, id.UInt64),
+	id.Float:      ua.NewNumericNodeID(0, id.Float),
+	id.Double:     ua.NewNumericNodeID(0, id.Double),
+	id.String:     ua.NewNumericNodeID(0, id.String),
+	id.ByteString: ua.NewNumericNodeID(0, id.ByteString),
+}
+
+func lookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
+	valueRank := int32(-1)
+
+	switch v := value.(type) {
+	case func() *ua.DataValue:
+		if dataValue := v(); dataValue != nil && dataValue.Value != nil {
+			return lookupTypeNodeIDFromValue(dataValue.Value.Value())
+		}
+	case bool:
+		return typeNodeIdFromDataType[id.Boolean], valueRank
+	case int8:
+		return typeNodeIdFromDataType[id.SByte], valueRank
+	case uint8:
+		return typeNodeIdFromDataType[id.Byte], valueRank
+	case int16:
+		return typeNodeIdFromDataType[id.Int16], valueRank
+	case uint16:
+		return typeNodeIdFromDataType[id.UInt16], valueRank
+	case int32:
+		return typeNodeIdFromDataType[id.Int32], valueRank
+	case uint32:
+		return typeNodeIdFromDataType[id.UInt32], valueRank
+	case int64:
+		return typeNodeIdFromDataType[id.Int64], valueRank
+	case uint64:
+		return typeNodeIdFromDataType[id.UInt64], valueRank
+	case int:
+		if strconv.IntSize == 64 {
+			return typeNodeIdFromDataType[id.Int64], valueRank
+		} else {
+			return typeNodeIdFromDataType[id.Int32], valueRank
+		}
+	case uint:
+		if strconv.IntSize == 64 {
+			return typeNodeIdFromDataType[id.UInt64], valueRank
+		} else {
+			return typeNodeIdFromDataType[id.UInt32], valueRank
+		}
+	case float32:
+		return typeNodeIdFromDataType[id.Float], valueRank
+	case float64:
+		return typeNodeIdFromDataType[id.Double], valueRank
+	case string:
+		return typeNodeIdFromDataType[id.String], valueRank
+	case []byte:
+		return typeNodeIdFromDataType[id.ByteString], valueRank
+	case []any:
+		if len(v) > 0 {
+			if typeNode, _ := lookupTypeNodeIDFromValue(v[0]); typeNode != nil {
+				return typeNode, 1
+			}
+		}
+	}
+
+	return nil, valueRank
+}
+
+func NewVariableNode(nodeID *ua.NodeID, name string, value any) *Node {
+	dataTypeNodeID, valueRank := lookupTypeNodeIDFromValue(value)
+
+	var valueFunc func() *ua.DataValue
+	if vf, ok := value.(func() *ua.DataValue); ok {
+		valueFunc = vf
+	} else {
+		dataValue := DataValueFromValue(value) // check if the type is supported
+		valueFunc = func() *ua.DataValue { return dataValue }
+	}
+
+	n := NewNode(
+		nodeID,
+		map[ua.AttributeID]*ua.DataValue{
+			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassVariable)),
+			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
+			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, "")),
+			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
+			ua.AttributeIDValueRank:     DataValueFromValue(valueRank),
+		},
+		[]*ua.ReferenceDescription{},
+		valueFunc,
+	)
+
+	if dataTypeNodeID != nil {
+		n.SetAttribute(ua.AttributeIDDataType, DataValueFromValue(dataTypeNodeID))
+	}
+
+	return n
 }
 
 func (n *Node) ID() *ua.NodeID {
@@ -233,24 +238,20 @@ func (n *Node) Value() *ua.DataValue {
 }
 
 func (n *Node) Attribute(id ua.AttributeID) (*AttrValue, error) {
-	switch {
-	case id == ua.AttributeIDValue:
-		if n.val != nil {
+	if id == ua.AttributeIDValue {
+		if n.attr != nil && n.val != nil {
 			val := n.val()
-			if val == nil || val.Value == nil {
-				return nil, ua.StatusBadAttributeIDInvalid
+			if val != nil && val.Value != nil {
+				return NewAttrValue(val), nil
 			}
-			return NewAttrValue(val), nil
 		}
-		return nil, ua.StatusBadAttributeIDInvalid
-	case n.attr == nil:
-		return nil, ua.StatusBadAttributeIDInvalid
-	default:
+	} else if n.attr != nil {
 		if v := n.attr[id]; v != nil {
 			return NewAttrValue(v), nil
 		}
-		return nil, ua.StatusBadAttributeIDInvalid
 	}
+
+	return nil, ua.StatusBadAttributeIDInvalid
 }
 
 func (n *Node) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
@@ -370,31 +371,19 @@ func (n *Node) NodeClass() ua.NodeClass {
 }
 
 func (n *Node) AddObject(o *Node) *Node {
-	nn := &Node{
-		id:   o.id,
-		attr: maps.Clone(o.attr),
-		refs: slices.Clone(o.refs),
-	}
-	if n.attr == nil {
-		n.attr = Attributes{}
-	}
+	nn := NewNode(o.ID(), o.attr, o.refs, nil)
 	nn.SetNodeClass(ua.NodeClassObject)
-	n.refs = append(n.refs, refs.Organizes(nn.id, nn.BrowseName().Name, nn.DisplayName().Text, nn.DataType()))
+
+	n.refs = append(n.refs, refs.NewOrganizesRefDesc(nn.id, nn.BrowseName().Name, nn.DisplayName().Text, nn.DataType()))
+
 	return n.ns.AddNode(nn)
 }
 
 func (n *Node) AddVariable(o *Node) *Node {
-	nn := &Node{
-		id:   o.id,
-		attr: maps.Clone(o.attr),
-		refs: slices.Clone(o.refs),
-		val:  o.val,
-	}
-	if n.attr == nil {
-		n.attr = Attributes{}
-	}
+	nn := NewNode(o.ID(), o.attr, o.refs, o.val)
+
 	nn.SetNodeClass(ua.NodeClassVariable)
-	n.refs = append(n.refs, refs.Organizes(nn.id, nn.BrowseName().Name, nn.DisplayName().Text, nn.DataType()))
+	n.refs = append(n.refs, refs.NewOrganizesRefDesc(nn.id, nn.BrowseName().Name, nn.DisplayName().Text, nn.DataType()))
 	return nn
 }
 
@@ -418,6 +407,7 @@ func (n *Node) AddRef(o *Node, rt RefType, forward bool) {
 		NodeClass:       o.NodeClass(),
 		TypeDefinition:  o.DataType(),
 	}
+
 	n.refs = append(n.refs, &ref)
 }
 
@@ -441,6 +431,7 @@ func (n Node) Access(flag ua.AccessLevelType) bool {
 			return false
 		}
 	}
+
 	access, err = n.Attribute(ua.AttributeIDAccessLevel)
 	if err == nil { // if we have an access level, we need to check it.
 		val0 := access.Value.Value.Value()
@@ -453,5 +444,6 @@ func (n Node) Access(flag ua.AccessLevelType) bool {
 			return false
 		}
 	}
+
 	return true
 }

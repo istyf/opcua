@@ -6,19 +6,23 @@ import (
 	"github.com/gopcua/opcua/ua"
 )
 
-// HasSubtype returns a HasSubtype reference.
-func HasSubtype(typeID *ua.ExpandedNodeID) *ua.ReferenceDescription {
+var (
+	OrganizesRefTypeID  *ua.NodeID = ua.NewNumericNodeID(0, id.Organizes)
+	HasSubtypeRefTypeID *ua.NodeID = ua.NewNumericNodeID(0, id.HasSubtype)
+)
+
+// NewHasSubtypeRefDesc returns a NewHasSubtypeRefDesc reference.
+func NewHasSubtypeRefDesc(typeID *ua.ExpandedNodeID) *ua.ReferenceDescription {
 	return &ua.ReferenceDescription{
-		ReferenceTypeID: ua.NewNumericNodeID(0, id.HasSubtype),
+		ReferenceTypeID: HasSubtypeRefTypeID,
 		TypeDefinition:  typeID,
 		IsForward:       true,
 	}
 }
 
-// HasSubtype returns a HasSubtype reference.
-func Organizes(nid *ua.NodeID, browseName, displayName string, typeID *ua.ExpandedNodeID) *ua.ReferenceDescription {
+func NewOrganizesRefDesc(nid *ua.NodeID, browseName, displayName string, typeID *ua.ExpandedNodeID) *ua.ReferenceDescription {
 	return &ua.ReferenceDescription{
-		ReferenceTypeID: ua.NewNumericNodeID(0, id.Organizes),
+		ReferenceTypeID: OrganizesRefTypeID,
 		NodeID:          &ua.ExpandedNodeID{NodeID: nid},
 		BrowseName:      attrs.BrowseName(browseName),
 		DisplayName:     attrs.DisplayName(displayName, ""),
