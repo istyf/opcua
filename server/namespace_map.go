@@ -7,6 +7,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/attrs"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -351,13 +352,13 @@ func (s *MapNamespace) SetAttribute(ctx context.Context, node *ua.NodeID, attr u
 func (ns *MapNamespace) Name() string {
 	return ns.name
 }
-func (ns *MapNamespace) AddNode(n *Node) *Node {
+func (ns *MapNamespace) AddNode(n types.INode) types.INode {
 	return n
 }
-func (ns *MapNamespace) Node(id *ua.NodeID) *Node {
+func (ns *MapNamespace) Node(id *ua.NodeID) types.INode {
 	return nil
 }
-func (ns *MapNamespace) Objects() *Node {
+func (ns *MapNamespace) Objects() types.INode {
 	oid := ua.NewNumericNodeID(ns.ID(), id.ObjectsFolder)
 	//eoid := ua.NewNumericExpandedNodeID(ns.ID(), id.ObjectsFolder)
 	typedef := ua.NewNumericExpandedNodeID(0, id.ObjectsFolder)
@@ -367,8 +368,7 @@ func (ns *MapNamespace) Objects() *Node {
 		map[ua.AttributeID]*ua.DataValue{
 			ua.AttributeIDNodeClass:     DataValueFromValue(int32(ua.NodeClassObject)),
 			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(ns.name)),
-			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(ns.name, ns.name)),
-			ua.AttributeIDDescription:   DataValueFromValue(uint32(ua.NodeClassObject)),
+			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(ns.name, "")),
 			ua.AttributeIDDataType:      DataValueFromValue(typedef),
 			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
 		},
@@ -378,7 +378,7 @@ func (ns *MapNamespace) Objects() *Node {
 	return n
 }
 
-func (ns *MapNamespace) Root() *Node {
+func (ns *MapNamespace) Root() types.INode {
 	n := NewNode(
 		ua.NewNumericNodeID(ns.ID(), id.RootFolder),
 		map[ua.AttributeID]*ua.DataValue{

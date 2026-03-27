@@ -17,6 +17,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uacp"
 	"github.com/gopcua/opcua/ualog"
@@ -449,7 +450,7 @@ func (s *Server) initEndpoints() {
 	s.mu.Unlock()
 }
 
-func (s *Server) Node(nid *ua.NodeID) *Node {
+func (s *Server) Node(nid *ua.NodeID) types.INode {
 	ns := int(nid.Namespace())
 	if ns < len(s.namespaces) {
 		return s.namespaces[ns].Node(nid)

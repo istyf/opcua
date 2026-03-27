@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
-	"slices"
 
 	srvctx "github.com/gopcua/opcua/server/context"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -41,16 +41,10 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	status := ua.StatusOK
 
 	// Check if the method has a non forward reference to this object
-	methodBelongsToObject := func(method *Node, object *Node) bool {
-		return slices.ContainsFunc(
-			method.refs,
-			func(e *ua.ReferenceDescription) bool {
-				if !e.IsForward && e.NodeID.NodeID.IntID() == object.id.IntID() {
-					return true
-				}
-				return false
-			},
-		)
+	methodBelongsToObject := func(method types.INode, object types.INode) bool {
+		return method.References().Contains(func(e *ua.ReferenceDescription) bool {
+			return (!e.IsForward && e.NodeID.NodeID.IntID() == object.ID().IntID())
+		})
 	}
 
 	for _, method := range req.MethodsToCall {

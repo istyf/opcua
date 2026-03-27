@@ -5,10 +5,12 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/attrs"
+	"github.com/gopcua/opcua/server/refs"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 )
 
-func CurrentTimeNode() *Node {
+func CurrentTimeNode() types.INode {
 	return NewNode(
 		ua.NewNumericNodeID(0, id.Server_ServerStatus_CurrentTime),
 		map[ua.AttributeID]*ua.DataValue{
@@ -20,7 +22,7 @@ func CurrentTimeNode() *Node {
 	)
 }
 
-func NamespacesNode(s *Server) *Node {
+func NamespacesNode(s *Server) types.INode {
 	return NewNode(
 		ua.NewNumericNodeID(0, id.Server_NamespaceArray),
 		map[ua.AttributeID]*ua.DataValue{
@@ -39,8 +41,8 @@ func NamespacesNode(s *Server) *Node {
 	)
 }
 
-func ServerCapabilitiesNodes(s *Server) []*Node {
-	var nodes []*Node
+func ServerCapabilitiesNodes(s *Server) []types.INode {
+	var nodes []types.INode
 	nodes = append(nodes, NewNode(
 		ua.NewNumericNodeID(0, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerRead),
 		map[ua.AttributeID]*ua.DataValue{
@@ -53,7 +55,7 @@ func ServerCapabilitiesNodes(s *Server) []*Node {
 	return nodes
 }
 
-func RootNode() *Node {
+func RootNode() types.INode {
 	return NewNode(
 		ua.NewNumericNodeID(0, id.RootFolder),
 		map[ua.AttributeID]*ua.DataValue{
@@ -66,7 +68,7 @@ func RootNode() *Node {
 	)
 }
 
-func ServerStatusNodes(s *Server, serverNode *Node) []*Node {
+func ServerStatusNodes(s *Server, serverNode types.INode) []types.INode {
 
 	/*
 		Server_ServerArray                                                                                                                                                    = 2254
@@ -230,11 +232,11 @@ func ServerStatusNodes(s *Server, serverNode *Node) []*Node {
 		func() *ua.DataValue { return DataValueFromValue(int32(0)) },
 	)
 
-	nodes := []*Node{sState, mName, pName, pURI, sVersion, bNumber, bDate, timeStart, timeCurrent, bInfo, sTillShutdown, sReason}
+	nodes := []types.INode{sState, mName, pName, pURI, sVersion, bNumber, bDate, timeStart, timeCurrent, bInfo, sTillShutdown, sReason}
 	for i := range nodes {
-		sStatus.AddRef(nodes[i], id.HasComponent, true)
+		sStatus.AddRef(refs.NewHasComponentRefDesc(nodes[i]))
 	}
-	serverNode.AddRef(sStatus, id.HasComponent, true)
+	serverNode.AddRef(refs.NewHasComponentRefDesc(sStatus))
 
 	nodes = append(nodes, sStatus)
 

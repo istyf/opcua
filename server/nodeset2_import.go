@@ -9,6 +9,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -548,9 +549,10 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(n, RefType(reftypeid.IntID()), *ref.IsForwardAttr)
+			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(node, RefType(reftypeid.IntID()), !*ref.IsForwardAttr)
+				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -585,9 +587,10 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 			}
 
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(n, RefType(reftypeid.IntID()), *ref.IsForwardAttr)
+			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(node, RefType(reftypeid.IntID()), !*ref.IsForwardAttr)
+				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -616,9 +619,10 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(n, RefType(reftypeid.IntID()), *ref.IsForwardAttr)
+			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(node, RefType(reftypeid.IntID()), !*ref.IsForwardAttr)
+				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -647,9 +651,9 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(n, RefType(reftypeid.IntID()), *ref.IsForwardAttr)
+			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(node, RefType(reftypeid.IntID()), !*ref.IsForwardAttr)
+				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -678,9 +682,9 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(n, RefType(reftypeid.IntID()), *ref.IsForwardAttr)
+			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(node, RefType(reftypeid.IntID()), !*ref.IsForwardAttr)
+				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -709,9 +713,9 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(n, RefType(reftypeid.IntID()), *ref.IsForwardAttr)
+			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(node, RefType(reftypeid.IntID()), !*ref.IsForwardAttr)
+				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -743,9 +747,9 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(n, RefType(reftypeid.IntID()), *ref.IsForwardAttr)
+			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(node, RefType(reftypeid.IntID()), !*ref.IsForwardAttr)
+				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}

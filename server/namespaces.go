@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/gopcua/opcua/id"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -22,16 +23,16 @@ type NameSpace interface {
 	Name() string
 
 	// This function should create a new node
-	AddNode(n *Node) *Node
+	AddNode(n types.INode) types.INode
 
 	// This function should lookup and return the node indicated by the Node ID
-	Node(id *ua.NodeID) *Node
+	Node(id *ua.NodeID) types.INode
 
 	// This function should return the base Objects node that contains other nodes
-	Objects() *Node
+	Objects() types.INode
 
 	// This function should return the root node
-	Root() *Node
+	Root() types.INode
 
 	// This is the function to list all available nodes to the client that is browsing.
 	// The BrowseDescription has the root node of the browse and what kind of nodes the

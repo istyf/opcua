@@ -20,8 +20,8 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -200,8 +200,8 @@ func main() {
 	// then we add the namespace to the server and add a reference to it from the object node.
 	// the object node of the map namespace is a virtual node that contains all the "nodes" for each
 	// map key
-	rootObjects.AddRef(myMapNamespace1.Objects(), id.HasComponent, true)
-	rootObjects.AddRef(myMapNamespace2.Objects(), id.HasComponent, true)
+	rootObjects.AddRef(refs.NewHasComponentRefDesc(myMapNamespace1.Objects()))
+	rootObjects.AddRef(refs.NewHasComponentRefDesc(myMapNamespace2.Objects()))
 
 	// Start the server
 	// Note that you can add namespaces before or after starting the server.

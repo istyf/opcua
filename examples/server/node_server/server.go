@@ -17,9 +17,9 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/debug"
-	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server"
 	"github.com/gopcua/opcua/server/attrs"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -162,13 +162,13 @@ func main() {
 	// add the reference for this namespace's root object folder to the server's root object folder
 	// but you can add a reference to whatever node(s) you need
 	nodeNSObjects := nodeNS.Objects()
-	rootObjects.AddRef(nodeNSObjects, id.HasComponent, true)
+	rootObjects.AddRef(refs.NewHasComponentRefDesc(nodeNSObjects))
 
 	// Create some nodes for it.  Here we are using the AddNewVariableNode utility function to create a new variable node
 	// with an integer node ID that is automatically assigned. (ns=<namespace id>,s=<auto assigned>)
 	// be sure to add the reference to the node somewhere if desired, or clients won't be able to browse it.
 	var1 := nodeNS.AddNewVariableNode("TestVar1", float32(123.45))
-	nodeNSObjects.AddRef(var1, id.HasComponent, true)
+	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var1))
 
 	// This node will have a string node id (ns=<namespace id>,s=TestVar2)
 	// your variable node's value can also return a ua.Variant from a function if you want to update the value dynamically
@@ -180,7 +180,7 @@ func main() {
 			return server.DataValueFromValue(var2Value.Add(1))
 		}
 	}())
-	nodeNSObjects.AddRef(var2, id.HasComponent, true)
+	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var2))
 
 	// Now we'll add a node from scratch.  This is a more manual way to add nodes to the server and gives you full
 	// control, but you'll have to build the node up with the correct attributes and references and then reference it from
@@ -195,7 +195,7 @@ func main() {
 		func() *ua.DataValue { return server.DataValueFromValue(12.34) },
 	)
 	nodeNS.AddNode(var3)
-	nodeNSObjects.AddRef(var3, id.HasComponent, true)
+	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var3))
 
 	var4 := server.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 100), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -209,7 +209,7 @@ func main() {
 		func() *ua.DataValue { return server.DataValueFromValue(12.34) },
 	)
 	nodeNS.AddNode(var4)
-	nodeNSObjects.AddRef(var4, id.HasComponent, true)
+	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var4))
 
 	var5 := server.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 105), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -223,7 +223,7 @@ func main() {
 		func() *ua.DataValue { return server.DataValueFromValue(9.87) },
 	)
 	nodeNS.AddNode(var5)
-	nodeNSObjects.AddRef(var5, id.HasComponent, true)
+	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var5))
 
 	var6 := server.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 102), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -237,7 +237,7 @@ func main() {
 		func() *ua.DataValue { return server.DataValueFromValue(9.87) },
 	)
 	nodeNS.AddNode(var6)
-	nodeNSObjects.AddRef(var6, id.HasComponent, true)
+	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var6))
 
 	// simulate a background process updating the data in the namespace.
 	go func() {

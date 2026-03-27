@@ -8,6 +8,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/attrs"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -17,8 +18,8 @@ type NodeNameSpace struct {
 	srv                 *Server
 	name                string
 	mu                  sync.RWMutex
-	nodes               []*Node
-	m                   map[string]*Node
+	nodes               []types.INode
+	m                   map[string]types.INode
 	id                  uint16
 	nextAvailableNodeID atomic.Uint32
 
@@ -35,8 +36,8 @@ func NewNodeNameSpace(srv *Server, name string) *NodeNameSpace {
 	ns := &NodeNameSpace{
 		srv:                  srv,
 		name:                 name,
-		nodes:                make([]*Node, 0),
-		m:                    make(map[string]*Node),
+		nodes:                make([]types.INode, 0),
+		m:                    make(map[string]types.INode),
 		nextAvailableNodeID:  atomic.Uint32{},
 		ExternalNotification: make(chan *ua.NodeID),
 		logAttributes:        ualog.GroupAttrs("namespace", ualog.String("name", name), ualog.String("type", "node")),
@@ -75,7 +76,7 @@ func (ns *NodeNameSpace) Name() string {
 	return ns.name
 }
 
-func (as *NodeNameSpace) AddNode(n *Node) *Node {
+func (as *NodeNameSpace) AddNode(n types.INode) types.INode {
 	as.mu.Lock()
 	defer as.mu.Unlock()
 
@@ -87,13 +88,13 @@ func (as *NodeNameSpace) AddNode(n *Node) *Node {
 	return n
 }
 
-func (as *NodeNameSpace) AddNewVariableNode(name string, value any) *Node {
+func (as *NodeNameSpace) AddNewVariableNode(name string, value any) types.INode {
 	n := NewVariableNode(ua.NewNumericNodeID(as.id, as.GetNextNodeID()), name, value)
 	as.AddNode(n)
 	return n
 }
 
-func (as *NodeNameSpace) AddNewVariableStringNode(name string, value any) *Node {
+func (as *NodeNameSpace) AddNewVariableStringNode(name string, value any) types.INode {
 	n := NewVariableNode(ua.NewStringNodeID(as.id, name), name, value)
 	as.AddNode(n)
 	return n
@@ -123,16 +124,16 @@ func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.A
 	}
 
 	var err error
-	var a *AttrValue
+	var a *types.AttrValue
 
 	switch attr {
 	case ua.AttributeIDNodeID:
-		a = &AttrValue{Value: DataValueFromValue(id)}
+		a = &types.AttrValue{Value: DataValueFromValue(id)}
 	case ua.AttributeIDEventNotifier:
 		// TODO: this is a hack to force the EventNotifier to false for everything.
 		// If at some point someone or something needs to use this, this will have to go away and be
 		// fixed properly.
-		a = &AttrValue{Value: DataValueFromValue(byte(0))}
+		a = &types.AttrValue{Value: DataValueFromValue(byte(0))}
 	case ua.AttributeIDNodeClass:
 		a, err = n.Attribute(attr)
 		if err != nil {
@@ -161,7 +162,7 @@ func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.A
 	return a.Value
 }
 
-func (as *NodeNameSpace) Node(id *ua.NodeID) *Node {
+func (as *NodeNameSpace) Node(id *ua.NodeID) types.INode {
 	if id == nil {
 		return nil
 	}
@@ -174,12 +175,12 @@ func (as *NodeNameSpace) Node(id *ua.NodeID) *Node {
 	return as.m[k]
 }
 
-func (as *NodeNameSpace) Objects() *Node {
+func (as *NodeNameSpace) Objects() types.INode {
 	of := ua.NewNumericNodeID(as.id, id.ObjectsFolder)
 	return as.Node(of)
 }
 
-func (as *NodeNameSpace) Root() *Node {
+func (as *NodeNameSpace) Root() types.INode {
 	return as.Node(RootFolder)
 }
 
@@ -196,19 +197,23 @@ func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *
 		return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDUnknown}
 	}
 
-	refs := make([]*ua.ReferenceDescription, 0, len(n.refs))
+	refs := make([]*ua.ReferenceDescription, 0, n.References().Count())
 
-	for i := range n.refs {
-		r := n.refs[i]
+	validReferences := func(r *ua.ReferenceDescription) bool {
 		// we can't have nils in these or the encoder will fail.
 		if r.NodeID == nil || r.BrowseName == nil || r.DisplayName == nil || r.TypeDefinition == nil {
-			continue
+			return false
 		}
 
 		// see if this is a ref the client was interested in.
 		if !suitableRef(ctx, ns.srv, bd, r) {
-			continue
+			return false
 		}
+
+		return true
+	}
+
+	for r := range n.References().Find(validReferences) {
 
 		td := ns.srv.Node(r.NodeID.NodeID)
 

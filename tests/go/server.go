@@ -8,9 +8,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server"
 	"github.com/gopcua/opcua/server/attrs"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -54,20 +54,20 @@ func startServer(ctx context.Context) *server.Server {
 	s.AddNamespace(nodeNS)
 	nns_obj := nodeNS.Objects()
 	// add the reference for this namespace's root object folder to the server's root object folder
-	obj_node.AddRef(nns_obj, id.HasComponent, true)
+	obj_node.AddRef(refs.NewHasComponentRefDesc(nns_obj))
 
 	// Create some nodes for it.
 	n := nodeNS.AddNewVariableStringNode("ro_bool", true)
 	n.SetAttribute(ua.AttributeIDUserAccessLevel, &ua.DataValue{EncodingMask: ua.DataValueValue, Value: ua.MustVariant(uint32(1))})
-	nns_obj.AddRef(n, id.HasComponent, true)
+	nns_obj.AddRef(refs.NewHasComponentRefDesc(n))
 	n = nodeNS.AddNewVariableStringNode("rw_bool", true)
-	nns_obj.AddRef(n, id.HasComponent, true)
+	nns_obj.AddRef(refs.NewHasComponentRefDesc(n))
 
 	n = nodeNS.AddNewVariableStringNode("ro_int32", int32(5))
 	n.SetAttribute(ua.AttributeIDUserAccessLevel, &ua.DataValue{EncodingMask: ua.DataValueValue, Value: ua.MustVariant(uint32(1))})
-	nns_obj.AddRef(n, id.HasComponent, true)
+	nns_obj.AddRef(refs.NewHasComponentRefDesc(n))
 	n = nodeNS.AddNewVariableStringNode("rw_int32", int32(5))
-	nns_obj.AddRef(n, id.HasComponent, true)
+	nns_obj.AddRef(refs.NewHasComponentRefDesc(n))
 
 	var3 := server.NewNode(
 		ua.NewStringNodeID(nodeNS.ID(), "NoPermVariable"), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -79,7 +79,7 @@ func startServer(ctx context.Context) *server.Server {
 		func() *ua.DataValue { return server.DataValueFromValue(int32(742)) },
 	)
 	nodeNS.AddNode(var3)
-	nns_obj.AddRef(var3, id.HasComponent, true)
+	nns_obj.AddRef(refs.NewHasComponentRefDesc(var3))
 
 	var4 := server.NewNode(
 		ua.NewStringNodeID(nodeNS.ID(), "ReadWriteVariable"), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -93,7 +93,7 @@ func startServer(ctx context.Context) *server.Server {
 		func() *ua.DataValue { return server.DataValueFromValue(12.34) },
 	)
 	nodeNS.AddNode(var4)
-	nns_obj.AddRef(var4, id.HasComponent, true)
+	nns_obj.AddRef(refs.NewHasComponentRefDesc(var4))
 
 	var5 := server.NewNode(
 		ua.NewStringNodeID(nodeNS.ID(), "ReadOnlyVariable"), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -107,7 +107,7 @@ func startServer(ctx context.Context) *server.Server {
 		func() *ua.DataValue { return server.DataValueFromValue(9.87) },
 	)
 	nodeNS.AddNode(var5)
-	nns_obj.AddRef(var5, id.HasComponent, true)
+	nns_obj.AddRef(refs.NewHasComponentRefDesc(var5))
 
 	var6 := server.NewNode(
 		ua.NewStringNodeID(nodeNS.ID(), "NoAccessVariable"), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
@@ -121,7 +121,7 @@ func startServer(ctx context.Context) *server.Server {
 		func() *ua.DataValue { return server.DataValueFromValue(55.43) },
 	)
 	nodeNS.AddNode(var6)
-	nns_obj.AddRef(var6, id.HasComponent, true)
+	nns_obj.AddRef(refs.NewHasComponentRefDesc(var6))
 
 	// Create a new node namespace.  You can add namespaces before or after starting the server.
 	gopcuaNS := server.NewNodeNameSpace(s, "http://gopcua.com/")
@@ -129,12 +129,13 @@ func startServer(ctx context.Context) *server.Server {
 	s.AddNamespace(gopcuaNS)
 	nns_obj = gopcuaNS.Objects()
 	// add the reference for this namespace's root object folder to the server's root object folder
-	obj_node.AddRef(nns_obj, id.HasComponent, true)
+	obj_node.AddRef(refs.NewHasComponentRefDesc(nns_obj))
 
 	// Create a new node namespace.  You can add namespaces before or after starting the server.
 	// Start the server
 	if err := s.Start(ctx); err != nil {
 		log.Fatalf("Error starting server, exiting: %s", err)
 	}
+
 	return s
 }

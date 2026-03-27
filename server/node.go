@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"iter"
 	"maps"
 	"slices"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/attrs"
-	"github.com/gopcua/opcua/server/refs"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -23,13 +24,8 @@ type MethodMiddleware func(MethodFunc) MethodFunc
 
 type ValueFunc func() *ua.DataValue
 
-type AttrValue struct {
-	Value           *ua.DataValue
-	SourceTimestamp time.Time
-}
-
-func NewAttrValue(v *ua.DataValue) *AttrValue {
-	return &AttrValue{Value: v, SourceTimestamp: time.Now()}
+func NewAttrValue(v *ua.DataValue) *types.AttrValue {
+	return &types.AttrValue{Value: v, SourceTimestamp: time.Now()}
 }
 
 func DataValueFromVariant(v *ua.Variant) *ua.DataValue {
@@ -68,7 +64,7 @@ type Node struct {
 	ns NameSpace
 }
 
-func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) *Node {
+func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) types.INode {
 	if attr == nil {
 		attr = Attributes{}
 	}
@@ -96,7 +92,7 @@ func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) *No
 	return n
 }
 
-func NewFolderNode(nodeID *ua.NodeID, name string) *Node {
+func NewFolderNode(nodeID *ua.NodeID, name string) types.INode {
 	reftype := ua.NewNumericNodeID(0, id.HasComponent)
 
 	n := NewNode(
@@ -116,6 +112,22 @@ func NewFolderNode(nodeID *ua.NodeID, name string) *Node {
 			NodeClass:       ua.NodeClassObject,
 			TypeDefinition:  ua.NewNumericExpandedNodeID(0, id.ObjectsFolder),
 		}},
+		nil,
+	)
+
+	return n
+}
+
+func NewObjectNode(nodeID *ua.NodeID, browsename *ua.QualifiedName, displayname *ua.LocalizedText) types.INode {
+	n := NewNode(
+		nodeID,
+		map[ua.AttributeID]*ua.DataValue{
+			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassObject)),
+			ua.AttributeIDBrowseName:    DataValueFromValue(browsename),
+			ua.AttributeIDDisplayName:   DataValueFromValue(displayname),
+			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
+		},
+		[]*ua.ReferenceDescription{},
 		nil,
 	)
 
@@ -195,7 +207,7 @@ func lookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 	return nil, valueRank
 }
 
-func NewVariableNode(nodeID *ua.NodeID, name string, value any) *Node {
+func NewVariableNode(nodeID *ua.NodeID, name string, value any) types.INode {
 	dataTypeNodeID, valueRank := lookupTypeNodeIDFromValue(value)
 
 	var valueFunc func() *ua.DataValue
@@ -206,22 +218,24 @@ func NewVariableNode(nodeID *ua.NodeID, name string, value any) *Node {
 		valueFunc = func() *ua.DataValue { return dataValue }
 	}
 
+	attrs := map[ua.AttributeID]*ua.DataValue{
+		ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassVariable)),
+		ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
+		ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, "")),
+		ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
+		ua.AttributeIDValueRank:     DataValueFromValue(valueRank),
+	}
+
+	if dataTypeNodeID != nil {
+		attrs[ua.AttributeIDDataType] = DataValueFromValue(dataTypeNodeID)
+	}
+
 	n := NewNode(
 		nodeID,
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassVariable)),
-			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
-			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, "")),
-			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
-			ua.AttributeIDValueRank:     DataValueFromValue(valueRank),
-		},
+		attrs,
 		[]*ua.ReferenceDescription{},
 		valueFunc,
 	)
-
-	if dataTypeNodeID != nil {
-		n.SetAttribute(ua.AttributeIDDataType, DataValueFromValue(dataTypeNodeID))
-	}
 
 	return n
 }
@@ -237,7 +251,7 @@ func (n *Node) Value() *ua.DataValue {
 	return n.val()
 }
 
-func (n *Node) Attribute(id ua.AttributeID) (*AttrValue, error) {
+func (n *Node) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	if id == ua.AttributeIDValue {
 		if n.attr != nil && n.val != nil {
 			val := n.val()
@@ -370,23 +384,6 @@ func (n *Node) NodeClass() ua.NodeClass {
 	return ua.NodeClass(vi32)
 }
 
-func (n *Node) AddObject(o *Node) *Node {
-	nn := NewNode(o.ID(), o.attr, o.refs, nil)
-	nn.SetNodeClass(ua.NodeClassObject)
-
-	n.refs = append(n.refs, refs.NewOrganizesRefDesc(nn.id, nn.BrowseName().Name, nn.DisplayName().Text, nn.DataType()))
-
-	return n.ns.AddNode(nn)
-}
-
-func (n *Node) AddVariable(o *Node) *Node {
-	nn := NewNode(o.ID(), o.attr, o.refs, o.val)
-
-	nn.SetNodeClass(ua.NodeClassVariable)
-	n.refs = append(n.refs, refs.NewOrganizesRefDesc(nn.id, nn.BrowseName().Name, nn.DisplayName().Text, nn.DataType()))
-	return nn
-}
-
 type RefType int
 
 const (
@@ -394,21 +391,8 @@ const (
 	RefTypeIDOrganizes    = id.Organizes
 )
 
-func (n *Node) AddRef(o *Node, rt RefType, forward bool) {
-	//eoid := ua.NewNumericExpandedNodeID(o.ns.ID(), o.)
-	eoid := ua.NewExpandedNodeID(o.ID(), "", 0)
-
-	ref := ua.ReferenceDescription{
-		ReferenceTypeID: ua.NewNumericNodeID(0, uint32(rt)), //o.refs[0].ReferenceTypeID,
-		IsForward:       forward,
-		NodeID:          eoid,
-		BrowseName:      o.BrowseName(),
-		DisplayName:     o.DisplayName(),
-		NodeClass:       o.NodeClass(),
-		TypeDefinition:  o.DataType(),
-	}
-
-	n.refs = append(n.refs, &ref)
+func (n *Node) AddRef(refdesc *ua.ReferenceDescription) {
+	n.refs = append(n.refs, refdesc)
 }
 
 // Access returns true if the node has the access level requested.
@@ -446,4 +430,48 @@ func (n Node) Access(flag ua.AccessLevelType) bool {
 	}
 
 	return true
+}
+
+type refcollection struct {
+	n *Node
+}
+
+func (n *Node) References() types.ReferenceCollection {
+	return &refcollection{n}
+}
+
+// All implements [types.ReferenceCollection].
+func (r *refcollection) All() iter.Seq[*ua.ReferenceDescription] {
+	return func(yield func(*ua.ReferenceDescription) bool) {
+		for _, k := range r.n.refs {
+			if !yield(k) {
+				return
+			}
+		}
+	}
+}
+
+// Contains implements [types.ReferenceCollection].
+func (r *refcollection) Contains(isMatching func(*ua.ReferenceDescription) bool) bool {
+	for r := range r.All() {
+		if isMatching(r) {
+			return true
+		}
+	}
+	return false
+}
+
+func (r *refcollection) Count() int {
+	return len(r.n.refs)
+}
+
+// Find implements [types.ReferenceCollection].
+func (r *refcollection) Find(isMatching func(*ua.ReferenceDescription) bool) iter.Seq[*ua.ReferenceDescription] {
+	return func(yield func(*ua.ReferenceDescription) bool) {
+		for _, k := range r.n.refs {
+			if isMatching(k) && !yield(k) {
+				return
+			}
+		}
+	}
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/id"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -125,7 +126,6 @@ func suitableRefType(srv *Server, ref1, ref2 *ua.NodeID, subtypes bool) bool {
 }
 
 func getSubRefs(srv *Server, nid *ua.NodeID) []*ua.NodeID {
-	var refs []*ua.NodeID
 	ns, err := srv.Namespace(int(nid.Namespace()))
 	if err != nil {
 		// TODO: return error
@@ -135,11 +135,14 @@ func getSubRefs(srv *Server, nid *ua.NodeID) []*ua.NodeID {
 	if node == nil {
 		return nil
 	}
-	for _, ref := range node.refs {
-		if ref.ReferenceTypeID.Equal(hasSubtype) && ref.IsForward && ref.NodeID != nil {
-			refs = append(refs, ref.NodeID.NodeID)
-			refs = append(refs, getSubRefs(srv, ref.NodeID.NodeID)...)
-		}
+
+	refs := make([]*ua.NodeID, 0, node.References().Count())
+
+	for ref := range node.References().Find(func(r *ua.ReferenceDescription) bool {
+		return r.ReferenceTypeID.Equal(hasSubtype) && r.IsForward && r.NodeID != nil
+	}) {
+		refs = append(refs, ref.NodeID.NodeID)
+		refs = append(refs, getSubRefs(srv, ref.NodeID.NodeID)...)
 	}
 	return refs
 }
@@ -181,21 +184,25 @@ func (s *ViewService) TranslateBrowsePathsToNodeIDs(ctx context.Context, sc *uas
 		DiagnosticInfos: []*ua.DiagnosticInfo{},
 	}
 
-	findTarget := func(n *Node, pathElements []*ua.RelativePathElement) (*ua.BrowsePathResult, error) {
+	findTarget := func(n types.INode, pathElements []*ua.RelativePathElement) (*ua.BrowsePathResult, error) {
 		for _, elem := range pathElements {
 			var e *ua.RelativePathElement = elem
-			for _, ref := range n.refs {
-				if ref.ReferenceTypeID.Equal(e.ReferenceTypeID) && ref.IsForward == !e.IsInverse {
-					referenceTarget := s.srv.Node(ref.NodeID.NodeID)
+			for ref := range n.References().Find(func(r *ua.ReferenceDescription) bool {
+				if r.ReferenceTypeID.Equal(e.ReferenceTypeID) && r.IsForward == !e.IsInverse {
+					referenceTarget := s.srv.Node(r.NodeID.NodeID)
 					if strings.Compare(referenceTarget.DisplayName().Text, e.TargetName.Name) == 0 {
-						return &ua.BrowsePathResult{
-							StatusCode: ua.StatusOK,
-							Targets: []*ua.BrowsePathTarget{
-								{TargetID: ref.NodeID, RemainingPathIndex: math.MaxUint32},
-							},
-						}, nil
+						return true
 					}
 				}
+
+				return false
+			}) {
+				return &ua.BrowsePathResult{
+					StatusCode: ua.StatusOK,
+					Targets: []*ua.BrowsePathTarget{
+						{TargetID: ref.NodeID, RemainingPathIndex: math.MaxUint32},
+					},
+				}, nil
 			}
 		}
 
