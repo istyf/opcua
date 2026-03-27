@@ -20,7 +20,7 @@ type ReferenceCollection interface {
 	Find(matching func(*ua.ReferenceDescription) bool) iter.Seq[*ua.ReferenceDescription]
 }
 
-type INode interface {
+type Node interface {
 	ID() *ua.NodeID
 	BrowseName() *ua.QualifiedName
 	DisplayName() *ua.LocalizedText

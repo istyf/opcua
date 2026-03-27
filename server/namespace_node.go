@@ -18,8 +18,8 @@ type NodeNameSpace struct {
 	srv                 *Server
 	name                string
 	mu                  sync.RWMutex
-	nodes               []types.INode
-	m                   map[string]types.INode
+	nodes               []types.Node
+	m                   map[string]types.Node
 	id                  uint16
 	nextAvailableNodeID atomic.Uint32
 
@@ -36,8 +36,8 @@ func NewNodeNameSpace(srv *Server, name string) *NodeNameSpace {
 	ns := &NodeNameSpace{
 		srv:                  srv,
 		name:                 name,
-		nodes:                make([]types.INode, 0),
-		m:                    make(map[string]types.INode),
+		nodes:                make([]types.Node, 0),
+		m:                    make(map[string]types.Node),
 		nextAvailableNodeID:  atomic.Uint32{},
 		ExternalNotification: make(chan *ua.NodeID),
 		logAttributes:        ualog.GroupAttrs("namespace", ualog.String("name", name), ualog.String("type", "node")),
@@ -76,7 +76,7 @@ func (ns *NodeNameSpace) Name() string {
 	return ns.name
 }
 
-func (as *NodeNameSpace) AddNode(n types.INode) types.INode {
+func (as *NodeNameSpace) AddNode(n types.Node) types.Node {
 	as.mu.Lock()
 	defer as.mu.Unlock()
 
@@ -88,13 +88,13 @@ func (as *NodeNameSpace) AddNode(n types.INode) types.INode {
 	return n
 }
 
-func (as *NodeNameSpace) AddNewVariableNode(name string, value any) types.INode {
+func (as *NodeNameSpace) AddNewVariableNode(name string, value any) types.Node {
 	n := NewVariableNode(ua.NewNumericNodeID(as.id, as.GetNextNodeID()), name, value)
 	as.AddNode(n)
 	return n
 }
 
-func (as *NodeNameSpace) AddNewVariableStringNode(name string, value any) types.INode {
+func (as *NodeNameSpace) AddNewVariableStringNode(name string, value any) types.Node {
 	n := NewVariableNode(ua.NewStringNodeID(as.id, name), name, value)
 	as.AddNode(n)
 	return n
@@ -162,7 +162,7 @@ func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.A
 	return a.Value
 }
 
-func (as *NodeNameSpace) Node(id *ua.NodeID) types.INode {
+func (as *NodeNameSpace) Node(id *ua.NodeID) types.Node {
 	if id == nil {
 		return nil
 	}
@@ -175,12 +175,12 @@ func (as *NodeNameSpace) Node(id *ua.NodeID) types.INode {
 	return as.m[k]
 }
 
-func (as *NodeNameSpace) Objects() types.INode {
+func (as *NodeNameSpace) Objects() types.Node {
 	of := ua.NewNumericNodeID(as.id, id.ObjectsFolder)
 	return as.Node(of)
 }
 
-func (as *NodeNameSpace) Root() types.INode {
+func (as *NodeNameSpace) Root() types.Node {
 	return as.Node(RootFolder)
 }
 

@@ -352,13 +352,13 @@ func (s *MapNamespace) SetAttribute(ctx context.Context, node *ua.NodeID, attr u
 func (ns *MapNamespace) Name() string {
 	return ns.name
 }
-func (ns *MapNamespace) AddNode(n types.INode) types.INode {
+func (ns *MapNamespace) AddNode(n types.Node) types.Node {
 	return n
 }
-func (ns *MapNamespace) Node(id *ua.NodeID) types.INode {
+func (ns *MapNamespace) Node(id *ua.NodeID) types.Node {
 	return nil
 }
-func (ns *MapNamespace) Objects() types.INode {
+func (ns *MapNamespace) Objects() types.Node {
 	oid := ua.NewNumericNodeID(ns.ID(), id.ObjectsFolder)
 	//eoid := ua.NewNumericExpandedNodeID(ns.ID(), id.ObjectsFolder)
 	typedef := ua.NewNumericExpandedNodeID(0, id.ObjectsFolder)
@@ -378,7 +378,7 @@ func (ns *MapNamespace) Objects() types.INode {
 	return n
 }
 
-func (ns *MapNamespace) Root() types.INode {
+func (ns *MapNamespace) Root() types.Node {
 	n := NewNode(
 		ua.NewNumericNodeID(ns.ID(), id.RootFolder),
 		map[ua.AttributeID]*ua.DataValue{

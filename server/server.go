@@ -450,7 +450,7 @@ func (s *Server) initEndpoints() {
 	s.mu.Unlock()
 }
 
-func (s *Server) Node(nid *ua.NodeID) types.INode {
+func (s *Server) Node(nid *ua.NodeID) types.Node {
 	ns := int(nid.Namespace())
 	if ns < len(s.namespaces) {
 		return s.namespaces[ns].Node(nid)

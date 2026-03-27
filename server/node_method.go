@@ -6,7 +6,7 @@ import (
 	"github.com/gopcua/opcua/ua"
 )
 
-func SetMethod(n *Node, fn func(context.Context) error) {
+func SetMethod(n *baseNode, fn func(context.Context) error) {
 	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
 		if len(args) > 0 {
 			return nil, ua.StatusBadTooManyArguments
@@ -16,7 +16,7 @@ func SetMethod(n *Node, fn func(context.Context) error) {
 	}
 }
 
-func SetMethod1S[T any](n *Node, fn func(context.Context, []T) error) {
+func SetMethod1S[T any](n *baseNode, fn func(context.Context, []T) error) {
 	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
 		if len(args) == 0 {
 			return nil, ua.StatusBadArgumentsMissing
@@ -35,7 +35,7 @@ func SetMethod1S[T any](n *Node, fn func(context.Context, []T) error) {
 	}
 }
 
-func SetMethod1[T any](n *Node, fn func(context.Context, T) error) {
+func SetMethod1[T any](n *baseNode, fn func(context.Context, T) error) {
 	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
 		if len(args) == 0 {
 			return nil, ua.StatusBadArgumentsMissing
@@ -54,7 +54,7 @@ func SetMethod1[T any](n *Node, fn func(context.Context, T) error) {
 	}
 }
 
-func SetMethod2[T, U any](n *Node, fn func(context.Context, T, U) error) {
+func SetMethod2[T, U any](n *baseNode, fn func(context.Context, T, U) error) {
 	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
 		if len(args) < 2 {
 			return nil, ua.StatusBadArgumentsMissing
@@ -74,7 +74,7 @@ func SetMethod2[T, U any](n *Node, fn func(context.Context, T, U) error) {
 	}
 }
 
-func SetMethod3[T, U, V any](n *Node, fn func(context.Context, T, U, V) error) {
+func SetMethod3[T, U, V any](n *baseNode, fn func(context.Context, T, U, V) error) {
 	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
 		if len(args) < 3 {
 			return nil, ua.StatusBadArgumentsMissing

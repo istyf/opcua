@@ -23,16 +23,16 @@ type NameSpace interface {
 	Name() string
 
 	// This function should create a new node
-	AddNode(n types.INode) types.INode
+	AddNode(n types.Node) types.Node
 
 	// This function should lookup and return the node indicated by the Node ID
-	Node(id *ua.NodeID) types.INode
+	Node(id *ua.NodeID) types.Node
 
 	// This function should return the base Objects node that contains other nodes
-	Objects() types.INode
+	Objects() types.Node
 
 	// This function should return the root node
-	Root() types.INode
+	Root() types.Node
 
 	// This is the function to list all available nodes to the client that is browsing.
 	// The BrowseDescription has the root node of the browse and what kind of nodes the

@@ -41,7 +41,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	status := ua.StatusOK
 
 	// Check if the method has a non forward reference to this object
-	methodBelongsToObject := func(method types.INode, object types.INode) bool {
+	methodBelongsToObject := func(method types.Node, object types.Node) bool {
 		return method.References().Contains(func(e *ua.ReferenceDescription) bool {
 			return (!e.IsForward && e.NodeID.NodeID.IntID() == object.ID().IntID())
 		})

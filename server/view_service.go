@@ -184,7 +184,7 @@ func (s *ViewService) TranslateBrowsePathsToNodeIDs(ctx context.Context, sc *uas
 		DiagnosticInfos: []*ua.DiagnosticInfo{},
 	}
 
-	findTarget := func(n types.INode, pathElements []*ua.RelativePathElement) (*ua.BrowsePathResult, error) {
+	findTarget := func(n types.Node, pathElements []*ua.RelativePathElement) (*ua.BrowsePathResult, error) {
 		for _, elem := range pathElements {
 			var e *ua.RelativePathElement = elem
 			for ref := range n.References().Find(func(r *ua.ReferenceDescription) bool {

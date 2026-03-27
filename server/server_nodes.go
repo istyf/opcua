@@ -10,7 +10,7 @@ import (
 	"github.com/gopcua/opcua/ua"
 )
 
-func CurrentTimeNode() types.INode {
+func CurrentTimeNode() types.Node {
 	return NewNode(
 		ua.NewNumericNodeID(0, id.Server_ServerStatus_CurrentTime),
 		map[ua.AttributeID]*ua.DataValue{
@@ -22,7 +22,7 @@ func CurrentTimeNode() types.INode {
 	)
 }
 
-func NamespacesNode(s *Server) types.INode {
+func NamespacesNode(s *Server) types.Node {
 	return NewNode(
 		ua.NewNumericNodeID(0, id.Server_NamespaceArray),
 		map[ua.AttributeID]*ua.DataValue{
@@ -41,8 +41,8 @@ func NamespacesNode(s *Server) types.INode {
 	)
 }
 
-func ServerCapabilitiesNodes(s *Server) []types.INode {
-	var nodes []types.INode
+func ServerCapabilitiesNodes(s *Server) []types.Node {
+	var nodes []types.Node
 	nodes = append(nodes, NewNode(
 		ua.NewNumericNodeID(0, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerRead),
 		map[ua.AttributeID]*ua.DataValue{
@@ -55,7 +55,7 @@ func ServerCapabilitiesNodes(s *Server) []types.INode {
 	return nodes
 }
 
-func RootNode() types.INode {
+func RootNode() types.Node {
 	return NewNode(
 		ua.NewNumericNodeID(0, id.RootFolder),
 		map[ua.AttributeID]*ua.DataValue{
@@ -68,7 +68,7 @@ func RootNode() types.INode {
 	)
 }
 
-func ServerStatusNodes(s *Server, serverNode types.INode) []types.INode {
+func ServerStatusNodes(s *Server, serverNode types.Node) []types.Node {
 
 	/*
 		Server_ServerArray                                                                                                                                                    = 2254
@@ -232,7 +232,7 @@ func ServerStatusNodes(s *Server, serverNode types.INode) []types.INode {
 		func() *ua.DataValue { return DataValueFromValue(int32(0)) },
 	)
 
-	nodes := []types.INode{sState, mName, pName, pURI, sVersion, bNumber, bDate, timeStart, timeCurrent, bInfo, sTillShutdown, sReason}
+	nodes := []types.Node{sState, mName, pName, pURI, sVersion, bNumber, bDate, timeStart, timeCurrent, bInfo, sTillShutdown, sReason}
 	for i := range nodes {
 		sStatus.AddRef(refs.NewHasComponentRefDesc(nodes[i]))
 	}

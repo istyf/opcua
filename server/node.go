@@ -54,7 +54,7 @@ func DataValueFromValue(val any) *ua.DataValue {
 	return DataValueFromVariant(ua.MustVariant(val))
 }
 
-type Node struct {
+type baseNode struct {
 	id   *ua.NodeID
 	attr Attributes
 	refs References
@@ -64,12 +64,12 @@ type Node struct {
 	ns NameSpace
 }
 
-func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) types.INode {
+func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) types.Node {
 	if attr == nil {
 		attr = Attributes{}
 	}
 
-	n := &Node{
+	n := &baseNode{
 		id:   id,
 		attr: maps.Clone(attr),
 		refs: slices.Clone(refs),
@@ -92,7 +92,7 @@ func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) typ
 	return n
 }
 
-func NewFolderNode(nodeID *ua.NodeID, name string) types.INode {
+func NewFolderNode(nodeID *ua.NodeID, name string) types.Node {
 	reftype := ua.NewNumericNodeID(0, id.HasComponent)
 
 	n := NewNode(
@@ -118,7 +118,7 @@ func NewFolderNode(nodeID *ua.NodeID, name string) types.INode {
 	return n
 }
 
-func NewObjectNode(nodeID *ua.NodeID, browsename *ua.QualifiedName, displayname *ua.LocalizedText) types.INode {
+func NewObjectNode(nodeID *ua.NodeID, browsename *ua.QualifiedName, displayname *ua.LocalizedText) types.Node {
 	n := NewNode(
 		nodeID,
 		map[ua.AttributeID]*ua.DataValue{
@@ -207,7 +207,7 @@ func lookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 	return nil, valueRank
 }
 
-func NewVariableNode(nodeID *ua.NodeID, name string, value any) types.INode {
+func NewVariableNode(nodeID *ua.NodeID, name string, value any) types.Node {
 	dataTypeNodeID, valueRank := lookupTypeNodeIDFromValue(value)
 
 	var valueFunc func() *ua.DataValue
@@ -240,18 +240,18 @@ func NewVariableNode(nodeID *ua.NodeID, name string, value any) types.INode {
 	return n
 }
 
-func (n *Node) ID() *ua.NodeID {
+func (n *baseNode) ID() *ua.NodeID {
 	return n.id
 }
 
-func (n *Node) Value() *ua.DataValue {
+func (n *baseNode) Value() *ua.DataValue {
 	if n.val == nil {
 		return nil
 	}
 	return n.val()
 }
 
-func (n *Node) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
+func (n *baseNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	if id == ua.AttributeIDValue {
 		if n.attr != nil && n.val != nil {
 			val := n.val()
@@ -268,7 +268,7 @@ func (n *Node) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	return nil, ua.StatusBadAttributeIDInvalid
 }
 
-func (n *Node) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
+func (n *baseNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
 
 	switch id {
 	case ua.AttributeIDValue:
@@ -285,7 +285,7 @@ func (n *Node) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
 	return nil
 }
 
-func (n *Node) BrowseName() *ua.QualifiedName {
+func (n *baseNode) BrowseName() *ua.QualifiedName {
 	v := n.attr[ua.AttributeIDBrowseName]
 	if v == nil || v.Value.Value() == nil {
 		return &ua.QualifiedName{}
@@ -293,11 +293,11 @@ func (n *Node) BrowseName() *ua.QualifiedName {
 	return v.Value.Value().(*ua.QualifiedName)
 }
 
-func (n *Node) SetBrowseName(s string) {
+func (n *baseNode) SetBrowseName(s string) {
 	n.attr[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{Name: s})
 }
 
-func (n *Node) DisplayName() *ua.LocalizedText {
+func (n *baseNode) DisplayName() *ua.LocalizedText {
 	v := n.attr[ua.AttributeIDDisplayName]
 	if v == nil || v.Value.Value() == nil {
 		return &ua.LocalizedText{}
@@ -307,13 +307,13 @@ func (n *Node) DisplayName() *ua.LocalizedText {
 	return val
 }
 
-func (n *Node) SetDisplayName(text, locale string) {
+func (n *baseNode) SetDisplayName(text, locale string) {
 	lt := &ua.LocalizedText{Text: text, Locale: locale}
 	lt.UpdateMask()
 	n.attr[ua.AttributeIDDisplayName] = DataValueFromValue(lt)
 }
 
-func (n *Node) Description() *ua.LocalizedText {
+func (n *baseNode) Description() *ua.LocalizedText {
 	v := n.attr[ua.AttributeIDDescription]
 	if v == nil || v.Value.Value() == nil {
 		return &ua.LocalizedText{}
@@ -321,11 +321,11 @@ func (n *Node) Description() *ua.LocalizedText {
 	return v.Value.Value().(*ua.LocalizedText)
 }
 
-func (n *Node) SetDescription(text, locale string) {
+func (n *baseNode) SetDescription(text, locale string) {
 	n.attr[ua.AttributeIDDescription] = DataValueFromValue(&ua.LocalizedText{Text: text, Locale: locale})
 }
 
-func (n *Node) DataType() *ua.ExpandedNodeID {
+func (n *baseNode) DataType() *ua.ExpandedNodeID {
 	if n == nil {
 		fmt.Println("n was nil!")
 		return ua.NewTwoByteExpandedNodeID(0)
@@ -356,7 +356,7 @@ func (n *Node) DataType() *ua.ExpandedNodeID {
 	return ua.NewTwoByteExpandedNodeID(0)
 }
 
-func (n *Node) CallMethod(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+func (n *baseNode) CallMethod(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
 	if n.call == nil {
 		return nil, ua.StatusBadNotImplemented
 	}
@@ -364,11 +364,11 @@ func (n *Node) CallMethod(ctx context.Context, args ...*ua.Variant) ([]*ua.Varia
 	return n.call(ctx, args...)
 }
 
-func (n *Node) SetNodeClass(nc ua.NodeClass) {
+func (n *baseNode) SetNodeClass(nc ua.NodeClass) {
 	n.attr[ua.AttributeIDNodeClass] = DataValueFromValue(uint32(nc))
 }
 
-func (n *Node) NodeClass() ua.NodeClass {
+func (n *baseNode) NodeClass() ua.NodeClass {
 	v := n.attr[ua.AttributeIDNodeClass]
 	if v == nil || v.Value.Value() == nil {
 		return ua.NodeClassObject
@@ -391,7 +391,7 @@ const (
 	RefTypeIDOrganizes    = id.Organizes
 )
 
-func (n *Node) AddRef(refdesc *ua.ReferenceDescription) {
+func (n *baseNode) AddRef(refdesc *ua.ReferenceDescription) {
 	n.refs = append(n.refs, refdesc)
 }
 
@@ -402,7 +402,7 @@ func (n *Node) AddRef(refdesc *ua.ReferenceDescription) {
 // I'm not sure what the best way to implement "user" specific access levels
 // is presently.  Will need functioning user authentication first, and then a way to
 // pass it into the nodes user access attribute so it can be checked properly.
-func (n Node) Access(flag ua.AccessLevelType) bool {
+func (n baseNode) Access(flag ua.AccessLevelType) bool {
 
 	access, err := n.Attribute(ua.AttributeIDUserAccessLevel)
 	if err == nil { // if we have a user access level, we need to check it.
@@ -433,10 +433,10 @@ func (n Node) Access(flag ua.AccessLevelType) bool {
 }
 
 type refcollection struct {
-	n *Node
+	n *baseNode
 }
 
-func (n *Node) References() types.ReferenceCollection {
+func (n *baseNode) References() types.ReferenceCollection {
 	return &refcollection{n}
 }
 
