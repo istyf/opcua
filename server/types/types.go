@@ -31,10 +31,17 @@ type Node interface {
 
 	CallMethod(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode)
 
-	Value() *ua.DataValue
-
 	AddRef(*ua.ReferenceDescription)
 	References() ReferenceCollection
+
+	Attribute(ua.AttributeID) (*AttrValue, error)
+	SetAttribute(ua.AttributeID, *ua.DataValue) error
+}
+
+type VariableNode interface {
+	Node
+
+	Value() *ua.DataValue
 
 	Attribute(ua.AttributeID) (*AttrValue, error)
 	SetAttribute(ua.AttributeID, *ua.DataValue) error

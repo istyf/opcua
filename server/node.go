@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"iter"
 	"maps"
@@ -58,13 +59,17 @@ type baseNode struct {
 	id   *ua.NodeID
 	attr Attributes
 	refs References
-	val  ValueFunc
 	call MethodFunc
 
 	ns NameSpace
 }
 
-func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) types.Node {
+type variableNode struct {
+	baseNode
+	val ValueFunc
+}
+
+func newBaseNode(id *ua.NodeID, attr Attributes, refs References) *baseNode {
 	if attr == nil {
 		attr = Attributes{}
 	}
@@ -73,8 +78,13 @@ func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) typ
 		id:   id,
 		attr: maps.Clone(attr),
 		refs: slices.Clone(refs),
-		val:  val,
 	}
+
+	return n
+}
+
+func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) types.Node {
+	n := newBaseNode(id, attr, refs)
 
 	if n.attr[ua.AttributeIDBrowseName] == nil {
 		n.SetBrowseName("")
@@ -207,7 +217,7 @@ func lookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 	return nil, valueRank
 }
 
-func NewVariableNode(nodeID *ua.NodeID, name string, value any) types.Node {
+func NewVariableNode(nodeID *ua.NodeID, name string, value any) types.VariableNode {
 	dataTypeNodeID, valueRank := lookupTypeNodeIDFromValue(value)
 
 	var valueFunc func() *ua.DataValue
@@ -230,12 +240,10 @@ func NewVariableNode(nodeID *ua.NodeID, name string, value any) types.Node {
 		attrs[ua.AttributeIDDataType] = DataValueFromValue(dataTypeNodeID)
 	}
 
-	n := NewNode(
-		nodeID,
-		attrs,
-		[]*ua.ReferenceDescription{},
-		valueFunc,
-	)
+	n := &variableNode{
+		baseNode: *newBaseNode(nodeID, attrs, []*ua.ReferenceDescription{}),
+		val:      valueFunc,
+	}
 
 	return n
 }
@@ -244,7 +252,7 @@ func (n *baseNode) ID() *ua.NodeID {
 	return n.id
 }
 
-func (n *baseNode) Value() *ua.DataValue {
+func (n *variableNode) Value() *ua.DataValue {
 	if n.val == nil {
 		return nil
 	}
@@ -253,13 +261,10 @@ func (n *baseNode) Value() *ua.DataValue {
 
 func (n *baseNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	if id == ua.AttributeIDValue {
-		if n.attr != nil && n.val != nil {
-			val := n.val()
-			if val != nil && val.Value != nil {
-				return NewAttrValue(val), nil
-			}
-		}
-	} else if n.attr != nil {
+		return nil, errors.New("value attribute only supported on variable nodes")
+	}
+
+	if n.attr != nil {
 		if v := n.attr[id]; v != nil {
 			return NewAttrValue(v), nil
 		}
@@ -268,21 +273,41 @@ func (n *baseNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	return nil, ua.StatusBadAttributeIDInvalid
 }
 
+func (n *variableNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
+	if id == ua.AttributeIDValue {
+		val := n.val()
+		if val != nil && val.Value != nil {
+			return NewAttrValue(val), nil
+		}
+	}
+
+	return n.baseNode.Attribute(id)
+}
+
 func (n *baseNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
 
-	switch id {
-	case ua.AttributeIDValue:
+	if id == ua.AttributeIDValue {
+		return errors.New("set value attribute only supported on variable nodes")
+	}
 
+	n.attr[id] = val
+
+	return nil
+}
+
+func (n *variableNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
+
+	if id == ua.AttributeIDValue {
 		// TODO: probably need to do some type checking here.
 		// And some permissions tests
 		n.val = func() *ua.DataValue {
 			return val
 		}
-	default:
-		n.attr[id] = val
+
+		return nil
 	}
 
-	return nil
+	return n.baseNode.SetAttribute(id, val)
 }
 
 func (n *baseNode) BrowseName() *ua.QualifiedName {

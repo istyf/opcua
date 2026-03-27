@@ -20,6 +20,7 @@ import (
 	"github.com/gopcua/opcua/server"
 	"github.com/gopcua/opcua/server/attrs"
 	"github.com/gopcua/opcua/server/refs"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -272,12 +273,14 @@ func main() {
 		for {
 			changedID := <-nodeNS.ExternalNotification
 			node := nodeNS.Node(changedID)
-			value := node.Value().Value.Value()
+			if variable, ok := node.(types.VariableNode); ok {
+				value := variable.Value().Value.Value()
 
-			ualog.Info(ctx, "value changed",
-				ualog.String("key", changedID.String()),
-				ualog.Any("value", value),
-			)
+				ualog.Info(ctx, "value changed",
+					ualog.String("key", changedID.String()),
+					ualog.Any("value", value),
+				)
+			}
 		}
 	}()
 

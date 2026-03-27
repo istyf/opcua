@@ -88,13 +88,13 @@ func (as *NodeNameSpace) AddNode(n types.Node) types.Node {
 	return n
 }
 
-func (as *NodeNameSpace) AddNewVariableNode(name string, value any) types.Node {
+func (as *NodeNameSpace) AddNewVariableNode(name string, value any) types.VariableNode {
 	n := NewVariableNode(ua.NewNumericNodeID(as.id, as.GetNextNodeID()), name, value)
 	as.AddNode(n)
 	return n
 }
 
-func (as *NodeNameSpace) AddNewVariableStringNode(name string, value any) types.Node {
+func (as *NodeNameSpace) AddNewVariableStringNode(name string, value any) types.VariableNode {
 	n := NewVariableNode(ua.NewStringNodeID(as.id, name), name, value)
 	as.AddNode(n)
 	return n
