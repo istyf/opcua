@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"iter"
+	"slices"
 	"time"
 
 	"github.com/gopcua/opcua/id"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -240,6 +242,18 @@ const (
 )
 
 func (n *baseNode) AddRef(refdesc *ua.ReferenceDescription) {
+	// only one type def reference allowed, so replace the old one if we already have one
+	if refdesc.ReferenceTypeID == refs.HasTypeDefinitionRefTypeID {
+		hasTypeDefRefAtIndex := slices.IndexFunc(n.refs, func(rd *ua.ReferenceDescription) bool {
+			return rd.ReferenceTypeID == refs.HasTypeDefinitionRefTypeID
+		})
+
+		if hasTypeDefRefAtIndex >= 0 {
+			n.refs[hasTypeDefRefAtIndex] = refdesc
+			return
+		}
+	}
+
 	n.refs = append(n.refs, refdesc)
 }
 

@@ -1,6 +1,7 @@
 package node
 
 import (
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
@@ -12,8 +13,8 @@ type objectNode struct {
 }
 
 type objectConfig struct {
-	eventNotifier ua.EventNotifierType
-	objectType    types.ObjectTypeNode
+	eventNotifier    ua.EventNotifierType
+	objectTypeNodeId *ua.NodeID
 }
 
 type objectOption func(*objectConfig)
@@ -46,7 +47,7 @@ func WithType(typeNode types.ObjectTypeNode) objectOption {
 	}
 
 	return func(cfg *objectConfig) {
-		cfg.objectType = typeNode
+		cfg.objectTypeNodeId = typeNode.ID()
 	}
 }
 
@@ -58,8 +59,8 @@ func NewObjectNode(base func(ua.NodeClass) *baseConfig, opts ...objectOption) ty
 		applyOption(cfg)
 	}
 
-	if cfg.objectType == nil {
-		panic("creating object nodes without an object type is not allowed")
+	if cfg.objectTypeNodeId == nil {
+		cfg.objectTypeNodeId = ua.NewNumericNodeID(0, id.BaseObjectType)
 	}
 
 	n := &objectNode{
@@ -68,7 +69,7 @@ func NewObjectNode(base func(ua.NodeClass) *baseConfig, opts ...objectOption) ty
 
 	n.baseNode.attr[ua.AttributeIDEventNotifier] = values.DataValueFromValue(cfg.eventNotifier)
 
-	n.AddRef(refs.NewHasComponentRefDesc(cfg.objectType))
+	n.AddRef(refs.NewHasTypeDefinitionRefDesc(&ua.ExpandedNodeID{NodeID: cfg.objectTypeNodeId}))
 
 	return n
 }

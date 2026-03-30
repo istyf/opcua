@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/gopcua/opcua/id"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -12,10 +13,11 @@ import (
 type ValueFunc func() *ua.DataValue
 
 type variableConfig struct {
-	dataTypeNodeId *ua.NodeID
-	rank           int32
-	valueFunc      func() *ua.DataValue
-	historizing    bool
+	variableTypeNodeId *ua.NodeID
+	dataTypeNodeId     *ua.NodeID
+	rank               int32
+	valueFunc          func() *ua.DataValue
+	historizing        bool
 
 	accessLevel   ua.AccessLevelType
 	accessLevelEx ua.AccessLevelExType
@@ -80,6 +82,17 @@ func WithDataValue(value any) variableOption {
 func WithValueRank(rank int32) variableOption {
 	return func(cfg *variableConfig) {
 		cfg.rank = rank
+	}
+}
+
+func WithVariableType(varType types.VariableTypeNode) variableOption {
+
+	if varType == nil {
+		panic("creating variables with a nil type is not allowed")
+	}
+
+	return func(cfg *variableConfig) {
+		cfg.variableTypeNodeId = varType.ID()
 	}
 }
 
@@ -198,6 +211,12 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 	n.baseNode.attr[ua.AttributeIDValueRank] = values.DataValueFromValue(cfg.rank)
 	n.baseNode.attr[ua.AttributeIDDataType] = values.DataValueFromValue(cfg.dataTypeNodeId)
 	n.baseNode.attr[ua.AttributeIDHistorizing] = values.DataValueFromValue(cfg.historizing)
+
+	if cfg.variableTypeNodeId == nil {
+		cfg.variableTypeNodeId = ua.NewNumericNodeID(0, id.BaseVariableType)
+	}
+
+	n.AddRef(refs.NewHasTypeDefinitionRefDesc(&ua.ExpandedNodeID{NodeID: cfg.variableTypeNodeId}))
 
 	return n
 }

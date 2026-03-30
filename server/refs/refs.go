@@ -39,10 +39,10 @@ func NewHasSubtypeRefDesc(typeID *ua.ExpandedNodeID) *ua.ReferenceDescription {
 	}
 }
 
-func NewHasTypeDefinitionRefDesc(o types.ObjectTypeNode) *ua.ReferenceDescription {
+func NewHasTypeDefinitionRefDesc(typeID *ua.ExpandedNodeID) *ua.ReferenceDescription {
 	return &ua.ReferenceDescription{
 		ReferenceTypeID: HasTypeDefinitionRefTypeID,
-		TypeDefinition:  &ua.ExpandedNodeID{NodeID: o.ID()},
+		TypeDefinition:  typeID,
 		IsForward:       true,
 	}
 }
