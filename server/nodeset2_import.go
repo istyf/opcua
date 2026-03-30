@@ -9,7 +9,10 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/refs"
+	"github.com/gopcua/opcua/server/types"
+	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -45,11 +48,11 @@ func (srv *Server) namespacesImportNodeSet(nodes *schema.UANodeSet) (*nsIDLookup
 	for i := range nodes.NamespaceUris.Uri {
 		name := nodes.NamespaceUris.Uri[i]
 
-		idx := slices.IndexFunc(srv.Namespaces(), func(ns NameSpace) bool {
+		idx := slices.IndexFunc(srv.Namespaces(), func(ns types.NameSpace) bool {
 			return strings.Compare(ns.Name(), name) == 0
 		})
 
-		var ns NameSpace
+		var ns types.NameSpace
 
 		if idx >= 0 {
 			ns = srv.Namespaces()[idx]
@@ -72,6 +75,20 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 
 	ualog.Info(ctx, "new node set", ualog.String("last_modified", nodes.LastModifiedAttr))
 
+	localizedTextsFromSchema := func(localizedText []*schema.LocalizedText, defaultText string) []*ua.LocalizedText {
+		nrofTexts := len(localizedText)
+		if nrofTexts > 0 {
+			names := make([]*ua.LocalizedText, 0, nrofTexts)
+			for idx := range nrofTexts {
+				names = append(names, ua.NewLocalizedTextWithLocale(
+					localizedText[idx].Value, localizedText[idx].LocaleAttr,
+				))
+			}
+			return names
+		}
+		return []*ua.LocalizedText{ua.NewLocalizedText(defaultText)}
+	}
+
 	mustParseAndConvertNodeID := func(nodeID string) *ua.NodeID {
 		nid := ua.MustParseNodeID(nodeID)
 		if correctNS, ok := (*nsID)[nid.Namespace()]; ok {
@@ -80,9 +97,121 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 		return nid
 	}
 
+	valueFromSchema := func(v *schema.Value) any {
+		if v == nil {
+			return nil
+		}
+
+		if v.StringAttr != nil {
+			return v.StringAttr.Data
+		} else if v.StringListAttr != nil {
+			data := make([]string, 0, len(v.StringListAttr.Data))
+			for _, s := range v.StringListAttr.Data {
+				data = append(data, s.Data)
+			}
+			return data
+		} else if v.DateTimeAttr != nil {
+			return v.DateTimeAttr.Data
+		} else if v.Int32Attr != nil {
+			return v.Int32Attr.Data
+		} else if v.UInt32Attr != nil {
+			return v.UInt32Attr.Data
+		} else if v.Int32ListAttr != nil {
+			data := make([]int32, 0, len(v.Int32ListAttr.Data))
+			for _, i := range v.Int32ListAttr.Data {
+				data = append(data, i.Data)
+			}
+			return data
+		} else if v.BoolAttr != nil {
+			return v.BoolAttr.Data
+		} else if v.ByteStringAttr != nil {
+			bs := v.ByteStringAttr.Data
+			if b64b, err := base64.StdEncoding.DecodeString(bs); err == nil {
+				return b64b
+			}
+		} else if v.TextAttr != nil {
+			v := ua.NewLocalizedTextWithLocale(v.TextAttr.Text, v.TextAttr.Locale)
+			return v
+		} else if v.TextListAttr != nil {
+			data := make([]*ua.LocalizedText, 0, len(v.TextListAttr.Data))
+			for _, t := range v.TextListAttr.Data {
+				data = append(data, ua.NewLocalizedTextWithLocale(t.Text, t.Locale))
+			}
+			return data
+		} else if v.ExtObjAttr != nil {
+			extObj := v.ExtObjAttr
+			typeId := mustParseAndConvertNodeID(extObj.TypeID.Identifier)
+			if typeId.IntID() == id.Argument_Encoding_DefaultXML {
+				arg := &ua.Argument{
+					Name:            extObj.Body.Argument.Name,
+					DataType:        mustParseAndConvertNodeID(extObj.Body.Argument.DataType.Identifier),
+					ValueRank:       int32(extObj.Body.Argument.ValueRank),
+					ArrayDimensions: make([]uint32, 0, len(extObj.Body.Argument.ArrayDimensions.Data)),
+					Description:     ua.NewLocalizedText(extObj.Body.Argument.Description.Text),
+				}
+
+				for _, ad := range extObj.Body.Argument.ArrayDimensions.Data {
+					arg.ArrayDimensions = append(arg.ArrayDimensions, ad.Data)
+				}
+				v := ua.NewExtensionObject(arg)
+				return v
+			} else if typeId.IntID() == id.EnumValueType_Encoding_DefaultXML {
+				evt := v.ExtObjAttr.Body.EnumValueType
+				data := &ua.EnumValueType{
+					Value:       int64(evt.Value),
+					DisplayName: ua.NewLocalizedText(evt.DisplayName.Text),
+					Description: ua.NewLocalizedText(evt.Description.Text),
+				}
+				v := ua.NewExtensionObject(data)
+				return v
+			}
+		} else if v.ExtObjListAttr != nil {
+			supportedTypes := map[string]struct{}{"i=297": {}, "i=7616": {}}
+			if !slices.ContainsFunc(v.ExtObjListAttr.Data, func(eo schema.ValueExtensionObject) bool {
+				_, ok := supportedTypes[eo.TypeID.Identifier]
+				return !ok
+			}) {
+				data := make([]*ua.ExtensionObject, 0, len(v.ExtObjListAttr.Data))
+				for _, extObj := range v.ExtObjListAttr.Data {
+					typeId := mustParseAndConvertNodeID(extObj.TypeID.Identifier)
+					if typeId.IntID() == id.Argument_Encoding_DefaultXML {
+						arg := &ua.Argument{
+							Name:            extObj.Body.Argument.Name,
+							DataType:        mustParseAndConvertNodeID(extObj.Body.Argument.DataType.Identifier),
+							ValueRank:       int32(extObj.Body.Argument.ValueRank),
+							ArrayDimensions: make([]uint32, 0, len(extObj.Body.Argument.ArrayDimensions.Data)),
+							Description:     ua.NewLocalizedText(extObj.Body.Argument.Description.Text),
+						}
+
+						for _, ad := range extObj.Body.Argument.ArrayDimensions.Data {
+							arg.ArrayDimensions = append(arg.ArrayDimensions, ad.Data)
+						}
+						data = append(data, ua.NewExtensionObject(arg))
+					} else if typeId.IntID() == id.EnumValueType_Encoding_DefaultXML {
+						evt := extObj.Body.EnumValueType
+						data = append(data, ua.NewExtensionObject(&ua.EnumValueType{
+							Value:       int64(evt.Value),
+							DisplayName: ua.NewLocalizedText(evt.DisplayName.Text),
+							Description: ua.NewLocalizedText(evt.Description.Text),
+						}))
+					}
+				}
+				v, _ := ua.NewVariant(data)
+				return v
+			}
+		} else if v.QualifiedNameAttr != nil {
+			return &ua.QualifiedName{
+				NamespaceIndex: uint16(v.QualifiedNameAttr.NamespaceIndex),
+				Name:           v.QualifiedNameAttr.Name,
+			}
+		}
+
+		return nil
+	}
+
 	reftypes := make(map[string]*schema.UAReferenceType)
 
-	// the first thing we have to do is go thorugh and define all the nodes.
+	// the first thing we have to do is go through and define all the nodes.
 	// set up the reference types.
 	for i := range nodes.UAReferenceType {
 		rt := nodes.UAReferenceType[i]
@@ -91,35 +220,32 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 
 		nid := mustParseAndConvertNodeID(rt.NodeIdAttr)
 
-		var attrs Attributes = make(map[ua.AttributeID]*ua.DataValue)
-		attrs[ua.AttributeIDAccessRestrictions] = DataValueFromValue(rt.AccessRestrictionsAttr)
-		attrs[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: rt.BrowseNameAttr})
-		attrs[ua.AttributeIDIsAbstract] = DataValueFromValue(rt.IsAbstractAttr)
-		attrs[ua.AttributeIDUserWriteMask] = DataValueFromValue(rt.UserWriteMaskAttr)
-		attrs[ua.AttributeIDSymmetric] = DataValueFromValue(rt.SymmetricAttr)
-		attrs[ua.AttributeIDWriteMask] = DataValueFromValue(rt.WriteMaskAttr)
-		if len(rt.DisplayName) > 0 {
-			attrs[ua.AttributeIDDisplayName] = DataValueFromValue(ua.NewLocalizedText(rt.DisplayName[0].Value))
-		}
-		if len(rt.InverseName) > 0 {
-			attrs[ua.AttributeIDInverseName] = DataValueFromValue(ua.NewLocalizedText(rt.InverseName[0].Value))
-		} else {
-			attrs[ua.AttributeIDInverseName] = DataValueFromValue(ua.NewLocalizedText(""))
-		}
-		if len(rt.Description) > 0 {
-			attrs[ua.AttributeIDDescription] = DataValueFromValue(ua.NewLocalizedText(rt.Description[0].Value))
-		}
-		attrs[ua.AttributeIDNodeClass] = DataValueFromValue(uint32(ua.NodeClassReferenceType))
-
-		var refs References = make([]*ua.ReferenceDescription, 0)
-
-		n := NewNode(nid, attrs, refs, nil)
 		ns, err := srv.Namespace(int(nid.Namespace()))
 		if err != nil {
-			// This namespace doesn't exist.
 			ualog.Warn(ctx, "could not find namespace", ualog.Namespace(nid.Namespace()))
 			return err
 		}
+
+		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: rt.BrowseNameAttr}
+		displayNames := localizedTextsFromSchema(rt.DisplayName, browseName.Name)
+		descriptions := localizedTextsFromSchema(rt.Description, "")
+
+		n := node.NewReferenceTypeNode(
+			node.WithBase(
+				node.WithID(nid),
+				node.WithBrowseName(browseName),
+				node.WithDisplayNames(displayNames),
+				node.WithDescriptions(descriptions),
+			),
+			node.WithAbstract(rt.IsAbstractAttr),
+			node.WithInverseNames(func() []*ua.LocalizedText {
+				if len(rt.InverseName) == 0 {
+					return nil
+				}
+
+				return localizedTextsFromSchema(rt.InverseName, "")
+			}()),
+		)
 		ns.AddNode(n)
 	}
 
@@ -128,30 +254,28 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 		dt := nodes.UADataType[i]
 		nid := mustParseAndConvertNodeID(dt.NodeIdAttr)
 
-		var attrs Attributes = make(map[ua.AttributeID]*ua.DataValue)
-		attrs[ua.AttributeIDAccessRestrictions] = DataValueFromValue(dt.AccessRestrictionsAttr)
-		attrs[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: dt.BrowseNameAttr})
-		attrs[ua.AttributeIDIsAbstract] = DataValueFromValue(dt.IsAbstractAttr)
-		attrs[ua.AttributeIDUserWriteMask] = DataValueFromValue(dt.UserWriteMaskAttr)
-		attrs[ua.AttributeIDWriteMask] = DataValueFromValue(dt.WriteMaskAttr)
-		if len(dt.DisplayName) > 0 {
-			attrs[ua.AttributeIDDisplayName] = DataValueFromValue(ua.NewLocalizedText(dt.DisplayName[0].Value))
-		}
-		if len(dt.Description) > 0 {
-			attrs[ua.AttributeIDDescription] = DataValueFromValue(ua.NewLocalizedText(dt.Description[0].Value))
-		}
-		attrs[ua.AttributeIDNodeClass] = DataValueFromValue(uint32(ua.NodeClassDataType))
-
-		var refs References = make([]*ua.ReferenceDescription, 0)
-
-		n := NewNode(nid, attrs, refs, nil)
-
 		ns, err := srv.Namespace(int(nid.Namespace()))
 		if err != nil {
 			// This namespace doesn't exist.
 			ualog.Warn(ctx, "could not find namespace", ualog.Namespace(nid.Namespace()))
 			return err
 		}
+
+		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: dt.BrowseNameAttr}
+		displayNames := localizedTextsFromSchema(dt.DisplayName, browseName.Name)
+		descriptions := localizedTextsFromSchema(dt.Description, "")
+
+		// TODO: Add support for loading data type definitions
+
+		n := node.NewDataTypeNode(
+			node.WithBase(
+				node.WithID(nid),
+				node.WithBrowseName(browseName),
+				node.WithDisplayNames(displayNames),
+				node.WithDescriptions(descriptions),
+			),
+			node.WithAbstractType(dt.IsAbstractAttr),
+		)
 
 		ns.AddNode(n)
 	}
@@ -160,29 +284,26 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 	for i := range nodes.UAObjectType {
 		ot := nodes.UAObjectType[i]
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
-		var attrs Attributes = make(map[ua.AttributeID]*ua.DataValue)
-		attrs[ua.AttributeIDAccessRestrictions] = DataValueFromValue(ot.AccessRestrictionsAttr)
-		attrs[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr})
-		attrs[ua.AttributeIDIsAbstract] = DataValueFromValue(ot.IsAbstractAttr)
-		attrs[ua.AttributeIDUserWriteMask] = DataValueFromValue(ot.UserWriteMaskAttr)
-		attrs[ua.AttributeIDWriteMask] = DataValueFromValue(ot.WriteMaskAttr)
-		if len(ot.DisplayName) > 0 {
-			attrs[ua.AttributeIDDisplayName] = DataValueFromValue(ua.NewLocalizedText(ot.DisplayName[0].Value))
-		}
-		if len(ot.Description) > 0 {
-			attrs[ua.AttributeIDDescription] = DataValueFromValue(ua.NewLocalizedText(ot.Description[0].Value))
-		}
-		attrs[ua.AttributeIDNodeClass] = DataValueFromValue(uint32(ua.NodeClassObjectType))
 
-		var refs References = make([]*ua.ReferenceDescription, 0)
-
-		n := NewNode(nid, attrs, refs, nil)
 		ns, err := srv.Namespace(int(nid.Namespace()))
 		if err != nil {
-			// This namespace doesn't exist.
 			ualog.Warn(ctx, "could not find namespace", ualog.Namespace(nid.Namespace()))
 			return err
 		}
+
+		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		displayNames := localizedTextsFromSchema(ot.DisplayName, browseName.Name)
+		descriptions := localizedTextsFromSchema(ot.Description, "")
+
+		n := node.NewObjectTypeNode(
+			node.WithBase(
+				node.WithID(nid),
+				node.WithBrowseName(browseName),
+				node.WithDisplayNames(displayNames),
+				node.WithDescriptions(descriptions),
+			),
+			node.WithAbstractType(ot.IsAbstractAttr),
+		)
 		ns.AddNode(n)
 	}
 
@@ -190,28 +311,37 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 	for i := range nodes.UAVariableType {
 		ot := nodes.UAVariableType[i]
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
-		var attrs Attributes = make(map[ua.AttributeID]*ua.DataValue)
-		attrs[ua.AttributeIDAccessRestrictions] = DataValueFromValue(ot.AccessRestrictionsAttr)
-		attrs[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr})
-		attrs[ua.AttributeIDUserWriteMask] = DataValueFromValue(ot.UserWriteMaskAttr)
-		attrs[ua.AttributeIDWriteMask] = DataValueFromValue(ot.WriteMaskAttr)
-		if len(ot.DisplayName) > 0 {
-			attrs[ua.AttributeIDDisplayName] = DataValueFromValue(ua.NewLocalizedText(ot.DisplayName[0].Value))
-		}
-		if len(ot.Description) > 0 {
-			attrs[ua.AttributeIDDescription] = DataValueFromValue(ua.NewLocalizedText(ot.Description[0].Value))
-		}
-		attrs[ua.AttributeIDNodeClass] = DataValueFromValue(uint32(ua.NodeClassVariableType))
 
-		var refs References = make([]*ua.ReferenceDescription, 0)
-
-		n := NewNode(nid, attrs, refs, nil)
 		ns, err := srv.Namespace(int(nid.Namespace()))
 		if err != nil {
-			// This namespace doesn't exist.
 			ualog.Warn(ctx, "could not find namespace", ualog.Namespace(nid.Namespace()))
 			return err
 		}
+
+		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		displayNames := localizedTextsFromSchema(ot.DisplayName, browseName.Name)
+		descriptions := localizedTextsFromSchema(ot.Description, "")
+
+		n := node.NewVariableTypeNode(
+			node.WithBase(
+				node.WithID(nid),
+				node.WithBrowseName(browseName),
+				node.WithDisplayNames(displayNames),
+				node.WithDescriptions(descriptions),
+			),
+			node.WithAbstractVariableType(ot.IsAbstractAttr),
+			node.WithDefaultValue(
+				mustParseAndConvertNodeID(ot.DataTypeAttr),
+				func() int32 {
+					if ot.ValueRankAttr == nil {
+						return -1
+					}
+					return int32(*ot.ValueRankAttr)
+				}(),
+				valueFromSchema(ot.Value),
+			),
+			// TODO: Handle array dimensions
+		)
 		ns.AddNode(n)
 	}
 
@@ -219,13 +349,16 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 	for i := range nodes.UAVariable {
 		ot := nodes.UAVariable[i]
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
-		var attrs Attributes = make(map[ua.AttributeID]*ua.DataValue)
-		attrs[ua.AttributeIDAccessRestrictions] = DataValueFromValue(ot.AccessRestrictionsAttr)
-		attrs[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr})
-		attrs[ua.AttributeIDUserWriteMask] = DataValueFromValue(ot.UserWriteMaskAttr)
-		attrs[ua.AttributeIDWriteMask] = DataValueFromValue(ot.WriteMaskAttr)
-		attrs[ua.AttributeIDHistorizing] = DataValueFromValue(ot.HistorizingAttr)
-		attrs[ua.AttributeIDValueRank] = DataValueFromValue(ot.ValueRankAttr)
+
+		ns, err := srv.Namespace(int(nid.Namespace()))
+		if err != nil {
+			ualog.Warn(ctx, "could not find namespace", ualog.Namespace(nid.Namespace()))
+			return err
+		}
+
+		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		displayNames := localizedTextsFromSchema(ot.DisplayName, browseName.Name)
+		descriptions := localizedTextsFromSchema(ot.Description, "")
 
 		dtidx := slices.IndexFunc(nodes.UADataType, func(dt *schema.UADataType) bool {
 			if strings.Compare(dt.BrowseNameAttr, ot.DataTypeAttr) == 0 {
@@ -235,151 +368,58 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 			return strings.Compare(dt.NodeIdAttr, ot.DataTypeAttr) == 0
 		})
 
+		var dataTypeNodeId *ua.NodeID
+
 		if dtidx >= 0 {
 			dt := nodes.UADataType[dtidx]
-			attrs[ua.AttributeIDDataType] = DataValueFromValue(mustParseAndConvertNodeID(dt.NodeIdAttr))
+			dataTypeNodeId = mustParseAndConvertNodeID(dt.NodeIdAttr)
 		} else {
 			aliasidx := slices.IndexFunc(nodes.Aliases.Alias, func(a *schema.NodeIdAlias) bool {
 				return strings.Compare(a.AliasAttr, ot.DataTypeAttr) == 0
 			})
 			if aliasidx >= 0 {
 				dt := nodes.Aliases.Alias[aliasidx]
-				attrs[ua.AttributeIDDataType] = DataValueFromValue(mustParseAndConvertNodeID(dt.Value))
+				dataTypeNodeId = mustParseAndConvertNodeID(dt.Value)
 			}
 		}
 
-		if len(ot.DisplayName) > 0 {
-			attrs[ua.AttributeIDDisplayName] = DataValueFromValue(ua.NewLocalizedText(ot.DisplayName[0].Value))
-		}
-		if len(ot.Description) > 0 {
-			attrs[ua.AttributeIDDescription] = DataValueFromValue(ua.NewLocalizedText(ot.Description[0].Value))
-		}
-		attrs[ua.AttributeIDNodeClass] = DataValueFromValue(uint32(ua.NodeClassVariable))
-
-		var valueFunc ValueFunc
-		newValueFuncFromData := func(v any) ValueFunc {
-			dv := DataValueFromValue(v)
-			return func() *ua.DataValue { return dv }
+		if dataTypeNodeId == nil {
+			panic("failed to decode variable data type node id")
 		}
 
-		if ot.Value != nil {
-			if ot.Value.StringAttr != nil {
-				valueFunc = newValueFuncFromData(ot.Value.StringAttr.Data)
-			} else if ot.Value.StringListAttr != nil {
-				data := make([]string, 0, len(ot.Value.StringListAttr.Data))
-				for _, s := range ot.Value.StringListAttr.Data {
-					data = append(data, s.Data)
-				}
-				valueFunc = newValueFuncFromData(data)
-			} else if ot.Value.DateTimeAttr != nil {
-				valueFunc = newValueFuncFromData(ot.Value.DateTimeAttr.Data)
-			} else if ot.Value.Int32Attr != nil {
-				valueFunc = newValueFuncFromData(ot.Value.Int32Attr.Data)
-			} else if ot.Value.UInt32Attr != nil {
-				valueFunc = newValueFuncFromData(ot.Value.UInt32Attr.Data)
-			} else if ot.Value.Int32ListAttr != nil {
-				data := make([]int32, 0, len(ot.Value.Int32ListAttr.Data))
-				for _, i := range ot.Value.Int32ListAttr.Data {
-					data = append(data, i.Data)
-				}
-				valueFunc = newValueFuncFromData(data)
-			} else if ot.Value.BoolAttr != nil {
-				valueFunc = newValueFuncFromData(ot.Value.BoolAttr.Data)
-			} else if ot.Value.ByteStringAttr != nil {
-				bs := ot.Value.ByteStringAttr.Data
-				if b64b, err := base64.StdEncoding.DecodeString(bs); err == nil {
-					valueFunc = newValueFuncFromData(b64b)
-				}
-			} else if ot.Value.TextAttr != nil {
-				v := ua.NewLocalizedTextWithLocale(ot.Value.TextAttr.Text, ot.Value.TextAttr.Locale)
-				valueFunc = newValueFuncFromData(v)
-			} else if ot.Value.TextListAttr != nil {
-				data := make([]*ua.LocalizedText, 0, len(ot.Value.TextListAttr.Data))
-				for _, t := range ot.Value.TextListAttr.Data {
-					data = append(data, ua.NewLocalizedTextWithLocale(t.Text, t.Locale))
-				}
-				valueFunc = newValueFuncFromData(data)
-			} else if ot.Value.ExtObjAttr != nil {
-				extObj := ot.Value.ExtObjAttr
-				typeId := mustParseAndConvertNodeID(extObj.TypeID.Identifier)
-				if typeId.IntID() == id.Argument_Encoding_DefaultXML {
-					arg := &ua.Argument{
-						Name:            extObj.Body.Argument.Name,
-						DataType:        mustParseAndConvertNodeID(extObj.Body.Argument.DataType.Identifier),
-						ValueRank:       int32(extObj.Body.Argument.ValueRank),
-						ArrayDimensions: make([]uint32, 0, len(extObj.Body.Argument.ArrayDimensions.Data)),
-						Description:     ua.NewLocalizedText(extObj.Body.Argument.Description.Text),
-					}
-
-					for _, ad := range extObj.Body.Argument.ArrayDimensions.Data {
-						arg.ArrayDimensions = append(arg.ArrayDimensions, ad.Data)
-					}
-					v := ua.NewExtensionObject(arg)
-					valueFunc = newValueFuncFromData(v)
-				} else if typeId.IntID() == id.EnumValueType_Encoding_DefaultXML {
-					evt := ot.Value.ExtObjAttr.Body.EnumValueType
-					data := &ua.EnumValueType{
-						Value:       int64(evt.Value),
-						DisplayName: ua.NewLocalizedText(evt.DisplayName.Text),
-						Description: ua.NewLocalizedText(evt.Description.Text),
-					}
-					v := ua.NewExtensionObject(data)
-					valueFunc = newValueFuncFromData(v)
-				}
-			} else if ot.Value.ExtObjListAttr != nil {
-				supportedTypes := map[string]struct{}{"i=297": {}, "i=7616": {}}
-				if !slices.ContainsFunc(ot.Value.ExtObjListAttr.Data, func(eo schema.ValueExtensionObject) bool {
-					_, ok := supportedTypes[eo.TypeID.Identifier]
-					return !ok
-				}) {
-					data := make([]*ua.ExtensionObject, 0, len(ot.Value.ExtObjListAttr.Data))
-					for _, extObj := range ot.Value.ExtObjListAttr.Data {
-						typeId := mustParseAndConvertNodeID(extObj.TypeID.Identifier)
-						if typeId.IntID() == id.Argument_Encoding_DefaultXML {
-							arg := &ua.Argument{
-								Name:            extObj.Body.Argument.Name,
-								DataType:        mustParseAndConvertNodeID(extObj.Body.Argument.DataType.Identifier),
-								ValueRank:       int32(extObj.Body.Argument.ValueRank),
-								ArrayDimensions: make([]uint32, 0, len(extObj.Body.Argument.ArrayDimensions.Data)),
-								Description:     ua.NewLocalizedText(extObj.Body.Argument.Description.Text),
-							}
-
-							for _, ad := range extObj.Body.Argument.ArrayDimensions.Data {
-								arg.ArrayDimensions = append(arg.ArrayDimensions, ad.Data)
-							}
-							data = append(data, ua.NewExtensionObject(arg))
-						} else if typeId.IntID() == id.EnumValueType_Encoding_DefaultXML {
-							evt := extObj.Body.EnumValueType
-							data = append(data, ua.NewExtensionObject(&ua.EnumValueType{
-								Value:       int64(evt.Value),
-								DisplayName: ua.NewLocalizedText(evt.DisplayName.Text),
-								Description: ua.NewLocalizedText(evt.Description.Text),
-							}))
-						}
-					}
-					v, _ := ua.NewVariant(data)
-					valueFunc = newValueFuncFromData(v)
-				}
-			} else if ot.Value.QualifiedNameAttr != nil {
-				valueFunc = newValueFuncFromData(&ua.QualifiedName{
-					NamespaceIndex: uint16(ot.Value.QualifiedNameAttr.NamespaceIndex),
-					Name:           ot.Value.QualifiedNameAttr.Name,
-				})
-			} else {
-				if ot.ReleaseStatusAttr != "Deprecated" {
-					ualog.Warn(ctx, "failed to parse value for datatype ", ualog.String("datatype", ot.DataTypeAttr))
-				}
-			}
+		v := valueFromSchema(ot.Value)
+		if v == nil {
+			panic("failed to decode variable value from schema")
 		}
 
-		var refs References = make([]*ua.ReferenceDescription, 0)
-		n := NewNode(nid, attrs, refs, valueFunc)
+		baseOptions := node.WithBase(
+			node.WithID(nid),
+			node.WithBrowseName(browseName),
+			node.WithDisplayNames(displayNames),
+			node.WithDescriptions(descriptions),
+		)
 
-		ns, err := srv.Namespace(int(nid.Namespace()))
-		if err != nil {
-			// This namespace doesn't exist.
-			ualog.Warn(ctx, "could not find namespace", ualog.Namespace(nid.Namespace()))
-			return err
+		var n types.VariableNode
+
+		if dataTypeNodeId.Namespace() == 0 {
+			n = node.NewVariableNode(
+				baseOptions,
+				node.WithHistorization(ot.HistorizingAttr),
+				node.WithValue(v),
+			)
+		} else {
+			n = node.NewVariableNode(
+				baseOptions,
+				node.WithHistorization(ot.HistorizingAttr),
+				node.WithDataType(dataTypeNodeId),
+				node.WithValueRank(func() int32 {
+					if ot.ValueRankAttr == nil {
+						return -1
+					}
+					return int32(*ot.ValueRankAttr)
+				}()),
+				node.WithDataValue(values.DataValueFromValue(v)),
+			)
 		}
 
 		ns.AddNode(n)
@@ -388,31 +428,28 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 	// set up the methods
 	for i := range nodes.UAMethod {
 		ot := nodes.UAMethod[i]
+
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
-		var attrs Attributes = make(map[ua.AttributeID]*ua.DataValue)
-		attrs[ua.AttributeIDAccessRestrictions] = DataValueFromValue(ot.AccessRestrictionsAttr)
-		attrs[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr})
-		attrs[ua.AttributeIDUserWriteMask] = DataValueFromValue(ot.UserWriteMaskAttr)
-		attrs[ua.AttributeIDWriteMask] = DataValueFromValue(ot.WriteMaskAttr)
-
-		if len(ot.DisplayName) > 0 {
-			attrs[ua.AttributeIDDisplayName] = DataValueFromValue(ua.NewLocalizedText(ot.DisplayName[0].Value))
-		}
-		if len(ot.Description) > 0 {
-			attrs[ua.AttributeIDDescription] = DataValueFromValue(ua.NewLocalizedText(ot.Description[0].Value))
-		}
-		attrs[ua.AttributeIDNodeClass] = DataValueFromValue(uint32(ua.NodeClassMethod))
-
-		var refs References = make([]*ua.ReferenceDescription, 0)
-
-		n := NewNode(nid, attrs, refs, nil)
 
 		ns, err := srv.Namespace(int(nid.Namespace()))
 		if err != nil {
-			// This namespace doesn't exist.
 			ualog.Warn(ctx, "could not find namespace", ualog.Namespace(nid.Namespace()))
 			return err
 		}
+
+		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		displayNames := localizedTextsFromSchema(ot.DisplayName, ot.BrowseNameAttr)
+		descriptions := localizedTextsFromSchema(ot.Description, "")
+
+		n := node.NewMethodNode(
+			node.WithBase(
+				node.WithID(nid),
+				node.WithBrowseName(browseName),
+				node.WithDisplayNames(displayNames),
+				node.WithDescriptions(descriptions)),
+			node.Executable(ot.ExecutableAttr == nil || *ot.ExecutableAttr == true),
+		)
+
 		ns.AddNode(n)
 	}
 
@@ -420,32 +457,26 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 	for i := range nodes.UAObject {
 		ot := nodes.UAObject[i]
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
-		if nid.IntID() == id.ObjectsFolder {
-			ualog.Info(ctx, "doing objects")
-		}
-		var attrs Attributes = make(map[ua.AttributeID]*ua.DataValue)
-		attrs[ua.AttributeIDAccessRestrictions] = DataValueFromValue(ot.AccessRestrictionsAttr)
-		attrs[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr})
-		attrs[ua.AttributeIDUserWriteMask] = DataValueFromValue(ot.UserWriteMaskAttr)
-		attrs[ua.AttributeIDWriteMask] = DataValueFromValue(ot.WriteMaskAttr)
-		if len(ot.DisplayName) > 0 {
-			attrs[ua.AttributeIDDisplayName] = DataValueFromValue(ua.NewLocalizedText(ot.DisplayName[0].Value))
-		}
-		if len(ot.Description) > 0 {
-			attrs[ua.AttributeIDDescription] = DataValueFromValue(ua.NewLocalizedText(ot.Description[0].Value))
-		}
 
-		attrs[ua.AttributeIDNodeClass] = DataValueFromValue(uint32(ua.NodeClassObject))
-
-		var refs References = make([]*ua.ReferenceDescription, 0)
-
-		n := NewNode(nid, attrs, refs, nil)
 		ns, err := srv.Namespace(int(nid.Namespace()))
 		if err != nil {
-			// This namespace doesn't exist.
 			ualog.Warn(ctx, "could not find namespace", ualog.Namespace(nid.Namespace()))
 			return err
 		}
+
+		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		displayNames := localizedTextsFromSchema(ot.DisplayName, ot.BrowseNameAttr)
+		descriptions := localizedTextsFromSchema(ot.Description, "")
+
+		n := node.NewObjectNode(
+			node.WithBase(
+				node.WithID(nid),
+				node.WithBrowseName(browseName),
+				node.WithDisplayNames(displayNames),
+				node.WithDescriptions(descriptions),
+			),
+			node.WithEventNotifier(ua.EventNotifierType(ot.EventNotifierAttr)),
+		)
 		ns.AddNode(n)
 	}
 

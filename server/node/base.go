@@ -1,18 +1,17 @@
-package server
+package node
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"iter"
 	"maps"
 	"slices"
-	"strconv"
 	"time"
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/attrs"
 	"github.com/gopcua/opcua/server/types"
+	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -20,56 +19,82 @@ type Attributes map[ua.AttributeID]*ua.DataValue
 
 type References []*ua.ReferenceDescription
 
-type MethodFunc func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode)
-type MethodMiddleware func(MethodFunc) MethodFunc
-
-type ValueFunc func() *ua.DataValue
-
 func NewAttrValue(v *ua.DataValue) *types.AttrValue {
 	return &types.AttrValue{Value: v, SourceTimestamp: time.Now()}
 }
 
-func DataValueFromVariant(v *ua.Variant) *ua.DataValue {
-	return &ua.DataValue{
-		EncodingMask:    ua.DataValueValue | ua.DataValueSourceTimestamp,
-		Value:           v,
-		SourceTimestamp: time.Now(),
+type baseConfig struct {
+	nodeClass    ua.NodeClass
+	nodeID       *ua.NodeID
+	browseName   *ua.QualifiedName
+	displayNames []*ua.LocalizedText
+	descriptions []*ua.LocalizedText
+}
+
+func newDefaultBaseConfig(class ua.NodeClass) *baseConfig {
+	return &baseConfig{
+		nodeClass: class,
 	}
 }
 
-func DataValueFromValue(val any) *ua.DataValue {
-	// if we already have a data value, just return it.
-	switch v := val.(type) {
-	case *ua.DataValue:
-		return v
-	case ua.DataValue:
-		return &v
-	case ua.Variant:
-		return DataValueFromVariant(&v)
-	case *ua.Variant:
-		return DataValueFromVariant(v)
-	case int:
-		return DataValueFromVariant(ua.MustVariant(int32(v)))
-	}
+type baseOption func(*baseConfig)
 
-	return DataValueFromVariant(ua.MustVariant(val))
+func WithBrowseName(name *ua.QualifiedName) baseOption {
+	return func(cfg *baseConfig) {
+		cfg.browseName = name
+	}
+}
+
+func WithDescriptions(descriptions []*ua.LocalizedText) baseOption {
+	return func(cfg *baseConfig) {
+		cfg.descriptions = descriptions
+	}
+}
+
+func WithDisplayNames(names []*ua.LocalizedText) baseOption {
+	return func(cfg *baseConfig) {
+		cfg.displayNames = names
+	}
+}
+
+func WithID(id *ua.NodeID) baseOption {
+	return func(cfg *baseConfig) {
+		cfg.nodeID = id
+	}
+}
+
+func WithBase(opts ...baseOption) func(ua.NodeClass) *baseConfig {
+	return func(class ua.NodeClass) *baseConfig {
+		cfg := newDefaultBaseConfig(class)
+
+		for _, applyOption := range opts {
+			applyOption(cfg)
+		}
+
+		if cfg.descriptions == nil {
+			cfg.descriptions = []*ua.LocalizedText{ua.NewLocalizedText("")}
+		}
+
+		if cfg.displayNames == nil {
+			cfg.displayNames = []*ua.LocalizedText{ua.NewLocalizedText(cfg.browseName.Name)}
+		}
+
+		return cfg
+	}
 }
 
 type baseNode struct {
 	id   *ua.NodeID
 	attr Attributes
 	refs References
-	call MethodFunc
 
-	ns NameSpace
+	displayNames []*ua.LocalizedText
+	descriptions []*ua.LocalizedText
+
+	ns types.NameSpace
 }
 
-type variableNode struct {
-	baseNode
-	val ValueFunc
-}
-
-func newBaseNode(id *ua.NodeID, attr Attributes, refs References) *baseNode {
+func newBaseNode(id *ua.NodeID, class ua.NodeClass, attr Attributes, refs References) *baseNode {
 	if attr == nil {
 		attr = Attributes{}
 	}
@@ -80,11 +105,25 @@ func newBaseNode(id *ua.NodeID, attr Attributes, refs References) *baseNode {
 		refs: slices.Clone(refs),
 	}
 
+	n.attr[ua.AttributeIDNodeClass] = values.DataValueFromValue(uint32(class))
+
+	return n
+}
+
+func newBaseNodeFromCfg(cfg *baseConfig) *baseNode {
+	n := &baseNode{
+		id: cfg.nodeID,
+		attr: map[ua.AttributeID]*ua.DataValue{
+			ua.AttributeIDBrowseName: values.DataValueFromValue(cfg.browseName),
+			ua.AttributeIDNodeClass:  values.DataValueFromValue(uint32(cfg.nodeClass)),
+		},
+	}
+
 	return n
 }
 
 func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) types.Node {
-	n := newBaseNode(id, attr, refs)
+	n := newBaseNode(id, ua.NodeClassObject, attr, refs)
 
 	if n.attr[ua.AttributeIDBrowseName] == nil {
 		n.SetBrowseName("")
@@ -108,10 +147,10 @@ func NewFolderNode(nodeID *ua.NodeID, name string) types.Node {
 	n := NewNode(
 		nodeID,
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
-			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, "")),
-			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
+			ua.AttributeIDNodeClass:     values.DataValueFromValue(uint32(ua.NodeClassObject)),
+			ua.AttributeIDBrowseName:    values.DataValueFromValue(attrs.BrowseName(name)),
+			ua.AttributeIDDisplayName:   values.DataValueFromValue(attrs.DisplayName(name, "")),
+			ua.AttributeIDEventNotifier: values.DataValueFromValue(int16(0)),
 		},
 		[]*ua.ReferenceDescription{{
 			ReferenceTypeID: reftype,
@@ -128,140 +167,27 @@ func NewFolderNode(nodeID *ua.NodeID, name string) types.Node {
 	return n
 }
 
-func NewObjectNode(nodeID *ua.NodeID, browsename *ua.QualifiedName, displayname *ua.LocalizedText) types.Node {
-	n := NewNode(
-		nodeID,
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:    DataValueFromValue(browsename),
-			ua.AttributeIDDisplayName:   DataValueFromValue(displayname),
-			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
-		},
-		[]*ua.ReferenceDescription{},
-		nil,
-	)
-
-	return n
-}
-
-var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
-	id.Boolean:    ua.NewNumericNodeID(0, id.Boolean),
-	id.SByte:      ua.NewNumericNodeID(0, id.SByte),
-	id.Byte:       ua.NewNumericNodeID(0, id.Byte),
-	id.Int16:      ua.NewNumericNodeID(0, id.Int16),
-	id.UInt16:     ua.NewNumericNodeID(0, id.UInt16),
-	id.Int32:      ua.NewNumericNodeID(0, id.Int32),
-	id.UInt32:     ua.NewNumericNodeID(0, id.UInt32),
-	id.Int64:      ua.NewNumericNodeID(0, id.Int64),
-	id.UInt64:     ua.NewNumericNodeID(0, id.UInt64),
-	id.Float:      ua.NewNumericNodeID(0, id.Float),
-	id.Double:     ua.NewNumericNodeID(0, id.Double),
-	id.String:     ua.NewNumericNodeID(0, id.String),
-	id.ByteString: ua.NewNumericNodeID(0, id.ByteString),
-}
-
-func lookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
-	valueRank := int32(-1)
-
-	switch v := value.(type) {
-	case func() *ua.DataValue:
-		if dataValue := v(); dataValue != nil && dataValue.Value != nil {
-			return lookupTypeNodeIDFromValue(dataValue.Value.Value())
-		}
-	case bool:
-		return typeNodeIdFromDataType[id.Boolean], valueRank
-	case int8:
-		return typeNodeIdFromDataType[id.SByte], valueRank
-	case uint8:
-		return typeNodeIdFromDataType[id.Byte], valueRank
-	case int16:
-		return typeNodeIdFromDataType[id.Int16], valueRank
-	case uint16:
-		return typeNodeIdFromDataType[id.UInt16], valueRank
-	case int32:
-		return typeNodeIdFromDataType[id.Int32], valueRank
-	case uint32:
-		return typeNodeIdFromDataType[id.UInt32], valueRank
-	case int64:
-		return typeNodeIdFromDataType[id.Int64], valueRank
-	case uint64:
-		return typeNodeIdFromDataType[id.UInt64], valueRank
-	case int:
-		if strconv.IntSize == 64 {
-			return typeNodeIdFromDataType[id.Int64], valueRank
-		} else {
-			return typeNodeIdFromDataType[id.Int32], valueRank
-		}
-	case uint:
-		if strconv.IntSize == 64 {
-			return typeNodeIdFromDataType[id.UInt64], valueRank
-		} else {
-			return typeNodeIdFromDataType[id.UInt32], valueRank
-		}
-	case float32:
-		return typeNodeIdFromDataType[id.Float], valueRank
-	case float64:
-		return typeNodeIdFromDataType[id.Double], valueRank
-	case string:
-		return typeNodeIdFromDataType[id.String], valueRank
-	case []byte:
-		return typeNodeIdFromDataType[id.ByteString], valueRank
-	case []any:
-		if len(v) > 0 {
-			if typeNode, _ := lookupTypeNodeIDFromValue(v[0]); typeNode != nil {
-				return typeNode, 1
-			}
-		}
-	}
-
-	return nil, valueRank
-}
-
-func NewVariableNode(nodeID *ua.NodeID, name string, value any) types.VariableNode {
-	dataTypeNodeID, valueRank := lookupTypeNodeIDFromValue(value)
-
-	var valueFunc func() *ua.DataValue
-	if vf, ok := value.(func() *ua.DataValue); ok {
-		valueFunc = vf
-	} else {
-		dataValue := DataValueFromValue(value) // check if the type is supported
-		valueFunc = func() *ua.DataValue { return dataValue }
-	}
-
-	attrs := map[ua.AttributeID]*ua.DataValue{
-		ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassVariable)),
-		ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(name)),
-		ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(name, "")),
-		ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
-		ua.AttributeIDValueRank:     DataValueFromValue(valueRank),
-	}
-
-	if dataTypeNodeID != nil {
-		attrs[ua.AttributeIDDataType] = DataValueFromValue(dataTypeNodeID)
-	}
-
-	n := &variableNode{
-		baseNode: *newBaseNode(nodeID, attrs, []*ua.ReferenceDescription{}),
-		val:      valueFunc,
-	}
-
-	return n
-}
-
 func (n *baseNode) ID() *ua.NodeID {
 	return n.id
 }
 
 func (n *variableNode) Value() *ua.DataValue {
-	if n.val == nil {
-		return nil
-	}
-	return n.val()
+	return n.value
 }
 
 func (n *baseNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	if id == ua.AttributeIDValue {
 		return nil, errors.New("value attribute only supported on variable nodes")
+	}
+
+	if id == ua.AttributeIDDisplayName && len(n.displayNames) > 0 {
+		// TODO: Get the proper locale from the session's context
+		return NewAttrValue(values.DataValueFromValue(n.displayNames[0])), nil
+	}
+
+	if id == ua.AttributeIDDescription && len(n.descriptions) > 0 {
+		// TODO: Get the proper locale from the session's context
+		return NewAttrValue(values.DataValueFromValue(n.descriptions[0])), nil
 	}
 
 	if n.attr != nil {
@@ -271,17 +197,6 @@ func (n *baseNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	}
 
 	return nil, ua.StatusBadAttributeIDInvalid
-}
-
-func (n *variableNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
-	if id == ua.AttributeIDValue {
-		val := n.val()
-		if val != nil && val.Value != nil {
-			return NewAttrValue(val), nil
-		}
-	}
-
-	return n.baseNode.Attribute(id)
 }
 
 func (n *baseNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
@@ -295,21 +210,6 @@ func (n *baseNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
 	return nil
 }
 
-func (n *variableNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
-
-	if id == ua.AttributeIDValue {
-		// TODO: probably need to do some type checking here.
-		// And some permissions tests
-		n.val = func() *ua.DataValue {
-			return val
-		}
-
-		return nil
-	}
-
-	return n.baseNode.SetAttribute(id, val)
-}
-
 func (n *baseNode) BrowseName() *ua.QualifiedName {
 	v := n.attr[ua.AttributeIDBrowseName]
 	if v == nil || v.Value.Value() == nil {
@@ -319,7 +219,7 @@ func (n *baseNode) BrowseName() *ua.QualifiedName {
 }
 
 func (n *baseNode) SetBrowseName(s string) {
-	n.attr[ua.AttributeIDBrowseName] = DataValueFromValue(&ua.QualifiedName{Name: s})
+	n.attr[ua.AttributeIDBrowseName] = values.DataValueFromValue(&ua.QualifiedName{Name: s})
 }
 
 func (n *baseNode) DisplayName() *ua.LocalizedText {
@@ -335,7 +235,7 @@ func (n *baseNode) DisplayName() *ua.LocalizedText {
 func (n *baseNode) SetDisplayName(text, locale string) {
 	lt := &ua.LocalizedText{Text: text, Locale: locale}
 	lt.UpdateMask()
-	n.attr[ua.AttributeIDDisplayName] = DataValueFromValue(lt)
+	n.attr[ua.AttributeIDDisplayName] = values.DataValueFromValue(lt)
 }
 
 func (n *baseNode) Description() *ua.LocalizedText {
@@ -347,15 +247,10 @@ func (n *baseNode) Description() *ua.LocalizedText {
 }
 
 func (n *baseNode) SetDescription(text, locale string) {
-	n.attr[ua.AttributeIDDescription] = DataValueFromValue(&ua.LocalizedText{Text: text, Locale: locale})
+	n.attr[ua.AttributeIDDescription] = values.DataValueFromValue(&ua.LocalizedText{Text: text, Locale: locale})
 }
 
 func (n *baseNode) DataType() *ua.ExpandedNodeID {
-	if n == nil {
-		fmt.Println("n was nil!")
-		return ua.NewTwoByteExpandedNodeID(0)
-	}
-
 	v, ok := n.attr[ua.AttributeIDDataType]
 	if !ok || v == nil || v.Value.Value() == nil {
 		// if we have a type definition, return that?
@@ -381,16 +276,8 @@ func (n *baseNode) DataType() *ua.ExpandedNodeID {
 	return ua.NewTwoByteExpandedNodeID(0)
 }
 
-func (n *baseNode) CallMethod(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-	if n.call == nil {
-		return nil, ua.StatusBadNotImplemented
-	}
-
-	return n.call(ctx, args...)
-}
-
 func (n *baseNode) SetNodeClass(nc ua.NodeClass) {
-	n.attr[ua.AttributeIDNodeClass] = DataValueFromValue(uint32(nc))
+	n.attr[ua.AttributeIDNodeClass] = values.DataValueFromValue(uint32(nc))
 }
 
 func (n *baseNode) NodeClass() ua.NodeClass {

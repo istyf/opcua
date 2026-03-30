@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uapolicy"
@@ -151,7 +152,7 @@ func SoftwareVersion(name string) Option {
 	}
 }
 
-func WithMethodMiddleware(mw MethodMiddleware) Option {
+func WithMethodMiddleware(mw node.MethodMiddleware) Option {
 	return func(_ context.Context, s *serverConfig) {
 		s.methodCallMiddleware = mw
 	}

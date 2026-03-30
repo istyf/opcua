@@ -343,7 +343,7 @@ type Value struct {
 // UAVariable ...
 type UAVariable struct {
 	DataTypeAttr                string             `xml:"DataType,attr,omitempty"`
-	ValueRankAttr               int                `xml:"ValueRank,attr,omitempty"`
+	ValueRankAttr               *int               `xml:"ValueRank,attr,omitempty"`
 	ArrayDimensionsAttr         string             `xml:"ArrayDimensions,attr,omitempty"`
 	AccessLevelAttr             uint32             `xml:"AccessLevel,attr,omitempty"`
 	UserAccessLevelAttr         uint32             `xml:"UserAccessLevel,attr,omitempty"`
@@ -362,7 +362,7 @@ type UAMethodArgument struct {
 
 // UAMethod ...
 type UAMethod struct {
-	ExecutableAttr          bool                `xml:"Executable,attr,omitempty"`
+	ExecutableAttr          *bool               `xml:"Executable,attr,omitempty"`
 	UserExecutableAttr      bool                `xml:"UserExecutable,attr,omitempty"`
 	MethodDeclarationIdAttr string              `xml:"MethodDeclarationId,attr,omitempty"`
 	ArgumentDescription     []*UAMethodArgument `xml:"ArgumentDescription"`
@@ -402,7 +402,7 @@ type UAObjectType struct {
 // UAVariableType ...
 type UAVariableType struct {
 	DataTypeAttr        string `xml:"DataType,attr,omitempty"`
-	ValueRankAttr       int    `xml:"ValueRank,attr,omitempty"`
+	ValueRankAttr       *int   `xml:"ValueRank,attr,omitempty"`
 	ArrayDimensionsAttr string `xml:"ArrayDimensions,attr,omitempty"`
 	Value               *Value `xml:"Value"`
 	*UAType

@@ -17,6 +17,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uacp"
@@ -37,7 +38,7 @@ type Server struct {
 	mu         sync.Mutex
 	status     *ua.ServerStatusDataType
 	endpoints  []*ua.EndpointDescription
-	namespaces []NameSpace
+	namespaces []types.NameSpace
 
 	l  *uacp.Listener
 	cb *channelBroker
@@ -70,7 +71,7 @@ type serverConfig struct {
 
 	cap ServerCapabilities
 
-	methodCallMiddleware MethodMiddleware
+	methodCallMiddleware node.MethodMiddleware
 }
 
 var capabilities = ServerCapabilities{
@@ -105,7 +106,7 @@ func New(ctx context.Context, opts ...Option) *Server {
 		manufacturerName:     "The gopcua Team",      // override with the ManufacturerName option
 		productName:          "gopcua OPC/UA Server", // override with the ProductName option
 		softwareVersion:      "0.0.0-dev",            // override with the SoftwareVersion option
-		methodCallMiddleware: func(fn MethodFunc) MethodFunc { return fn },
+		methodCallMiddleware: func(fn node.MethodFunc) node.MethodFunc { return fn },
 	}
 
 	for _, opt := range opts {
@@ -123,7 +124,7 @@ func New(ctx context.Context, opts ...Option) *Server {
 		cb:         newChannelBroker(),
 		sb:         newSessionBroker(),
 		handlers:   make(map[uint16]Handler),
-		namespaces: []NameSpace{},
+		namespaces: []types.NameSpace{},
 		status: &ua.ServerStatusDataType{
 			StartTime:   time.Now(),
 			CurrentTime: time.Now(),
@@ -177,7 +178,7 @@ func (s *Server) Session(ctx context.Context, hdr *ua.RequestHeader) *session {
 	return s.sb.Session(ctx, hdr.AuthenticationToken)
 }
 
-func (s *Server) Namespace(id int) (NameSpace, error) {
+func (s *Server) Namespace(id int) (types.NameSpace, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if id < len(s.namespaces) {
@@ -186,7 +187,7 @@ func (s *Server) Namespace(id int) (NameSpace, error) {
 	return nil, fmt.Errorf("namespace %d not found", id)
 }
 
-func (s *Server) Namespaces() []NameSpace {
+func (s *Server) Namespaces() []types.NameSpace {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.namespaces
@@ -202,7 +203,7 @@ func (s *Server) ChangeNotification(ctx context.Context, n *ua.NodeID) {
 //
 // the refRoot and refObjects flags can be used to automatically add a reference to the new Namespaces
 // root or objects object respectively to the namespace 0
-func (s *Server) AddNamespace(ns NameSpace) int {
+func (s *Server) AddNamespace(ns types.NameSpace) int {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if idx := slices.Index(s.namespaces, ns); idx >= 0 {

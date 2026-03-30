@@ -10,10 +10,6 @@ func DisplayName(name, locale string) *ua.LocalizedText {
 	return ua.NewLocalizedTextWithLocale(name, locale)
 }
 
-func InverseName(name, locale string) *ua.LocalizedText {
-	return ua.NewLocalizedTextWithLocale(name, locale)
-}
-
 func NodeClass(n ua.NodeClass) uint32 {
 	return uint32(n)
 }

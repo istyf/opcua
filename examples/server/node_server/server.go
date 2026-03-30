@@ -19,8 +19,10 @@ import (
 	"github.com/gopcua/opcua/debug"
 	"github.com/gopcua/opcua/server"
 	"github.com/gopcua/opcua/server/attrs"
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
+	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -178,7 +180,7 @@ func main() {
 		var2Value := atomic.Int32{}
 
 		return func() *ua.DataValue {
-			return server.DataValueFromValue(var2Value.Add(1))
+			return values.DataValueFromValue(var2Value.Add(1))
 		}
 	}())
 	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var2))
@@ -186,56 +188,56 @@ func main() {
 	// Now we'll add a node from scratch.  This is a more manual way to add nodes to the server and gives you full
 	// control, but you'll have to build the node up with the correct attributes and references and then reference it from
 	// the parent node in the namespace if applicable.
-	var3 := server.NewNode(
+	var3 := node.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 12345), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDBrowseName: server.DataValueFromValue(attrs.BrowseName("MyBrowseName")),
-			ua.AttributeIDNodeClass:  server.DataValueFromValue(uint32(ua.NodeClassVariable)),
+			ua.AttributeIDBrowseName: values.DataValueFromValue(attrs.BrowseName("MyBrowseName")),
+			ua.AttributeIDNodeClass:  values.DataValueFromValue(uint32(ua.NodeClassVariable)),
 		},
 		nil,
-		func() *ua.DataValue { return server.DataValueFromValue(12.34) },
+		func() *ua.DataValue { return values.DataValueFromValue(12.34) },
 	)
 	nodeNS.AddNode(var3)
 	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var3))
 
-	var4 := server.NewNode(
+	var4 := node.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 100), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDAccessLevel:     server.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
-			ua.AttributeIDUserAccessLevel: server.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
-			ua.AttributeIDBrowseName:      server.DataValueFromValue(attrs.BrowseName("ReadWriteVariable")),
-			ua.AttributeIDNodeClass:       server.DataValueFromValue(uint32(ua.NodeClassVariable)),
+			ua.AttributeIDAccessLevel:     values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
+			ua.AttributeIDUserAccessLevel: values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
+			ua.AttributeIDBrowseName:      values.DataValueFromValue(attrs.BrowseName("ReadWriteVariable")),
+			ua.AttributeIDNodeClass:       values.DataValueFromValue(uint32(ua.NodeClassVariable)),
 		},
 		nil,
-		func() *ua.DataValue { return server.DataValueFromValue(12.34) },
+		func() *ua.DataValue { return values.DataValueFromValue(12.34) },
 	)
 	nodeNS.AddNode(var4)
 	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var4))
 
-	var5 := server.NewNode(
+	var5 := node.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 105), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDAccessLevel:     server.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
-			ua.AttributeIDUserAccessLevel: server.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
-			ua.AttributeIDBrowseName:      server.DataValueFromValue(attrs.BrowseName("ReadOnlyVariable")),
-			ua.AttributeIDNodeClass:       server.DataValueFromValue(uint32(ua.NodeClassVariable)),
+			ua.AttributeIDAccessLevel:     values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
+			ua.AttributeIDUserAccessLevel: values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
+			ua.AttributeIDBrowseName:      values.DataValueFromValue(attrs.BrowseName("ReadOnlyVariable")),
+			ua.AttributeIDNodeClass:       values.DataValueFromValue(uint32(ua.NodeClassVariable)),
 		},
 		nil,
-		func() *ua.DataValue { return server.DataValueFromValue(9.87) },
+		func() *ua.DataValue { return values.DataValueFromValue(9.87) },
 	)
 	nodeNS.AddNode(var5)
 	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var5))
 
-	var6 := server.NewNode(
+	var6 := node.NewNode(
 		ua.NewNumericNodeID(nodeNS.ID(), 102), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDAccessLevel:     server.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
-			ua.AttributeIDUserAccessLevel: server.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
-			ua.AttributeIDBrowseName:      server.DataValueFromValue(attrs.BrowseName("NoAccessVariable")),
-			ua.AttributeIDNodeClass:       server.DataValueFromValue(uint32(ua.NodeClassVariable)),
+			ua.AttributeIDAccessLevel:     values.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
+			ua.AttributeIDUserAccessLevel: values.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
+			ua.AttributeIDBrowseName:      values.DataValueFromValue(attrs.BrowseName("NoAccessVariable")),
+			ua.AttributeIDNodeClass:       values.DataValueFromValue(uint32(ua.NodeClassVariable)),
 		},
 		nil,
-		func() *ua.DataValue { return server.DataValueFromValue(9.87) },
+		func() *ua.DataValue { return values.DataValueFromValue(9.87) },
 	)
 	nodeNS.AddNode(var6)
 	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var6))
@@ -255,7 +257,7 @@ func main() {
 			lastValue += 1
 
 			// wrap the new value in a DataValue and use that to update the Value attribute of the node
-			val := server.DataValueFromVariant(ua.MustVariant(lastValue))
+			val := values.DataValueFromVariant(ua.MustVariant(lastValue))
 			var1.SetAttribute(ua.AttributeIDValue, val)
 
 			// we also need to let the node namespace know that the value has changed so it can trigger the change notification

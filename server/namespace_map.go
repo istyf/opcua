@@ -7,7 +7,9 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/attrs"
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
+	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -363,14 +365,14 @@ func (ns *MapNamespace) Objects() types.Node {
 	//eoid := ua.NewNumericExpandedNodeID(ns.ID(), id.ObjectsFolder)
 	typedef := ua.NewNumericExpandedNodeID(0, id.ObjectsFolder)
 	//reftype := ua.NewTwoByteNodeID(uint8(id.HasComponent)) // folder
-	n := NewNode(
+	n := node.NewNode(
 		oid,
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     DataValueFromValue(int32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(ns.name)),
-			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(ns.name, "")),
-			ua.AttributeIDDataType:      DataValueFromValue(typedef),
-			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
+			ua.AttributeIDNodeClass:     values.DataValueFromValue(int32(ua.NodeClassObject)),
+			ua.AttributeIDBrowseName:    values.DataValueFromValue(attrs.BrowseName(ns.name)),
+			ua.AttributeIDDisplayName:   values.DataValueFromValue(attrs.DisplayName(ns.name, "")),
+			ua.AttributeIDDataType:      values.DataValueFromValue(typedef),
+			ua.AttributeIDEventNotifier: values.DataValueFromValue(int16(0)),
 		},
 		[]*ua.ReferenceDescription{},
 		nil,
@@ -379,12 +381,12 @@ func (ns *MapNamespace) Objects() types.Node {
 }
 
 func (ns *MapNamespace) Root() types.Node {
-	n := NewNode(
+	n := node.NewNode(
 		ua.NewNumericNodeID(ns.ID(), id.RootFolder),
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:   DataValueFromValue(int32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:  DataValueFromValue(attrs.BrowseName("Root")),
-			ua.AttributeIDDisplayName: DataValueFromValue(attrs.DisplayName("Root", "")),
+			ua.AttributeIDNodeClass:   values.DataValueFromValue(int32(ua.NodeClassObject)),
+			ua.AttributeIDBrowseName:  values.DataValueFromValue(attrs.BrowseName("Root")),
+			ua.AttributeIDDisplayName: values.DataValueFromValue(attrs.DisplayName("Root", "")),
 		},
 		[]*ua.ReferenceDescription{},
 		nil,

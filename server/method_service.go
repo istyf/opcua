@@ -4,6 +4,7 @@ import (
 	"context"
 
 	srvctx "github.com/gopcua/opcua/server/context"
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
@@ -15,10 +16,10 @@ import (
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.12
 type MethodService struct {
 	srv        *Server
-	middleware MethodMiddleware
+	middleware node.MethodMiddleware
 }
 
-func NewMethodService(s *Server, middleware MethodMiddleware) *MethodService {
+func NewMethodService(s *Server, middleware node.MethodMiddleware) *MethodService {
 	return &MethodService{
 		srv:        s,
 		middleware: middleware,
@@ -41,7 +42,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	status := ua.StatusOK
 
 	// Check if the method has a non forward reference to this object
-	methodBelongsToObject := func(method types.Node, object types.Node) bool {
+	methodBelongsToObject := func(method types.MethodNode, object types.Node) bool {
 		return method.References().Contains(func(e *ua.ReferenceDescription) bool {
 			return (!e.IsForward && e.NodeID.NodeID.IntID() == object.ID().IntID())
 		})
@@ -62,7 +63,10 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			}, nil
 		}
 
-		methodNode := ns.Node(method.MethodID)
+		var methodNode types.MethodNode
+		if n := ns.Node(method.MethodID); n != nil {
+			methodNode, _ = n.(types.MethodNode)
+		}
 
 		if methodNode == nil || !methodBelongsToObject(methodNode, objectNode) {
 			ualog.Error(ctx, "method does not exist or does not belong to object",

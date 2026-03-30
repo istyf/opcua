@@ -10,7 +10,9 @@ import (
 
 	"github.com/gopcua/opcua/server"
 	"github.com/gopcua/opcua/server/attrs"
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/refs"
+	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -69,56 +71,56 @@ func startServer(ctx context.Context) *server.Server {
 	n = nodeNS.AddNewVariableStringNode("rw_int32", int32(5))
 	nns_obj.AddRef(refs.NewHasComponentRefDesc(n))
 
-	var3 := server.NewNode(
+	var3 := node.NewNode(
 		ua.NewStringNodeID(nodeNS.ID(), "NoPermVariable"), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDBrowseName: server.DataValueFromValue(attrs.BrowseName("NoPermVariable")),
-			ua.AttributeIDNodeClass:  server.DataValueFromValue(uint32(ua.NodeClassVariable)),
+			ua.AttributeIDBrowseName: values.DataValueFromValue(attrs.BrowseName("NoPermVariable")),
+			ua.AttributeIDNodeClass:  values.DataValueFromValue(uint32(ua.NodeClassVariable)),
 		},
 		nil,
-		func() *ua.DataValue { return server.DataValueFromValue(int32(742)) },
+		func() *ua.DataValue { return values.DataValueFromValue(int32(742)) },
 	)
 	nodeNS.AddNode(var3)
 	nns_obj.AddRef(refs.NewHasComponentRefDesc(var3))
 
-	var4 := server.NewNode(
+	var4 := node.NewNode(
 		ua.NewStringNodeID(nodeNS.ID(), "ReadWriteVariable"), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDAccessLevel:     server.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
-			ua.AttributeIDUserAccessLevel: server.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
-			ua.AttributeIDBrowseName:      server.DataValueFromValue(attrs.BrowseName("ReadWriteVariable")),
-			ua.AttributeIDNodeClass:       server.DataValueFromValue(uint32(ua.NodeClassVariable)),
+			ua.AttributeIDAccessLevel:     values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
+			ua.AttributeIDUserAccessLevel: values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
+			ua.AttributeIDBrowseName:      values.DataValueFromValue(attrs.BrowseName("ReadWriteVariable")),
+			ua.AttributeIDNodeClass:       values.DataValueFromValue(uint32(ua.NodeClassVariable)),
 		},
 		nil,
-		func() *ua.DataValue { return server.DataValueFromValue(12.34) },
+		func() *ua.DataValue { return values.DataValueFromValue(12.34) },
 	)
 	nodeNS.AddNode(var4)
 	nns_obj.AddRef(refs.NewHasComponentRefDesc(var4))
 
-	var5 := server.NewNode(
+	var5 := node.NewNode(
 		ua.NewStringNodeID(nodeNS.ID(), "ReadOnlyVariable"), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDAccessLevel:     server.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
-			ua.AttributeIDUserAccessLevel: server.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
-			ua.AttributeIDBrowseName:      server.DataValueFromValue(attrs.BrowseName("ReadOnlyVariable")),
-			ua.AttributeIDNodeClass:       server.DataValueFromValue(uint32(ua.NodeClassVariable)),
+			ua.AttributeIDAccessLevel:     values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
+			ua.AttributeIDUserAccessLevel: values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
+			ua.AttributeIDBrowseName:      values.DataValueFromValue(attrs.BrowseName("ReadOnlyVariable")),
+			ua.AttributeIDNodeClass:       values.DataValueFromValue(uint32(ua.NodeClassVariable)),
 		},
 		nil,
-		func() *ua.DataValue { return server.DataValueFromValue(9.87) },
+		func() *ua.DataValue { return values.DataValueFromValue(9.87) },
 	)
 	nodeNS.AddNode(var5)
 	nns_obj.AddRef(refs.NewHasComponentRefDesc(var5))
 
-	var6 := server.NewNode(
+	var6 := node.NewNode(
 		ua.NewStringNodeID(nodeNS.ID(), "NoAccessVariable"), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDAccessLevel:     server.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
-			ua.AttributeIDUserAccessLevel: server.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
-			ua.AttributeIDBrowseName:      server.DataValueFromValue(attrs.BrowseName("NoAccessVariable")),
-			ua.AttributeIDNodeClass:       server.DataValueFromValue(uint32(ua.NodeClassVariable)),
+			ua.AttributeIDAccessLevel:     values.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
+			ua.AttributeIDUserAccessLevel: values.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
+			ua.AttributeIDBrowseName:      values.DataValueFromValue(attrs.BrowseName("NoAccessVariable")),
+			ua.AttributeIDNodeClass:       values.DataValueFromValue(uint32(ua.NodeClassVariable)),
 		},
 		nil,
-		func() *ua.DataValue { return server.DataValueFromValue(55.43) },
+		func() *ua.DataValue { return values.DataValueFromValue(55.43) },
 	)
 	nodeNS.AddNode(var6)
 	nns_obj.AddRef(refs.NewHasComponentRefDesc(var6))

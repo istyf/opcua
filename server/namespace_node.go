@@ -8,7 +8,9 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/attrs"
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
+	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -48,14 +50,14 @@ func NewNodeNameSpace(srv *Server, name string) *NodeNameSpace {
 	oid := ua.NewNumericNodeID(ns.ID(), id.ObjectsFolder)
 	typedef := ua.NewNumericNodeID(0, id.ObjectsFolder)
 
-	objectsNode := NewNode(
+	objectsNode := node.NewNode(
 		oid,
 		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     DataValueFromValue(uint32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:    DataValueFromValue(attrs.BrowseName(ns.name)),
-			ua.AttributeIDDisplayName:   DataValueFromValue(attrs.DisplayName(ns.name, "")),
-			ua.AttributeIDDataType:      DataValueFromValue(typedef),
-			ua.AttributeIDEventNotifier: DataValueFromValue(int16(0)),
+			ua.AttributeIDNodeClass:     values.DataValueFromValue(uint32(ua.NodeClassObject)),
+			ua.AttributeIDBrowseName:    values.DataValueFromValue(attrs.BrowseName(ns.name)),
+			ua.AttributeIDDisplayName:   values.DataValueFromValue(attrs.DisplayName(ns.name, "")),
+			ua.AttributeIDDataType:      values.DataValueFromValue(typedef),
+			ua.AttributeIDEventNotifier: values.DataValueFromValue(int16(0)),
 		},
 		[]*ua.ReferenceDescription{},
 		nil,
@@ -89,13 +91,25 @@ func (as *NodeNameSpace) AddNode(n types.Node) types.Node {
 }
 
 func (as *NodeNameSpace) AddNewVariableNode(name string, value any) types.VariableNode {
-	n := NewVariableNode(ua.NewNumericNodeID(as.id, as.GetNextNodeID()), name, value)
+	n := node.NewVariableNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(as.id, as.GetNextNodeID())),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: as.ID(), Name: name}),
+		),
+		node.WithValue(value),
+	)
 	as.AddNode(n)
 	return n
 }
 
 func (as *NodeNameSpace) AddNewVariableStringNode(name string, value any) types.VariableNode {
-	n := NewVariableNode(ua.NewStringNodeID(as.id, name), name, value)
+	n := node.NewVariableNode(
+		node.WithBase(
+			node.WithID(ua.NewStringNodeID(as.id, name)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: as.ID(), Name: name}),
+		),
+		node.WithValue(value),
+	)
 	as.AddNode(n)
 	return n
 }
@@ -128,12 +142,12 @@ func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.A
 
 	switch attr {
 	case ua.AttributeIDNodeID:
-		a = &types.AttrValue{Value: DataValueFromValue(id)}
+		a = &types.AttrValue{Value: values.DataValueFromValue(id)}
 	case ua.AttributeIDEventNotifier:
 		// TODO: this is a hack to force the EventNotifier to false for everything.
 		// If at some point someone or something needs to use this, this will have to go away and be
 		// fixed properly.
-		a = &types.AttrValue{Value: DataValueFromValue(byte(0))}
+		a = &types.AttrValue{Value: values.DataValueFromValue(byte(0))}
 	case ua.AttributeIDNodeClass:
 		a, err = n.Attribute(attr)
 		if err != nil {
