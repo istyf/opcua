@@ -10,7 +10,6 @@ import (
 
 	"github.com/gopcua/opcua/server"
 	"github.com/gopcua/opcua/server/node"
-	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -45,80 +44,113 @@ func startServer(ctx context.Context) *server.Server {
 
 	s := server.New(ctx, opts...)
 
-	root_ns, _ := s.Namespace(0)
-	obj_node := root_ns.Objects()
+	rootNS, _ := s.Namespace(0)
+	rootObjects := rootNS.Objects()
 
 	// Create a new node namespace.  You can add namespaces before or after starting the server.
 	nodeNS := server.NewNodeNameSpace(s, "NodeNamespace")
 	// add it to the server.
 	s.AddNamespace(nodeNS)
-	nns_obj := nodeNS.Objects()
+
+	nodeNSObjects := nodeNS.Objects()
 	// add the reference for this namespace's root object folder to the server's root object folder
-	obj_node.AddRef(refs.NewHasComponentRefDesc(nns_obj))
+	rootObjects.AddComponent(nodeNSObjects)
 
 	// Create some nodes for it.
-	n := nodeNS.AddNewVariableStringNode("ro_bool", true)
-	n.SetAttribute(ua.AttributeIDUserAccessLevel, &ua.DataValue{EncodingMask: ua.DataValueValue, Value: ua.MustVariant(uint32(1))})
-	nns_obj.AddRef(refs.NewHasComponentRefDesc(n))
-	n = nodeNS.AddNewVariableStringNode("rw_bool", true)
-	nns_obj.AddRef(refs.NewHasComponentRefDesc(n))
-
-	n = nodeNS.AddNewVariableStringNode("ro_int32", int32(5))
-	n.SetAttribute(ua.AttributeIDUserAccessLevel, &ua.DataValue{EncodingMask: ua.DataValueValue, Value: ua.MustVariant(uint32(1))})
-	nns_obj.AddRef(refs.NewHasComponentRefDesc(n))
-	n = nodeNS.AddNewVariableStringNode("rw_int32", int32(5))
-	nns_obj.AddRef(refs.NewHasComponentRefDesc(n))
-
-	var3 := node.NewVariableNode(
+	nodeNSObjects.AddComponent(nodeNS.AddNode(node.NewVariableNode(
 		node.WithBase(
-			node.WithID(ua.NewStringNodeID(nodeNS.ID(), "NoPermVariable")),
-			node.WithBrowseName(nodeNS.NewQualifiedName("NoPermVariable")),
+			node.WithID(ua.NewStringNodeID(nodeNS.ID(), "ro_bool")),
+			node.WithBrowseName(nodeNS.NewQualifiedName("ro_bool")),
 		),
-		node.WithValue(int32(742)),
-	)
-	nodeNS.AddNode(var3)
-	nns_obj.AddRef(refs.NewHasComponentRefDesc(var3))
+		node.WithValue(true),
+	)))
 
-	var4 := node.NewVariableNode(
+	nodeNSObjects.AddComponent(nodeNS.AddNode(node.NewVariableNode(
 		node.WithBase(
-			node.WithID(ua.NewStringNodeID(nodeNS.ID(), "ReadWriteVariable")),
-			node.WithBrowseName(nodeNS.NewQualifiedName("ReadWriteVariable")),
+			node.WithID(ua.NewStringNodeID(nodeNS.ID(), "rw_bool")),
+			node.WithBrowseName(nodeNS.NewQualifiedName("rw_bool")),
 		),
 		node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead, ua.AccessLevelExTypeCurrentWrite),
-		node.WithValue(12.34),
-	)
-	nodeNS.AddNode(var4)
-	nns_obj.AddRef(refs.NewHasComponentRefDesc(var4))
+		node.WithValue(true),
+	)))
 
-	var5 := node.NewVariableNode(
+	nodeNSObjects.AddComponent(nodeNS.AddNode(node.NewVariableNode(
 		node.WithBase(
-			node.WithID(ua.NewStringNodeID(nodeNS.ID(), "ReadOnlyVariable")),
-			node.WithBrowseName(nodeNS.NewQualifiedName("ReadOnlyVariable")),
+			node.WithID(ua.NewStringNodeID(nodeNS.ID(), "ro_int32")),
+			node.WithBrowseName(nodeNS.NewQualifiedName("ro_int32")),
 		),
 		node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead),
-		node.WithValue(9.87),
-	)
-	nodeNS.AddNode(var5)
-	nns_obj.AddRef(refs.NewHasComponentRefDesc(var5))
+		node.WithValue(int32(5)),
+	)))
 
-	var6 := node.NewVariableNode(
+	nodeNSObjects.AddComponent(nodeNS.AddNode(node.NewVariableNode(
 		node.WithBase(
-			node.WithID(ua.NewStringNodeID(nodeNS.ID(), "NoAccessVariable")),
-			node.WithBrowseName(nodeNS.NewQualifiedName("NoAccessVariable")),
+			node.WithID(ua.NewStringNodeID(nodeNS.ID(), "rw_int32")),
+			node.WithBrowseName(nodeNS.NewQualifiedName("rw_int32")),
 		),
-		node.WithAccessLevels(ua.AccessLevelExTypeNone),
-		node.WithValue(55.43),
+		node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead, ua.AccessLevelExTypeCurrentWrite),
+		node.WithValue(int32(5)),
+	)))
+
+	nodeNSObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					node.WithID(ua.NewStringNodeID(nodeNS.ID(), "NoPermVariable")),
+					node.WithBrowseName(nodeNS.NewQualifiedName("NoPermVariable")),
+				),
+				node.WithValue(int32(742)),
+			),
+		),
 	)
-	nodeNS.AddNode(var6)
-	nns_obj.AddRef(refs.NewHasComponentRefDesc(var6))
+
+	nodeNSObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					node.WithID(ua.NewStringNodeID(nodeNS.ID(), "ReadWriteVariable")),
+					node.WithBrowseName(nodeNS.NewQualifiedName("ReadWriteVariable")),
+				),
+				node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead, ua.AccessLevelExTypeCurrentWrite),
+				node.WithValue(12.34),
+			),
+		),
+	)
+
+	nodeNSObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					node.WithID(ua.NewStringNodeID(nodeNS.ID(), "ReadOnlyVariable")),
+					node.WithBrowseName(nodeNS.NewQualifiedName("ReadOnlyVariable")),
+				),
+				node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead),
+				node.WithValue(9.87),
+			),
+		),
+	)
+
+	nodeNSObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					node.WithID(ua.NewStringNodeID(nodeNS.ID(), "NoAccessVariable")),
+					node.WithBrowseName(nodeNS.NewQualifiedName("NoAccessVariable")),
+				),
+				node.WithAccessLevels(ua.AccessLevelExTypeNone),
+				node.WithValue(55.43),
+			),
+		),
+	)
 
 	// Create a new node namespace.  You can add namespaces before or after starting the server.
 	gopcuaNS := server.NewNodeNameSpace(s, "http://gopcua.com/")
 	// add it to the server.
 	s.AddNamespace(gopcuaNS)
-	nns_obj = gopcuaNS.Objects()
+
+	nodeNSObjects = gopcuaNS.Objects()
 	// add the reference for this namespace's root object folder to the server's root object folder
-	obj_node.AddRef(refs.NewHasComponentRefDesc(nns_obj))
+	rootObjects.AddComponent(nodeNSObjects)
 
 	// Create a new node namespace.  You can add namespaces before or after starting the server.
 	// Start the server

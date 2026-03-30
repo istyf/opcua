@@ -63,7 +63,8 @@ type Node interface {
 	NodeClass() ua.NodeClass
 	DataType() *ua.ExpandedNodeID
 
-	Access(ua.AccessLevelType) bool
+	AddComponent(Node) Node
+	AddComponents(...Node) Node
 
 	AddRef(*ua.ReferenceDescription)
 	References() ReferenceCollection
@@ -108,6 +109,7 @@ type ReferenceTypeNode interface {
 type VariableNode interface {
 	Node
 
+	Access(ua.AccessLevelType) bool
 	Value() *ua.DataValue
 
 	Attribute(ua.AttributeID) (*AttrValue, error)

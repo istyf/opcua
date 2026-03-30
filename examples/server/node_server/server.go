@@ -17,9 +17,9 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/debug"
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server"
 	"github.com/gopcua/opcua/server/node"
-	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -164,73 +164,96 @@ func main() {
 	// add the reference for this namespace's root object folder to the server's root object folder
 	// but you can add a reference to whatever node(s) you need
 	nodeNSObjects := nodeNS.Objects()
-	rootObjects.AddRef(refs.NewHasComponentRefDesc(nodeNSObjects))
+	rootObjects.AddComponent(nodeNSObjects)
 
-	// Create some nodes for it.  Here we are using the AddNewVariableNode utility function to create a new variable node
+	// Create some nodes for it.  Here we are creating a new variable node
 	// with an integer node ID that is automatically assigned. (ns=<namespace id>,s=<auto assigned>)
 	// be sure to add the reference to the node somewhere if desired, or clients won't be able to browse it.
-	var1 := nodeNS.AddNewVariableNode("TestVar1", float32(123.45))
-	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var1))
+	var1 := node.NewVariableNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(nodeNS.ID(), nodeNS.GetNextNodeID())),
+			node.WithBrowseName(nodeNS.NewQualifiedName("TestVar1")),
+		),
+		node.WithValue(float32(123.45)),
+	)
+	nodeNSObjects.AddComponent(nodeNS.AddNode(var1))
 
 	// This node will have a string node id (ns=<namespace id>,s=TestVar2)
 	// your variable node's value can also return a ua.Variant from a function if you want to update the value dynamically
 	// here we are just incrementing a counter every time the value is read.
-	var2 := nodeNS.AddNewVariableStringNode("TestVar2", func() func() *ua.DataValue {
-		var2Value := atomic.Int32{}
-
-		return func() *ua.DataValue {
-			return values.DataValueFromValue(var2Value.Add(1))
-		}
-	}())
-	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var2))
+	nodeNSObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					node.WithID(ua.NewStringNodeID(nodeNS.ID(), "TestVar2")),
+					node.WithBrowseName(nodeNS.NewQualifiedName("TestVar2")),
+				),
+				node.WithDataType(ua.NewNumericNodeID(0, id.Int32)),
+				node.WithDataValue(
+					func() func() *ua.DataValue {
+						var2Value := atomic.Int32{}
+						return func() *ua.DataValue {
+							return values.DataValueFromValue(var2Value.Add(1))
+						}
+					}(),
+				),
+			),
+		))
 
 	// Now we'll add a node from scratch.  This is a more manual way to add nodes to the server and gives you full
 	// control, but you'll have to build the node up with the correct attributes and references and then reference it from
 	// the parent node in the namespace if applicable.
-	var3 := node.NewVariableNode(
-		node.WithBase(
-			// you can use whatever node id you want here, whether it's numeric, string, guid, etc...
-			node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 12345)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: nodeNS.ID(), Name: "MyBrowseName"}),
+
+	nodeNSObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					// you can use whatever node id you want here, whether it's numeric, string, guid, etc...
+					node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 12345)),
+					node.WithBrowseName(nodeNS.NewQualifiedName("MyBrowseName")),
+				),
+				node.WithValue(12.34),
+			),
+		))
+
+	nodeNSObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 100)),
+					node.WithBrowseName(nodeNS.NewQualifiedName("ReadWriteVariable")),
+				),
+				node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead, ua.AccessLevelExTypeCurrentWrite),
+				node.WithValue(12.34),
+			),
 		),
-		node.WithValue(12.34),
 	)
 
-	nodeNS.AddNode(var3)
-	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var3))
-
-	var4 := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 100)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: nodeNS.ID(), Name: "ReadWriteVariable"}),
+	nodeNSObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 105)),
+					node.WithBrowseName(nodeNS.NewQualifiedName("ReadOnlyVariable")),
+				),
+				node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead),
+				node.WithValue(9.87),
+			),
 		),
-		node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead, ua.AccessLevelExTypeCurrentWrite),
-		node.WithValue(12.34),
 	)
-	nodeNS.AddNode(var4)
-	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var4))
 
-	var5 := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 105)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: nodeNS.ID(), Name: "ReadOnlyVariable"}),
+	nodeNSObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 102)),
+					node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: nodeNS.ID(), Name: "NoAccessVariable"}),
+				),
+				node.WithAccessLevels(ua.AccessLevelExTypeNone),
+				node.WithValue(9.87),
+			),
 		),
-		node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead),
-		node.WithValue(9.87),
 	)
-	nodeNS.AddNode(var5)
-	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var5))
-
-	var6 := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 102)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: nodeNS.ID(), Name: "NoAccessVariable"}),
-		),
-		node.WithAccessLevels(ua.AccessLevelExTypeNone),
-		node.WithValue(9.87),
-	)
-	nodeNS.AddNode(var6)
-	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var6))
 
 	// simulate a background process updating the data in the namespace.
 	go func() {

@@ -100,30 +100,6 @@ func (as *NodeNameSpace) AddNode(n types.Node) types.Node {
 	return n
 }
 
-func (as *NodeNameSpace) AddNewVariableNode(name string, value any) types.VariableNode {
-	n := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(as.id, as.GetNextNodeID())),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: as.ID(), Name: name}),
-		),
-		node.WithValue(value),
-	)
-	as.AddNode(n)
-	return n
-}
-
-func (as *NodeNameSpace) AddNewVariableStringNode(name string, value any) types.VariableNode {
-	n := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewStringNodeID(as.id, name)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: as.ID(), Name: name}),
-		),
-		node.WithValue(value),
-	)
-	as.AddNode(n)
-	return n
-}
-
 func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.AttributeID) *ua.DataValue {
 	ctx = ualog.WithAttrs(ctx, as.logAttributes)
 	ualog.Debug(ctx, "read node attribute",
@@ -136,14 +112,6 @@ func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.A
 			EncodingMask:    ua.DataValueServerTimestamp | ua.DataValueStatusCode,
 			ServerTimestamp: time.Now(),
 			Status:          ua.StatusBadNodeIDUnknown,
-		}
-	}
-
-	if !n.Access(ua.AccessLevelTypeCurrentRead) {
-		return &ua.DataValue{
-			EncodingMask:    ua.DataValueServerTimestamp | ua.DataValueStatusCode,
-			ServerTimestamp: time.Now(),
-			Status:          ua.StatusBadUserAccessDenied,
 		}
 	}
 
@@ -280,10 +248,6 @@ func (as *NodeNameSpace) SetAttribute(ctx context.Context, id *ua.NodeID, attr u
 	n := as.Node(id)
 	if n == nil {
 		return ua.StatusBadNodeIDUnknown
-	}
-
-	if !n.Access(ua.AccessLevelTypeCurrentWrite) {
-		return ua.StatusBadUserAccessDenied
 	}
 
 	err := n.SetAttribute(attr, val)

@@ -7,7 +7,7 @@ import (
 
 	"github.com/gopcua/opcua"
 	"github.com/gopcua/opcua/server"
-	"github.com/gopcua/opcua/server/refs"
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -77,11 +77,20 @@ func populateServer(s *server.Server) {
 	// add the reference for this namespace's root object folder to the server's root object folder
 	// but you can add a reference to whatever node(s) you need
 	nsObjects := nodeNS.Objects()
-	rootObjects.AddRef(refs.NewHasComponentRefDesc(nsObjects))
+	rootObjects.AddComponent(nsObjects)
 
-	// Create some nodes for it.  Here we are using the AddNewVariableNode utility function to create a new variable node
+	// Create some nodes for it.  Here we are creating a new variable node
 	// with an integer node ID that is automatically assigned. (ns=<namespace id>,s=<auto assigned>)
 	// be sure to add the reference to the node somewhere if desired, or clients won't be able to browse it.
-	var1 := nodeNS.AddNewVariableNode("TestVar1", float32(123.45))
-	nsObjects.AddRef(refs.NewHasComponentRefDesc(var1))
+	nsObjects.AddComponent(
+		nodeNS.AddNode(
+			node.NewVariableNode(
+				node.WithBase(
+					node.WithID(ua.NewNumericNodeID(nodeNS.ID(), nodeNS.GetNextNodeID())),
+					node.WithBrowseName(nodeNS.NewQualifiedName("TestVar1")),
+				),
+				node.WithValue(float32(123.45)),
+			),
+		),
+	)
 }

@@ -2,7 +2,6 @@ package node
 
 import (
 	"errors"
-	"fmt"
 	"iter"
 	"slices"
 	"time"
@@ -94,6 +93,14 @@ type baseNode struct {
 }
 
 func newBaseNode(cfg *baseConfig) *baseNode {
+	if cfg.nodeID == nil {
+		panic("creating nodes with no id is not allowed")
+	}
+
+	if cfg.browseName == nil {
+		panic("creating nodes with no browse name is not allowed")
+	}
+
 	n := &baseNode{
 		id: cfg.nodeID,
 		attr: map[ua.AttributeID]*ua.DataValue{
@@ -156,51 +163,58 @@ func (n *baseNode) BrowseName() *ua.QualifiedName {
 	return v.Value.Value().(*ua.QualifiedName)
 }
 
-func (n *baseNode) SetBrowseName(s string) {
-	n.attr[ua.AttributeIDBrowseName] = values.DataValueFromValue(&ua.QualifiedName{Name: s})
-}
-
 func (n *baseNode) DisplayName() *ua.LocalizedText {
-	v := n.attr[ua.AttributeIDDisplayName]
-	if v == nil || v.Value.Value() == nil {
-		return &ua.LocalizedText{}
+	if len(n.displayNames) > 0 {
+		return n.displayNames[0]
 	}
-	val := v.Value.Value().(*ua.LocalizedText)
-	val.UpdateMask()
-	return val
+
+	return ua.NewLocalizedText("")
 }
 
 func (n *baseNode) SetDisplayName(text, locale string) {
-	lt := &ua.LocalizedText{Text: text, Locale: locale}
-	lt.UpdateMask()
-	n.attr[ua.AttributeIDDisplayName] = values.DataValueFromValue(lt)
+	lt := ua.NewLocalizedTextWithLocale(text, locale)
+
+	for idx := range n.displayNames {
+		if n.displayNames[idx].Locale == locale {
+			n.displayNames[idx] = lt
+			return
+		}
+	}
+
+	n.displayNames = append(n.displayNames, lt)
 }
 
 func (n *baseNode) Description() *ua.LocalizedText {
-	v := n.attr[ua.AttributeIDDescription]
-	if v == nil || v.Value.Value() == nil {
-		return &ua.LocalizedText{}
+	if len(n.descriptions) > 0 {
+		return n.descriptions[0]
 	}
-	return v.Value.Value().(*ua.LocalizedText)
+
+	return ua.NewLocalizedText("")
 }
 
 func (n *baseNode) SetDescription(text, locale string) {
-	n.attr[ua.AttributeIDDescription] = values.DataValueFromValue(&ua.LocalizedText{Text: text, Locale: locale})
+	localized := ua.NewLocalizedTextWithLocale(text, locale)
+
+	for idx := range n.descriptions {
+		if n.descriptions[idx].Locale == locale {
+			n.descriptions[idx] = localized
+			return
+		}
+	}
+
+	n.descriptions = append(n.descriptions, localized)
 }
 
 func (n *baseNode) DataType() *ua.ExpandedNodeID {
 	v, ok := n.attr[ua.AttributeIDDataType]
 	if !ok || v == nil || v.Value.Value() == nil {
 		// if we have a type definition, return that?
-		for i := range n.refs {
-			r := n.refs[i]
-			if r.ReferenceTypeID == nil {
-				fmt.Println("reftypeid was nil!")
-			}
-			if r.ReferenceTypeID != nil && r.ReferenceTypeID.IntID() == id.HasTypeDefinition && r.IsForward {
-				return r.NodeID
-			}
+		for r := range n.References().Find(func(rd *ua.ReferenceDescription) bool {
+			return rd.ReferenceTypeID != nil && rd.ReferenceTypeID.IntID() == id.HasTypeDefinition && rd.IsForward
+		}) {
+			return r.NodeID
 		}
+
 		return ua.NewTwoByteExpandedNodeID(0)
 	}
 
@@ -212,10 +226,6 @@ func (n *baseNode) DataType() *ua.ExpandedNodeID {
 	}
 
 	return ua.NewTwoByteExpandedNodeID(0)
-}
-
-func (n *baseNode) SetNodeClass(nc ua.NodeClass) {
-	n.attr[ua.AttributeIDNodeClass] = values.DataValueFromValue(uint32(nc))
 }
 
 func (n *baseNode) NodeClass() ua.NodeClass {
@@ -241,6 +251,21 @@ const (
 	RefTypeIDOrganizes    = id.Organizes
 )
 
+func (n *baseNode) AddComponent(sub types.Node) types.Node {
+	n.AddRef(refs.NewHasComponentRefDesc(sub))
+	sub.AddRef(refs.NewReferenceDescription(n, refs.Type(id.HasComponent), false))
+
+	return n
+}
+
+func (n *baseNode) AddComponents(subs ...types.Node) types.Node {
+	for _, sub := range subs {
+		n.AddComponent(sub)
+	}
+
+	return n
+}
+
 func (n *baseNode) AddRef(refdesc *ua.ReferenceDescription) {
 	// only one type def reference allowed, so replace the old one if we already have one
 	if refdesc.ReferenceTypeID == refs.HasTypeDefinitionRefTypeID {
@@ -255,43 +280,6 @@ func (n *baseNode) AddRef(refdesc *ua.ReferenceDescription) {
 	}
 
 	n.refs = append(n.refs, refdesc)
-}
-
-// Access returns true if the node has the access level requested.
-// It checks both the UserAccessLevel and AccessLevel attributes.
-// If neither are present, it assumes global access and returns true.
-//
-// I'm not sure what the best way to implement "user" specific access levels
-// is presently.  Will need functioning user authentication first, and then a way to
-// pass it into the nodes user access attribute so it can be checked properly.
-func (n baseNode) Access(flag ua.AccessLevelType) bool {
-
-	access, err := n.Attribute(ua.AttributeIDUserAccessLevel)
-	if err == nil { // if we have a user access level, we need to check it.
-		val0 := access.Value.Value.Value()
-		val, ok := val0.(uint8)
-		if !ok {
-			return false
-		}
-		if val&uint8(flag) == 0 {
-			return false
-		}
-	}
-
-	access, err = n.Attribute(ua.AttributeIDAccessLevel)
-	if err == nil { // if we have an access level, we need to check it.
-		val0 := access.Value.Value.Value()
-		val, ok := val0.(uint8)
-		if !ok {
-			return false
-		}
-
-		if val&uint8(flag) == 0 {
-			return false
-		}
-	}
-
-	return true
 }
 
 type refcollection struct {

@@ -2,6 +2,7 @@ package node
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/refs"
@@ -197,7 +198,10 @@ func LookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 
 func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption) types.VariableNode {
 
-	cfg := &variableConfig{}
+	cfg := &variableConfig{
+		accessLevel:   ua.AccessLevelTypeCurrentRead,
+		accessLevelEx: ua.AccessLevelExTypeCurrentRead,
+	}
 
 	for _, applyOption := range opts {
 		applyOption(cfg)
@@ -211,6 +215,8 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 	n.baseNode.attr[ua.AttributeIDValueRank] = values.DataValueFromValue(cfg.rank)
 	n.baseNode.attr[ua.AttributeIDDataType] = values.DataValueFromValue(cfg.dataTypeNodeId)
 	n.baseNode.attr[ua.AttributeIDHistorizing] = values.DataValueFromValue(cfg.historizing)
+	n.baseNode.attr[ua.AttributeIDAccessLevel] = values.DataValueFromValue(cfg.accessLevel)
+	n.baseNode.attr[ua.AttributeIDAccessLevelEx] = values.DataValueFromValue(cfg.accessLevelEx)
 
 	if cfg.variableTypeNodeId == nil {
 		cfg.variableTypeNodeId = ua.NewNumericNodeID(0, id.BaseVariableType)
@@ -221,8 +227,41 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 	return n
 }
 
+// Access returns true if the node has the access level requested.
+// It checks both the UserAccessLevel and AccessLevel attributes.
+// If neither are present, it assumes global access and returns true.
+//
+// I'm not sure what the best way to implement "user" specific access levels
+// is presently.  Will need functioning user authentication first, and then a way to
+// pass it into the nodes user access attribute so it can be checked properly.
+func (n *variableNode) Access(flag ua.AccessLevelType) bool {
+
+	access, err := n.Attribute(ua.AttributeIDAccessLevel)
+	if err == nil { // if we have an access level, we need to check it.
+		val0 := access.Value.Value.Value()
+		val, ok := val0.(uint8)
+		if !ok {
+			return false
+		}
+
+		if val&uint8(flag) == 0 {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (n *variableNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	if id == ua.AttributeIDValue {
+		if !n.Access(ua.AccessLevelTypeCurrentRead) {
+			return NewAttrValue(&ua.DataValue{
+				EncodingMask:    ua.DataValueServerTimestamp | ua.DataValueStatusCode,
+				ServerTimestamp: time.Now(),
+				Status:          ua.StatusBadUserAccessDenied,
+			}), nil
+		}
+
 		return NewAttrValue(n.valueFunc()), nil
 	}
 
@@ -232,8 +271,10 @@ func (n *variableNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 func (n *variableNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
 
 	if id == ua.AttributeIDValue {
-		// TODO: probably need to do some type checking here.
-		// And some permissions tests
+		if !n.Access(ua.AccessLevelTypeCurrentWrite) {
+			return ua.StatusBadUserAccessDenied
+		}
+
 		if val != nil {
 			copy := *val
 			n.valueFunc = func() *ua.DataValue { return &copy }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/node"
-	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -210,12 +209,9 @@ func ServerStatusNodes(s *Server, serverNode types.Node) []types.Node {
 	)
 
 	nodes := []types.Node{sState, mName, pName, pURI, sVersion, bNumber, bDate, timeStart, timeCurrent, bInfo, sTillShutdown, sReason}
-	for i := range nodes {
-		sStatus.AddRef(refs.NewHasComponentRefDesc(nodes[i]))
-	}
-	serverNode.AddRef(refs.NewHasComponentRefDesc(sStatus))
 
-	nodes = append(nodes, sStatus)
+	sStatus.AddComponents(nodes...)
+	serverNode.AddComponent(sStatus)
 
-	return nodes
+	return append(nodes, sStatus)
 }
