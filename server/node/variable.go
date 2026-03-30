@@ -14,11 +14,45 @@ type ValueFunc func() *ua.DataValue
 type variableConfig struct {
 	dataTypeNodeId *ua.NodeID
 	rank           int32
-	value          *ua.DataValue
+	valueFunc      func() *ua.DataValue
 	historizing    bool
+
+	accessLevel   ua.AccessLevelType
+	accessLevelEx ua.AccessLevelExType
 }
 
 type variableOption func(*variableConfig)
+
+func WithAccessLevel(level uint8) variableOption {
+	return func(cfg *variableConfig) {
+		cfg.accessLevel = ua.AccessLevelType(level)
+	}
+}
+
+func WithAccessLevelEx(level uint32) variableOption {
+	return func(cfg *variableConfig) {
+		cfg.accessLevelEx = ua.AccessLevelExType(level)
+	}
+}
+
+func WithAccessLevels(levels ...ua.AccessLevelExType) variableOption {
+	var level ua.AccessLevelExType
+
+	for _, l := range levels {
+		if l == ua.AccessLevelExTypeNone && len(levels) > 1 {
+			panic("ua.AccessLevelExTypeNone can not be combined with other levels")
+		}
+
+		level |= l
+	}
+
+	return func(cfg *variableConfig) {
+		cfg.accessLevelEx = level
+
+		lowestBits := ua.AccessLevelType(uint32(level) & 255)
+		cfg.accessLevel = lowestBits
+	}
+}
 
 func WithDataType(dataTypeNodeId *ua.NodeID) variableOption {
 	return func(cfg *variableConfig) {
@@ -26,9 +60,20 @@ func WithDataType(dataTypeNodeId *ua.NodeID) variableOption {
 	}
 }
 
-func WithDataValue(value *ua.DataValue) variableOption {
+func WithDataValue(value any) variableOption {
+	v, isVal := value.(*ua.DataValue)
+	f, isFun := value.(func() *ua.DataValue)
+
+	if !isVal && !isFun {
+		panic("variable data value must be a *ua.DataValue or a func returning *ua.DataValue")
+	}
+
 	return func(cfg *variableConfig) {
-		cfg.value = value
+		if isVal {
+			cfg.valueFunc = func() *ua.DataValue { return v }
+		} else if isFun {
+			cfg.valueFunc = f
+		}
 	}
 }
 
@@ -53,13 +98,15 @@ func WithValue(value any) variableOption {
 	return func(cfg *variableConfig) {
 		cfg.dataTypeNodeId = dataTypeNodeId
 		cfg.rank = rank
-		cfg.value = values.DataValueFromValue(value)
+
+		dataValue := values.DataValueFromValue(value)
+		cfg.valueFunc = func() *ua.DataValue { return dataValue }
 	}
 }
 
 type variableNode struct {
 	baseNode
-	value *ua.DataValue
+	valueFunc func() *ua.DataValue
 }
 
 var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
@@ -144,8 +191,8 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 	}
 
 	n := &variableNode{
-		baseNode: *newBaseNodeFromCfg(base(ua.NodeClassVariable)),
-		value:    cfg.value,
+		baseNode:  *newBaseNode(base(ua.NodeClassVariable)),
+		valueFunc: cfg.valueFunc,
 	}
 
 	n.baseNode.attr[ua.AttributeIDValueRank] = values.DataValueFromValue(cfg.rank)
@@ -157,7 +204,7 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 
 func (n *variableNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	if id == ua.AttributeIDValue {
-		return NewAttrValue(n.value), nil
+		return NewAttrValue(n.valueFunc()), nil
 	}
 
 	return n.baseNode.Attribute(id)
@@ -168,7 +215,12 @@ func (n *variableNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error 
 	if id == ua.AttributeIDValue {
 		// TODO: probably need to do some type checking here.
 		// And some permissions tests
-		n.value = val
+		if val != nil {
+			copy := *val
+			n.valueFunc = func() *ua.DataValue { return &copy }
+		} else {
+			n.valueFunc = func() *ua.DataValue { return nil }
+		}
 
 		return nil
 	}

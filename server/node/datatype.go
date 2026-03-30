@@ -28,7 +28,7 @@ func NewDataTypeNode(base func(ua.NodeClass) *baseConfig, opts ...typeOption) ty
 
 	n := &dataTypeNode{
 		typeNode: typeNode{
-			baseNode: *newBaseNodeFromCfg(base(ua.NodeClassDataType)),
+			baseNode: *newBaseNode(base(ua.NodeClassDataType)),
 			abstract: cfg.abstract,
 		},
 	}

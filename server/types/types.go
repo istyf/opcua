@@ -32,10 +32,10 @@ type NameSpace interface {
 	Node(id *ua.NodeID) Node
 
 	// This function should return the base Objects node that contains other nodes
-	Objects() Node
+	Objects() ObjectNode
 
 	// This function should return the root node
-	Root() Node
+	Root() ObjectNode
 
 	// This is the function to list all available nodes to the client that is browsing.
 	// The BrowseDescription has the root node of the browse and what kind of nodes the
@@ -52,6 +52,8 @@ type NameSpace interface {
 	// as well as attributes related to array bounds
 	Attribute(context.Context, *ua.NodeID, ua.AttributeID) *ua.DataValue
 	SetAttribute(context.Context, *ua.NodeID, ua.AttributeID, *ua.DataValue) ua.StatusCode
+
+	NewQualifiedName(name string) *ua.QualifiedName
 }
 
 type Node interface {

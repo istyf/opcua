@@ -45,7 +45,7 @@ func NewMethodNode(base func(ua.NodeClass) *baseConfig, opts ...methodOption) ty
 	}
 
 	n := &methodNode{
-		baseNode:   *newBaseNodeFromCfg(base(ua.NodeClassMethod)),
+		baseNode:   *newBaseNode(base(ua.NodeClassMethod)),
 		call:       cfg.handler,
 		executable: cfg.executable,
 	}

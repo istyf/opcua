@@ -160,7 +160,6 @@ func New(ctx context.Context, opts ...Option) *Server {
 
 	s.ImportNodeSet(ctx, &nodes)
 
-	s.namespaces[0].AddNode(CurrentTimeNode())
 	s.namespaces[0].AddNode(NamespacesNode(s))
 
 	for _, n := range ServerStatusNodes(s, s.namespaces[0].Node(ua.NewNumericNodeID(0, id.Server))) {

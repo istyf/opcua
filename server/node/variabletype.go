@@ -55,7 +55,7 @@ func NewVariableTypeNode(base func(ua.NodeClass) *baseConfig, opts ...variableTy
 
 	n := &variableTypeNode{
 		typeNode: typeNode{
-			baseNode: *newBaseNodeFromCfg(base(ua.NodeClassVariableType)),
+			baseNode: *newBaseNode(base(ua.NodeClassVariableType)),
 			abstract: cfg.abstract,
 		},
 	}

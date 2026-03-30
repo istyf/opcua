@@ -18,7 +18,6 @@ import (
 
 	"github.com/gopcua/opcua/debug"
 	"github.com/gopcua/opcua/server"
-	"github.com/gopcua/opcua/server/attrs"
 	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
@@ -188,56 +187,47 @@ func main() {
 	// Now we'll add a node from scratch.  This is a more manual way to add nodes to the server and gives you full
 	// control, but you'll have to build the node up with the correct attributes and references and then reference it from
 	// the parent node in the namespace if applicable.
-	var3 := node.NewNode(
-		ua.NewNumericNodeID(nodeNS.ID(), 12345), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDBrowseName: values.DataValueFromValue(attrs.BrowseName("MyBrowseName")),
-			ua.AttributeIDNodeClass:  values.DataValueFromValue(uint32(ua.NodeClassVariable)),
-		},
-		nil,
-		func() *ua.DataValue { return values.DataValueFromValue(12.34) },
+	var3 := node.NewVariableNode(
+		node.WithBase(
+			// you can use whatever node id you want here, whether it's numeric, string, guid, etc...
+			node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 12345)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: nodeNS.ID(), Name: "MyBrowseName"}),
+		),
+		node.WithValue(12.34),
 	)
+
 	nodeNS.AddNode(var3)
 	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var3))
 
-	var4 := node.NewNode(
-		ua.NewNumericNodeID(nodeNS.ID(), 100), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDAccessLevel:     values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
-			ua.AttributeIDUserAccessLevel: values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite)),
-			ua.AttributeIDBrowseName:      values.DataValueFromValue(attrs.BrowseName("ReadWriteVariable")),
-			ua.AttributeIDNodeClass:       values.DataValueFromValue(uint32(ua.NodeClassVariable)),
-		},
-		nil,
-		func() *ua.DataValue { return values.DataValueFromValue(12.34) },
+	var4 := node.NewVariableNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 100)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: nodeNS.ID(), Name: "ReadWriteVariable"}),
+		),
+		node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead, ua.AccessLevelExTypeCurrentWrite),
+		node.WithValue(12.34),
 	)
 	nodeNS.AddNode(var4)
 	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var4))
 
-	var5 := node.NewNode(
-		ua.NewNumericNodeID(nodeNS.ID(), 105), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDAccessLevel:     values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
-			ua.AttributeIDUserAccessLevel: values.DataValueFromValue(byte(ua.AccessLevelTypeCurrentRead)),
-			ua.AttributeIDBrowseName:      values.DataValueFromValue(attrs.BrowseName("ReadOnlyVariable")),
-			ua.AttributeIDNodeClass:       values.DataValueFromValue(uint32(ua.NodeClassVariable)),
-		},
-		nil,
-		func() *ua.DataValue { return values.DataValueFromValue(9.87) },
+	var5 := node.NewVariableNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 105)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: nodeNS.ID(), Name: "ReadOnlyVariable"}),
+		),
+		node.WithAccessLevels(ua.AccessLevelExTypeCurrentRead),
+		node.WithValue(9.87),
 	)
 	nodeNS.AddNode(var5)
 	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var5))
 
-	var6 := node.NewNode(
-		ua.NewNumericNodeID(nodeNS.ID(), 102), // you can use whatever node id you want here, whether it's numeric, string, guid, etc...
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDAccessLevel:     values.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
-			ua.AttributeIDUserAccessLevel: values.DataValueFromValue(byte(ua.AccessLevelTypeNone)),
-			ua.AttributeIDBrowseName:      values.DataValueFromValue(attrs.BrowseName("NoAccessVariable")),
-			ua.AttributeIDNodeClass:       values.DataValueFromValue(uint32(ua.NodeClassVariable)),
-		},
-		nil,
-		func() *ua.DataValue { return values.DataValueFromValue(9.87) },
+	var6 := node.NewVariableNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(nodeNS.ID(), 102)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: nodeNS.ID(), Name: "NoAccessVariable"}),
+		),
+		node.WithAccessLevels(ua.AccessLevelExTypeNone),
+		node.WithValue(9.87),
 	)
 	nodeNS.AddNode(var6)
 	nodeNSObjects.AddRef(refs.NewHasComponentRefDesc(var6))

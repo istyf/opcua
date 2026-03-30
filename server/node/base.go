@@ -4,12 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"iter"
-	"maps"
-	"slices"
 	"time"
 
 	"github.com/gopcua/opcua/id"
-	"github.com/gopcua/opcua/server/attrs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -94,23 +91,7 @@ type baseNode struct {
 	ns types.NameSpace
 }
 
-func newBaseNode(id *ua.NodeID, class ua.NodeClass, attr Attributes, refs References) *baseNode {
-	if attr == nil {
-		attr = Attributes{}
-	}
-
-	n := &baseNode{
-		id:   id,
-		attr: maps.Clone(attr),
-		refs: slices.Clone(refs),
-	}
-
-	n.attr[ua.AttributeIDNodeClass] = values.DataValueFromValue(uint32(class))
-
-	return n
-}
-
-func newBaseNodeFromCfg(cfg *baseConfig) *baseNode {
+func newBaseNode(cfg *baseConfig) *baseNode {
 	n := &baseNode{
 		id: cfg.nodeID,
 		attr: map[ua.AttributeID]*ua.DataValue{
@@ -122,57 +103,12 @@ func newBaseNodeFromCfg(cfg *baseConfig) *baseNode {
 	return n
 }
 
-func NewNode(id *ua.NodeID, attr Attributes, refs References, val ValueFunc) types.Node {
-	n := newBaseNode(id, ua.NodeClassObject, attr, refs)
-
-	if n.attr[ua.AttributeIDBrowseName] == nil {
-		n.SetBrowseName("")
-	}
-	if n.attr[ua.AttributeIDDisplayName] == nil {
-		n.SetDisplayName("", "")
-	}
-	if n.DisplayName().Text == "" {
-		n.SetDisplayName(n.BrowseName().Name, "")
-	}
-	if n.attr[ua.AttributeIDDescription] == nil {
-		n.SetDescription("", "")
-	}
-
-	return n
-}
-
-func NewFolderNode(nodeID *ua.NodeID, name string) types.Node {
-	reftype := ua.NewNumericNodeID(0, id.HasComponent)
-
-	n := NewNode(
-		nodeID,
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     values.DataValueFromValue(uint32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:    values.DataValueFromValue(attrs.BrowseName(name)),
-			ua.AttributeIDDisplayName:   values.DataValueFromValue(attrs.DisplayName(name, "")),
-			ua.AttributeIDEventNotifier: values.DataValueFromValue(int16(0)),
-		},
-		[]*ua.ReferenceDescription{{
-			ReferenceTypeID: reftype,
-			IsForward:       true,
-			NodeID:          ua.NewNumericExpandedNodeID(nodeID.Namespace(), id.ObjectsFolder),
-			BrowseName:      &ua.QualifiedName{NamespaceIndex: nodeID.Namespace(), Name: name},
-			DisplayName:     &ua.LocalizedText{EncodingMask: ua.LocalizedTextText, Text: name},
-			NodeClass:       ua.NodeClassObject,
-			TypeDefinition:  ua.NewNumericExpandedNodeID(0, id.ObjectsFolder),
-		}},
-		nil,
-	)
-
-	return n
-}
-
 func (n *baseNode) ID() *ua.NodeID {
 	return n.id
 }
 
 func (n *variableNode) Value() *ua.DataValue {
-	return n.value
+	return n.valueFunc()
 }
 
 func (n *baseNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {

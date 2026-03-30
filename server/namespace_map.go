@@ -9,7 +9,6 @@ import (
 	"github.com/gopcua/opcua/server/attrs"
 	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
-	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -360,36 +359,47 @@ func (ns *MapNamespace) AddNode(n types.Node) types.Node {
 func (ns *MapNamespace) Node(id *ua.NodeID) types.Node {
 	return nil
 }
-func (ns *MapNamespace) Objects() types.Node {
+func (ns *MapNamespace) Objects() types.ObjectNode {
+	// TODO: This is a constructor method masquerading as an accessor ... Why?
 	oid := ua.NewNumericNodeID(ns.ID(), id.ObjectsFolder)
-	//eoid := ua.NewNumericExpandedNodeID(ns.ID(), id.ObjectsFolder)
-	typedef := ua.NewNumericExpandedNodeID(0, id.ObjectsFolder)
-	//reftype := ua.NewTwoByteNodeID(uint8(id.HasComponent)) // folder
-	n := node.NewNode(
-		oid,
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     values.DataValueFromValue(int32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:    values.DataValueFromValue(attrs.BrowseName(ns.name)),
-			ua.AttributeIDDisplayName:   values.DataValueFromValue(attrs.DisplayName(ns.name, "")),
-			ua.AttributeIDDataType:      values.DataValueFromValue(typedef),
-			ua.AttributeIDEventNotifier: values.DataValueFromValue(int16(0)),
-		},
-		[]*ua.ReferenceDescription{},
-		nil,
+
+	n := node.NewObjectNode(
+		node.WithBase(
+			node.WithID(oid),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: ns.ID(), Name: ns.Name()}),
+		),
+		node.WithType(
+			node.NewObjectTypeNode(
+				node.WithBase(
+					node.WithID(ua.NewNumericNodeID(0, id.FolderType)),
+					node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "FolderType"}),
+				),
+			),
+		),
+	)
+
+	return n
+}
+
+func (ns *MapNamespace) Root() types.ObjectNode {
+	// TODO: This is a constructor method masquerading as an accessor ... Why?
+	n := node.NewObjectNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(ns.ID(), id.RootFolder)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: ns.ID(), Name: "Root"}),
+		),
+		node.WithType(
+			node.NewObjectTypeNode(
+				node.WithBase(
+					node.WithID(ua.NewNumericNodeID(0, id.FolderType)),
+					node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "FolderType"}),
+				),
+			),
+		),
 	)
 	return n
 }
 
-func (ns *MapNamespace) Root() types.Node {
-	n := node.NewNode(
-		ua.NewNumericNodeID(ns.ID(), id.RootFolder),
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:   values.DataValueFromValue(int32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:  values.DataValueFromValue(attrs.BrowseName("Root")),
-			ua.AttributeIDDisplayName: values.DataValueFromValue(attrs.DisplayName("Root", "")),
-		},
-		[]*ua.ReferenceDescription{},
-		nil,
-	)
-	return n
+func (ns *MapNamespace) NewQualifiedName(name string) *ua.QualifiedName {
+	return &ua.QualifiedName{NamespaceIndex: ns.ID(), Name: name}
 }

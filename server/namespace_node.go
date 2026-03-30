@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/id"
-	"github.com/gopcua/opcua/server/attrs"
 	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
@@ -47,23 +46,34 @@ func NewNodeNameSpace(srv *Server, name string) *NodeNameSpace {
 	ns.nextAvailableNodeID.Store(100)
 	srv.AddNamespace(ns)
 
-	oid := ua.NewNumericNodeID(ns.ID(), id.ObjectsFolder)
-	typedef := ua.NewNumericNodeID(0, id.ObjectsFolder)
+	folderTypeNodeID := ua.NewNumericNodeID(0, id.FolderType)
+	var folderType types.ObjectTypeNode
 
-	objectsNode := node.NewNode(
-		oid,
-		map[ua.AttributeID]*ua.DataValue{
-			ua.AttributeIDNodeClass:     values.DataValueFromValue(uint32(ua.NodeClassObject)),
-			ua.AttributeIDBrowseName:    values.DataValueFromValue(attrs.BrowseName(ns.name)),
-			ua.AttributeIDDisplayName:   values.DataValueFromValue(attrs.DisplayName(ns.name, "")),
-			ua.AttributeIDDataType:      values.DataValueFromValue(typedef),
-			ua.AttributeIDEventNotifier: values.DataValueFromValue(int16(0)),
-		},
-		[]*ua.ReferenceDescription{},
-		nil,
-	)
+	typeNode := srv.Node(folderTypeNodeID)
+	if typeNode != nil {
+		if typeNode, ok := typeNode.(types.ObjectTypeNode); ok {
+			folderType = typeNode
+		} else {
+			panic("node " + folderTypeNodeID.String() + "was not an object type")
+		}
+	}
 
-	ns.AddNode(objectsNode)
+	if folderType == nil && ns.ID() == 0 {
+		folderType = ns.AddNode(node.NewObjectTypeNode(
+			node.WithBase(
+				node.WithID(folderTypeNodeID),
+				node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: folderTypeNodeID.Namespace(), Name: "FolderType"}),
+			),
+		)).(types.ObjectTypeNode)
+	}
+
+	ns.AddNode(node.NewObjectNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(ns.ID(), id.ObjectsFolder)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: ns.ID(), Name: ns.name}),
+		),
+		node.WithType(folderType),
+	))
 
 	return ns
 }
@@ -189,12 +199,12 @@ func (as *NodeNameSpace) Node(id *ua.NodeID) types.Node {
 	return as.m[k]
 }
 
-func (as *NodeNameSpace) Objects() types.Node {
+func (as *NodeNameSpace) Objects() types.ObjectNode {
 	of := ua.NewNumericNodeID(as.id, id.ObjectsFolder)
 	return as.Node(of)
 }
 
-func (as *NodeNameSpace) Root() types.Node {
+func (as *NodeNameSpace) Root() types.ObjectNode {
 	return as.Node(RootFolder)
 }
 
@@ -287,4 +297,8 @@ func (as *NodeNameSpace) SetAttribute(ctx context.Context, id *ua.NodeID, attr u
 	}
 
 	return ua.StatusOK
+}
+
+func (as *NodeNameSpace) NewQualifiedName(name string) *ua.QualifiedName {
+	return &ua.QualifiedName{NamespaceIndex: as.ID(), Name: name}
 }

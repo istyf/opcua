@@ -9,9 +9,10 @@ import (
 type Type uint32
 
 var (
-	OrganizesRefTypeID    *ua.NodeID = ua.NewNumericNodeID(0, id.Organizes)
-	HasComponentRefTypeID *ua.NodeID = ua.NewNumericNodeID(0, id.HasComponent)
-	HasSubtypeRefTypeID   *ua.NodeID = ua.NewNumericNodeID(0, id.HasSubtype)
+	OrganizesRefTypeID         *ua.NodeID = ua.NewNumericNodeID(0, id.Organizes)
+	HasComponentRefTypeID      *ua.NodeID = ua.NewNumericNodeID(0, id.HasComponent)
+	HasSubtypeRefTypeID        *ua.NodeID = ua.NewNumericNodeID(0, id.HasSubtype)
+	HasTypeDefinitionRefTypeID *ua.NodeID = ua.NewNumericNodeID(0, id.HasTypeDefinition)
 )
 
 func NewReferenceDescription(toNode types.Node, refType Type, isForward bool) *ua.ReferenceDescription {
@@ -34,6 +35,14 @@ func NewHasSubtypeRefDesc(typeID *ua.ExpandedNodeID) *ua.ReferenceDescription {
 	return &ua.ReferenceDescription{
 		ReferenceTypeID: HasSubtypeRefTypeID,
 		TypeDefinition:  typeID,
+		IsForward:       true,
+	}
+}
+
+func NewHasTypeDefinitionRefDesc(o types.ObjectTypeNode) *ua.ReferenceDescription {
+	return &ua.ReferenceDescription{
+		ReferenceTypeID: HasTypeDefinitionRefTypeID,
+		TypeDefinition:  &ua.ExpandedNodeID{NodeID: o.ID()},
 		IsForward:       true,
 	}
 }

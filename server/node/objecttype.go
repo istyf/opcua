@@ -30,7 +30,7 @@ func NewObjectTypeNode(base func(ua.NodeClass) *baseConfig, opts ...typeOption) 
 
 	n := &objTypeNode{
 		typeNode: typeNode{
-			baseNode: *newBaseNodeFromCfg(base(ua.NodeClassObjectType)),
+			baseNode: *newBaseNode(base(ua.NodeClassObjectType)),
 			abstract: cfg.abstract,
 		},
 	}

@@ -48,7 +48,7 @@ func NewReferenceTypeNode(base func(ua.NodeClass) *baseConfig, opts ...refTypeOp
 	}
 
 	n := &refTypeNode{
-		baseNode: *newBaseNodeFromCfg(base(ua.NodeClassReferenceType)),
+		baseNode: *newBaseNode(base(ua.NodeClassReferenceType)),
 		abstract: cfg.abstract,
 		symetric: cfg.symetric,
 	}
