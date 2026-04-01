@@ -1,54 +1,53 @@
 package server
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gopcua/opcua/id"
-	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
 )
 
-func NamespacesNode(s *Server) types.VariableNode {
-	return node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_NamespaceArray)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "NamespaceArray"}),
-		),
-		node.WithDataType(ua.NewNumericNodeID(0, id.String)),
-		node.WithValueRank(1),
-		node.WithDataValue(
-			func() *ua.DataValue {
-				n := s.Namespaces()
-				ns := make([]string, len(n))
-				for i := range ns {
-					ns[i] = n[i].Name()
-				}
-				return values.DataValueFromValue(ns)
-			}),
-	)
+func mustHaveServerNode[T any](nodeID *ua.NodeID, ns types.NameSpace) T {
+	theNode := ns.Node(nodeID)
+	if theNode == nil {
+		panic("expected server node " + nodeID.String() + " but got nil!")
+	}
+
+	if typedNode, ok := theNode.(T); ok {
+		return typedNode
+	}
+
+	var zero T
+	panic(fmt.Sprintf("failed to type cast server node %s to %T", nodeID.String(), zero))
 }
 
-func ServerCapabilitiesNodes(s *Server) []types.VariableNode {
-	var nodes []types.VariableNode
-	nodes = append(nodes, node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerRead)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "MaxNodesPerRead"}),
-		),
-		node.WithDataType(ua.NewNumericNodeID(0, id.UInt32)),
-		node.WithDataValue(
-			func() *ua.DataValue {
-				return values.DataValueFromValue(
-					s.cfg.cap.OperationalLimits.MaxNodesPerRead,
-				)
-			}),
+func WireupNamespacesArrayNodeValue(s *Server, ns types.NameSpace) {
+	nodeID := ua.NewNumericNodeID(0, id.Server_NamespaceArray)
+	theNode := mustHaveServerNode[types.VariableNode](nodeID, ns)
+
+	theNode.SetValueFunc(func() *ua.DataValue {
+		n := s.Namespaces()
+		ns := make([]string, len(n))
+		for i := range ns {
+			ns[i] = n[i].Name()
+		}
+		return values.DataValueFromValue(ns)
+	})
+}
+
+func WireupServerCapabilityNodeValue(s *Server, ns types.NameSpace) {
+	nodeID := ua.NewNumericNodeID(0, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerRead)
+	theNode := mustHaveServerNode[types.VariableNode](nodeID, ns)
+
+	theNode.SetValue(values.DataValueFromValue(
+		s.cfg.cap.OperationalLimits.MaxNodesPerRead,
 	))
-	return nodes
 }
 
-func ServerStatusNodes(s *Server, serverNode types.Node) []types.Node {
+func WireupServerStatusNodesValues(s *Server, serverNode types.Node, ns types.NameSpace) {
 
 	/*
 		Server_ServerArray                                                                                                                                                    = 2254
@@ -85,133 +84,97 @@ func ServerStatusNodes(s *Server, serverNode types.Node) []types.Node {
 		Server_ServerRedundancy                                                                                                                                               = 2296
 	*/
 
-	sStatus := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "Status"}),
-		),
-		node.WithDataType(ua.NewExtensionObject(s.Status()).TypeID.NodeID),
-		node.WithDataValue(
+	ts := time.Now()
+
+	type nodeconf struct {
+		nodeID    uint32
+		valueFunc func() *ua.DataValue
+	}
+
+	nodeconfigs := []nodeconf{
+		{
+			id.Server_ServerStatus,
 			func() *ua.DataValue {
 				return values.DataValueFromValue(ua.NewExtensionObject(s.Status()))
-			}),
-	)
-
-	sState := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_State)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ServerStatus"}),
-		),
-		node.WithDataType(ua.NewNumericNodeID(0, id.Int32)),
-		node.WithDataValue(
+			},
+		},
+		{
+			id.Server_ServerStatus_State,
 			func() *ua.DataValue {
 				return values.DataValueFromValue(int32(s.Status().State))
-			}),
-	)
-	mName := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_BuildInfo_ManufacturerName)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ManufacturerName"}),
-		),
-		node.WithValue(s.cfg.manufacturerName),
-	)
-	pName := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_BuildInfo_ProductName)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ProductName"}),
-		),
-		node.WithValue(s.cfg.productName),
-	)
-
-	pURI := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_BuildInfo_ProductURI)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ProductURI"}),
-		),
-		node.WithValue(s.cfg.applicationURI),
-	)
-
-	bInfo := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_BuildInfo)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "BuildInfo"}),
-		),
-		node.WithValue(""),
-	)
-	sVersion := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_BuildInfo_SoftwareVersion)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "SoftwareVersion"}),
-		),
-		node.WithValue(s.cfg.softwareVersion),
-	)
-
-	bNumber := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_BuildInfo_BuildNumber)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "BuildNumber"}),
-		),
-		node.WithValue(s.cfg.softwareVersion),
-	)
-
-	ts := time.Now()
-	bDate := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_BuildInfo_BuildDate)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "BuildDate"}),
-		),
-		node.WithDataType(ua.NewNumericNodeID(0, id.DateTime)),
-		node.WithDataValue(values.DataValueFromValue(ts)),
-	)
-	timeStart := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_StartTime)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "StartTime"}),
-		),
-		node.WithDataType(ua.NewNumericNodeID(0, id.UtcTime)),
-		node.WithDataValue(values.DataValueFromValue(ts.UTC())),
-	)
-	timeCurrent := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_CurrentTime)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "CurrentTime"}),
-		),
-		node.WithDataType(ua.NewNumericNodeID(0, id.UtcTime)),
-		node.WithDataValue(
+			},
+		},
+		{
+			id.Server_ServerStatus_BuildInfo_ManufacturerName,
+			func() *ua.DataValue {
+				return values.DataValueFromValue(s.cfg.manufacturerName)
+			},
+		},
+		{
+			id.Server_ServerStatus_BuildInfo_ProductName,
+			func() *ua.DataValue {
+				return values.DataValueFromValue(s.cfg.productName)
+			},
+		},
+		{
+			id.Server_ServerStatus_BuildInfo_ProductURI,
+			func() *ua.DataValue {
+				return values.DataValueFromValue(s.cfg.applicationURI)
+			},
+		},
+		{
+			id.Server_ServerStatus_BuildInfo,
+			func() *ua.DataValue {
+				return values.DataValueFromValue("")
+			},
+		},
+		{
+			id.Server_ServerStatus_BuildInfo_SoftwareVersion,
+			func() *ua.DataValue {
+				return values.DataValueFromValue(s.cfg.softwareVersion)
+			},
+		},
+		{
+			id.Server_ServerStatus_BuildInfo_BuildNumber,
+			func() *ua.DataValue {
+				return values.DataValueFromValue(s.cfg.softwareVersion)
+			},
+		},
+		{
+			id.Server_ServerStatus_BuildInfo_BuildDate,
+			func() *ua.DataValue {
+				return values.DataValueFromValue(ts)
+			},
+		},
+		{
+			id.Server_ServerStatus_StartTime,
+			func() *ua.DataValue {
+				return values.DataValueFromValue(ts.UTC())
+			},
+		},
+		{
+			id.Server_ServerStatus_CurrentTime,
 			func() *ua.DataValue {
 				return values.DataValueFromValue(time.Now().UTC())
-			}),
-	)
-
-	//Server_ServerStatus_SecondsTillShutdown                                                                                                                               = 2992
-	//Server_ServerStatus_ShutdownReason                                                                                                                                    = 2993
-	sTillShutdown := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_SecondsTillShutdown)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "SecondsTillShutdown"}),
-		),
-		node.WithDataType(ua.NewNumericNodeID(0, id.Int32)),
-		node.WithDataValue(
+			},
+		},
+		{
+			id.Server_ServerStatus_SecondsTillShutdown,
 			func() *ua.DataValue {
 				return values.DataValueFromValue(int32(0))
-			}),
-	)
-	sReason := node.NewVariableNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, id.Server_ServerStatus_ShutdownReason)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ShutdownReason"}),
-		),
-		node.WithDataType(ua.NewNumericNodeID(0, id.Int32)),
-		node.WithDataValue(
+			},
+		},
+		{
+			id.Server_ServerStatus_ShutdownReason,
 			func() *ua.DataValue {
 				return values.DataValueFromValue(int32(0))
-			}),
-	)
+			},
+		},
+	}
 
-	nodes := []types.Node{sState, mName, pName, pURI, sVersion, bNumber, bDate, timeStart, timeCurrent, bInfo, sTillShutdown, sReason}
-
-	sStatus.AddComponents(nodes...)
-	serverNode.AddComponent(sStatus)
-
-	return append(nodes, sStatus)
+	for _, cfg := range nodeconfigs {
+		nodeID := ua.NewNumericNodeID(0, cfg.nodeID)
+		theNode := mustHaveServerNode[types.VariableNode](nodeID, ns)
+		theNode.SetValueFunc(cfg.valueFunc)
+	}
 }

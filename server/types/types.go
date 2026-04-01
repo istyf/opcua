@@ -31,12 +31,6 @@ type NameSpace interface {
 	// This function should lookup and return the node indicated by the Node ID
 	Node(id *ua.NodeID) Node
 
-	// This function should return the base Objects node that contains other nodes
-	Objects() ObjectNode
-
-	// This function should return the root node
-	Root() ObjectNode
-
 	// This is the function to list all available nodes to the client that is browsing.
 	// The BrowseDescription has the root node of the browse and what kind of nodes the
 	// client is looking for.  The Browse Result should have the list of matching nodes.
@@ -54,6 +48,7 @@ type NameSpace interface {
 	SetAttribute(context.Context, *ua.NodeID, ua.AttributeID, *ua.DataValue) ua.StatusCode
 
 	NewQualifiedName(name string) *ua.QualifiedName
+	NextAvailableID() *ua.NodeID
 }
 
 type Node interface {
@@ -61,7 +56,6 @@ type Node interface {
 	BrowseName() *ua.QualifiedName
 	DisplayName() *ua.LocalizedText
 	NodeClass() ua.NodeClass
-	DataType() *ua.ExpandedNodeID
 
 	AddComponent(Node) Node
 	AddComponents(...Node) Node
@@ -76,6 +70,7 @@ type Node interface {
 type TypeNode interface {
 	Node
 
+	DataType() *ua.ExpandedNodeID
 	IsAbstract() bool
 }
 
@@ -111,6 +106,8 @@ type VariableNode interface {
 
 	Access(ua.AccessLevelType) bool
 	Value() *ua.DataValue
+	SetValue(*ua.DataValue)
+	SetValueFunc(func() *ua.DataValue)
 
 	Attribute(ua.AttributeID) (*AttrValue, error)
 	SetAttribute(ua.AttributeID, *ua.DataValue) error

@@ -1,7 +1,6 @@
 package node
 
 import (
-	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
@@ -13,8 +12,8 @@ type objectNode struct {
 }
 
 type objectConfig struct {
-	eventNotifier    ua.EventNotifierType
-	objectTypeNodeId *ua.NodeID
+	eventNotifier  ua.EventNotifierType
+	objectTypeNode types.ObjectTypeNode
 }
 
 type objectOption func(*objectConfig)
@@ -47,7 +46,7 @@ func WithType(typeNode types.ObjectTypeNode) objectOption {
 	}
 
 	return func(cfg *objectConfig) {
-		cfg.objectTypeNodeId = typeNode.ID()
+		cfg.objectTypeNode = typeNode
 	}
 }
 
@@ -59,17 +58,18 @@ func NewObjectNode(base func(ua.NodeClass) *baseConfig, opts ...objectOption) ty
 		applyOption(cfg)
 	}
 
-	if cfg.objectTypeNodeId == nil {
-		cfg.objectTypeNodeId = ua.NewNumericNodeID(0, id.BaseObjectType)
+	if cfg.objectTypeNode == nil {
+		panic("creating objects without a type definition is not allowed")
+		//cfg.objectTypeNodeId = ua.NewNumericNodeID(0, id.BaseObjectType)
 	}
 
 	n := &objectNode{
 		baseNode: *newBaseNode(base(ua.NodeClassObject)),
 	}
 
-	n.baseNode.attr[ua.AttributeIDEventNotifier] = values.DataValueFromValue(cfg.eventNotifier)
+	n.baseNode.attr[ua.AttributeIDEventNotifier] = values.DataValueFromValue(uint8(cfg.eventNotifier))
 
-	n.AddRef(refs.NewHasTypeDefinitionRefDesc(&ua.ExpandedNodeID{NodeID: cfg.objectTypeNodeId}))
+	n.AddRef(refs.NewHasTypeDefinitionRefDesc(cfg.objectTypeNode))
 
 	return n
 }

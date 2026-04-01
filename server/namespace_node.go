@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/id"
-	"github.com/gopcua/opcua/server/node"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -45,35 +45,6 @@ func NewNodeNameSpace(srv *Server, name string) *NodeNameSpace {
 	}
 	ns.nextAvailableNodeID.Store(100)
 	srv.AddNamespace(ns)
-
-	folderTypeNodeID := ua.NewNumericNodeID(0, id.FolderType)
-	var folderType types.ObjectTypeNode
-
-	typeNode := srv.Node(folderTypeNodeID)
-	if typeNode != nil {
-		if typeNode, ok := typeNode.(types.ObjectTypeNode); ok {
-			folderType = typeNode
-		} else {
-			panic("node " + folderTypeNodeID.String() + "was not an object type")
-		}
-	}
-
-	if folderType == nil && ns.ID() == 0 {
-		folderType = ns.AddNode(node.NewObjectTypeNode(
-			node.WithBase(
-				node.WithID(folderTypeNodeID),
-				node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: folderTypeNodeID.Namespace(), Name: "FolderType"}),
-			),
-		)).(types.ObjectTypeNode)
-	}
-
-	ns.AddNode(node.NewObjectNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(ns.ID(), id.ObjectsFolder)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: ns.ID(), Name: ns.name}),
-		),
-		node.WithType(folderType),
-	))
 
 	return ns
 }
@@ -172,10 +143,6 @@ func (as *NodeNameSpace) Objects() types.ObjectNode {
 	return as.Node(of)
 }
 
-func (as *NodeNameSpace) Root() types.ObjectNode {
-	return as.Node(RootFolder)
-}
-
 func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *ua.BrowseResult {
 	ualog.Debug(ctx, "browse", ns.logAttributes,
 		ualog.Any(ualog.NodeIdKey, bd.NodeID), ualog.Bitmask("mask", bd.ResultMask),
@@ -189,11 +156,11 @@ func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *
 		return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDUnknown}
 	}
 
-	refs := make([]*ua.ReferenceDescription, 0, n.References().Count())
+	references := make([]*ua.ReferenceDescription, 0, n.References().Count())
 
 	validReferences := func(r *ua.ReferenceDescription) bool {
 		// we can't have nils in these or the encoder will fail.
-		if r.NodeID == nil || r.BrowseName == nil || r.DisplayName == nil || r.TypeDefinition == nil {
+		if r.NodeID == nil || r.BrowseName == nil || r.DisplayName == nil {
 			return false
 		}
 
@@ -209,27 +176,19 @@ func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *
 
 		td := ns.srv.Node(r.NodeID.NodeID)
 
-		rf := &ua.ReferenceDescription{
-			ReferenceTypeID: r.ReferenceTypeID,
-			IsForward:       r.IsForward,
-			NodeID:          r.NodeID,
-			BrowseName:      r.BrowseName,
-			DisplayName:     r.DisplayName,
-			NodeClass:       r.NodeClass,
-			TypeDefinition:  td.DataType(),
-		}
+		rf := refs.Copy(ctx, td, r)
 
 		if rf.ReferenceTypeID.IntID() == id.HasTypeDefinition && rf.IsForward {
 			// this one has to be first!
-			refs = append([]*ua.ReferenceDescription{rf}, refs...)
+			references = append([]*ua.ReferenceDescription{rf}, references...)
 		} else {
-			refs = append(refs, rf)
+			references = append(references, rf)
 		}
 	}
 
 	return &ua.BrowseResult{
 		StatusCode: ua.StatusGood,
-		References: refs,
+		References: references,
 	}
 }
 
@@ -265,4 +224,8 @@ func (as *NodeNameSpace) SetAttribute(ctx context.Context, id *ua.NodeID, attr u
 
 func (as *NodeNameSpace) NewQualifiedName(name string) *ua.QualifiedName {
 	return &ua.QualifiedName{NamespaceIndex: as.ID(), Name: name}
+}
+
+func (as *NodeNameSpace) NextAvailableID() *ua.NodeID {
+	return ua.NewNumericNodeID(as.ID(), as.GetNextNodeID())
 }

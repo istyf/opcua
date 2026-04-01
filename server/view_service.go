@@ -131,6 +131,7 @@ func getSubRefs(srv *Server, nid *ua.NodeID) []*ua.NodeID {
 		// TODO: return error
 		return nil
 	}
+
 	node := ns.Node(nid)
 	if node == nil {
 		return nil
@@ -144,6 +145,7 @@ func getSubRefs(srv *Server, nid *ua.NodeID) []*ua.NodeID {
 		refs = append(refs, ref.NodeID.NodeID)
 		refs = append(refs, getSubRefs(srv, ref.NodeID.NodeID)...)
 	}
+
 	return refs
 }
 

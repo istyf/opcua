@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"math"
+	"reflect"
 	"slices"
 	"strings"
 
@@ -196,8 +198,7 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 						}))
 					}
 				}
-				v, _ := ua.NewVariant(data)
-				return v
+				return data
 			}
 		} else if v.QualifiedNameAttr != nil {
 			return &ua.QualifiedName{
@@ -360,6 +361,26 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 		displayNames := localizedTextsFromSchema(ot.DisplayName, browseName.Name)
 		descriptions := localizedTextsFromSchema(ot.Description, "")
 
+		vartype := func() types.VariableTypeNode {
+			for _, r := range ot.References.Reference {
+				if r.ReferenceTypeAttr == "HasTypeDefinition" || r.ReferenceTypeAttr == "i=40" {
+					if tn := srv.Node(mustParseAndConvertNodeID(r.Value)); tn != nil {
+						if vartypenode, ok := tn.(types.VariableTypeNode); ok {
+							return vartypenode
+						}
+					}
+				}
+			}
+
+			if tn := srv.Node(ua.NewNumericNodeID(0, id.BaseVariableType)); tn != nil {
+				if vartypenode, ok := tn.(types.VariableTypeNode); ok {
+					return vartypenode
+				}
+			}
+
+			return nil
+		}()
+
 		dtidx := slices.IndexFunc(nodes.UADataType, func(dt *schema.UADataType) bool {
 			if strings.Compare(dt.BrowseNameAttr, ot.DataTypeAttr) == 0 {
 				return true
@@ -384,13 +405,11 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 		}
 
 		if dataTypeNodeId == nil {
-			panic("failed to decode variable data type node id")
+			fmt.Printf("failed to decode variable data type node id: %s (%s)\n", nid.String(), ot.DataTypeAttr)
+			dataTypeNodeId = ua.NewNumericNodeID(0, id.BaseDataType)
 		}
 
 		v := valueFromSchema(ot.Value)
-		if v == nil {
-			panic("failed to decode variable value from schema")
-		}
 
 		baseOptions := node.WithBase(
 			node.WithID(nid),
@@ -401,16 +420,39 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 
 		var n types.VariableNode
 
-		if dataTypeNodeId.Namespace() == 0 {
+		isNilInterface := func(v any) bool {
+			if v == nil {
+				return true
+			}
+
+			rv := reflect.ValueOf(v)
+			switch rv.Kind() {
+			case reflect.Chan, reflect.Func, reflect.Map, reflect.Pointer, reflect.Interface, reflect.Slice:
+				return rv.IsNil()
+			default:
+				return false
+			}
+		}
+
+		if dataTypeNodeId.Namespace() == 0 && !isNilInterface(v) {
 			n = node.NewVariableNode(
 				baseOptions,
 				node.WithHistorization(ot.HistorizingAttr),
+				node.WithVariableType(vartype),
 				node.WithValue(v),
+				node.WithAccessLevelEx(
+					func() uint32 {
+						if ot.AccessLevelAttr == nil {
+							return math.MaxUint32
+						}
+						return *ot.AccessLevelAttr
+					}()),
 			)
 		} else {
 			n = node.NewVariableNode(
 				baseOptions,
 				node.WithHistorization(ot.HistorizingAttr),
+				node.WithVariableType(vartype),
 				node.WithDataType(dataTypeNodeId),
 				node.WithValueRank(func() int32 {
 					if ot.ValueRankAttr == nil {
@@ -419,6 +461,13 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 					return int32(*ot.ValueRankAttr)
 				}()),
 				node.WithDataValue(values.DataValueFromValue(v)),
+				node.WithAccessLevelEx(
+					func() uint32 {
+						if ot.AccessLevelAttr == nil {
+							return math.MaxUint32
+						}
+						return *ot.AccessLevelAttr
+					}()),
 			)
 		}
 
@@ -468,6 +517,26 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 		displayNames := localizedTextsFromSchema(ot.DisplayName, ot.BrowseNameAttr)
 		descriptions := localizedTextsFromSchema(ot.Description, "")
 
+		objtype := func() types.ObjectTypeNode {
+			for _, r := range ot.References.Reference {
+				if r.ReferenceTypeAttr == "HasTypeDefinition" || r.ReferenceTypeAttr == "i=40" {
+					if tn := srv.Node(mustParseAndConvertNodeID(r.Value)); tn != nil {
+						if objtypenode, ok := tn.(types.ObjectTypeNode); ok {
+							return objtypenode
+						}
+					}
+				}
+			}
+
+			if tn := srv.Node(ua.NewNumericNodeID(0, id.BaseObjectType)); tn != nil {
+				if objtypenode, ok := tn.(types.ObjectTypeNode); ok {
+					return objtypenode
+				}
+			}
+
+			return nil
+		}()
+
 		n := node.NewObjectNode(
 			node.WithBase(
 				node.WithID(nid),
@@ -475,6 +544,7 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 				node.WithDisplayNames(displayNames),
 				node.WithDescriptions(descriptions),
 			),
+			node.WithType(objtype),
 			node.WithEventNotifier(ua.EventNotifierType(ot.EventNotifierAttr)),
 		)
 		ns.AddNode(n)
@@ -580,10 +650,10 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
+				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -618,10 +688,10 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 			}
 
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
+				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -650,10 +720,10 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
+				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -682,9 +752,9 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
+				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -713,9 +783,9 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
+				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -744,9 +814,9 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
+				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}
@@ -778,9 +848,9 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 				ref.IsForwardAttr = &v
 			}
 			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(refs.NewReferenceDescription(n, refs.Type(reftypeid.IntID()), *ref.IsForwardAttr))
+			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(refs.NewReferenceDescription(node, refs.Type(reftypeid.IntID()), !*ref.IsForwardAttr))
+				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
 	}

@@ -135,35 +135,24 @@ func browse(ctx context.Context, n *opcua.Node, path string, level int) ([]NodeD
 	// fmt.Printf("%d: def.Path:%s def.NodeClass:%s\n", level, def.Path, def.NodeClass)
 
 	var nodes []NodeDef
-	if def.NodeClass == ua.NodeClassVariable {
-		nodes = append(nodes, def)
-	}
+	nodes = append(nodes, def)
 
-	browseChildren := func(refType uint32) error {
+	for _, refType := range []uint32{id.HasComponent, id.Organizes, id.HasProperty} {
+
 		refs, err := n.ReferencedNodes(ctx, refType, ua.BrowseDirectionForward, ua.NodeClassAll, true)
 		if err != nil {
-			return errors.Errorf("References: %d: %s", refType, err)
+			return nil, errors.Errorf("References: %d: %s", refType, err)
 		}
-		// fmt.Printf("found %d child refs\n", len(refs))
+
 		for _, rn := range refs {
 			children, err := browse(ctx, rn, def.Path, level+1)
 			if err != nil {
-				return errors.Errorf("browse children: %s", err)
+				return nil, errors.Errorf("browse children: %s", err)
 			}
 			nodes = append(nodes, children...)
 		}
-		return nil
 	}
 
-	if err := browseChildren(id.HasComponent); err != nil {
-		return nil, err
-	}
-	if err := browseChildren(id.Organizes); err != nil {
-		return nil, err
-	}
-	if err := browseChildren(id.HasProperty); err != nil {
-		return nil, err
-	}
 	return nodes, nil
 }
 

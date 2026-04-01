@@ -252,9 +252,7 @@ const (
 )
 
 func (n *baseNode) AddComponent(sub types.Node) types.Node {
-	n.AddRef(refs.NewHasComponentRefDesc(sub))
-	sub.AddRef(refs.NewReferenceDescription(n, refs.Type(id.HasComponent), false))
-
+	refs.AddHasComponentRefDescs(n, sub)
 	return n
 }
 

@@ -345,7 +345,7 @@ type UAVariable struct {
 	DataTypeAttr                string             `xml:"DataType,attr,omitempty"`
 	ValueRankAttr               *int               `xml:"ValueRank,attr,omitempty"`
 	ArrayDimensionsAttr         string             `xml:"ArrayDimensions,attr,omitempty"`
-	AccessLevelAttr             uint32             `xml:"AccessLevel,attr,omitempty"`
+	AccessLevelAttr             *uint32            `xml:"AccessLevel,attr,omitempty"`
 	UserAccessLevelAttr         uint32             `xml:"UserAccessLevel,attr,omitempty"`
 	MinimumSamplingIntervalAttr float64            `xml:"MinimumSamplingInterval,attr,omitempty"`
 	HistorizingAttr             bool               `xml:"Historizing,attr,omitempty"`

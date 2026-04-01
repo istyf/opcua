@@ -1,25 +1,29 @@
 package main
 
 import (
-	"context"
 	"log"
 	"testing"
 
 	"github.com/gopcua/opcua"
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server"
 	"github.com/gopcua/opcua/server/node"
+	"github.com/gopcua/opcua/server/refs"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 )
 
 func TestBrowse(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 
 	// start the server
 	s := server.New(
 		ctx,
 		server.EndPoint("localhost", 4840),
 	)
+
 	populateServer(s)
+
 	if err := s.Start(ctx); err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +42,7 @@ func TestBrowse(t *testing.T) {
 	// browse the nodes
 	nodeList, err := browse(
 		ctx,
-		c.Node(ua.MustParseNodeID("i=84")),
+		c.Node(ua.NewNumericNodeID(0, id.ObjectsFolder)),
 		"",
 		maxDepth-3, // faster test with reduced depth
 	)
@@ -49,13 +53,13 @@ func TestBrowse(t *testing.T) {
 	// ensure that the TestVar1 node was found
 	found := false
 	for _, n := range nodeList {
-		if n.BrowseName == "TestVar1" {
+		if n.BrowseName == "TestObj1" {
 			found = true
 			break
 		}
 	}
 	if !found {
-		t.Errorf("TestVar1 not found in nodeList: %v", nodeList)
+		t.Errorf("TestObj1 not found in nodeList: %v", nodeList)
 	}
 }
 
@@ -68,28 +72,25 @@ func populateServer(s *server.Server) {
 	// to do this we first need to get the root namespace object folder so we
 	// get the object node
 	rootNS, _ := s.Namespace(0)
-	rootObjects := rootNS.Objects()
 
 	// Now we'll add a node namespace.
 	nodeNS := server.NewNodeNameSpace(s, "NodeNamespace")
-	log.Printf("Node Namespace added at index %d", nodeNS.ID())
+	log.Printf("node namespace added at index %d", nodeNS.ID())
 
-	// add the reference for this namespace's root object folder to the server's root object folder
-	// but you can add a reference to whatever node(s) you need
-	nsObjects := nodeNS.Objects()
-	rootObjects.AddComponent(nsObjects)
+	objectTypeNode := rootNS.Node(ua.NewNumericNodeID(0, id.BaseObjectType))
+	objectType, _ := objectTypeNode.(types.VariableTypeNode)
 
-	// Create some nodes for it.  Here we are creating a new variable node
-	// with an integer node ID that is automatically assigned. (ns=<namespace id>,s=<auto assigned>)
-	// be sure to add the reference to the node somewhere if desired, or clients won't be able to browse it.
-	nsObjects.AddComponent(
+	// Add forward and backward organizes references between the existing root
+	// ObjectsFolder and a test object that we create here
+	refs.AddOrganizesRefDescs(
+		rootNS.Node(ua.NewNumericNodeID(0, id.ObjectsFolder)),
 		nodeNS.AddNode(
-			node.NewVariableNode(
+			node.NewObjectNode(
 				node.WithBase(
-					node.WithID(ua.NewNumericNodeID(nodeNS.ID(), nodeNS.GetNextNodeID())),
-					node.WithBrowseName(nodeNS.NewQualifiedName("TestVar1")),
+					node.WithID(nodeNS.NextAvailableID()),
+					node.WithBrowseName(nodeNS.NewQualifiedName("TestObj1")),
 				),
-				node.WithValue(float32(123.45)),
+				node.WithType(objectType),
 			),
 		),
 	)

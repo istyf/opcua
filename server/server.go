@@ -142,11 +142,6 @@ func New(ctx context.Context, opts ...Option) *Server {
 		},
 	}
 
-	// init server address space
-	//for _, n := range PredefinedNodes() {
-	//s.namespaces[0].AddNode(n)
-	//}
-
 	// this nodeset is pre-compiled into the binary and contains a known set of nodes
 	// so it should *always* work ok.
 	var nodes schema.UANodeSet
@@ -159,16 +154,12 @@ func New(ctx context.Context, opts ...Option) *Server {
 	}
 
 	s.ImportNodeSet(ctx, &nodes)
+	ns := s.namespaces[0]
+	serverNode := ns.Node(ua.NewNumericNodeID(0, id.Server))
 
-	s.namespaces[0].AddNode(NamespacesNode(s))
-
-	for _, n := range ServerStatusNodes(s, s.namespaces[0].Node(ua.NewNumericNodeID(0, id.Server))) {
-		s.namespaces[0].AddNode(n)
-	}
-
-	for _, n := range ServerCapabilitiesNodes(s) {
-		s.namespaces[0].AddNode(n)
-	}
+	WireupNamespacesArrayNodeValue(s, ns)
+	WireupServerStatusNodesValues(s, serverNode, ns)
+	WireupServerCapabilityNodeValue(s, ns)
 
 	return s
 }

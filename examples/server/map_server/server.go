@@ -20,7 +20,9 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 )
@@ -141,17 +143,21 @@ func main() {
 	ualog.Info(ctx, "map namespace 2 added", ualog.Uint32("index", uint32(myMapNamespace1.ID())))
 
 	// fill them with data.
-	myMapNamespace1.Data["Tag1"] = 123.4
-	myMapNamespace1.Data["Tag2"] = 42
-	myMapNamespace1.Data["Tag3.Tag4"] = "some string"
-	myMapNamespace1.Data["Tag5"] = true
-	myMapNamespace1.Data["Tag6"] = time.Now()
+	setNS1Value := myMapNamespace1.ValueUpdater(ctx)
 
-	myMapNamespace2.Data["Tag7"] = 56.78
-	myMapNamespace2.Data["Tag8"] = 92
-	myMapNamespace2.Data["Tag9"] = "different string"
-	myMapNamespace2.Data["Tag10"] = false
-	myMapNamespace2.Data["Tag11"] = time.Now().Add(time.Hour)
+	setNS1Value("Tag1", 123.4)
+	setNS1Value("Tag2", 42)
+	setNS1Value("Tag3.Tag4", "some string")
+	setNS1Value("Tag5", true)
+	setNS1Value("Tag6", time.Now())
+
+	setNS2Value := myMapNamespace2.ValueUpdater(ctx)
+
+	setNS2Value("Tag7", 56.78)
+	setNS2Value("Tag8", 92)
+	setNS2Value("Tag9", "different string")
+	setNS2Value("Tag10", false)
+	setNS2Value("Tag11", time.Now().Add(time.Hour))
 
 	// simulate a background process updating the data in the map namespace.
 	go func() {
@@ -162,11 +168,9 @@ func main() {
 		for {
 			updates++
 			num++
-			// you can manually lock and change the value, then manually trigger the change notification
-			myMapNamespace1.Mu.Lock()
-			myMapNamespace1.Data["Tag2"] = num
-			myMapNamespace1.ChangeNotification(ctx, "Tag2")
-			myMapNamespace1.Mu.Unlock()
+
+			setNS1Value("Tag2", num)
+
 			if updates == 10 {
 				// or you can do it with the built-in functions.
 				// which handles the locking and triggering
@@ -194,15 +198,13 @@ func main() {
 	// add the namespaces to the server. If you want them to show up in a browse, you'll
 	// also have to add a reference to them (probably from the object node).
 	rootNS, _ := s.Namespace(0)
-	rootObjects := rootNS.Objects()
 
 	// then we add the namespace to the server and add a reference to it from the object node.
 	// the object node of the map namespace is a virtual node that contains all the "nodes" for each
 	// map key
-	rootObjects.AddComponents(
-		myMapNamespace1.Objects(),
-		myMapNamespace2.Objects(),
-	)
+	rootObjectsFolder := rootNS.Node(ua.NewNumericNodeID(0, id.ObjectsFolder))
+	refs.AddOrganizesRefDescs(rootObjectsFolder, myMapNamespace1.Objects())
+	refs.AddHasComponentRefDescs(rootObjectsFolder, myMapNamespace2.Objects())
 
 	// Start the server
 	// Note that you can add namespaces before or after starting the server.

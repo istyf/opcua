@@ -1,6 +1,8 @@
 package node
 
 import (
+	"fmt"
+	"math"
 	"strconv"
 	"time"
 
@@ -14,11 +16,12 @@ import (
 type ValueFunc func() *ua.DataValue
 
 type variableConfig struct {
-	variableTypeNodeId *ua.NodeID
-	dataTypeNodeId     *ua.NodeID
-	rank               int32
-	valueFunc          func() *ua.DataValue
-	historizing        bool
+	variableTypeNode types.VariableTypeNode
+
+	dataTypeNodeId *ua.NodeID
+	rank           int32
+	valueFunc      func() *ua.DataValue
+	historizing    bool
 
 	accessLevel   ua.AccessLevelType
 	accessLevelEx ua.AccessLevelExType
@@ -34,7 +37,12 @@ func WithAccessLevel(level uint8) variableOption {
 
 func WithAccessLevelEx(level uint32) variableOption {
 	return func(cfg *variableConfig) {
-		cfg.accessLevelEx = ua.AccessLevelExType(level)
+		if level != math.MaxUint32 {
+			cfg.accessLevelEx = ua.AccessLevelExType(level)
+
+			lowestBits := ua.AccessLevelType(uint32(level) & 255)
+			cfg.accessLevel = lowestBits
+		}
 	}
 }
 
@@ -93,7 +101,7 @@ func WithVariableType(varType types.VariableTypeNode) variableOption {
 	}
 
 	return func(cfg *variableConfig) {
-		cfg.variableTypeNodeId = varType.ID()
+		cfg.variableTypeNode = varType
 	}
 }
 
@@ -106,7 +114,7 @@ func WithHistorization(historizing bool) variableOption {
 func WithValue(value any) variableOption {
 	dataTypeNodeId, rank := LookupTypeNodeIDFromValue(value)
 	if dataTypeNodeId == nil {
-		panic("WithValue is only supported for built in types")
+		panic(fmt.Sprintf("WithValue is only supported for built in types: %v", value))
 	}
 
 	return func(cfg *variableConfig) {
@@ -124,19 +132,22 @@ type variableNode struct {
 }
 
 var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
-	id.Boolean:    ua.NewNumericNodeID(0, id.Boolean),
-	id.SByte:      ua.NewNumericNodeID(0, id.SByte),
-	id.Byte:       ua.NewNumericNodeID(0, id.Byte),
-	id.Int16:      ua.NewNumericNodeID(0, id.Int16),
-	id.UInt16:     ua.NewNumericNodeID(0, id.UInt16),
-	id.Int32:      ua.NewNumericNodeID(0, id.Int32),
-	id.UInt32:     ua.NewNumericNodeID(0, id.UInt32),
-	id.Int64:      ua.NewNumericNodeID(0, id.Int64),
-	id.UInt64:     ua.NewNumericNodeID(0, id.UInt64),
-	id.Float:      ua.NewNumericNodeID(0, id.Float),
-	id.Double:     ua.NewNumericNodeID(0, id.Double),
-	id.String:     ua.NewNumericNodeID(0, id.String),
-	id.ByteString: ua.NewNumericNodeID(0, id.ByteString),
+	id.Boolean:       ua.NewNumericNodeID(0, id.Boolean),
+	id.SByte:         ua.NewNumericNodeID(0, id.SByte),
+	id.Byte:          ua.NewNumericNodeID(0, id.Byte),
+	id.Int16:         ua.NewNumericNodeID(0, id.Int16),
+	id.UInt16:        ua.NewNumericNodeID(0, id.UInt16),
+	id.Int32:         ua.NewNumericNodeID(0, id.Int32),
+	id.UInt32:        ua.NewNumericNodeID(0, id.UInt32),
+	id.Int64:         ua.NewNumericNodeID(0, id.Int64),
+	id.UInt64:        ua.NewNumericNodeID(0, id.UInt64),
+	id.Float:         ua.NewNumericNodeID(0, id.Float),
+	id.Double:        ua.NewNumericNodeID(0, id.Double),
+	id.String:        ua.NewNumericNodeID(0, id.String),
+	id.ByteString:    ua.NewNumericNodeID(0, id.ByteString),
+	id.UtcTime:       ua.NewNumericNodeID(0, id.UtcTime),
+	id.DateTime:      ua.NewNumericNodeID(0, id.DateTime),
+	id.LocalizedText: ua.NewNumericNodeID(0, id.LocalizedText),
 }
 
 func LookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
@@ -159,6 +170,8 @@ func LookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 		return typeNodeIdFromDataType[id.UInt16], valueRank
 	case int32:
 		return typeNodeIdFromDataType[id.Int32], valueRank
+	case []int32:
+		return typeNodeIdFromDataType[id.Int32], 1
 	case uint32:
 		return typeNodeIdFromDataType[id.UInt32], valueRank
 	case int64:
@@ -183,14 +196,25 @@ func LookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 		return typeNodeIdFromDataType[id.Double], valueRank
 	case string:
 		return typeNodeIdFromDataType[id.String], valueRank
+	case []string:
+		return typeNodeIdFromDataType[id.String], 1
+	case time.Time:
+		if v.Location() == time.UTC {
+			return typeNodeIdFromDataType[id.UtcTime], valueRank
+		}
+		return typeNodeIdFromDataType[id.DateTime], valueRank
+	case *ua.ExtensionObject:
+		return v.TypeID.NodeID, valueRank
+	case []*ua.ExtensionObject:
+		return v[0].TypeID.NodeID, 1
+	case *ua.LocalizedText:
+		return typeNodeIdFromDataType[id.LocalizedText], valueRank
+	case []*ua.LocalizedText:
+		return typeNodeIdFromDataType[id.LocalizedText], 1
 	case []byte:
 		return typeNodeIdFromDataType[id.ByteString], valueRank
-	case []any:
-		if len(v) > 0 {
-			if typeNode, _ := LookupTypeNodeIDFromValue(v[0]); typeNode != nil {
-				return typeNode, 1
-			}
-		}
+	default:
+		fmt.Printf("failed to handle value type: %v (%T)", v, v)
 	}
 
 	return nil, valueRank
@@ -207,6 +231,11 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 		applyOption(cfg)
 	}
 
+	if cfg.variableTypeNode == nil {
+		panic("creating variables with no variable type is not allowed")
+		//cfg.variableTypeNodeId = ua.NewNumericNodeID(0, id.BaseVariableType)
+	}
+
 	n := &variableNode{
 		baseNode:  *newBaseNode(base(ua.NodeClassVariable)),
 		valueFunc: cfg.valueFunc,
@@ -215,14 +244,10 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 	n.baseNode.attr[ua.AttributeIDValueRank] = values.DataValueFromValue(cfg.rank)
 	n.baseNode.attr[ua.AttributeIDDataType] = values.DataValueFromValue(cfg.dataTypeNodeId)
 	n.baseNode.attr[ua.AttributeIDHistorizing] = values.DataValueFromValue(cfg.historizing)
-	n.baseNode.attr[ua.AttributeIDAccessLevel] = values.DataValueFromValue(cfg.accessLevel)
-	n.baseNode.attr[ua.AttributeIDAccessLevelEx] = values.DataValueFromValue(cfg.accessLevelEx)
+	n.baseNode.attr[ua.AttributeIDAccessLevel] = values.DataValueFromValue(uint8(cfg.accessLevel))
+	n.baseNode.attr[ua.AttributeIDAccessLevelEx] = values.DataValueFromValue(uint32(cfg.accessLevelEx))
 
-	if cfg.variableTypeNodeId == nil {
-		cfg.variableTypeNodeId = ua.NewNumericNodeID(0, id.BaseVariableType)
-	}
-
-	n.AddRef(refs.NewHasTypeDefinitionRefDesc(&ua.ExpandedNodeID{NodeID: cfg.variableTypeNodeId}))
+	n.AddRef(refs.NewHasTypeDefinitionRefDesc(cfg.variableTypeNode))
 
 	return n
 }
@@ -277,13 +302,21 @@ func (n *variableNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error 
 
 		if val != nil {
 			copy := *val
-			n.valueFunc = func() *ua.DataValue { return &copy }
+			n.SetValueFunc(func() *ua.DataValue { return &copy })
 		} else {
-			n.valueFunc = func() *ua.DataValue { return nil }
+			n.SetValue(nil)
 		}
 
 		return nil
 	}
 
 	return n.baseNode.SetAttribute(id, val)
+}
+
+func (n *variableNode) SetValue(value *ua.DataValue) {
+	n.SetValueFunc(func() *ua.DataValue { return value })
+}
+
+func (n *variableNode) SetValueFunc(valueFunc func() *ua.DataValue) {
+	n.valueFunc = valueFunc
 }

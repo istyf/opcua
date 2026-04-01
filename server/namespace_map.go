@@ -8,6 +8,7 @@ import (
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/attrs"
 	"github.com/gopcua/opcua/server/node"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
@@ -23,8 +24,10 @@ import (
 type MapNamespace struct {
 	srv  *Server
 	name string
-	Mu   sync.RWMutex
-	Data map[string]any
+	mu   sync.RWMutex
+
+	data          map[string]any
+	objectsFolder types.Node
 
 	// This can be used to be alerted when a value is changed from the opc server
 	ExternalNotification chan string
@@ -39,18 +42,24 @@ type MapNamespace struct {
 //
 // Returns nil if the value doesn't exist.
 func (s *MapNamespace) GetValue(key string) any {
-	s.Mu.RLock()
-	defer s.Mu.RUnlock()
-	return s.Data[key]
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.data[key]
 }
 
 // update the value associated with a key and trigger the change notification
 // to the OPC server
 func (s *MapNamespace) SetValue(ctx context.Context, key string, value any) {
-	s.Mu.Lock()
-	defer s.Mu.Unlock()
-	s.Data[key] = value
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.data[key] = value
 	s.ChangeNotification(ctx, key)
+}
+
+func (s *MapNamespace) ValueUpdater(ctx context.Context) func(string, any) {
+	return func(key string, value any) {
+		s.SetValue(ctx, key, value)
+	}
 }
 
 // This function is used to notify OPC UA subscribers if a key was changed without using the
@@ -63,75 +72,72 @@ func NewMapNamespace(srv *Server, name string) *MapNamespace {
 	mrw := MapNamespace{
 		srv:                  srv,
 		name:                 name,
-		Data:                 make(map[string]any),
+		data:                 make(map[string]any),
 		ExternalNotification: make(chan string),
 		logAttributes:        ualog.GroupAttrs("namespace", ualog.String("name", name), ualog.String("type", "map")),
 	}
 	srv.AddNamespace(&mrw)
+
+	folderTypeNode := srv.Node(ua.NewNumericNodeID(0, id.FolderType))
+	folderType, _ := folderTypeNode.(types.ObjectTypeNode)
+
+	mrw.objectsFolder = node.NewObjectNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(mrw.ID(), id.ObjectsFolder)),
+			node.WithBrowseName(mrw.NewQualifiedName("Objects")),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Objects")}),
+		),
+		node.WithType(folderType),
+	)
+
+	refs.AddOrganizesRefDescs(
+		srv.Node(ua.NewNumericNodeID(0, id.ObjectsFolder)),
+		mrw.objectsFolder,
+	)
+
 	return &mrw
 }
 
 func (s *MapNamespace) ID() uint16 {
 	return s.id
 }
+
 func (ns *MapNamespace) SetID(id uint16) {
 	ns.id = id
 }
 
 func (ns *MapNamespace) Browse(ctx context.Context, bd *ua.BrowseDescription) *ua.BrowseResult {
-	ns.Mu.RLock()
-	defer ns.Mu.RUnlock()
+	ns.mu.RLock()
+	defer ns.mu.RUnlock()
 
 	ualog.Debug(ctx, "browse request for node", ns.logAttributes,
 		ualog.Any(ualog.NodeIdKey, bd.NodeID), ualog.Bitmask("mask", bd.ResultMask),
 	)
 
-	if bd.NodeID.IntID() != id.RootFolder && bd.NodeID.IntID() != id.ObjectsFolder {
+	if bd.NodeID.IntID() != ns.objectsFolder.ID().IntID() {
 		refs := make([]*ua.ReferenceDescription, 0)
 		return &ua.BrowseResult{
 			StatusCode: ua.StatusGood,
 			References: refs,
 		}
-		//return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDUnknown}
 	}
 
-	if bd.NodeID.IntID() == id.RootFolder {
+	refs := make([]*ua.ReferenceDescription, len(ns.data))
 
-		refs := make([]*ua.ReferenceDescription, 1)
-		newid := ua.NewNumericNodeID(ns.id, id.ObjectsFolder)
-		expnewid := ua.NewNumericExpandedNodeID(ns.id, id.ObjectsFolder)
-		refs[0] = &ua.ReferenceDescription{
-			ReferenceTypeID: newid,
-			NodeID:          expnewid,
-			BrowseName:      &ua.QualifiedName{NamespaceIndex: ns.id, Name: "Objects"},
-			DisplayName:     &ua.LocalizedText{EncodingMask: ua.LocalizedTextText, Text: "Objects"},
-			TypeDefinition:  expnewid,
-		}
+	hasComponentRef := ua.NewNumericNodeID(0, id.HasComponent)
 
-		return &ua.BrowseResult{
-			StatusCode: ua.StatusGood,
-			References: refs,
-		}
-	}
-
-	refs := make([]*ua.ReferenceDescription, len(ns.Data))
-
-	keyid := 0
-	for k := range ns.Data {
-		key := k
-		refid := ua.NewNumericNodeID(0, id.HasComponent)
+	for key := range ns.data {
 		expnewid := ua.NewStringExpandedNodeID(ns.id, key)
 
-		refs[keyid] = &ua.ReferenceDescription{
-			ReferenceTypeID: refid,
+		refs = append(refs, &ua.ReferenceDescription{
+			ReferenceTypeID: hasComponentRef,
 			IsForward:       true,
 			NodeID:          expnewid,
 			BrowseName:      &ua.QualifiedName{NamespaceIndex: ns.ID(), Name: key},
 			DisplayName:     &ua.LocalizedText{EncodingMask: ua.LocalizedTextText, Text: key},
 			NodeClass:       ua.NodeClassVariable, // when support is added for nested maps, this will be NodeClassObject
 			TypeDefinition:  expnewid,
-		}
-		keyid++
+		})
 	}
 
 	return &ua.BrowseResult{
@@ -175,7 +181,7 @@ func (ns *MapNamespace) Attribute(ctx context.Context, n *ua.NodeID, a ua.Attrib
 	}
 
 	key := n.StringID()
-	ualog.Debug(ctx, "read request", ualog.String("key", key), ualog.Any("data", ns.Data))
+	ualog.Debug(ctx, "read request", ualog.String("key", key), ualog.Any("data", ns.data))
 
 	var err error
 
@@ -193,7 +199,7 @@ func (ns *MapNamespace) Attribute(ctx context.Context, n *ua.NodeID, a ua.Attrib
 	case ua.AttributeIDValue:
 		dv.Status = ua.StatusOK
 		dv.EncodingMask |= ua.DataValueValue
-		v, ok := ns.Data[key]
+		v, ok := ns.data[key]
 		if !ok {
 			return &ua.DataValue{
 				EncodingMask:    ua.DataValueServerTimestamp | ua.DataValueStatusCode,
@@ -254,7 +260,7 @@ func (ns *MapNamespace) Attribute(ctx context.Context, n *ua.NodeID, a ua.Attrib
 	case ua.AttributeIDDataType:
 		dv.Status = ua.StatusOK
 		dv.EncodingMask |= ua.DataValueValue
-		v := ns.Data[key]
+		v := ns.data[key]
 		switch v.(type) {
 		case string:
 			dv.Value, err = ua.NewVariant(ua.NewNumericNodeID(0, 12))
@@ -325,10 +331,10 @@ func (s *MapNamespace) SetAttribute(ctx context.Context, node *ua.NodeID, attr u
 	ctx = ualog.WithAttrs(ctx, s.logAttributes)
 	ualog.Debug(ctx, "write node attribute", ualog.Any(ualog.NodeIdKey, node), ualog.Any("attr", attr))
 
-	s.Mu.Lock()
-	defer s.Mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
-	ualog.Debug(ctx, "data pre-write", ualog.Any("data", s.Data))
+	ualog.Debug(ctx, "data pre-write", ualog.Any("data", s.data))
 
 	key := node.StringID()
 
@@ -336,7 +342,7 @@ func (s *MapNamespace) SetAttribute(ctx context.Context, node *ua.NodeID, attr u
 	// going to use the node id directly to look it up from our data map.
 	if attr == ua.AttributeIDValue {
 		v := val.Value.Value()
-		s.Data[key] = v
+		s.data[key] = v
 	}
 
 	// notify the opc ua server the value has changed.
@@ -354,52 +360,19 @@ func (ns *MapNamespace) Name() string {
 	return ns.name
 }
 func (ns *MapNamespace) AddNode(n types.Node) types.Node {
-	return n
+	panic("not implemented")
 }
 func (ns *MapNamespace) Node(id *ua.NodeID) types.Node {
-	return nil
+	panic("not implemented")
 }
 func (ns *MapNamespace) Objects() types.ObjectNode {
-	// TODO: This is a constructor method masquerading as an accessor ... Why?
-	oid := ua.NewNumericNodeID(ns.ID(), id.ObjectsFolder)
-
-	n := node.NewObjectNode(
-		node.WithBase(
-			node.WithID(oid),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: ns.ID(), Name: ns.Name()}),
-		),
-		node.WithType(
-			node.NewObjectTypeNode(
-				node.WithBase(
-					node.WithID(ua.NewNumericNodeID(0, id.FolderType)),
-					node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "FolderType"}),
-				),
-			),
-		),
-	)
-
-	return n
-}
-
-func (ns *MapNamespace) Root() types.ObjectNode {
-	// TODO: This is a constructor method masquerading as an accessor ... Why?
-	n := node.NewObjectNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(ns.ID(), id.RootFolder)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: ns.ID(), Name: "Root"}),
-		),
-		node.WithType(
-			node.NewObjectTypeNode(
-				node.WithBase(
-					node.WithID(ua.NewNumericNodeID(0, id.FolderType)),
-					node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "FolderType"}),
-				),
-			),
-		),
-	)
-	return n
+	return ns.objectsFolder
 }
 
 func (ns *MapNamespace) NewQualifiedName(name string) *ua.QualifiedName {
 	return &ua.QualifiedName{NamespaceIndex: ns.ID(), Name: name}
+}
+
+func (ns *MapNamespace) NextAvailableID() *ua.NodeID {
+	panic("not implemented")
 }

@@ -20,6 +20,7 @@ import (
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server"
 	"github.com/gopcua/opcua/server/node"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -147,7 +148,6 @@ func main() {
 	// to do this we first need to get the root namespace object folder so we
 	// get the object node
 	rootNamespace, _ := s.Namespace(0)
-	rootObjects := rootNamespace.Objects()
 
 	// Start the server
 	// Note that you can add namespaces before or after starting the server.
@@ -163,8 +163,24 @@ func main() {
 
 	// add the reference for this namespace's root object folder to the server's root object folder
 	// but you can add a reference to whatever node(s) you need
-	nodeNSObjects := nodeNS.Objects()
-	rootObjects.AddComponent(nodeNSObjects)
+
+	folderTypeNode := rootNamespace.Node(ua.NewNumericNodeID(0, id.FolderType))
+	folderType, _ := folderTypeNode.(types.ObjectTypeNode)
+
+	nodeNSObjectsFolder := nodeNS.AddNode(
+		node.NewObjectNode(
+			node.WithBase(
+				node.WithID(nodeNS.NextAvailableID()),
+				node.WithBrowseName(nodeNS.NewQualifiedName("Objects")),
+			),
+			node.WithType(folderType),
+		),
+	)
+
+	refs.AddOrganizesRefDescs(
+		rootNamespace.Node(ua.NewNumericNodeID(0, id.ObjectsFolder)),
+		nodeNSObjectsFolder,
+	)
 
 	// Create some nodes for it.  Here we are creating a new variable node
 	// with an integer node ID that is automatically assigned. (ns=<namespace id>,s=<auto assigned>)
@@ -176,12 +192,12 @@ func main() {
 		),
 		node.WithValue(float32(123.45)),
 	)
-	nodeNSObjects.AddComponent(nodeNS.AddNode(var1))
+	nodeNSObjectsFolder.AddComponent(nodeNS.AddNode(var1))
 
 	// This node will have a string node id (ns=<namespace id>,s=TestVar2)
 	// your variable node's value can also return a ua.Variant from a function if you want to update the value dynamically
 	// here we are just incrementing a counter every time the value is read.
-	nodeNSObjects.AddComponent(
+	nodeNSObjectsFolder.AddComponent(
 		nodeNS.AddNode(
 			node.NewVariableNode(
 				node.WithBase(
@@ -204,7 +220,7 @@ func main() {
 	// control, but you'll have to build the node up with the correct attributes and references and then reference it from
 	// the parent node in the namespace if applicable.
 
-	nodeNSObjects.AddComponent(
+	nodeNSObjectsFolder.AddComponent(
 		nodeNS.AddNode(
 			node.NewVariableNode(
 				node.WithBase(
@@ -216,7 +232,7 @@ func main() {
 			),
 		))
 
-	nodeNSObjects.AddComponent(
+	nodeNSObjectsFolder.AddComponent(
 		nodeNS.AddNode(
 			node.NewVariableNode(
 				node.WithBase(
@@ -229,7 +245,7 @@ func main() {
 		),
 	)
 
-	nodeNSObjects.AddComponent(
+	nodeNSObjectsFolder.AddComponent(
 		nodeNS.AddNode(
 			node.NewVariableNode(
 				node.WithBase(
@@ -242,7 +258,7 @@ func main() {
 		),
 	)
 
-	nodeNSObjects.AddComponent(
+	nodeNSObjectsFolder.AddComponent(
 		nodeNS.AddNode(
 			node.NewVariableNode(
 				node.WithBase(
