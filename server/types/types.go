@@ -13,11 +13,25 @@ type AttrValue struct {
 	SourceTimestamp time.Time
 }
 
+type ReferenceWrapper interface {
+	NodeClass() ua.NodeClass
+
+	IsForward() bool
+
+	IsReferenceType(refType uint32) bool
+	ReferenceType() *ua.NodeID
+
+	TargetNodeID() *ua.ExpandedNodeID
+	TargetsNode(Node) bool
+
+	Copy(context.Context) *ua.ReferenceDescription
+}
+
 type ReferenceCollection interface {
-	All() iter.Seq[*ua.ReferenceDescription]
-	Contains(match func(*ua.ReferenceDescription) bool) bool
+	All() iter.Seq[ReferenceWrapper]
+	Contains(match func(ReferenceWrapper) bool) bool
 	Count() int
-	Find(matching func(*ua.ReferenceDescription) bool) iter.Seq[*ua.ReferenceDescription]
+	Find(matching func(ReferenceWrapper) bool) iter.Seq[ReferenceWrapper]
 }
 
 // These are all the functions a namespace needs in order to provide nodes into the server
@@ -54,17 +68,17 @@ type NameSpace interface {
 type Node interface {
 	ID() *ua.NodeID
 	BrowseName() *ua.QualifiedName
-	DisplayName() *ua.LocalizedText
+	DisplayName(context.Context) *ua.LocalizedText
 	NodeClass() ua.NodeClass
 
 	AddComponent(Node) Node
 	AddComponents(...Node) Node
 
-	AddRef(*ua.ReferenceDescription)
+	AddRef(ReferenceWrapper)
 	References() ReferenceCollection
 
-	Attribute(ua.AttributeID) (*AttrValue, error)
-	SetAttribute(ua.AttributeID, *ua.DataValue) error
+	Attribute(context.Context, ua.AttributeID) (*AttrValue, error)
+	SetAttribute(context.Context, ua.AttributeID, *ua.DataValue) error
 }
 
 type TypeNode interface {
@@ -104,13 +118,12 @@ type ReferenceTypeNode interface {
 type VariableNode interface {
 	Node
 
-	Access(ua.AccessLevelType) bool
+	Access(context.Context, ua.AccessLevelType) bool
 	Value() *ua.DataValue
 	SetValue(*ua.DataValue)
 	SetValueFunc(func() *ua.DataValue)
 
-	Attribute(ua.AttributeID) (*AttrValue, error)
-	SetAttribute(ua.AttributeID, *ua.DataValue) error
+	Attribute(context.Context, ua.AttributeID) (*AttrValue, error)
 }
 
 type VariableTypeNode interface {

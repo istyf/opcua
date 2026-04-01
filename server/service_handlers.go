@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/id"
+	srvctx "github.com/gopcua/opcua/server/context"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -102,7 +103,13 @@ func (s *Server) handleService(ctx context.Context, sc *uasc.SecureChannel, reqI
 	typeID := ua.ServiceTypeID(req)
 	h, ok := s.handlers[typeID]
 	if ok {
-		resp, err = h(ctx, sc, req, reqID)
+		handlerContext := ctx
+
+		if session := s.sb.Session(ctx, req.Header().AuthenticationToken); session != nil {
+			handlerContext = srvctx.WithPreferedLocales(ctx, session.cfg.locales)
+		}
+
+		resp, err = h(handlerContext, sc, req, reqID)
 	} else {
 		if typeID == 0 {
 			ualog.Warn(ctx, "unknown (potentially non registered) service", ualog.Any("request", req))

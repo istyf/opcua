@@ -598,7 +598,7 @@ func (srv *Server) refsImportNodeSet(ctx context.Context, nodes *schema.UANodeSe
 		rt.UAType.UANode = new(schema.UANode)
 		rt.BrowseNameAttr = alias
 		rt.NodeIdAttr = aliases[alias]
-		isSymmetricValue, err := refnode.Attribute(ua.AttributeIDSymmetric)
+		isSymmetricValue, err := refnode.Attribute(ctx, ua.AttributeIDSymmetric)
 		if err == nil {
 			rt.SymmetricAttr = isSymmetricValue.Value.Value.Value().(bool)
 		}

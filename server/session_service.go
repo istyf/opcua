@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/rand"
+	"slices"
 	"strings"
 	"time"
 
@@ -122,6 +123,24 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 		return nil, ua.StatusBadInternalError
 	}
 	sess.serverNonce = nonce
+
+	addMissingBaseLocales := func(locales []string) []string {
+		for idx := range len(locales) {
+			// find out if this locales has a country or region component
+			lang, _, hasSeparator := strings.Cut(locales[idx], "-")
+			if hasSeparator {
+				// if it does, and the language is not present on its own in the locale list
+				if idx == len(locales)-1 || slices.Index(locales[idx+1:], lang) == -1 {
+					// we add the language to the list of locales
+					locales = append(locales, lang)
+				}
+			}
+		}
+
+		return locales
+	}
+
+	sess.cfg.locales = addMissingBaseLocales(req.LocaleIDs)
 
 	response := &ua.ActivateSessionResponse{
 		ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),

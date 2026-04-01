@@ -25,6 +25,7 @@ type session struct {
 
 type sessionConfig struct {
 	sessionTimeout time.Duration
+	locales        []string
 }
 
 type sessionBroker struct {
@@ -46,11 +47,15 @@ func (sb *sessionBroker) NewSession() *session {
 		ID:              ua.NewGUIDNodeID(1, uuid.New().String()),
 		AuthTokenID:     ua.NewNumericNodeID(0, uint32(mrand.Int31())),
 		PublishRequests: make(chan PubReq, 100),
+		cfg: sessionConfig{
+			locales: []string{"en"},
+		},
 	}
 
 	sb.mu.Lock()
+	defer sb.mu.Unlock()
+
 	sb.s[s.AuthTokenID.String()] = s
-	sb.mu.Unlock()
 
 	return s
 }

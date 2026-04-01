@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/id"
-	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -98,7 +97,7 @@ func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.A
 		// fixed properly.
 		a = &types.AttrValue{Value: values.DataValueFromValue(byte(0))}
 	case ua.AttributeIDNodeClass:
-		a, err = n.Attribute(attr)
+		a, err = n.Attribute(ctx, attr)
 		if err != nil {
 			return &ua.DataValue{
 				EncodingMask:    ua.DataValueServerTimestamp | ua.DataValueStatusCode,
@@ -112,7 +111,7 @@ func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.A
 			a.Value.Value = ua.MustVariant(int32(x))
 		}
 	default:
-		a, err = n.Attribute(attr)
+		a, err = n.Attribute(ctx, attr)
 	}
 
 	if err != nil {
@@ -158,11 +157,7 @@ func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *
 
 	references := make([]*ua.ReferenceDescription, 0, n.References().Count())
 
-	validReferences := func(r *ua.ReferenceDescription) bool {
-		// we can't have nils in these or the encoder will fail.
-		if r.NodeID == nil || r.BrowseName == nil || r.DisplayName == nil {
-			return false
-		}
+	validReferences := func(r types.ReferenceWrapper) bool {
 
 		// see if this is a ref the client was interested in.
 		if !suitableRef(ctx, ns.srv, bd, r) {
@@ -173,10 +168,7 @@ func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *
 	}
 
 	for r := range n.References().Find(validReferences) {
-
-		td := ns.srv.Node(r.NodeID.NodeID)
-
-		rf := refs.Copy(ctx, td, r)
+		rf := r.Copy(ctx)
 
 		if rf.ReferenceTypeID.IntID() == id.HasTypeDefinition && rf.IsForward {
 			// this one has to be first!
@@ -209,7 +201,7 @@ func (as *NodeNameSpace) SetAttribute(ctx context.Context, id *ua.NodeID, attr u
 		return ua.StatusBadNodeIDUnknown
 	}
 
-	err := n.SetAttribute(attr, val)
+	err := n.SetAttribute(ctx, attr, val)
 	if err != nil {
 		return ua.StatusBadAttributeIDInvalid
 	}

@@ -2,11 +2,16 @@ package context
 
 import (
 	"context"
+	"iter"
+
+	"github.com/gopcua/opcua/ua"
 )
 
 type srvCtxKeyType struct{}
 
 var srvCtxKey = srvCtxKeyType{}
+
+type LocalizedTextReader func([]*ua.LocalizedText) *ua.LocalizedText
 
 type srvctx struct {
 	methodID         string
@@ -16,13 +21,19 @@ type srvctx struct {
 
 	serviceSet  string
 	serviceName string
+
+	preferedLocales []string
 }
+
+var defaultLocales = []string{"en"}
 
 func load(ctx context.Context) *srvctx {
 	sc, ok := ctx.Value(srvCtxKey).(*srvctx)
 
 	if !ok {
-		return &srvctx{}
+		return &srvctx{
+			preferedLocales: defaultLocales,
+		}
 	}
 
 	return sc
@@ -57,6 +68,28 @@ func MethodObjectID(ctx context.Context) string {
 
 func MethodObjectName(ctx context.Context) string {
 	return load(ctx).methodObjectName
+}
+
+func WithPreferedLocales(ctx context.Context, locales []string) context.Context {
+	sc := load(ctx)
+
+	if len(locales) == 0 {
+		locales = defaultLocales
+	}
+
+	sc.preferedLocales = locales
+	return store(ctx, sc)
+}
+
+func PreferedLocalesFromContext(ctx context.Context) iter.Seq[string] {
+	locales := load(ctx).preferedLocales
+	return func(yield func(string) bool) {
+		for _, loc := range locales {
+			if !yield(loc) {
+				return
+			}
+		}
+	}
 }
 
 func WithServiceSetAndName(ctx context.Context, set, name string) context.Context {

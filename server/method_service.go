@@ -43,8 +43,8 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 
 	// Check if the method has a non forward reference to this object
 	methodBelongsToObject := func(method types.MethodNode, object types.Node) bool {
-		return method.References().Contains(func(e *ua.ReferenceDescription) bool {
-			return (!e.IsForward && e.NodeID.NodeID.IntID() == object.ID().IntID())
+		return method.References().Contains(func(e types.ReferenceWrapper) bool {
+			return !e.IsForward() && e.TargetsNode(object)
 		})
 	}
 
@@ -70,8 +70,8 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 
 		if methodNode == nil || !methodBelongsToObject(methodNode, objectNode) {
 			ualog.Error(ctx, "method does not exist or does not belong to object",
-				ualog.String("method", methodNode.DisplayName().Text),
-				ualog.String("object", objectNode.DisplayName().Text),
+				ualog.String("method", methodNode.BrowseName().String()),
+				ualog.String("object", objectNode.BrowseName().String()),
 			)
 			return &ua.CallResponse{
 				ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
@@ -81,15 +81,15 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		res := &ua.CallMethodResult{}
 		res.OutputArguments, res.StatusCode = s.middleware(methodNode.CallMethod)(
 			srvctx.WithMethodCall(ctx,
-				objectNode.ID().String(), objectNode.DisplayName().Text,
-				methodNode.ID().String(), methodNode.DisplayName().Text,
+				objectNode.ID().String(), objectNode.BrowseName().String(),
+				methodNode.ID().String(), methodNode.BrowseName().String(),
 			),
 			method.InputArguments...,
 		)
 
 		ualog.Info(ctx, "called method",
-			ualog.String("method", methodNode.DisplayName().Text),
-			ualog.String("object", objectNode.DisplayName().Text),
+			ualog.String("method", methodNode.BrowseName().String()),
+			ualog.String("object", objectNode.BrowseName().String()),
 			ualog.Any("status", res.StatusCode),
 		)
 

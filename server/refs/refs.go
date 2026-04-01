@@ -8,8 +8,6 @@ import (
 	"github.com/gopcua/opcua/ua"
 )
 
-type Type uint32
-
 var (
 	OrganizesRefTypeID         *ua.NodeID = ua.NewNumericNodeID(0, id.Organizes)
 	HasComponentRefTypeID      *ua.NodeID = ua.NewNumericNodeID(0, id.HasComponent)
@@ -17,34 +15,58 @@ var (
 	HasTypeDefinitionRefTypeID *ua.NodeID = ua.NewNumericNodeID(0, id.HasTypeDefinition)
 )
 
-func Copy(_ context.Context, _ types.Node, r *ua.ReferenceDescription) *ua.ReferenceDescription {
-	// TODO: Use the context to request the correct display name from the node
-	refdesc := &ua.ReferenceDescription{
-		ReferenceTypeID: r.ReferenceTypeID,
-		IsForward:       r.IsForward,
-		NodeID:          r.NodeID,
-		BrowseName:      r.BrowseName,
-		DisplayName:     r.DisplayName,
-		NodeClass:       r.NodeClass,
-		TypeDefinition:  r.TypeDefinition,
-	}
-
-	return refdesc
+type Description interface {
+	Copy(context.Context) *ua.ReferenceDescription
 }
 
-func NewReferenceDescription(targetNode types.Node, refTypeNodeID *ua.NodeID, isForward bool) *ua.ReferenceDescription {
+type desc struct {
+	refType *ua.NodeID
+	target  types.Node
+	forward bool
+}
+
+func (d *desc) NodeClass() ua.NodeClass {
+	return d.target.NodeClass()
+}
+
+// IsForward implements [types.ReferenceWrapper].
+func (d *desc) IsForward() bool {
+	return d.forward
+}
+
+// IsReferenceType implements [types.ReferenceWrapper].
+func (d *desc) IsReferenceType(refTypeID uint32) bool {
+	return d.refType.Namespace() == 0 || d.refType.IntID() == refTypeID
+}
+
+func (d *desc) ReferenceType() *ua.NodeID {
+	return d.refType
+}
+
+// TargetNodeID implements [types.ReferenceWrapper].
+func (d *desc) TargetNodeID() *ua.ExpandedNodeID {
+	return &ua.ExpandedNodeID{NodeID: d.target.ID()}
+}
+
+// Targets implements [types.ReferenceWrapper].
+func (d *desc) TargetsNode(other types.Node) bool {
+	return d.target.ID().Equal(other.ID())
+}
+
+func (d *desc) Copy(ctx context.Context) *ua.ReferenceDescription {
+
 	rd := &ua.ReferenceDescription{
-		ReferenceTypeID: refTypeNodeID,
-		NodeClass:       targetNode.NodeClass(),
-		BrowseName:      targetNode.BrowseName(),
-		DisplayName:     targetNode.DisplayName(),
-		NodeID:          &ua.ExpandedNodeID{NodeID: targetNode.ID()},
-		IsForward:       isForward,
+		ReferenceTypeID: d.refType,
+		IsForward:       d.forward,
+		NodeID:          &ua.ExpandedNodeID{NodeID: d.target.ID()},
+		BrowseName:      d.target.BrowseName(),
+		DisplayName:     d.target.DisplayName(ctx),
+		NodeClass:       d.target.NodeClass(),
 	}
 
 	switch rd.NodeClass {
 	case ua.NodeClassObject, ua.NodeClassVariable:
-		if td, ok := targetNode.(types.TypeNode); ok {
+		if td, ok := d.target.(types.TypeNode); ok {
 			rd.TypeDefinition = td.DataType()
 		}
 	default:
@@ -57,12 +79,23 @@ func NewReferenceDescription(targetNode types.Node, refTypeNodeID *ua.NodeID, is
 	return rd
 }
 
+func NewReferenceDescription(targetNode types.Node, refTypeNodeID *ua.NodeID, isForward bool) types.ReferenceWrapper {
+
+	d := &desc{
+		refType: refTypeNodeID,
+		target:  targetNode,
+		forward: isForward,
+	}
+
+	return d
+}
+
 func AddHasComponentRefDescs(fromNode, toNode types.Node) {
 	fromNode.AddRef(NewReferenceDescription(toNode, HasComponentRefTypeID, true))
 	toNode.AddRef(NewReferenceDescription(fromNode, HasComponentRefTypeID, false))
 }
 
-func NewHasTypeDefinitionRefDesc(typeNode types.TypeNode) *ua.ReferenceDescription {
+func NewHasTypeDefinitionRefDesc(typeNode types.TypeNode) types.ReferenceWrapper {
 	return NewReferenceDescription(typeNode, HasTypeDefinitionRefTypeID, true)
 }
 

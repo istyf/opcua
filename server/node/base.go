@@ -1,12 +1,14 @@
 package node
 
 import (
+	"context"
 	"errors"
 	"iter"
 	"slices"
 	"time"
 
 	"github.com/gopcua/opcua/id"
+	srvctx "github.com/gopcua/opcua/server/context"
 	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
@@ -15,7 +17,7 @@ import (
 
 type Attributes map[ua.AttributeID]*ua.DataValue
 
-type References []*ua.ReferenceDescription
+type References []types.ReferenceWrapper
 
 func NewAttrValue(v *ua.DataValue) *types.AttrValue {
 	return &types.AttrValue{Value: v, SourceTimestamp: time.Now()}
@@ -120,19 +122,25 @@ func (n *variableNode) Value() *ua.DataValue {
 	return n.valueFunc()
 }
 
-func (n *baseNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
+func (n *baseNode) Attribute(ctx context.Context, id ua.AttributeID) (*types.AttrValue, error) {
 	if id == ua.AttributeIDValue {
 		return nil, errors.New("value attribute only supported on variable nodes")
 	}
 
 	if id == ua.AttributeIDDisplayName && len(n.displayNames) > 0 {
-		// TODO: Get the proper locale from the session's context
-		return NewAttrValue(values.DataValueFromValue(n.displayNames[0])), nil
+		displayName := ua.LocalizedTextFromLocale(
+			n.displayNames,
+			srvctx.PreferedLocalesFromContext(ctx),
+		)
+		return NewAttrValue(values.DataValueFromValue(displayName)), nil
 	}
 
 	if id == ua.AttributeIDDescription && len(n.descriptions) > 0 {
-		// TODO: Get the proper locale from the session's context
-		return NewAttrValue(values.DataValueFromValue(n.descriptions[0])), nil
+		description := ua.LocalizedTextFromLocale(
+			n.descriptions,
+			srvctx.PreferedLocalesFromContext(ctx),
+		)
+		return NewAttrValue(values.DataValueFromValue(description)), nil
 	}
 
 	if n.attr != nil {
@@ -144,7 +152,7 @@ func (n *baseNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 	return nil, ua.StatusBadAttributeIDInvalid
 }
 
-func (n *baseNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
+func (n *baseNode) SetAttribute(_ context.Context, id ua.AttributeID, val *ua.DataValue) error {
 
 	if id == ua.AttributeIDValue {
 		return errors.New("set value attribute only supported on variable nodes")
@@ -163,12 +171,11 @@ func (n *baseNode) BrowseName() *ua.QualifiedName {
 	return v.Value.Value().(*ua.QualifiedName)
 }
 
-func (n *baseNode) DisplayName() *ua.LocalizedText {
-	if len(n.displayNames) > 0 {
-		return n.displayNames[0]
-	}
-
-	return ua.NewLocalizedText("")
+func (n *baseNode) DisplayName(ctx context.Context) *ua.LocalizedText {
+	return ua.LocalizedTextFromLocale(
+		n.displayNames,
+		srvctx.PreferedLocalesFromContext(ctx),
+	)
 }
 
 func (n *baseNode) SetDisplayName(text, locale string) {
@@ -182,14 +189,6 @@ func (n *baseNode) SetDisplayName(text, locale string) {
 	}
 
 	n.displayNames = append(n.displayNames, lt)
-}
-
-func (n *baseNode) Description() *ua.LocalizedText {
-	if len(n.descriptions) > 0 {
-		return n.descriptions[0]
-	}
-
-	return ua.NewLocalizedText("")
 }
 
 func (n *baseNode) SetDescription(text, locale string) {
@@ -209,10 +208,10 @@ func (n *baseNode) DataType() *ua.ExpandedNodeID {
 	v, ok := n.attr[ua.AttributeIDDataType]
 	if !ok || v == nil || v.Value.Value() == nil {
 		// if we have a type definition, return that?
-		for r := range n.References().Find(func(rd *ua.ReferenceDescription) bool {
-			return rd.ReferenceTypeID != nil && rd.ReferenceTypeID.IntID() == id.HasTypeDefinition && rd.IsForward
+		for r := range n.References().Find(func(rd types.ReferenceWrapper) bool {
+			return rd.IsReferenceType(id.HasTypeDefinition) && rd.IsForward()
 		}) {
-			return r.NodeID
+			return r.TargetNodeID()
 		}
 
 		return ua.NewTwoByteExpandedNodeID(0)
@@ -264,11 +263,11 @@ func (n *baseNode) AddComponents(subs ...types.Node) types.Node {
 	return n
 }
 
-func (n *baseNode) AddRef(refdesc *ua.ReferenceDescription) {
+func (n *baseNode) AddRef(refdesc types.ReferenceWrapper) {
 	// only one type def reference allowed, so replace the old one if we already have one
-	if refdesc.ReferenceTypeID == refs.HasTypeDefinitionRefTypeID {
-		hasTypeDefRefAtIndex := slices.IndexFunc(n.refs, func(rd *ua.ReferenceDescription) bool {
-			return rd.ReferenceTypeID == refs.HasTypeDefinitionRefTypeID
+	if refdesc.IsReferenceType(id.HasTypeDefinition) {
+		hasTypeDefRefAtIndex := slices.IndexFunc(n.refs, func(rd types.ReferenceWrapper) bool {
+			return rd.IsReferenceType(id.HasTypeDefinition)
 		})
 
 		if hasTypeDefRefAtIndex >= 0 {
@@ -289,8 +288,8 @@ func (n *baseNode) References() types.ReferenceCollection {
 }
 
 // All implements [types.ReferenceCollection].
-func (r *refcollection) All() iter.Seq[*ua.ReferenceDescription] {
-	return func(yield func(*ua.ReferenceDescription) bool) {
+func (r *refcollection) All() iter.Seq[types.ReferenceWrapper] {
+	return func(yield func(types.ReferenceWrapper) bool) {
 		for _, k := range r.n.refs {
 			if !yield(k) {
 				return
@@ -300,7 +299,7 @@ func (r *refcollection) All() iter.Seq[*ua.ReferenceDescription] {
 }
 
 // Contains implements [types.ReferenceCollection].
-func (r *refcollection) Contains(isMatching func(*ua.ReferenceDescription) bool) bool {
+func (r *refcollection) Contains(isMatching func(types.ReferenceWrapper) bool) bool {
 	for r := range r.All() {
 		if isMatching(r) {
 			return true
@@ -314,8 +313,8 @@ func (r *refcollection) Count() int {
 }
 
 // Find implements [types.ReferenceCollection].
-func (r *refcollection) Find(isMatching func(*ua.ReferenceDescription) bool) iter.Seq[*ua.ReferenceDescription] {
-	return func(yield func(*ua.ReferenceDescription) bool) {
+func (r *refcollection) Find(isMatching func(types.ReferenceWrapper) bool) iter.Seq[types.ReferenceWrapper] {
+	return func(yield func(types.ReferenceWrapper) bool) {
 		for _, k := range r.n.refs {
 			if isMatching(k) && !yield(k) {
 				return

@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"iter"
 	"strings"
 	"time"
 )
@@ -194,6 +195,26 @@ type LocalizedText struct {
 	EncodingMask uint8
 	Locale       string
 	Text         string
+}
+
+var emptyLocalizedText = NewLocalizedText("")
+
+func LocalizedTextFromLocale(texts []*LocalizedText, locales iter.Seq[string]) *LocalizedText {
+	nrofTexts := len(texts)
+
+	if nrofTexts > 0 {
+		for locale := range locales {
+			for textIdx := range nrofTexts {
+				if strings.Compare(texts[textIdx].Locale, locale) == 0 {
+					return texts[textIdx]
+				}
+			}
+		}
+
+		return texts[0]
+	}
+
+	return emptyLocalizedText
 }
 
 // NewLocalizedText creates a new localized text without a locale.

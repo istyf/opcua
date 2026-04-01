@@ -287,7 +287,7 @@ func main() {
 
 			// wrap the new value in a DataValue and use that to update the Value attribute of the node
 			val := values.DataValueFromVariant(ua.MustVariant(lastValue))
-			var1.SetAttribute(ua.AttributeIDValue, val)
+			var1.SetAttribute(ctx, ua.AttributeIDValue, val)
 
 			// we also need to let the node namespace know that the value has changed so it can trigger the change notification
 			// and send the updated value to any subscribed clients.

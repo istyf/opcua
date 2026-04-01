@@ -162,7 +162,7 @@ func (ns *MapNamespace) Attribute(ctx context.Context, n *ua.NodeID, a ua.Attrib
 			}
 		}
 
-		attrval, err := ns.Objects().Attribute(a)
+		attrval, err := ns.Objects().Attribute(ctx, a)
 		if err != nil {
 			return &ua.DataValue{
 				EncodingMask:    ua.DataValueServerTimestamp | ua.DataValueStatusCode,

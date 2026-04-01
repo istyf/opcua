@@ -4,6 +4,8 @@
 
 package ua
 
+import "fmt"
+
 // QualifiedName contains a qualified name. It is, for example, used as BrowseName.
 // The name part of the QualifiedName is restricted to 512 characters.
 //
@@ -11,4 +13,8 @@ package ua
 type QualifiedName struct {
 	NamespaceIndex uint16
 	Name           string
+}
+
+func (qn *QualifiedName) String() string {
+	return fmt.Sprintf("%d: %s", qn.NamespaceIndex, qn.Name)
 }

@@ -78,14 +78,14 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	return resp, nil
 }
 
-func suitableRef(_ context.Context, srv *Server, desc *ua.BrowseDescription, ref *ua.ReferenceDescription) bool {
-	if !suitableDirection(desc.BrowseDirection, ref.IsForward) {
+func suitableRef(_ context.Context, srv *Server, desc *ua.BrowseDescription, ref types.ReferenceWrapper) bool {
+	if !suitableDirection(desc.BrowseDirection, ref.IsForward()) {
 		return false
 	}
-	if !suitableRefType(srv, desc.ReferenceTypeID, ref.ReferenceTypeID, desc.IncludeSubtypes) {
+	if !suitableRefType(srv, desc.ReferenceTypeID, ref.ReferenceType(), desc.IncludeSubtypes) {
 		return false
 	}
-	if desc.NodeClassMask > 0 && desc.NodeClassMask&uint32(ref.NodeClass) == 0 {
+	if desc.NodeClassMask > 0 && desc.NodeClassMask&uint32(ref.NodeClass()) == 0 {
 		return false
 	}
 	return true
@@ -139,11 +139,11 @@ func getSubRefs(srv *Server, nid *ua.NodeID) []*ua.NodeID {
 
 	refs := make([]*ua.NodeID, 0, node.References().Count())
 
-	for ref := range node.References().Find(func(r *ua.ReferenceDescription) bool {
-		return r.ReferenceTypeID.Equal(hasSubtype) && r.IsForward && r.NodeID != nil
+	for ref := range node.References().Find(func(r types.ReferenceWrapper) bool {
+		return r.IsReferenceType(id.HasSubtype) && r.IsForward()
 	}) {
-		refs = append(refs, ref.NodeID.NodeID)
-		refs = append(refs, getSubRefs(srv, ref.NodeID.NodeID)...)
+		refs = append(refs, ref.TargetNodeID().NodeID)
+		refs = append(refs, getSubRefs(srv, ref.TargetNodeID().NodeID)...)
 	}
 
 	return refs
@@ -189,10 +189,10 @@ func (s *ViewService) TranslateBrowsePathsToNodeIDs(ctx context.Context, sc *uas
 	findTarget := func(n types.Node, pathElements []*ua.RelativePathElement) (*ua.BrowsePathResult, error) {
 		for _, elem := range pathElements {
 			var e *ua.RelativePathElement = elem
-			for ref := range n.References().Find(func(r *ua.ReferenceDescription) bool {
-				if r.ReferenceTypeID.Equal(e.ReferenceTypeID) && r.IsForward == !e.IsInverse {
-					referenceTarget := s.srv.Node(r.NodeID.NodeID)
-					if strings.Compare(referenceTarget.DisplayName().Text, e.TargetName.Name) == 0 {
+			for ref := range n.References().Find(func(r types.ReferenceWrapper) bool {
+				if r.ReferenceType().Equal(e.ReferenceTypeID) && r.IsForward() == !e.IsInverse {
+					referenceTarget := s.srv.Node(r.TargetNodeID().NodeID)
+					if strings.Compare(referenceTarget.BrowseName().Name, e.TargetName.Name) == 0 {
 						return true
 					}
 				}
@@ -202,7 +202,7 @@ func (s *ViewService) TranslateBrowsePathsToNodeIDs(ctx context.Context, sc *uas
 				return &ua.BrowsePathResult{
 					StatusCode: ua.StatusOK,
 					Targets: []*ua.BrowsePathTarget{
-						{TargetID: ref.NodeID, RemainingPathIndex: math.MaxUint32},
+						{TargetID: ref.TargetNodeID(), RemainingPathIndex: math.MaxUint32},
 					},
 				}, nil
 			}

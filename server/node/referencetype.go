@@ -1,6 +1,9 @@
 package node
 
 import (
+	"context"
+
+	srvctx "github.com/gopcua/opcua/server/context"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -72,19 +75,22 @@ func (n *refTypeNode) IsSymetrical() bool {
 	return n.symetric
 }
 
-func (n *refTypeNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
+func (n *refTypeNode) Attribute(ctx context.Context, id ua.AttributeID) (*types.AttrValue, error) {
 	if id == ua.AttributeIDInverseName {
 		if n.symetric || len(n.inverseNames) == 0 {
 			return nil, ua.StatusBadAttributeIDInvalid
 		}
 
-		// TODO: resolve the proper locale to return from the session's context
-		return NewAttrValue(values.DataValueFromValue(n.inverseNames[0])), nil
+		inverseName := ua.LocalizedTextFromLocale(
+			n.inverseNames,
+			srvctx.PreferedLocalesFromContext(ctx),
+		)
+		return NewAttrValue(values.DataValueFromValue(inverseName)), nil
 	}
 
-	return n.baseNode.Attribute(id)
+	return n.baseNode.Attribute(ctx, id)
 }
 
-func (n *refTypeNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
-	return n.baseNode.SetAttribute(id, val)
+func (n *refTypeNode) SetAttribute(ctx context.Context, id ua.AttributeID, val *ua.DataValue) error {
+	return n.baseNode.SetAttribute(ctx, id, val)
 }

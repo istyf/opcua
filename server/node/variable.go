@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"strconv"
@@ -259,9 +260,9 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 // I'm not sure what the best way to implement "user" specific access levels
 // is presently.  Will need functioning user authentication first, and then a way to
 // pass it into the nodes user access attribute so it can be checked properly.
-func (n *variableNode) Access(flag ua.AccessLevelType) bool {
+func (n *variableNode) Access(ctx context.Context, flag ua.AccessLevelType) bool {
 
-	access, err := n.Attribute(ua.AttributeIDAccessLevel)
+	access, err := n.Attribute(ctx, ua.AttributeIDAccessLevel)
 	if err == nil { // if we have an access level, we need to check it.
 		val0 := access.Value.Value.Value()
 		val, ok := val0.(uint8)
@@ -277,9 +278,9 @@ func (n *variableNode) Access(flag ua.AccessLevelType) bool {
 	return true
 }
 
-func (n *variableNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
+func (n *variableNode) Attribute(ctx context.Context, id ua.AttributeID) (*types.AttrValue, error) {
 	if id == ua.AttributeIDValue {
-		if !n.Access(ua.AccessLevelTypeCurrentRead) {
+		if !n.Access(ctx, ua.AccessLevelTypeCurrentRead) {
 			return NewAttrValue(&ua.DataValue{
 				EncodingMask:    ua.DataValueServerTimestamp | ua.DataValueStatusCode,
 				ServerTimestamp: time.Now(),
@@ -290,13 +291,13 @@ func (n *variableNode) Attribute(id ua.AttributeID) (*types.AttrValue, error) {
 		return NewAttrValue(n.valueFunc()), nil
 	}
 
-	return n.baseNode.Attribute(id)
+	return n.baseNode.Attribute(ctx, id)
 }
 
-func (n *variableNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error {
+func (n *variableNode) SetAttribute(ctx context.Context, id ua.AttributeID, val *ua.DataValue) error {
 
 	if id == ua.AttributeIDValue {
-		if !n.Access(ua.AccessLevelTypeCurrentWrite) {
+		if !n.Access(ctx, ua.AccessLevelTypeCurrentWrite) {
 			return ua.StatusBadUserAccessDenied
 		}
 
@@ -310,7 +311,7 @@ func (n *variableNode) SetAttribute(id ua.AttributeID, val *ua.DataValue) error 
 		return nil
 	}
 
-	return n.baseNode.SetAttribute(id, val)
+	return n.baseNode.SetAttribute(ctx, id, val)
 }
 
 func (n *variableNode) SetValue(value *ua.DataValue) {
