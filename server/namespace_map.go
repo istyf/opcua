@@ -133,8 +133,8 @@ func (ns *MapNamespace) Browse(ctx context.Context, bd *ua.BrowseDescription) *u
 			ReferenceTypeID: hasComponentRef,
 			IsForward:       true,
 			NodeID:          expnewid,
-			BrowseName:      &ua.QualifiedName{NamespaceIndex: ns.ID(), Name: key},
-			DisplayName:     &ua.LocalizedText{EncodingMask: ua.LocalizedTextText, Text: key},
+			BrowseName:      ns.NewQualifiedName(key),
+			DisplayName:     ua.NewLocalizedText(key),
 			NodeClass:       ua.NodeClassVariable, // when support is added for nested maps, this will be NodeClassObject
 			TypeDefinition:  expnewid,
 		})

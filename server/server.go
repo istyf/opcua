@@ -138,7 +138,7 @@ func New(ctx context.Context, opts ...Option) *Server {
 				BuildDate:        time.Time{},
 			},
 			SecondsTillShutdown: 0,
-			ShutdownReason:      &ua.LocalizedText{},
+			ShutdownReason:      ua.NewLocalizedText(""),
 		},
 	}
 
@@ -377,12 +377,9 @@ func (s *Server) initEndpoints() {
 				EndpointURL:   url, // todo: be able to listen on multiple adapters
 				SecurityLevel: secLevel,
 				Server: &ua.ApplicationDescription{
-					ApplicationURI: s.cfg.applicationURI,
-					ProductURI:     "urn:github.com:gopcua:server",
-					ApplicationName: &ua.LocalizedText{
-						EncodingMask: ua.LocalizedTextText,
-						Text:         s.cfg.applicationName,
-					},
+					ApplicationURI:      s.cfg.applicationURI,
+					ProductURI:          "urn:github.com:gopcua:server",
+					ApplicationName:     ua.NewLocalizedText(s.cfg.applicationName),
 					ApplicationType:     ua.ApplicationTypeServer,
 					GatewayServerURI:    "",
 					DiscoveryProfileURI: "",
