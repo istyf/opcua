@@ -29,7 +29,7 @@ var Logger = log.New(os.Stderr, "debug: ", 0)
 
 // PrefixLogger returns a new debug logger when debug logging is enabled.
 // Otherwise, a discarding logger is returned.
-func NewPrefixLogger(format string, args ...interface{}) *log.Logger {
+func NewPrefixLogger(format string, args ...any) *log.Logger {
 	if !Enable {
 		return log.New(io.Discard, "", 0)
 	}
@@ -37,7 +37,7 @@ func NewPrefixLogger(format string, args ...interface{}) *log.Logger {
 }
 
 // Printf logs the message with Logger.Printf() when debug logging is enabled.
-func Printf(format string, args ...interface{}) {
+func Printf(format string, args ...any) {
 	if !Enable {
 		return
 	}
@@ -65,7 +65,7 @@ func Printf(format string, args ...interface{}) {
 
 // ToJSON returns the JSON representation of v when debug logging
 // is enabled.
-func ToJSON(v interface{}) string {
+func ToJSON(v any) string {
 	if !Enable {
 		return ""
 	}

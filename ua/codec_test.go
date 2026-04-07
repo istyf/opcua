@@ -17,7 +17,7 @@ import (
 // object from bytes.
 type CodecTestCase struct {
 	Name   string
-	Struct interface{}
+	Struct any
 	Bytes  []byte
 }
 
@@ -33,7 +33,7 @@ func RunCodecTest(t *testing.T, cases []CodecTestCase) {
 				typ := reflect.ValueOf(c.Struct).Type()
 				var v reflect.Value
 				switch typ.Kind() {
-				case reflect.Ptr:
+				case reflect.Pointer:
 					v = reflect.New(typ.Elem()) // typ: *struct, v: *struct
 				case reflect.Slice:
 					v = reflect.New(typ) // typ: []x, v: *[]x

@@ -391,7 +391,7 @@ func SecurityFromEndpoint(ep *ua.EndpointDescription, authType ua.UserTokenType)
 	}
 }
 
-func setPolicyID(t interface{}, policy string) {
+func setPolicyID(t any, policy string) {
 	switch tok := t.(type) {
 	case *ua.AnonymousIdentityToken:
 		tok.PolicyID = policy

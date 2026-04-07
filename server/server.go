@@ -421,6 +421,7 @@ func (s *Server) initEndpoints() {
 					if dup {
 						continue
 					}
+
 					tok := &ua.UserTokenPolicy{
 						PolicyID:          policyID,
 						TokenType:         auth.tokenType,

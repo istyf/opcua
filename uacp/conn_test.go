@@ -21,8 +21,7 @@ func TestConn(t *testing.T) {
 		require.NoError(t, err)
 		defer ln.Close()
 
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+		ctx := t.Context()
 
 		done := make(chan struct{})
 		acceptErr := make(chan error, 1)
@@ -68,8 +67,7 @@ func TestClientWrite(t *testing.T) {
 	require.NoError(t, err, "Listen failed")
 	defer ln.Close()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	var srvConn *Conn
 	done := make(chan int)
@@ -122,8 +120,7 @@ func TestServerWrite(t *testing.T) {
 	require.NoError(t, err, "Listen failed")
 	defer ln.Close()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := t.Context()
 
 	var srvConn *Conn
 	done := make(chan int)

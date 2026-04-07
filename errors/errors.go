@@ -9,7 +9,7 @@ import (
 const Prefix = "opcua: "
 
 // Errorf wraps fmt.Errorf
-func Errorf(format string, a ...interface{}) error {
+func Errorf(format string, a ...any) error {
 	return fmt.Errorf(Prefix+format, a...)
 }
 
@@ -24,7 +24,7 @@ func Is(err error, target error) bool {
 }
 
 // As wraps errors.As
-func As(err error, target interface{}) bool {
+func As(err error, target any) bool {
 	return errors.As(err, target)
 }
 

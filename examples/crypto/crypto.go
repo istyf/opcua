@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -338,13 +339,7 @@ func printEndpointOptions(endpoints []*ua.EndpointDescription) {
 			tok := strings.TrimPrefix(t.TokenType.String(), "UserTokenType")
 
 			// Just show one entry if a server has multiple varieties of one TokenType (eg. different algorithms)
-			dup := false
-			for _, v := range tt {
-				if tok == v {
-					dup = true
-					break
-				}
-			}
+			dup := slices.Contains(tt, tok)
 			if !dup {
 				tt = append(tt, tok)
 			}

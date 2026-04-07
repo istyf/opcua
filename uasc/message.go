@@ -90,7 +90,7 @@ func (m *MessageAbort) MessageAbort() string {
 type Message struct {
 	*MessageHeader
 	TypeID  *ua.ExpandedNodeID
-	Service interface{}
+	Service any
 }
 
 func (m *Message) Decode(b []byte) (int, error) {

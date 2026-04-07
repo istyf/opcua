@@ -84,7 +84,7 @@ func (c *channelInstance) newRequestMessage(req ua.Request, reqID uint32, authTo
 	return c.newMessage(req, typeID, reqID), nil
 }
 
-func (c *channelInstance) newMessage(srv interface{}, typeID uint16, requestID uint32) *Message {
+func (c *channelInstance) newMessage(srv any, typeID uint16, requestID uint32) *Message {
 	sequenceNumber := c.nextSequenceNumber()
 	debug.Printf("got sequence number %d", sequenceNumber)
 

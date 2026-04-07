@@ -14,7 +14,7 @@ var eotypes = NewTypeRegistry()
 
 // RegisterExtensionObject registers a new extension object type.
 // It panics if the type or the id is already registered.
-func RegisterExtensionObject(typeID *NodeID, v interface{}) {
+func RegisterExtensionObject(typeID *NodeID, v any) {
 	if err := eotypes.Register(typeID, v); err != nil {
 		panic("Extension object " + err.Error())
 	}
@@ -35,10 +35,10 @@ const (
 type ExtensionObject struct {
 	EncodingMask uint8
 	TypeID       *ExpandedNodeID
-	Value        interface{}
+	Value        any
 }
 
-func NewExtensionObject(value interface{}) *ExtensionObject {
+func NewExtensionObject(value any) *ExtensionObject {
 	e := &ExtensionObject{
 		TypeID: ExtensionObjectTypeID(value),
 		Value:  value,
@@ -115,7 +115,7 @@ func (e *ExtensionObject) UpdateMask() {
 	}
 }
 
-func ExtensionObjectTypeID(v interface{}) *ExpandedNodeID {
+func ExtensionObjectTypeID(v any) *ExpandedNodeID {
 	switch v.(type) {
 	case *AnonymousIdentityToken:
 		return NewFourByteExpandedNodeID(0, id.AnonymousIdentityToken_Encoding_DefaultBinary)

@@ -41,10 +41,7 @@ func (a *RSAOAEP) Decrypt(src []byte) ([]byte, error) {
 	start := 0
 
 	for srcRemaining > 0 {
-		end := start + blockSize
-		if end > len(src) {
-			end = len(src)
-		}
+		end := min(start+blockSize, len(src))
 
 		p, err := rsa.DecryptOAEP(a.Hash.New(), rng, a.PrivateKey, src[start:end], nil)
 		if err != nil {
@@ -80,10 +77,7 @@ func (a *RSAOAEP) Encrypt(src []byte) ([]byte, error) {
 	srcRemaining := len(src)
 	start := 0
 	for srcRemaining > 0 {
-		end := start + maxBlock
-		if end > len(src) {
-			end = len(src)
-		}
+		end := min(start+maxBlock, len(src))
 
 		c, err := rsa.EncryptOAEP(a.Hash.New(), rng, a.PublicKey, src[start:end], nil)
 		if err != nil {

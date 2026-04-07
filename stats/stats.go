@@ -17,7 +17,7 @@ import (
 var stats = NewStats()
 
 func init() {
-	expvar.Publish("gopcua", expvar.Func(func() interface{} { return stats }))
+	expvar.Publish("gopcua", expvar.Func(func() any { return stats }))
 }
 
 // Stats collects gopcua statistics via expvar.
@@ -36,7 +36,7 @@ func NewStats() *Stats {
 }
 
 func (s *Stats) MarshalJSON() ([]byte, error) {
-	return json.Marshal(map[string]interface{}{
+	return json.Marshal(map[string]any{
 		"Client":       json.RawMessage(s.Client.String()),
 		"Error":        json.RawMessage(s.Error.String()),
 		"Subscription": json.RawMessage(s.Subscription.String()),

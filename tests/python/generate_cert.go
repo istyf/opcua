@@ -61,8 +61,8 @@ func GenerateCert(host string, rsaBits int, validFor time.Duration) (certPEM, ke
 		BasicConstraintsValid: true,
 	}
 
-	hosts := strings.Split(host, ",")
-	for _, h := range hosts {
+	hosts := strings.SplitSeq(host, ",")
+	for h := range hosts {
 		if ip := net.ParseIP(h); ip != nil {
 			template.IPAddresses = append(template.IPAddresses, ip)
 		} else {
@@ -81,7 +81,7 @@ func GenerateCert(host string, rsaBits int, validFor time.Duration) (certPEM, ke
 	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes}), pem.EncodeToMemory(pemBlockForKey(priv)), nil
 }
 
-func publicKey(priv interface{}) interface{} {
+func publicKey(priv any) any {
 	switch k := priv.(type) {
 	case *rsa.PrivateKey:
 		return &k.PublicKey
@@ -92,7 +92,7 @@ func publicKey(priv interface{}) interface{} {
 	}
 }
 
-func pemBlockForKey(priv interface{}) *pem.Block {
+func pemBlockForKey(priv any) *pem.Block {
 	switch k := priv.(type) {
 	case *rsa.PrivateKey:
 		return &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)}

@@ -603,7 +603,7 @@ func TestArray(t *testing.T) {
 
 func TestSet(t *testing.T) {
 	tests := []struct {
-		v   interface{}
+		v   any
 		va  *Variant
 		err error
 	}{
@@ -707,7 +707,7 @@ func TestSet(t *testing.T) {
 
 func TestSliceDim(t *testing.T) {
 	tests := []struct {
-		v   interface{}
+		v   any
 		et  reflect.Type
 		dim []int32
 		len int32
@@ -723,49 +723,49 @@ func TestSliceDim(t *testing.T) {
 		},
 		{
 			v:   "a",
-			et:  reflect.TypeOf(""),
+			et:  reflect.TypeFor[string](),
 			dim: nil,
 			len: 1,
 		},
 		{
 			v:   1,
-			et:  reflect.TypeOf(int(0)),
+			et:  reflect.TypeFor[int](),
 			dim: nil,
 			len: 1,
 		},
 		{
 			v:   []int{},
-			et:  reflect.TypeOf(int(0)),
+			et:  reflect.TypeFor[int](),
 			dim: []int32{0},
 			len: 0,
 		},
 		{
 			v:   []int{1, 2, 3},
-			et:  reflect.TypeOf(int(0)),
+			et:  reflect.TypeFor[int](),
 			dim: []int32{3},
 			len: 3,
 		},
 		{
 			v:   [][]int{{1, 1}, {2, 2}, {3, 3}},
-			et:  reflect.TypeOf(int(0)),
+			et:  reflect.TypeFor[int](),
 			dim: []int32{3, 2},
 			len: 6,
 		},
 		{
 			v:   [][]int{{}, {}, {}},
-			et:  reflect.TypeOf(int(0)),
+			et:  reflect.TypeFor[int](),
 			dim: []int32{3, 0},
 			len: 0,
 		},
 		{
 			v:   ByteArray{},
-			et:  reflect.TypeOf(byte(0)),
+			et:  reflect.TypeFor[byte](),
 			dim: []int32{0},
 			len: 0,
 		},
 		{
 			v:   []ByteArray{{}, {}, {}},
-			et:  reflect.TypeOf(byte(0)),
+			et:  reflect.TypeFor[byte](),
 			dim: []int32{3, 0},
 			len: 0,
 		},
@@ -789,7 +789,7 @@ func TestSliceDim(t *testing.T) {
 }
 
 func TestVariantUnsupportedType(t *testing.T) {
-	tests := []interface{}{int(5), uint(5)}
+	tests := []any{int(5), uint(5)}
 	for _, v := range tests {
 		t.Run(fmt.Sprintf("%T", v), func(t *testing.T) {
 			_, err := NewVariant(v)
@@ -804,431 +804,431 @@ func TestVariantValueMethod(t *testing.T) {
 
 func TestVariantValueHelpers(t *testing.T) {
 	tests := []struct {
-		v    interface{}
-		want interface{}
-		fn   func(v *Variant) interface{}
+		v    any
+		want any
+		fn   func(v *Variant) any
 	}{
 		// bool
 		{
 			v:    int32(5),
 			want: false,
-			fn:   func(v *Variant) interface{} { return v.Bool() },
+			fn:   func(v *Variant) any { return v.Bool() },
 		},
 		{
 			v:    false,
 			want: false,
-			fn:   func(v *Variant) interface{} { return v.Bool() },
+			fn:   func(v *Variant) any { return v.Bool() },
 		},
 		{
 			v:    true,
 			want: true,
-			fn:   func(v *Variant) interface{} { return v.Bool() },
+			fn:   func(v *Variant) any { return v.Bool() },
 		},
 
 		// string
 		{
 			v:    false,
 			want: "",
-			fn:   func(v *Variant) interface{} { return v.String() },
+			fn:   func(v *Variant) any { return v.String() },
 		},
 		{
 			v:    "a",
 			want: "a",
-			fn:   func(v *Variant) interface{} { return v.String() },
+			fn:   func(v *Variant) any { return v.String() },
 		},
 		{
 			v:    XMLElement("a"),
 			want: "a",
-			fn:   func(v *Variant) interface{} { return v.String() },
+			fn:   func(v *Variant) any { return v.String() },
 		},
 		{
 			v:    NewLocalizedText("a"),
 			want: "a",
-			fn:   func(v *Variant) interface{} { return v.String() },
+			fn:   func(v *Variant) any { return v.String() },
 		},
 		{
 			v:    &QualifiedName{Name: "a"},
 			want: "a",
-			fn:   func(v *Variant) interface{} { return v.String() },
+			fn:   func(v *Variant) any { return v.String() },
 		},
 
 		// float
 		{
 			v:    false,
 			want: float64(0),
-			fn:   func(v *Variant) interface{} { return v.Float() },
+			fn:   func(v *Variant) any { return v.Float() },
 		},
 		{
 			v:    float32(5),
 			want: float64(5),
-			fn:   func(v *Variant) interface{} { return v.Float() },
+			fn:   func(v *Variant) any { return v.Float() },
 		},
 		{
 			v:    float64(5),
 			want: float64(5),
-			fn:   func(v *Variant) interface{} { return v.Float() },
+			fn:   func(v *Variant) any { return v.Float() },
 		},
 
 		// int
 		{
 			v:    false,
 			want: int64(0),
-			fn:   func(v *Variant) interface{} { return v.Int() },
+			fn:   func(v *Variant) any { return v.Int() },
 		},
 		{
 			v:    int8(5),
 			want: int64(5),
-			fn:   func(v *Variant) interface{} { return v.Int() },
+			fn:   func(v *Variant) any { return v.Int() },
 		},
 		{
 			v:    int16(5),
 			want: int64(5),
-			fn:   func(v *Variant) interface{} { return v.Int() },
+			fn:   func(v *Variant) any { return v.Int() },
 		},
 		{
 			v:    int32(5),
 			want: int64(5),
-			fn:   func(v *Variant) interface{} { return v.Int() },
+			fn:   func(v *Variant) any { return v.Int() },
 		},
 		{
 			v:    int64(5),
 			want: int64(5),
-			fn:   func(v *Variant) interface{} { return v.Int() },
+			fn:   func(v *Variant) any { return v.Int() },
 		},
 
 		// uint
 		{
 			v:    false,
 			want: uint64(0),
-			fn:   func(v *Variant) interface{} { return v.Uint() },
+			fn:   func(v *Variant) any { return v.Uint() },
 		},
 		{
 			v:    uint8(5),
 			want: uint64(5),
-			fn:   func(v *Variant) interface{} { return v.Uint() },
+			fn:   func(v *Variant) any { return v.Uint() },
 		},
 		{
 			v:    uint16(5),
 			want: uint64(5),
-			fn:   func(v *Variant) interface{} { return v.Uint() },
+			fn:   func(v *Variant) any { return v.Uint() },
 		},
 		{
 			v:    uint32(5),
 			want: uint64(5),
-			fn:   func(v *Variant) interface{} { return v.Uint() },
+			fn:   func(v *Variant) any { return v.Uint() },
 		},
 		{
 			v:    uint64(5),
 			want: uint64(5),
-			fn:   func(v *Variant) interface{} { return v.Uint() },
+			fn:   func(v *Variant) any { return v.Uint() },
 		},
 
 		// ByteArray
 		{
 			v:    false,
 			want: (ByteArray)(nil),
-			fn:   func(v *Variant) interface{} { return v.ByteArray() },
+			fn:   func(v *Variant) any { return v.ByteArray() },
 		},
 		{
 			v:    ByteArray("abc"),
 			want: ByteArray("abc"),
-			fn:   func(v *Variant) interface{} { return v.ByteArray() },
+			fn:   func(v *Variant) any { return v.ByteArray() },
 		},
 
 		// ByteString
 		{
 			v:    false,
 			want: ([]byte)(nil),
-			fn:   func(v *Variant) interface{} { return v.ByteString() },
+			fn:   func(v *Variant) any { return v.ByteString() },
 		},
 		{
 			v:    []byte("abc"),
 			want: []byte("abc"),
-			fn:   func(v *Variant) interface{} { return v.ByteString() },
+			fn:   func(v *Variant) any { return v.ByteString() },
 		},
 
 		// DataValue
 		{
 			v:    false,
 			want: (*DataValue)(nil),
-			fn:   func(v *Variant) interface{} { return v.DataValue() },
+			fn:   func(v *Variant) any { return v.DataValue() },
 		},
 		{
 			v:    &DataValue{Status: StatusBad},
 			want: &DataValue{Status: StatusBad},
-			fn:   func(v *Variant) interface{} { return v.DataValue() },
+			fn:   func(v *Variant) any { return v.DataValue() },
 		},
 
 		// DiagnosticInfo
 		{
 			v:    false,
 			want: (*DiagnosticInfo)(nil),
-			fn:   func(v *Variant) interface{} { return v.DiagnosticInfo() },
+			fn:   func(v *Variant) any { return v.DiagnosticInfo() },
 		},
 		{
 			v:    &DiagnosticInfo{SymbolicID: 5},
 			want: &DiagnosticInfo{SymbolicID: 5},
-			fn:   func(v *Variant) interface{} { return v.DiagnosticInfo() },
+			fn:   func(v *Variant) any { return v.DiagnosticInfo() },
 		},
 
 		// ExpandedNodeID
 		{
 			v:    false,
 			want: (*ExpandedNodeID)(nil),
-			fn:   func(v *Variant) interface{} { return v.ExpandedNodeID() },
+			fn:   func(v *Variant) any { return v.ExpandedNodeID() },
 		},
 		{
 			v:    &ExpandedNodeID{NamespaceURI: "abc"},
 			want: &ExpandedNodeID{NamespaceURI: "abc"},
-			fn:   func(v *Variant) interface{} { return v.ExpandedNodeID() },
+			fn:   func(v *Variant) any { return v.ExpandedNodeID() },
 		},
 
 		// ExtensionObject
 		{
 			v:    false,
 			want: (*ExtensionObject)(nil),
-			fn:   func(v *Variant) interface{} { return v.ExtensionObject() },
+			fn:   func(v *Variant) any { return v.ExtensionObject() },
 		},
 		{
 			v:    &ExtensionObject{Value: "abc"},
 			want: &ExtensionObject{Value: "abc"},
-			fn:   func(v *Variant) interface{} { return v.ExtensionObject() },
+			fn:   func(v *Variant) any { return v.ExtensionObject() },
 		},
 
 		// GUID
 		{
 			v:    false,
 			want: (*GUID)(nil),
-			fn:   func(v *Variant) interface{} { return v.GUID() },
+			fn:   func(v *Variant) any { return v.GUID() },
 		},
 		{
 			v:    NewGUID("abc"),
 			want: NewGUID("abc"),
-			fn:   func(v *Variant) interface{} { return v.GUID() },
+			fn:   func(v *Variant) any { return v.GUID() },
 		},
 
 		// LocalizedText
 		{
 			v:    false,
 			want: (*LocalizedText)(nil),
-			fn:   func(v *Variant) interface{} { return v.LocalizedText() },
+			fn:   func(v *Variant) any { return v.LocalizedText() },
 		},
 		{
 			v:    NewLocalizedText("abc"),
 			want: NewLocalizedText("abc"),
-			fn:   func(v *Variant) interface{} { return v.LocalizedText() },
+			fn:   func(v *Variant) any { return v.LocalizedText() },
 		},
 
 		// NodeID
 		{
 			v:    false,
 			want: (*NodeID)(nil),
-			fn:   func(v *Variant) interface{} { return v.NodeID() },
+			fn:   func(v *Variant) any { return v.NodeID() },
 		},
 		{
 			v:    NewFourByteNodeID(1, 2),
 			want: NewFourByteNodeID(1, 2),
-			fn:   func(v *Variant) interface{} { return v.NodeID() },
+			fn:   func(v *Variant) any { return v.NodeID() },
 		},
 
 		// ExpandedNodeID
 		{
 			v:    NewExpandedNodeID(NewFourByteNodeID(1, 2), "uri", 1),
 			want: NewFourByteNodeID(1, 2),
-			fn:   func(v *Variant) interface{} { return v.NodeID() },
+			fn:   func(v *Variant) any { return v.NodeID() },
 		},
 
 		// QualifiedName
 		{
 			v:    false,
 			want: (*QualifiedName)(nil),
-			fn:   func(v *Variant) interface{} { return v.QualifiedName() },
+			fn:   func(v *Variant) any { return v.QualifiedName() },
 		},
 		{
 			v:    &QualifiedName{Name: "a"},
 			want: &QualifiedName{Name: "a"},
-			fn:   func(v *Variant) interface{} { return v.QualifiedName() },
+			fn:   func(v *Variant) any { return v.QualifiedName() },
 		},
 
 		// StatusCode
 		{
 			v:    false,
 			want: StatusBadTypeMismatch,
-			fn:   func(v *Variant) interface{} { return v.StatusCode() },
+			fn:   func(v *Variant) any { return v.StatusCode() },
 		},
 		{
 			v:    StatusBad,
 			want: StatusBad,
-			fn:   func(v *Variant) interface{} { return v.StatusCode() },
+			fn:   func(v *Variant) any { return v.StatusCode() },
 		},
 
 		// time.Time
 		{
 			v:    false,
 			want: time.Time{},
-			fn:   func(v *Variant) interface{} { return v.Time() },
+			fn:   func(v *Variant) any { return v.Time() },
 		},
 		{
 			v:    time.Date(2019, 1, 1, 12, 13, 14, 0, time.UTC),
 			want: time.Date(2019, 1, 1, 12, 13, 14, 0, time.UTC),
-			fn:   func(v *Variant) interface{} { return v.Time() },
+			fn:   func(v *Variant) any { return v.Time() },
 		},
 
 		// Variant
 		{
 			v:    false,
 			want: (*Variant)(nil),
-			fn:   func(v *Variant) interface{} { return v.Variant() },
+			fn:   func(v *Variant) any { return v.Variant() },
 		},
 		{
 			v:    MustVariant("abc"),
 			want: MustVariant("abc"),
-			fn:   func(v *Variant) interface{} { return v.Variant() },
+			fn:   func(v *Variant) any { return v.Variant() },
 		},
 
 		// XMLElement
 		{
 			v:    false,
 			want: XMLElement(""),
-			fn:   func(v *Variant) interface{} { return v.XMLElement() },
+			fn:   func(v *Variant) any { return v.XMLElement() },
 		},
 		{
 			v:    XMLElement("a"),
 			want: XMLElement("a"),
-			fn:   func(v *Variant) interface{} { return v.XMLElement() },
+			fn:   func(v *Variant) any { return v.XMLElement() },
 		},
 
 		// []string
 		{
 			v:    []string{"a", "b", "c"},
 			want: "",
-			fn:   func(v *Variant) interface{} { return v.String() },
+			fn:   func(v *Variant) any { return v.String() },
 		},
 
 		// []bool
 		{
 			v:    []bool{true, true, true},
 			want: false,
-			fn:   func(v *Variant) interface{} { return v.Bool() },
+			fn:   func(v *Variant) any { return v.Bool() },
 		},
 
 		// []float64
 		{
 			v:    []float64{1, 2, 3},
 			want: float64(0),
-			fn:   func(v *Variant) interface{} { return v.Float() },
+			fn:   func(v *Variant) any { return v.Float() },
 		},
 
 		// []int64
 		{
 			v:    []int64{1, 2, 3},
 			want: int64(0),
-			fn:   func(v *Variant) interface{} { return v.Int() },
+			fn:   func(v *Variant) any { return v.Int() },
 		},
 
 		// []uint64
 		{
 			v:    []uint64{1, 2, 3},
 			want: uint64(0),
-			fn:   func(v *Variant) interface{} { return v.Uint() },
+			fn:   func(v *Variant) any { return v.Uint() },
 		},
 
 		// [][]byte
 		{
 			v:    [][]byte{{'x', 'y', 'z'}},
 			want: ([]byte)(nil),
-			fn:   func(v *Variant) interface{} { return v.ByteString() },
+			fn:   func(v *Variant) any { return v.ByteString() },
 		},
 
 		// []ByteArray
 		{
 			v:    []ByteArray{{'x', 'y', 'z'}},
 			want: (ByteArray)(nil),
-			fn:   func(v *Variant) interface{} { return v.ByteArray() },
+			fn:   func(v *Variant) any { return v.ByteArray() },
 		},
 
 		// []*DataValue
 		{
 			v:    []*DataValue{{Status: StatusBad}},
 			want: (*DataValue)(nil),
-			fn:   func(v *Variant) interface{} { return v.DataValue() },
+			fn:   func(v *Variant) any { return v.DataValue() },
 		},
 
 		// []*DiagnosticInfo
 		{
 			v:    []*DiagnosticInfo{{AdditionalInfo: "nop"}},
 			want: (*DiagnosticInfo)(nil),
-			fn:   func(v *Variant) interface{} { return v.DiagnosticInfo() },
+			fn:   func(v *Variant) any { return v.DiagnosticInfo() },
 		},
 
 		// []*ExpandedNodeID
 		{
 			v:    []*ExpandedNodeID{{NamespaceURI: "abc"}},
 			want: (*ExpandedNodeID)(nil),
-			fn:   func(v *Variant) interface{} { return v.ExpandedNodeID() },
+			fn:   func(v *Variant) any { return v.ExpandedNodeID() },
 		},
 
 		// []*ExtensionObject
 		{
 			v:    []*ExtensionObject{{Value: "abc"}},
 			want: (*ExtensionObject)(nil),
-			fn:   func(v *Variant) interface{} { return v.ExtensionObject() },
+			fn:   func(v *Variant) any { return v.ExtensionObject() },
 		},
 
 		// []*GUID
 		{
 			v:    []*GUID{NewGUID("abcd")},
 			want: (*GUID)(nil),
-			fn:   func(v *Variant) interface{} { return v.GUID() },
+			fn:   func(v *Variant) any { return v.GUID() },
 		},
 
 		// []*LocalizedText
 		{
 			v:    []*LocalizedText{{Text: "abc"}},
 			want: (*LocalizedText)(nil),
-			fn:   func(v *Variant) interface{} { return v.LocalizedText() },
+			fn:   func(v *Variant) any { return v.LocalizedText() },
 		},
 
 		// []*NodeID
 		{
 			v:    []*NodeID{NewFourByteNodeID(1, 2)},
 			want: (*NodeID)(nil),
-			fn:   func(v *Variant) interface{} { return v.NodeID() },
+			fn:   func(v *Variant) any { return v.NodeID() },
 		},
 
 		// []*QualifiedName
 		{
 			v:    []*QualifiedName{{Name: "a"}},
 			want: (*QualifiedName)(nil),
-			fn:   func(v *Variant) interface{} { return v.QualifiedName() },
+			fn:   func(v *Variant) any { return v.QualifiedName() },
 		},
 
 		// []*StatusCode
 		{
 			v:    []StatusCode{StatusOK, StatusBad},
 			want: StatusBadTypeMismatch,
-			fn:   func(v *Variant) interface{} { return v.StatusCode() },
+			fn:   func(v *Variant) any { return v.StatusCode() },
 		},
 
 		// []time.Time
 		{
 			v:    []time.Time{time.Date(2019, 1, 1, 12, 13, 14, 0, time.UTC)},
 			want: time.Time{},
-			fn:   func(v *Variant) interface{} { return v.Time() },
+			fn:   func(v *Variant) any { return v.Time() },
 		},
 
 		// []*Variant
 		{
 			v:    []*Variant{MustVariant("abc")},
 			want: (*Variant)(nil),
-			fn:   func(v *Variant) interface{} { return v.Variant() },
+			fn:   func(v *Variant) any { return v.Variant() },
 		},
 
 		// []XMLElement
 		{
 			v:    []XMLElement{XMLElement("a")},
 			want: XMLElement(""),
-			fn:   func(v *Variant) interface{} { return v.XMLElement() },
+			fn:   func(v *Variant) any { return v.XMLElement() },
 		},
 	}
 	for i, tt := range tests {

@@ -17,7 +17,7 @@ func TestMessage(t *testing.T) {
 	cases := []CodecTestCase{
 		{
 			Name: "OPN",
-			Struct: func() interface{} {
+			Struct: func() any {
 				s := &SecureChannel{
 					cfg: &Config{
 						SecurityPolicyURI: "http://gopcua.example/OPCUA/SecurityPolicy#Foo",
@@ -116,7 +116,7 @@ func TestMessage(t *testing.T) {
 		},
 		{
 			Name: "MSG",
-			Struct: func() interface{} {
+			Struct: func() any {
 				s := &SecureChannel{
 					cfg: &Config{
 						SecurityPolicyURI: "http://gopcua.example/OPCUA/SecurityPolicy#Foo",
@@ -187,7 +187,7 @@ func TestMessage(t *testing.T) {
 			},
 		}, {
 			Name: "CLO",
-			Struct: func() interface{} {
+			Struct: func() any {
 				s := &SecureChannel{
 					cfg: &Config{
 						SecurityPolicyURI: "http://gopcua.example/OPCUA/SecurityPolicy#Foo",

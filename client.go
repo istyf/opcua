@@ -1343,7 +1343,7 @@ func (c *Client) UpdateNamespaces(ctx context.Context) error {
 }
 
 // safeAssign implements a type-safe assign from T to *T.
-func safeAssign(t, ptrT interface{}) error {
+func safeAssign(t, ptrT any) error {
 	if reflect.TypeOf(t) != reflect.TypeOf(ptrT).Elem() {
 		return InvalidResponseTypeError{t, ptrT}
 	}
@@ -1354,7 +1354,7 @@ func safeAssign(t, ptrT interface{}) error {
 }
 
 type InvalidResponseTypeError struct {
-	got, want interface{}
+	got, want any
 }
 
 func (e InvalidResponseTypeError) Error() string {

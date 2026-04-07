@@ -9,6 +9,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -65,14 +66,8 @@ func EnableSecurity(secPolicy string, secMode ua.MessageSecurityMode) Option {
 			secPolicy = "http://opcfoundation.org/UA/SecurityPolicy#" + secPolicy
 		}
 
-		var ok bool
 		ss := uapolicy.SupportedPolicies()
-		for _, sp := range ss {
-			if sp == secPolicy {
-				ok = true
-				break
-			}
-		}
+		ok := slices.Contains(ss, secPolicy)
 		if !ok {
 			ualog.Error(ctx, "unable to add endpoint security mode to config",
 				ualog.String(ualog.ErrorKey, "unsupported policy"),

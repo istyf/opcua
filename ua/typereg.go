@@ -39,7 +39,7 @@ func NewTypeRegistry() *TypeRegistry {
 // If the id is not known the function returns nil.
 //
 // New panics if id is nil.
-func (r *TypeRegistry) New(id *NodeID) interface{} {
+func (r *TypeRegistry) New(id *NodeID) any {
 	if id == nil {
 		panic("opcua: missing id in call to TypeRegistry.New")
 	}
@@ -59,7 +59,7 @@ func (r *TypeRegistry) New(id *NodeID) interface{} {
 //
 // If the type was registered multiple times the first
 // registered id for this type is returned.
-func (r *TypeRegistry) Lookup(v interface{}) *NodeID {
+func (r *TypeRegistry) Lookup(v any) *NodeID {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if id, ok := r.ids[reflect.TypeOf(v)]; ok {
@@ -73,7 +73,7 @@ func (r *TypeRegistry) Lookup(v interface{}) *NodeID {
 // If the id is already registered as a different type the function returns an error.
 //
 // Register panics if id is nil.
-func (r *TypeRegistry) Register(id *NodeID, v interface{}) error {
+func (r *TypeRegistry) Register(id *NodeID, v any) error {
 	if id == nil {
 		panic("opcua: missing id in call to TypeRegistry.Register")
 	}

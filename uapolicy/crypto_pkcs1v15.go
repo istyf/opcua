@@ -34,10 +34,7 @@ func (c *PKCS1v15) Decrypt(src []byte) ([]byte, error) {
 	start := 0
 
 	for srcRemaining > 0 {
-		end := start + blockSize
-		if end > len(src) {
-			end = len(src)
-		}
+		end := min(start+blockSize, len(src))
 
 		p, err := rsa.DecryptPKCS1v15(rng, c.PrivateKey, src[start:end])
 		if err != nil {
@@ -65,10 +62,7 @@ func (c *PKCS1v15) Encrypt(src []byte) ([]byte, error) {
 	srcRemaining := len(src)
 	start := 0
 	for srcRemaining > 0 {
-		end := start + maxBlock
-		if end > len(src) {
-			end = len(src)
-		}
+		end := min(start+maxBlock, len(src))
 
 		c, err := rsa.EncryptPKCS1v15(rng, c.PublicKey, src[start:end])
 		if err != nil {

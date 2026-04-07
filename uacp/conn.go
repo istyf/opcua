@@ -397,7 +397,7 @@ func (c *Conn) Receive() ([]byte, error) {
 	return b[:h.MessageSize], nil
 }
 
-func (c *Conn) Send(typ string, msg interface{}) error {
+func (c *Conn) Send(typ string, msg any) error {
 	if len(typ) != 4 {
 		return errors.Errorf("invalid msg type: %s", typ)
 	}

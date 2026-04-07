@@ -159,7 +159,7 @@ func (b *Buffer) ReadBytes() []byte {
 	return d
 }
 
-func (b *Buffer) ReadStruct(r interface{}) {
+func (b *Buffer) ReadStruct(r any) {
 	if b.err != nil {
 		return
 	}

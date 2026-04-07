@@ -75,7 +75,7 @@ func NewMonitoredItemCreateRequestWithDefaults(nodeID *ua.NodeID, attributeID ua
 type PublishNotificationData struct {
 	SubscriptionID uint32
 	Error          error
-	Value          interface{}
+	Value          any
 }
 
 // Cancel stops the subscription and removes it

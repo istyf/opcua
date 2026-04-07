@@ -58,10 +58,10 @@ type Variant struct {
 	// is set.
 	arrayDimensions []int32
 
-	value interface{}
+	value any
 }
 
-func NewVariant(v interface{}) (*Variant, error) {
+func NewVariant(v any) (*Variant, error) {
 	va := &Variant{}
 	if !isBuiltinType(v) {
 		return nil, fmt.Errorf("trying to create a variant from a type that is not supported: %s", reflect.ValueOf(v).Type().Name())
@@ -72,7 +72,7 @@ func NewVariant(v interface{}) (*Variant, error) {
 	return va, nil
 }
 
-func MustVariant(v interface{}) *Variant {
+func MustVariant(v any) *Variant {
 	va, err := NewVariant(v)
 	if err != nil {
 		panic(err)
@@ -110,7 +110,7 @@ func (m *Variant) ArrayDimensions() []int32 {
 }
 
 // Value returns the value.
-func (m *Variant) Value() interface{} {
+func (m *Variant) Value() any {
 	return m.value
 }
 
@@ -148,7 +148,7 @@ func (m *Variant) Decode(b []byte) (int, error) {
 	// get the type for the slice
 	sliceType := reflect.SliceOf(typ)
 	if m.Type() == TypeIDByte {
-		sliceType = reflect.TypeOf(ByteArray{})
+		sliceType = reflect.TypeFor[ByteArray]()
 	}
 
 	var vals reflect.Value
@@ -161,7 +161,7 @@ func (m *Variant) Decode(b []byte) (int, error) {
 	// decode a slice with values
 	default:
 		vals = reflect.MakeSlice(sliceType, n, n)
-		for i := 0; i < n; i++ {
+		for i := range n {
 			vals.Index(i).Set(reflect.ValueOf(m.decodeValue(buf)))
 		}
 	}
@@ -250,7 +250,7 @@ func split(level, i, j int, dims []int, vals reflect.Value) reflect.Value {
 }
 
 // decodeValue reads a single value of the base type from the buffer.
-func (m *Variant) decodeValue(buf *Buffer) interface{} {
+func (m *Variant) decodeValue(buf *Buffer) any {
 	switch m.Type() {
 	case TypeIDBoolean:
 		return buf.ReadBool()
@@ -365,7 +365,7 @@ func (m *Variant) encode(buf *Buffer, val reflect.Value) {
 }
 
 // encodeValue writes a single value of the base type to the buffer.
-func (m *Variant) encodeValue(buf *Buffer, v interface{}) {
+func (m *Variant) encodeValue(buf *Buffer, v any) {
 	switch x := v.(type) {
 	case bool:
 		buf.WriteBool(x)
@@ -442,7 +442,7 @@ func sliceDim(val reflect.Value) (typ reflect.Type, dim []int32, count int32, er
 	// array of Byte.
 	//
 	// https://github.com/gopcua/opcua/issues/463
-	if val.Type() == reflect.TypeOf([]byte{}) && val.Type() != reflect.TypeOf(ByteArray{}) {
+	if val.Type() == reflect.TypeFor[[]byte]() && val.Type() != reflect.TypeFor[ByteArray]() {
 		return val.Type(), nil, 1, nil
 	}
 
@@ -479,7 +479,7 @@ func sliceDim(val reflect.Value) (typ reflect.Type, dim []int32, count int32, er
 }
 
 // set sets the value and updates the flags according to the type.
-func (m *Variant) set(v interface{}) error {
+func (m *Variant) set(v any) error {
 	// set array length and dimensions if value is a slice
 	et, dim, count, err := sliceDim(reflect.ValueOf(v))
 	if err != nil {
@@ -789,7 +789,7 @@ func (m *Variant) XMLElement() XMLElement {
 	}
 }
 
-func isBuiltinType(v interface{}) bool {
+func isBuiltinType(v any) bool {
 	if v == nil {
 		return true
 	}
@@ -843,31 +843,31 @@ func isBuiltinType(v interface{}) bool {
 var variantTypeToTypeID = map[reflect.Type]TypeID{}
 var variantTypeIDToType = map[TypeID]reflect.Type{
 	TypeIDNull:            reflect.TypeOf(nil),
-	TypeIDBoolean:         reflect.TypeOf(false),
-	TypeIDSByte:           reflect.TypeOf(int8(0)),
-	TypeIDByte:            reflect.TypeOf(uint8(0)),
-	TypeIDInt16:           reflect.TypeOf(int16(0)),
-	TypeIDUint16:          reflect.TypeOf(uint16(0)),
-	TypeIDInt32:           reflect.TypeOf(int32(0)),
-	TypeIDUint32:          reflect.TypeOf(uint32(0)),
-	TypeIDInt64:           reflect.TypeOf(int64(0)),
-	TypeIDUint64:          reflect.TypeOf(uint64(0)),
-	TypeIDFloat:           reflect.TypeOf(float32(0)),
-	TypeIDDouble:          reflect.TypeOf(float64(0)),
-	TypeIDString:          reflect.TypeOf(string("")),
-	TypeIDDateTime:        reflect.TypeOf(time.Time{}),
-	TypeIDGUID:            reflect.TypeOf(new(GUID)),
-	TypeIDByteString:      reflect.TypeOf([]byte{}),
-	TypeIDXMLElement:      reflect.TypeOf(XMLElement("")),
-	TypeIDNodeID:          reflect.TypeOf(new(NodeID)),
-	TypeIDExpandedNodeID:  reflect.TypeOf(new(ExpandedNodeID)),
-	TypeIDStatusCode:      reflect.TypeOf(StatusCode(0)),
-	TypeIDQualifiedName:   reflect.TypeOf(new(QualifiedName)),
-	TypeIDLocalizedText:   reflect.TypeOf(new(LocalizedText)),
-	TypeIDExtensionObject: reflect.TypeOf(new(ExtensionObject)),
-	TypeIDDataValue:       reflect.TypeOf(new(DataValue)),
-	TypeIDVariant:         reflect.TypeOf(new(Variant)),
-	TypeIDDiagnosticInfo:  reflect.TypeOf(new(DiagnosticInfo)),
+	TypeIDBoolean:         reflect.TypeFor[bool](),
+	TypeIDSByte:           reflect.TypeFor[int8](),
+	TypeIDByte:            reflect.TypeFor[uint8](),
+	TypeIDInt16:           reflect.TypeFor[int16](),
+	TypeIDUint16:          reflect.TypeFor[uint16](),
+	TypeIDInt32:           reflect.TypeFor[int32](),
+	TypeIDUint32:          reflect.TypeFor[uint32](),
+	TypeIDInt64:           reflect.TypeFor[int64](),
+	TypeIDUint64:          reflect.TypeFor[uint64](),
+	TypeIDFloat:           reflect.TypeFor[float32](),
+	TypeIDDouble:          reflect.TypeFor[float64](),
+	TypeIDString:          reflect.TypeFor[string](),
+	TypeIDDateTime:        reflect.TypeFor[time.Time](),
+	TypeIDGUID:            reflect.TypeFor[*GUID](),
+	TypeIDByteString:      reflect.TypeFor[[]byte](),
+	TypeIDXMLElement:      reflect.TypeFor[XMLElement](),
+	TypeIDNodeID:          reflect.TypeFor[*NodeID](),
+	TypeIDExpandedNodeID:  reflect.TypeFor[*ExpandedNodeID](),
+	TypeIDStatusCode:      reflect.TypeFor[StatusCode](),
+	TypeIDQualifiedName:   reflect.TypeFor[*QualifiedName](),
+	TypeIDLocalizedText:   reflect.TypeFor[*LocalizedText](),
+	TypeIDExtensionObject: reflect.TypeFor[*ExtensionObject](),
+	TypeIDDataValue:       reflect.TypeFor[*DataValue](),
+	TypeIDVariant:         reflect.TypeFor[*Variant](),
+	TypeIDDiagnosticInfo:  reflect.TypeFor[*DiagnosticInfo](),
 }
 
 func init() {

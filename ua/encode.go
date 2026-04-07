@@ -24,13 +24,13 @@ type BinaryEncoder interface {
 	Encode() ([]byte, error)
 }
 
-var binaryEncoder = reflect.TypeOf((*BinaryEncoder)(nil)).Elem()
+var binaryEncoder = reflect.TypeFor[BinaryEncoder]()
 
 func isBinaryEncoder(val reflect.Value) bool {
 	return val.Type().Implements(binaryEncoder)
 }
 
-func Encode(v interface{}) ([]byte, error) {
+func Encode(v any) ([]byte, error) {
 	val := reflect.ValueOf(v)
 	return encode(val, val.Type().String())
 }
@@ -75,7 +75,7 @@ func encode(val reflect.Value, name string) ([]byte, error) {
 			buf.WriteFloat64(float64(val.Float()))
 		case reflect.String:
 			buf.WriteString(val.String())
-		case reflect.Ptr:
+		case reflect.Pointer:
 			if val.IsNil() {
 				return nil, nil
 			}

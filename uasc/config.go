@@ -121,7 +121,7 @@ type SessionConfig struct {
 	// The UserIdentityToken is an extensible parameter type defined in 7.36.
 	// The EndpointDescription specifies what UserIdentityTokens the Server shall accept.
 	// Null or empty user token shall always be interpreted as anonymous.
-	UserIdentityToken interface{}
+	UserIdentityToken any
 
 	// If the Client specified a user identity token that supports digital signatures, then it
 	// shall create a signature and pass it as this parameter. Otherwise the parameter is null.
