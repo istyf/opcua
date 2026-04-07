@@ -496,7 +496,7 @@ func (srv *Server) nodesImportNodeSet(ctx context.Context, nodes *schema.UANodeS
 				node.WithBrowseName(browseName),
 				node.WithDisplayNames(displayNames),
 				node.WithDescriptions(descriptions)),
-			node.Executable(ot.ExecutableAttr == nil || *ot.ExecutableAttr == true),
+			node.Executable(ot.ExecutableAttr == nil || *ot.ExecutableAttr),
 		)
 
 		ns.AddNode(n)

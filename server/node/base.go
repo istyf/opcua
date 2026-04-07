@@ -90,8 +90,6 @@ type baseNode struct {
 
 	displayNames []*ua.LocalizedText
 	descriptions []*ua.LocalizedText
-
-	ns types.NameSpace
 }
 
 func newBaseNode(cfg *baseConfig) *baseNode {
