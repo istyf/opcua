@@ -148,6 +148,7 @@ var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
 	id.ByteString:    ua.NewNumericNodeID(0, id.ByteString),
 	id.UtcTime:       ua.NewNumericNodeID(0, id.UtcTime),
 	id.DateTime:      ua.NewNumericNodeID(0, id.DateTime),
+	id.QualifiedName: ua.NewNumericNodeID(0, id.QualifiedName),
 	id.LocalizedText: ua.NewNumericNodeID(0, id.LocalizedText),
 }
 
@@ -208,6 +209,8 @@ func LookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 		return v.TypeID.NodeID, valueRank
 	case []*ua.ExtensionObject:
 		return v[0].TypeID.NodeID, 1
+	case *ua.QualifiedName:
+		return typeNodeIdFromDataType[id.QualifiedName], valueRank
 	case *ua.LocalizedText:
 		return typeNodeIdFromDataType[id.LocalizedText], valueRank
 	case []*ua.LocalizedText:
