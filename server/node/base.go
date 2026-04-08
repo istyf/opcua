@@ -102,7 +102,9 @@ func newBaseNode(cfg *baseConfig) *baseNode {
 	}
 
 	n := &baseNode{
-		id: cfg.nodeID,
+		id:           cfg.nodeID,
+		descriptions: cfg.descriptions,
+		displayNames: cfg.displayNames,
 		attr: map[ua.AttributeID]*ua.DataValue{
 			ua.AttributeIDBrowseName: values.DataValueFromValue(cfg.browseName),
 			ua.AttributeIDNodeClass:  values.DataValueFromValue(uint32(cfg.nodeClass)),

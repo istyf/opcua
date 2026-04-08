@@ -60,7 +60,6 @@ func NewObjectNode(base func(ua.NodeClass) *baseConfig, opts ...objectOption) ty
 
 	if cfg.objectTypeNode == nil {
 		panic("creating objects without a type definition is not allowed")
-		//cfg.objectTypeNodeId = ua.NewNumericNodeID(0, id.BaseObjectType)
 	}
 
 	n := &objectNode{
