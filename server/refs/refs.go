@@ -36,7 +36,7 @@ func (d *desc) IsForward() bool {
 
 // IsReferenceType implements [types.ReferenceWrapper].
 func (d *desc) IsReferenceType(refTypeID uint32) bool {
-	return d.refType.Namespace() == 0 || d.refType.IntID() == refTypeID
+	return d.refType.Namespace() == 0 && d.refType.IntID() == refTypeID
 }
 
 func (d *desc) ReferenceType() *ua.NodeID {
