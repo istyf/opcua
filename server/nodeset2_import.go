@@ -405,8 +405,12 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 		}
 
 		if dataTypeNodeId == nil {
-			fmt.Printf("failed to decode variable data type node id: %s (%s)\n", nid.String(), ot.DataTypeAttr)
-			dataTypeNodeId = ua.NewNumericNodeID(0, id.BaseDataType)
+			if n := s.Node(mustParseAndConvertNodeID(ot.NodeIdAttr)); n != nil {
+				dataTypeNodeId = n.ID()
+			} else {
+				fmt.Printf("failed to decode variable data type node id: %s (%s)\n", nid.String(), ot.DataTypeAttr)
+				dataTypeNodeId = ua.NewNumericNodeID(0, id.BaseDataType)
+			}
 		}
 
 		v := valueFromSchema(ot.Value)
