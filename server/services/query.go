@@ -3,22 +3,25 @@ package services
 import (
 	"context"
 
-	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
 )
 
+type QueryServiceBackend interface {
+	HandlerRegistrator
+}
+
 // QueryService implements the Query Service Set.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9
 type QueryService struct {
-	srv types.Server
+	backend QueryServiceBackend
 }
 
-func NewQueryService(s types.Server) *QueryService {
+func NewQueryService(b QueryServiceBackend) *QueryService {
 	return &QueryService{
-		srv: s,
+		backend: b,
 	}
 }
 

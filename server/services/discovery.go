@@ -4,23 +4,36 @@ import (
 	"context"
 	"strings"
 
-	"github.com/gopcua/opcua/server/types"
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
 )
 
+type DiscoveryServiceBackend interface {
+	HandlerRegistrator
+	EndpointsProvider
+}
+
 // DiscoveryService implements the Discovery Service Set
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.4
 type DiscoveryService struct {
-	srv types.Server
+	backend DiscoveryServiceBackend
 }
 
-func NewDiscoveryService(s types.Server) *DiscoveryService {
-	return &DiscoveryService{
-		srv: s,
+func NewDiscoveryService(b DiscoveryServiceBackend) *DiscoveryService {
+	ds := &DiscoveryService{
+		backend: b,
 	}
+
+	b.RegisterHandler(id.FindServersRequest_Encoding_DefaultBinary, ds.FindServers)
+	b.RegisterHandler(id.FindServersOnNetworkRequest_Encoding_DefaultBinary, ds.FindServersOnNetwork)
+	b.RegisterHandler(id.GetEndpointsRequest_Encoding_DefaultBinary, ds.GetEndpoints)
+	b.RegisterHandler(id.RegisterServerRequest_Encoding_DefaultBinary, ds.RegisterServer)
+	b.RegisterHandler(id.RegisterServer2Request_Encoding_DefaultBinary, ds.RegisterServer2)
+
+	return ds
 }
 
 var newDiscoveryServiceLogAttribute = newServiceLogAttributeCreatorForSet("discovery")
@@ -38,7 +51,7 @@ func (s *DiscoveryService) FindServers(ctx context.Context, sc *uasc.SecureChann
 	response := &ua.FindServersResponse{
 		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
 		Servers: []*ua.ApplicationDescription{
-			s.srv.Endpoints()[0].Server,
+			s.backend.Endpoints()[0].Server,
 		},
 	}
 
@@ -70,7 +83,7 @@ func (s *DiscoveryService) GetEndpoints(ctx context.Context, sc *uasc.SecureChan
 
 	requrl := strings.ToLower(req.EndpointURL)
 	matching_endpoints := make([]*ua.EndpointDescription, 0)
-	for _, ep := range s.srv.Endpoints() {
+	for _, ep := range s.backend.Endpoints() {
 		if strings.ToLower(ep.EndpointURL) == requrl {
 			matching_endpoints = append(matching_endpoints, ep)
 		}

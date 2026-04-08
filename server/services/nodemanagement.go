@@ -3,23 +3,34 @@ package services
 import (
 	"context"
 
-	"github.com/gopcua/opcua/server/types"
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
 )
 
+type NodeManagementBackend interface {
+	HandlerRegistrator
+}
+
 // NodeManagementService implements the Node Management Service Set.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.7
 type NodeManagementService struct {
-	srv types.Server
+	backend NodeManagementBackend
 }
 
-func NewNodeManagementService(s types.Server) *NodeManagementService {
-	return &NodeManagementService{
-		srv: s,
+func NewNodeManagementService(b NodeManagementBackend) *NodeManagementService {
+	nms := &NodeManagementService{
+		backend: b,
 	}
+
+	b.RegisterHandler(id.AddNodesRequest_Encoding_DefaultBinary, nms.AddNodes)
+	b.RegisterHandler(id.AddReferencesRequest_Encoding_DefaultBinary, nms.AddReferences)
+	b.RegisterHandler(id.DeleteNodesRequest_Encoding_DefaultBinary, nms.DeleteNodes)
+	b.RegisterHandler(id.DeleteReferencesRequest_Encoding_DefaultBinary, nms.DeleteReferences)
+
+	return nms
 }
 
 var newNodeMgmtServiceLogAttribute = newServiceLogAttributeCreatorForSet("nodemanagement")

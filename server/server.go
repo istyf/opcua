@@ -47,10 +47,17 @@ type serverImpl struct {
 
 	// Service Handlers are methods called to respond to service requests from clients
 	// All services should have a method here.
-	handlers map[uint16]Handler
+	handlers map[int]services.Handler
 
-	SubscriptionService  *services.SubscriptionService
-	MonitoredItemService *services.MonitoredItemService
+	attributeService      *services.AttributeService
+	discoveryService      *services.DiscoveryService
+	methodService         *services.MethodService
+	nodeManagementService *services.NodeManagementService
+	queryService          *services.QueryService
+	sessionService        *services.SessionService
+	viewService           *services.ViewService
+	SubscriptionService   *services.SubscriptionService
+	MonitoredItemService  *services.MonitoredItemService
 }
 
 // New returns an initialized OPC-UA server.
@@ -79,7 +86,7 @@ func New(ctx context.Context, opts ...Option) types.Server {
 		cfg:        cfg,
 		cb:         newChannelBroker(),
 		sb:         newSessionBroker(),
-		handlers:   make(map[uint16]Handler),
+		handlers:   make(map[int]services.Handler),
 		namespaces: []types.NameSpace{},
 		status: &ua.ServerStatusDataType{
 			StartTime:   time.Now(),
@@ -130,6 +137,10 @@ func (s *serverImpl) NewSession(timeout time.Duration, serverNonce []byte, remot
 
 func (s *serverImpl) Session(ctx context.Context, hdr *ua.RequestHeader) types.Session {
 	return s.sb.Session(ctx, hdr.AuthenticationToken)
+}
+
+func (s *serverImpl) Subscription(id types.SubscriptionID) (*services.Subscription, bool) {
+	return s.SubscriptionService.Get(id)
 }
 
 func (s *serverImpl) Namespace(id int) (types.NameSpace, error) {

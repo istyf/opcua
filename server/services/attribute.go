@@ -4,23 +4,39 @@ import (
 	"context"
 	"time"
 
-	"github.com/gopcua/opcua/server/types"
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
 )
 
+type HandlerRegistrator interface {
+	RegisterHandler(typeID int, h Handler)
+}
+
+type AttributeServiceBackend interface {
+	HandlerRegistrator
+	NamespaceProvider
+}
+
 // AttributeService implements the Attribute Service Set.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.10
 type AttributeService struct {
-	srv types.Server
+	backend AttributeServiceBackend
 }
 
-func NewAttributeService(s types.Server) *AttributeService {
-	return &AttributeService{
-		srv: s,
+func NewAttributeService(b AttributeServiceBackend) *AttributeService {
+	as := &AttributeService{
+		backend: b,
 	}
+
+	b.RegisterHandler(id.ReadRequest_Encoding_DefaultBinary, as.Read)
+	b.RegisterHandler(id.HistoryReadRequest_Encoding_DefaultBinary, as.HistoryRead)
+	b.RegisterHandler(id.WriteRequest_Encoding_DefaultBinary, as.Write)
+	b.RegisterHandler(id.HistoryUpdateRequest_Encoding_DefaultBinary, as.HistoryUpdate)
+
+	return as
 }
 
 var newAttributeServiceLogAttribute = newServiceLogAttributeCreatorForSet("attribute")
@@ -41,7 +57,7 @@ func (s *AttributeService) Read(ctx context.Context, sc *uasc.SecureChannel, r u
 			ualog.Any(ualog.NodeIdKey, n.NodeID), ualog.Any("attr", n.AttributeID),
 		)
 
-		ns, err := s.srv.Namespace(int(n.NodeID.Namespace()))
+		ns, err := s.backend.Namespace(int(n.NodeID.Namespace()))
 		if err != nil {
 			results[i] = &ua.DataValue{
 				EncodingMask:    ua.DataValueServerTimestamp | ua.DataValueStatusCode,
@@ -92,7 +108,7 @@ func (s *AttributeService) Write(ctx context.Context, sc *uasc.SecureChannel, r 
 			ualog.Any(ualog.NodeIdKey, n.NodeID), ualog.Any("attr", n.AttributeID),
 		)
 
-		ns, err := s.srv.Namespace(int(n.NodeID.Namespace()))
+		ns, err := s.backend.Namespace(int(n.NodeID.Namespace()))
 		if err != nil {
 			status[i] = ua.StatusBadNodeNotInView
 		}

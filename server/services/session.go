@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
@@ -16,8 +17,9 @@ const (
 	sessionNonceLength = 32
 )
 
-type SessionBroker interface {
-	Endpoints() []*ua.EndpointDescription
+type SessionServiceBackend interface {
+	HandlerRegistrator
+	EndpointsProvider
 
 	NewSession(timeout time.Duration, serverNonce []byte, remoteCert []byte) types.Session
 	Session(ctx context.Context, hdr *ua.RequestHeader) types.Session
@@ -28,15 +30,22 @@ type SessionBroker interface {
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.6
 type SessionService struct {
-	srv        SessionBroker
+	srv        SessionServiceBackend
 	serverCert []byte
 }
 
-func NewSessionService(s SessionBroker, serverCert []byte) *SessionService {
-	return &SessionService{
-		srv:        s,
+func NewSessionService(b SessionServiceBackend, serverCert []byte) *SessionService {
+	ss := &SessionService{
+		srv:        b,
 		serverCert: serverCert,
 	}
+
+	b.RegisterHandler(id.CreateSessionRequest_Encoding_DefaultBinary, ss.CreateSession)
+	b.RegisterHandler(id.ActivateSessionRequest_Encoding_DefaultBinary, ss.ActivateSession)
+	b.RegisterHandler(id.CloseSessionRequest_Encoding_DefaultBinary, ss.CloseSession)
+	b.RegisterHandler(id.CancelRequest_Encoding_DefaultBinary, ss.Cancel)
+
+	return ss
 }
 
 var newSessionServiceLogAttribute = newServiceLogAttributeCreatorForSet("session")

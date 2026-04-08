@@ -5,37 +5,64 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
 )
 
+type SubscriptionServiceBackend interface {
+	HandlerRegistrator
+	NamespaceProvider
+	SessionProvider
+	SubscriptionDeleter
+}
+
 // SubscriptionService implements the Subscription Service Set.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.13
 type SubscriptionService struct {
-	srv types.Server
+	srv SubscriptionServiceBackend
+
 	// pub sub stuff
-	Mu   sync.Mutex
-	Subs map[types.SubscriptionID]*Subscription
+	mu   sync.Mutex
+	subs map[types.SubscriptionID]*Subscription
 }
 
-func NewSubscriptionService(s types.Server) *SubscriptionService {
-	return &SubscriptionService{
-		srv:  s,
-		Subs: make(map[types.SubscriptionID]*Subscription),
+func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
+	ss := &SubscriptionService{
+		srv:  b,
+		subs: make(map[types.SubscriptionID]*Subscription),
 	}
+
+	b.RegisterHandler(id.CreateSubscriptionRequest_Encoding_DefaultBinary, ss.CreateSubscription)
+	b.RegisterHandler(id.ModifySubscriptionRequest_Encoding_DefaultBinary, ss.ModifySubscription)
+	b.RegisterHandler(id.SetPublishingModeRequest_Encoding_DefaultBinary, ss.SetPublishingMode)
+	b.RegisterHandler(id.PublishRequest_Encoding_DefaultBinary, ss.Publish)
+	b.RegisterHandler(id.RepublishRequest_Encoding_DefaultBinary, ss.Republish)
+	b.RegisterHandler(id.TransferSubscriptionsRequest_Encoding_DefaultBinary, ss.TransferSubscriptions)
+	b.RegisterHandler(id.DeleteSubscriptionsRequest_Encoding_DefaultBinary, ss.DeleteSubscriptions)
+
+	return ss
 }
 
 var newSubscriptionServiceLogAttribute = newServiceLogAttributeCreatorForSet("subscription")
 
+func (s *SubscriptionService) Get(id types.SubscriptionID) (*Subscription, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	sub, ok := s.subs[id]
+	return sub, ok
+}
+
 // get rid of all references to a subscription and all monitored items that are pointed at this subscription.
 func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id types.SubscriptionID) {
-	s.Mu.Lock()
-	defer s.Mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
-	sub, ok := s.Subs[id]
+	sub, ok := s.subs[id]
 	if ok {
 		sub.Mu.Lock()
 		if sub.running {
@@ -45,7 +72,7 @@ func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id types.S
 		sub.Mu.Unlock()
 	}
 
-	delete(s.Subs, id)
+	delete(s.subs, id)
 
 	// ask the monitored item service to purge out any items that use this subscription
 	s.srv.DeleteSubscription(id)
@@ -61,10 +88,10 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 		return nil, err
 	}
 
-	s.Mu.Lock()
-	defer s.Mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
-	newsubid := types.SubscriptionID(len(s.Subs)) + 1
+	newsubid := types.SubscriptionID(len(s.subs)) + 1
 
 	ualog.Info(ctx, "new subscription created",
 		ualog.Uint32("sub", uint32(newsubid)),
@@ -80,7 +107,7 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 	sub.RevisedLifetimeCount = req.RequestedLifetimeCount
 	sub.RevisedMaxKeepAliveCount = req.RequestedMaxKeepAliveCount
 
-	s.Subs[newsubid] = sub
+	s.subs[newsubid] = sub
 	sub.running = true
 	sub.Start(ctx)
 
@@ -213,15 +240,15 @@ func (s *SubscriptionService) DeleteSubscriptions(ctx context.Context, sc *uasc.
 	}
 	session := s.srv.Session(ctx, req.Header())
 
-	s.Mu.Lock()
-	defer s.Mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	results := make([]ua.StatusCode, len(req.SubscriptionIDs))
 	for i := range req.SubscriptionIDs {
 
 		subid := types.SubscriptionID(req.SubscriptionIDs[i])
 		ualog.Info(ctx, "subscription deleted by client", ualog.Uint32("sub", uint32(subid)))
-		sub, ok := s.Subs[subid]
+		sub, ok := s.subs[subid]
 		if !ok {
 			results[i] = ua.StatusBadSubscriptionIDInvalid
 			continue

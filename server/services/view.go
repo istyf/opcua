@@ -18,17 +18,31 @@ var (
 	hasSubtype = ua.NewNumericNodeID(0, id.HasSubtype)
 )
 
+type ViewServiceBackend interface {
+	HandlerRegistrator
+	NamespaceProvider
+	NodeProvider
+}
+
 // ViewService implements the View Service Set.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9
 type ViewService struct {
-	srv types.Server
+	backend ViewServiceBackend
 }
 
-func NewViewService(s types.Server) *ViewService {
-	return &ViewService{
-		srv: s,
+func NewViewService(b ViewServiceBackend) *ViewService {
+	vs := &ViewService{
+		backend: b,
 	}
+
+	b.RegisterHandler(id.BrowseRequest_Encoding_DefaultBinary, vs.Browse)
+	b.RegisterHandler(id.BrowseNextRequest_Encoding_DefaultBinary, vs.BrowseNext)
+	b.RegisterHandler(id.TranslateBrowsePathsToNodeIDsRequest_Encoding_DefaultBinary, vs.TranslateBrowsePathsToNodeIDs)
+	b.RegisterHandler(id.RegisterNodesRequest_Encoding_DefaultBinary, vs.RegisterNodes)
+	b.RegisterHandler(id.UnregisterNodesRequest_Encoding_DefaultBinary, vs.UnregisterNodes)
+
+	return vs
 }
 
 var newViewServiceLogAttribute = newServiceLogAttributeCreatorForSet("view")
@@ -66,7 +80,7 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			ualog.String("ref", br.ReferenceTypeID.String()),
 		)
 
-		ns, err := s.srv.Namespace(int(br.NodeID.Namespace()))
+		ns, err := s.backend.Namespace(int(br.NodeID.Namespace()))
 		if err != nil {
 			resp.Results[i] = &ua.BrowseResult{StatusCode: ua.StatusBad}
 			continue
@@ -191,7 +205,7 @@ func (s *ViewService) TranslateBrowsePathsToNodeIDs(ctx context.Context, sc *uas
 			var e *ua.RelativePathElement = elem
 			for ref := range n.References().Find(func(r types.ReferenceWrapper) bool {
 				if r.ReferenceType().Equal(e.ReferenceTypeID) && r.IsForward() == !e.IsInverse {
-					referenceTarget := s.srv.Node(r.TargetNodeID().NodeID)
+					referenceTarget := s.backend.Node(r.TargetNodeID().NodeID)
 					if strings.Compare(referenceTarget.BrowseName().Name, e.TargetName.Name) == 0 {
 						return true
 					}
@@ -215,7 +229,7 @@ func (s *ViewService) TranslateBrowsePathsToNodeIDs(ctx context.Context, sc *uas
 	}
 
 	for idx, path := range req.BrowsePaths {
-		if n := s.srv.Node(path.StartingNode); n != nil && path.RelativePath != nil {
+		if n := s.backend.Node(path.StartingNode); n != nil && path.RelativePath != nil {
 			if bpr, err := findTarget(n, path.RelativePath.Elements); err == nil {
 				resp.Results[idx] = bpr
 			}

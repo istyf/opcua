@@ -1,10 +1,39 @@
 package services
 
 import (
+	"context"
 	"time"
 
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
+	"github.com/gopcua/opcua/uasc"
 )
+
+type Handler func(context.Context, *uasc.SecureChannel, ua.Request, uint32) (ua.Response, error)
+
+type EndpointsProvider interface {
+	Endpoints() []*ua.EndpointDescription
+}
+
+type NamespaceProvider interface {
+	Namespace(int) (types.NameSpace, error)
+}
+
+type NodeProvider interface {
+	Node(*ua.NodeID) types.Node
+}
+
+type SessionProvider interface {
+	Session(ctx context.Context, hdr *ua.RequestHeader) types.Session
+}
+
+type SubscriptionDeleter interface {
+	DeleteSubscription(types.SubscriptionID)
+}
+
+type SubscriptionProvider interface {
+	Subscription(types.SubscriptionID) (*Subscription, bool)
+}
 
 func NewResponseHeader(reqID uint32, statusCode ua.StatusCode) *ua.ResponseHeader {
 	return &ua.ResponseHeader{

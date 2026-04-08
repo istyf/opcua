@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"github.com/gopcua/opcua/id"
 	srvctx "github.com/gopcua/opcua/server/context"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
@@ -10,19 +11,28 @@ import (
 	"github.com/gopcua/opcua/uasc"
 )
 
+type MethodServiceBackend interface {
+	HandlerRegistrator
+	NamespaceProvider
+}
+
 // MethodService implements the Method Service Set.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.12
 type MethodService struct {
-	srv        types.Server
+	backend    MethodServiceBackend
 	middleware types.MethodMiddleware
 }
 
-func NewMethodService(s types.Server, middleware types.MethodMiddleware) *MethodService {
-	return &MethodService{
-		srv:        s,
+func NewMethodService(b MethodServiceBackend, middleware types.MethodMiddleware) *MethodService {
+	ms := &MethodService{
+		backend:    b,
 		middleware: middleware,
 	}
+
+	b.RegisterHandler(id.CallRequest_Encoding_DefaultBinary, ms.Call)
+
+	return ms
 }
 
 var newMethodServiceLogAttribute = newServiceLogAttributeCreatorForSet("method")
@@ -48,7 +58,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 
 	for _, method := range req.MethodsToCall {
-		ns, err := s.srv.Namespace(int(method.ObjectID.Namespace()))
+		ns, err := s.backend.Namespace(int(method.ObjectID.Namespace()))
 		if err != nil {
 			return &ua.CallResponse{
 				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
