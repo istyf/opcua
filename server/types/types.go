@@ -2,9 +2,11 @@ package types
 
 import (
 	"context"
+	"crypto/rsa"
 	"iter"
 	"time"
 
+	"github.com/gopcua/opcua/schema"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -128,4 +130,72 @@ type VariableNode interface {
 
 type VariableTypeNode interface {
 	TypeNode
+}
+
+type SubscriptionID uint32
+
+type Server interface {
+	ImportNodeSet(context.Context, *schema.UANodeSet) error
+
+	AddNamespace(ns NameSpace) int
+	Namespace(int) (NameSpace, error)
+	Namespaces() []NameSpace
+
+	Node(*ua.NodeID) Node
+
+	ChangeNotification(context.Context, *ua.NodeID)
+	DeleteSubscription(id SubscriptionID)
+
+	Config() ServerConfig
+	Endpoints() []*ua.EndpointDescription
+	Session(ctx context.Context, hdr *ua.RequestHeader) Session
+	Status() *ua.ServerStatusDataType
+
+	Close(context.Context) error
+	Start(context.Context) error
+}
+
+type MethodFunc func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode)
+type MethodMiddleware func(MethodFunc) MethodFunc
+
+type ServerConfig interface {
+	Certificate() []byte
+	Endpoints() []string
+	PrivateKey() *rsa.PrivateKey
+
+	ApplicationURI() string
+	ManufacturerName() string
+	ProductName() string
+	SoftwareVersion() string
+
+	MaxNodesPerRead() uint32
+
+	MethodCallMiddleware() MethodMiddleware
+}
+
+type PubReq struct {
+	// The data of the publish request
+	Req *ua.PublishRequest
+
+	// The request ID (from the header) of the publish request.  This has to be used when replying.
+	ID uint32
+}
+
+type Session interface {
+	AuthTokenID() *ua.NodeID
+	ID() *ua.NodeID
+
+	Locales() []string
+	SetLocales([]string)
+
+	RemoteCertificate() []byte
+
+	ServerNonce() []byte
+	SetServerNonce([]byte)
+
+	TimeOutInMillis() float64
+
+	IsSameAs(Session) bool
+
+	PublishRequestChannel() chan PubReq
 }

@@ -1,9 +1,10 @@
-package server
+package services
 
 import (
 	"context"
 	"time"
 
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -13,10 +14,10 @@ import (
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.10
 type AttributeService struct {
-	srv *Server
+	srv types.Server
 }
 
-func NewAttributeService(s *Server) *AttributeService {
+func NewAttributeService(s types.Server) *AttributeService {
 	return &AttributeService{
 		srv: s,
 	}
@@ -53,7 +54,7 @@ func (s *AttributeService) Read(ctx context.Context, sc *uasc.SecureChannel, r u
 	}
 
 	response := &ua.ReadResponse{
-		ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
+		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
 		Results:        results,
 	}
 

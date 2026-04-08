@@ -24,7 +24,7 @@ func mustHaveServerNode[T any](nodeID *ua.NodeID, ns types.NameSpace) T {
 	panic(fmt.Sprintf("failed to type cast server node %s to %T", nodeID.String(), zero))
 }
 
-func WireupNamespacesArrayNodeValue(s *Server, ns types.NameSpace) {
+func WireupNamespacesArrayNodeValue(s types.Server, ns types.NameSpace) {
 	nodeID := ua.NewNumericNodeID(0, id.Server_NamespaceArray)
 	theNode := mustHaveServerNode[types.VariableNode](nodeID, ns)
 
@@ -38,16 +38,16 @@ func WireupNamespacesArrayNodeValue(s *Server, ns types.NameSpace) {
 	})
 }
 
-func WireupServerCapabilityNodeValue(s *Server, ns types.NameSpace) {
+func WireupServerCapabilityNodeValue(s types.Server, ns types.NameSpace) {
 	nodeID := ua.NewNumericNodeID(0, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerRead)
 	theNode := mustHaveServerNode[types.VariableNode](nodeID, ns)
 
 	theNode.SetValue(values.DataValueFromValue(
-		s.cfg.cap.OperationalLimits.MaxNodesPerRead,
+		s.Config().MaxNodesPerRead(),
 	))
 }
 
-func WireupServerStatusNodesValues(s *Server, serverNode types.Node, ns types.NameSpace) {
+func WireupServerStatusNodesValues(s types.Server, serverNode types.Node, ns types.NameSpace) {
 
 	/*
 		Server_ServerArray                                                                                                                                                    = 2254
@@ -107,19 +107,19 @@ func WireupServerStatusNodesValues(s *Server, serverNode types.Node, ns types.Na
 		{
 			id.Server_ServerStatus_BuildInfo_ManufacturerName,
 			func() *ua.DataValue {
-				return values.DataValueFromValue(s.cfg.manufacturerName)
+				return values.DataValueFromValue(s.Config().ManufacturerName())
 			},
 		},
 		{
 			id.Server_ServerStatus_BuildInfo_ProductName,
 			func() *ua.DataValue {
-				return values.DataValueFromValue(s.cfg.productName)
+				return values.DataValueFromValue(s.Config().ProductName())
 			},
 		},
 		{
 			id.Server_ServerStatus_BuildInfo_ProductURI,
 			func() *ua.DataValue {
-				return values.DataValueFromValue(s.cfg.applicationURI)
+				return values.DataValueFromValue(s.Config().ApplicationURI())
 			},
 		},
 		{
@@ -131,13 +131,13 @@ func WireupServerStatusNodesValues(s *Server, serverNode types.Node, ns types.Na
 		{
 			id.Server_ServerStatus_BuildInfo_SoftwareVersion,
 			func() *ua.DataValue {
-				return values.DataValueFromValue(s.cfg.softwareVersion)
+				return values.DataValueFromValue(s.Config().SoftwareVersion())
 			},
 		},
 		{
 			id.Server_ServerStatus_BuildInfo_BuildNumber,
 			func() *ua.DataValue {
-				return values.DataValueFromValue(s.cfg.softwareVersion)
+				return values.DataValueFromValue(s.Config().SoftwareVersion())
 			},
 		},
 		{

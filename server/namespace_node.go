@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/id"
+	"github.com/gopcua/opcua/server/services"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -15,7 +16,7 @@ import (
 
 // the base "node-centric" namespace
 type NodeNameSpace struct {
-	srv                 *Server
+	srv                 types.Server
 	name                string
 	mu                  sync.RWMutex
 	nodes               []types.Node
@@ -32,7 +33,7 @@ func (ns *NodeNameSpace) GetNextNodeID() uint32 {
 	return ns.nextAvailableNodeID.Add(1)
 }
 
-func NewNodeNameSpace(srv *Server, name string) *NodeNameSpace {
+func NewNodeNameSpace(srv types.Server, name string) *NodeNameSpace {
 	ns := &NodeNameSpace{
 		srv:                  srv,
 		name:                 name,
@@ -160,7 +161,7 @@ func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *
 	validReferences := func(r types.ReferenceWrapper) bool {
 
 		// see if this is a ref the client was interested in.
-		if !suitableRef(ctx, ns.srv, bd, r) {
+		if !services.SuitableReference(ctx, ns.srv, bd, r) {
 			return false
 		}
 

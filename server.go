@@ -11,10 +11,10 @@ type Server struct {
 	// conn *uasc.ServerConn
 }
 
-func (a *Server) Open() error {
+func (s *Server) Open() error {
 	return nil
 }
 
-func (a *Server) Close() error {
+func (s *Server) Close() error {
 	return nil
 }

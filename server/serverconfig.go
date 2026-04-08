@@ -1,0 +1,87 @@
+package server
+
+import (
+	"crypto/rsa"
+
+	"github.com/gopcua/opcua/server/types"
+	"github.com/gopcua/opcua/ua"
+)
+
+type authMode struct {
+	tokenType ua.UserTokenType
+}
+
+type security struct {
+	secPolicy string
+	secMode   ua.MessageSecurityMode
+}
+
+type serverConfig struct {
+	privateKey     *rsa.PrivateKey
+	certificate    []byte
+	applicationURI string
+
+	endpoints []string
+
+	applicationName  string
+	manufacturerName string
+	productName      string
+	softwareVersion  string
+
+	enabledSec  []security
+	enabledAuth []authMode
+
+	cap ServerCapabilities
+
+	methodCallMiddleware types.MethodMiddleware
+}
+
+var capabilities = ServerCapabilities{
+	OperationalLimits: OperationalLimits{
+		MaxNodesPerRead: 32,
+	},
+}
+
+type ServerCapabilities struct {
+	OperationalLimits OperationalLimits
+}
+
+type OperationalLimits struct {
+	MaxNodesPerRead uint32
+}
+
+func (cfg *serverConfig) ApplicationURI() string {
+	return cfg.applicationURI
+}
+
+func (cfg *serverConfig) Certificate() []byte {
+	return cfg.certificate
+}
+
+func (cfg *serverConfig) PrivateKey() *rsa.PrivateKey {
+	return cfg.privateKey
+}
+
+func (cfg *serverConfig) Endpoints() []string {
+	return cfg.endpoints
+}
+
+func (cfg *serverConfig) ManufacturerName() string {
+	return cfg.manufacturerName
+}
+
+func (cfg *serverConfig) MaxNodesPerRead() uint32 {
+	return cfg.cap.OperationalLimits.MaxNodesPerRead
+}
+
+func (cfg *serverConfig) ProductName() string {
+	return cfg.productName
+}
+
+func (cfg *serverConfig) SoftwareVersion() string {
+	return cfg.softwareVersion
+}
+
+func (cfg *serverConfig) MethodCallMiddleware() types.MethodMiddleware {
+	return cfg.methodCallMiddleware
+}

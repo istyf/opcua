@@ -1,10 +1,11 @@
-package server
+package services
 
 import (
 	"context"
 	"sync"
 	"time"
 
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -14,23 +15,23 @@ import (
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.13
 type SubscriptionService struct {
-	srv *Server
+	srv types.Server
 	// pub sub stuff
 	Mu   sync.Mutex
-	Subs map[uint32]*Subscription
+	Subs map[types.SubscriptionID]*Subscription
 }
 
-func NewSubscriptionService(s *Server) *SubscriptionService {
+func NewSubscriptionService(s types.Server) *SubscriptionService {
 	return &SubscriptionService{
 		srv:  s,
-		Subs: make(map[uint32]*Subscription),
+		Subs: make(map[types.SubscriptionID]*Subscription),
 	}
 }
 
 var newSubscriptionServiceLogAttribute = newServiceLogAttributeCreatorForSet("subscription")
 
 // get rid of all references to a subscription and all monitored items that are pointed at this subscription.
-func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id uint32) {
+func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id types.SubscriptionID) {
 	s.Mu.Lock()
 	defer s.Mu.Unlock()
 
@@ -47,7 +48,7 @@ func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id uint32)
 	delete(s.Subs, id)
 
 	// ask the monitored item service to purge out any items that use this subscription
-	s.srv.MonitoredItemService.DeleteSub(id)
+	s.srv.DeleteSubscription(id)
 }
 
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.13.2
@@ -63,16 +64,16 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 	s.Mu.Lock()
 	defer s.Mu.Unlock()
 
-	newsubid := uint32(len(s.Subs)) + 1
+	newsubid := types.SubscriptionID(len(s.Subs)) + 1
 
 	ualog.Info(ctx, "new subscription created",
-		ualog.Uint32("sub", newsubid),
+		ualog.Uint32("sub", uint32(newsubid)),
 		ualog.Any("remote", sc.RemoteAddr()),
 	)
 
 	sub := NewSubscription()
 	sub.srv = s
-	sub.Session = s.srv.Session(ctx, r.Header())
+	sub.session = s.srv.Session(ctx, r.Header())
 	sub.Channel = sc
 	sub.ID = newsubid
 	sub.RevisedPublishingInterval = req.RequestedPublishingInterval
@@ -155,7 +156,7 @@ func (s *SubscriptionService) Publish(ctx context.Context, sc *uasc.SecureChanne
 			SubscriptionID:           0,
 			MoreNotifications:        false,
 			NotificationMessage:      &ua.NotificationMessage{NotificationData: []*ua.ExtensionObject{}},
-			AvailableSequenceNumbers: []uint32{}, // an empty array indicates taht we don't support retransmission of messages
+			AvailableSequenceNumbers: []uint32{}, // an empty array indicates that we don't support retransmission of messages
 			Results:                  []ua.StatusCode{},
 			DiagnosticInfos:          []*ua.DiagnosticInfo{},
 		}
@@ -164,7 +165,7 @@ func (s *SubscriptionService) Publish(ctx context.Context, sc *uasc.SecureChanne
 	}
 
 	select {
-	case session.PublishRequests <- PubReq{Req: req, ID: reqID}:
+	case session.PublishRequestChannel() <- types.PubReq{Req: req, ID: reqID}:
 	default:
 		ualog.Warn(ctx, "too many publish requests")
 	}
@@ -218,14 +219,14 @@ func (s *SubscriptionService) DeleteSubscriptions(ctx context.Context, sc *uasc.
 	results := make([]ua.StatusCode, len(req.SubscriptionIDs))
 	for i := range req.SubscriptionIDs {
 
-		subid := req.SubscriptionIDs[i]
-		ualog.Info(ctx, "subscription deleted by client", ualog.Uint32("sub", subid))
+		subid := types.SubscriptionID(req.SubscriptionIDs[i])
+		ualog.Info(ctx, "subscription deleted by client", ualog.Uint32("sub", uint32(subid)))
 		sub, ok := s.Subs[subid]
 		if !ok {
 			results[i] = ua.StatusBadSubscriptionIDInvalid
 			continue
 		}
-		if session.AuthTokenID.String() != sub.Session.AuthTokenID.String() {
+		if !session.IsSameAs(sub.session) {
 			results[i] = ua.StatusBadSessionIDInvalid
 			continue
 		}
@@ -243,17 +244,9 @@ func (s *SubscriptionService) DeleteSubscriptions(ctx context.Context, sc *uasc.
 			StringTable:        []string{},
 			AdditionalHeader:   ua.NewExtensionObject(nil),
 		},
-		Results:         results,                //                  []StatusCode
-		DiagnosticInfos: []*ua.DiagnosticInfo{}, //          []*DiagnosticInfo
+		Results:         results,                //   []StatusCode
+		DiagnosticInfos: []*ua.DiagnosticInfo{}, //   []*DiagnosticInfo
 	}, nil
-}
-
-type PubReq struct {
-	// The data of the publish request
-	Req *ua.PublishRequest
-
-	// The request ID (from the header) of the publish request.  This has to be used when replying.
-	ID uint32
 }
 
 // This is the type that with its run() function will work in the bakground fullfilling subscription
@@ -263,8 +256,8 @@ type PubReq struct {
 // an event has occured that needs to be published.
 type Subscription struct {
 	srv                       *SubscriptionService
-	Session                   *session
-	ID                        uint32
+	session                   types.Session
+	ID                        types.SubscriptionID
 	RevisedPublishingInterval float64
 	RevisedLifetimeCount      uint32
 	RevisedMaxKeepAliveCount  uint32
@@ -300,11 +293,11 @@ func (s *Subscription) Update(req *ua.ModifySubscriptionRequest) {
 }
 
 func (s *Subscription) Start(ctx context.Context) {
-	ctx = ualog.WithAttrs(ctx, ualog.Uint32("sub", s.ID))
+	ctx = ualog.WithAttrs(ctx, ualog.Uint32("sub", uint32(s.ID)))
 	go s.run(ctx)
 }
 
-func (s *Subscription) keepalive(pubreq PubReq) error {
+func (s *Subscription) keepalive(pubreq types.PubReq) error {
 	eo := make([]*ua.ExtensionObject, 0)
 
 	msg := ua.NotificationMessage{
@@ -322,7 +315,7 @@ func (s *Subscription) keepalive(pubreq PubReq) error {
 			StringTable:        []string{},
 			AdditionalHeader:   ua.NewExtensionObject(nil),
 		},
-		SubscriptionID:           s.ID,
+		SubscriptionID:           uint32(s.ID),
 		MoreNotifications:        false,
 		NotificationMessage:      &msg,
 		AvailableSequenceNumbers: []uint32{}, // an empty array indicates taht we don't support retransmission of messages
@@ -384,7 +377,7 @@ func (s *Subscription) run(ctx context.Context) {
 					if keepalive_counter > int(s.RevisedMaxKeepAliveCount) {
 						keepalive_counter = 0
 						select {
-						case pubreq := <-s.Session.PublishRequests:
+						case pubreq := <-s.session.PublishRequestChannel():
 							err := s.keepalive(pubreq)
 							if err != nil {
 								ualog.Warn(ctx, "problem sending keepalive to subscription", ualog.Err(err))
@@ -406,7 +399,7 @@ func (s *Subscription) run(ctx context.Context) {
 				s.Update(update)
 			}
 		}
-		var pubreq PubReq
+		var pubreq types.PubReq
 
 		// now we need to continue to collect notifications until we've got a publish request
 	L2:
@@ -414,7 +407,7 @@ func (s *Subscription) run(ctx context.Context) {
 			select {
 			case <-s.shutdown:
 				return
-			case pubreq = <-s.Session.PublishRequests:
+			case pubreq = <-s.session.PublishRequestChannel():
 				// once we get a publish request, we should move on to publish them back
 				break L2
 			case newNotification := <-s.NotifyChannel:
@@ -478,7 +471,7 @@ func (s *Subscription) run(ctx context.Context) {
 				StringTable:        []string{},
 				AdditionalHeader:   ua.NewExtensionObject(nil),
 			},
-			SubscriptionID:           s.ID,
+			SubscriptionID:           uint32(s.ID),
 			MoreNotifications:        false,
 			NotificationMessage:      &msg,
 			AvailableSequenceNumbers: []uint32{}, // an empty array indicates taht we don't support retransmission of messages

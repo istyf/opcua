@@ -22,7 +22,7 @@ import (
 // To notify subscribers of changes, be sure to call ChangeNotification(key) after changing the value.
 // To be notified of changes from the opc-ua server to the map, receive on ExternalNotification channel
 type MapNamespace struct {
-	srv  *Server
+	srv  types.Server
 	name string
 	mu   sync.RWMutex
 
@@ -68,7 +68,7 @@ func (s *MapNamespace) ChangeNotification(ctx context.Context, key string) {
 	s.srv.ChangeNotification(ctx, ua.NewStringNodeID(s.id, key))
 }
 
-func NewMapNamespace(srv *Server, name string) *MapNamespace {
+func NewMapNamespace(srv types.Server, name string) *MapNamespace {
 	mrw := MapNamespace{
 		srv:                  srv,
 		name:                 name,

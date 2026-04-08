@@ -6,7 +6,6 @@ package server
 
 import (
 	"context"
-	"crypto/rsa"
 	"encoding/xml"
 	"fmt"
 	"net"
@@ -17,7 +16,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
-	"github.com/gopcua/opcua/server/node"
+	"github.com/gopcua/opcua/server/services"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uacp"
@@ -29,8 +28,8 @@ import (
 
 const defaultListenAddr = "opc.tcp://localhost:0"
 
-// Server is a high-level OPC-UA Server
-type Server struct {
+// serverImpl is a high-level OPC-UA Server
+type serverImpl struct {
 	url string
 
 	cfg *serverConfig
@@ -50,63 +49,20 @@ type Server struct {
 	// All services should have a method here.
 	handlers map[uint16]Handler
 
-	SubscriptionService  *SubscriptionService
-	MonitoredItemService *MonitoredItemService
-}
-
-type serverConfig struct {
-	privateKey     *rsa.PrivateKey
-	certificate    []byte
-	applicationURI string
-
-	endpoints []string
-
-	applicationName  string
-	manufacturerName string
-	productName      string
-	softwareVersion  string
-
-	enabledSec  []security
-	enabledAuth []authMode
-
-	cap ServerCapabilities
-
-	methodCallMiddleware node.MethodMiddleware
-}
-
-var capabilities = ServerCapabilities{
-	OperationalLimits: OperationalLimits{
-		MaxNodesPerRead: 32,
-	},
-}
-
-type ServerCapabilities struct {
-	OperationalLimits OperationalLimits
-}
-
-type OperationalLimits struct {
-	MaxNodesPerRead uint32
-}
-
-type authMode struct {
-	tokenType ua.UserTokenType
-}
-
-type security struct {
-	secPolicy string
-	secMode   ua.MessageSecurityMode
+	SubscriptionService  *services.SubscriptionService
+	MonitoredItemService *services.MonitoredItemService
 }
 
 // New returns an initialized OPC-UA server.
 // Call Start() afterwards to begin listening and serving connections
-func New(ctx context.Context, opts ...Option) *Server {
+func New(ctx context.Context, opts ...Option) types.Server {
 	cfg := &serverConfig{
 		cap:                  capabilities,
 		applicationName:      "GOPCUA",               // override with the ServerName option
 		manufacturerName:     "The gopcua Team",      // override with the ManufacturerName option
 		productName:          "gopcua OPC/UA Server", // override with the ProductName option
 		softwareVersion:      "0.0.0-dev",            // override with the SoftwareVersion option
-		methodCallMiddleware: func(fn node.MethodFunc) node.MethodFunc { return fn },
+		methodCallMiddleware: func(fn types.MethodFunc) types.MethodFunc { return fn },
 	}
 
 	for _, opt := range opts {
@@ -118,7 +74,7 @@ func New(ctx context.Context, opts ...Option) *Server {
 		url = cfg.endpoints[0]
 	}
 
-	s := &Server{
+	s := &serverImpl{
 		url:        url,
 		cfg:        cfg,
 		cb:         newChannelBroker(),
@@ -164,11 +120,19 @@ func New(ctx context.Context, opts ...Option) *Server {
 	return s
 }
 
-func (s *Server) Session(ctx context.Context, hdr *ua.RequestHeader) *session {
+func (s *serverImpl) Config() types.ServerConfig {
+	return s.cfg
+}
+
+func (s *serverImpl) NewSession(timeout time.Duration, serverNonce []byte, remoteCert []byte) types.Session {
+	return s.sb.NewSession(timeout, serverNonce, remoteCert)
+}
+
+func (s *serverImpl) Session(ctx context.Context, hdr *ua.RequestHeader) types.Session {
 	return s.sb.Session(ctx, hdr.AuthenticationToken)
 }
 
-func (s *Server) Namespace(id int) (types.NameSpace, error) {
+func (s *serverImpl) Namespace(id int) (types.NameSpace, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if id < len(s.namespaces) {
@@ -177,14 +141,18 @@ func (s *Server) Namespace(id int) (types.NameSpace, error) {
 	return nil, fmt.Errorf("namespace %d not found", id)
 }
 
-func (s *Server) Namespaces() []types.NameSpace {
+func (s *serverImpl) Namespaces() []types.NameSpace {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.namespaces
 }
 
-func (s *Server) ChangeNotification(ctx context.Context, n *ua.NodeID) {
+func (s *serverImpl) ChangeNotification(ctx context.Context, n *ua.NodeID) {
 	s.MonitoredItemService.ChangeNotification(ctx, n)
+}
+
+func (s *serverImpl) DeleteSubscription(id types.SubscriptionID) {
+	s.MonitoredItemService.DeleteSub(id)
 }
 
 // for now, the address space of the server is split up into namespaces.
@@ -193,7 +161,7 @@ func (s *Server) ChangeNotification(ctx context.Context, n *ua.NodeID) {
 //
 // the refRoot and refObjects flags can be used to automatically add a reference to the new Namespaces
 // root or objects object respectively to the namespace 0
-func (s *Server) AddNamespace(ns types.NameSpace) int {
+func (s *serverImpl) AddNamespace(ns types.NameSpace) int {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if idx := slices.Index(s.namespaces, ns); idx >= 0 {
@@ -209,14 +177,14 @@ func (s *Server) AddNamespace(ns types.NameSpace) int {
 	return len(s.namespaces) - 1
 }
 
-func (s *Server) Endpoints() []*ua.EndpointDescription {
+func (s *serverImpl) Endpoints() []*ua.EndpointDescription {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return slices.Clone(s.endpoints)
 }
 
 // Status returns the current server status.
-func (s *Server) Status() *ua.ServerStatusDataType {
+func (s *serverImpl) Status() *ua.ServerStatusDataType {
 	status := new(ua.ServerStatusDataType)
 	s.mu.Lock()
 	*status = *s.status
@@ -226,17 +194,17 @@ func (s *Server) Status() *ua.ServerStatusDataType {
 }
 
 // URLs returns opc endpoint that the server is listening on.
-func (s *Server) URLs() []string {
-	return s.cfg.endpoints
+func (s *serverImpl) URLs() []string {
+	return s.Config().Endpoints()
 }
 
 // Start initializes and starts a Server listening on addr
 // If s was not initialized with NewServer(), addr defaults
 // to localhost:0 to let the OS select a random port
-func (s *Server) Start(ctx context.Context) error {
+func (s *serverImpl) Start(ctx context.Context) error {
 	var err error
 
-	if len(s.cfg.endpoints) == 0 {
+	if len(s.Config().Endpoints()) == 0 {
 		return fmt.Errorf("cannot start server: no endpoints defined")
 	}
 
@@ -266,7 +234,7 @@ func (s *Server) Start(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) setServerState(state ua.ServerState) {
+func (s *serverImpl) setServerState(state ua.ServerState) {
 	s.mu.Lock()
 	s.status.State = state
 	s.mu.Unlock()
@@ -274,7 +242,7 @@ func (s *Server) setServerState(state ua.ServerState) {
 
 // Close gracefully shuts the server down by closing all open connections,
 // and stops listening on all endpoints
-func (s *Server) Close(ctx context.Context) error {
+func (s *serverImpl) Close(ctx context.Context) error {
 	s.setServerState(ua.ServerStateShutdown)
 
 	// Close the listener, preventing new sessions from starting
@@ -286,11 +254,15 @@ func (s *Server) Close(ctx context.Context) error {
 	return s.cb.Close(ctx)
 }
 
+func (s *serverImpl) CloseSession(ctx context.Context, authToken *ua.NodeID) error {
+	return s.sb.Close(ctx, authToken)
+}
+
 type temporary interface {
 	Temporary() bool
 }
 
-func (s *Server) acceptAndRegister(ctx context.Context, l *uacp.Listener) {
+func (s *serverImpl) acceptAndRegister(ctx context.Context, l *uacp.Listener) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -313,7 +285,7 @@ func (s *Server) acceptAndRegister(ctx context.Context, l *uacp.Listener) {
 				}
 			}
 
-			go s.cb.RegisterConn(ctx, c, s.cfg.certificate, s.cfg.privateKey)
+			go s.cb.RegisterConn(ctx, c, s.Config().Certificate(), s.Config().PrivateKey())
 
 			ualog.Info(ctx, "registered connection",
 				ualog.String("remote", c.RemoteAddr().String()),
@@ -324,7 +296,7 @@ func (s *Server) acceptAndRegister(ctx context.Context, l *uacp.Listener) {
 
 // monitorConnections reads messages off the secure channel connection and
 // sends the message to the service handler
-func (s *Server) monitorConnections(ctx context.Context) {
+func (s *serverImpl) monitorConnections(ctx context.Context) {
 
 	for ctx.Err() == nil {
 		msg := s.cb.ReadMessage(ctx)
@@ -367,7 +339,7 @@ func (s *Server) monitorConnections(ctx context.Context) {
 }
 
 // initEndpoints builds the endpoint list from the server's configuration
-func (s *Server) initEndpoints() {
+func (s *serverImpl) initEndpoints() {
 	var endpoints []*ua.EndpointDescription
 	for _, sec := range s.cfg.enabledSec {
 		for _, url := range s.cfg.endpoints {
@@ -439,7 +411,7 @@ func (s *Server) initEndpoints() {
 	s.mu.Unlock()
 }
 
-func (s *Server) Node(nid *ua.NodeID) types.Node {
+func (s *serverImpl) Node(nid *ua.NodeID) types.Node {
 	ns := int(nid.Namespace())
 	if ns < len(s.namespaces) {
 		return s.namespaces[ns].Node(nid)

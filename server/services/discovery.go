@@ -1,9 +1,10 @@
-package server
+package services
 
 import (
 	"context"
 	"strings"
 
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -13,10 +14,10 @@ import (
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.4
 type DiscoveryService struct {
-	srv *Server
+	srv types.Server
 }
 
-func NewDiscoveryService(s *Server) *DiscoveryService {
+func NewDiscoveryService(s types.Server) *DiscoveryService {
 	return &DiscoveryService{
 		srv: s,
 	}
@@ -35,7 +36,7 @@ func (s *DiscoveryService) FindServers(ctx context.Context, sc *uasc.SecureChann
 	}
 
 	response := &ua.FindServersResponse{
-		ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
+		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
 		Servers: []*ua.ApplicationDescription{
 			s.srv.Endpoints()[0].Server,
 		},
@@ -69,15 +70,14 @@ func (s *DiscoveryService) GetEndpoints(ctx context.Context, sc *uasc.SecureChan
 
 	requrl := strings.ToLower(req.EndpointURL)
 	matching_endpoints := make([]*ua.EndpointDescription, 0)
-	for i := range s.srv.endpoints {
-		ep := s.srv.endpoints[i]
+	for _, ep := range s.srv.Endpoints() {
 		if strings.ToLower(ep.EndpointURL) == requrl {
 			matching_endpoints = append(matching_endpoints, ep)
 		}
 	}
 
 	response := &ua.GetEndpointsResponse{
-		ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
+		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
 		Endpoints:      matching_endpoints,
 	}
 

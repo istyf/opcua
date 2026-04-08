@@ -1,4 +1,4 @@
-package server
+package services
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -25,7 +26,7 @@ type MonitoredItemService struct {
 	// items tracked by node
 	Nodes map[string][]*MonitoredItem
 	// items tracked by subscription
-	Subs map[uint32][]*MonitoredItem
+	Subs map[types.SubscriptionID][]*MonitoredItem
 
 	id uint32
 }
@@ -35,7 +36,7 @@ func NewMonitoredItemService(sub *SubscriptionService) *MonitoredItemService {
 		SubService: sub,
 		Items:      make(map[uint32]*MonitoredItem),
 		Nodes:      make(map[string][]*MonitoredItem),
-		Subs:       make(map[uint32][]*MonitoredItem),
+		Subs:       make(map[types.SubscriptionID][]*MonitoredItem),
 	}
 }
 
@@ -95,14 +96,16 @@ func (s *MonitoredItemService) DeleteMonitoredItem(id uint32) {
 }
 
 // function to delete all monitored items associated with a specific sub (as indicated by id number)
-func (s *MonitoredItemService) DeleteSub(id uint32) {
+func (s *MonitoredItemService) DeleteSub(id types.SubscriptionID) {
 	s.Mu.Lock()
 	items, ok := s.Subs[id]
 	delete(s.Subs, id)
 	s.Mu.Unlock()
+
 	if !ok {
 		return
 	}
+
 	for i := range items {
 		if items[i] != nil {
 			s.DeleteMonitoredItem(items[i].ID)
@@ -180,8 +183,8 @@ func (s *MonitoredItemService) CreateMonitoredItems(ctx context.Context, sc *uas
 
 	res := make([]*ua.MonitoredItemCreateResult, count)
 
-	subID := req.SubscriptionID
-	ualog.Debug(ctx, "creating monitored items", ualog.Uint32("sub", subID))
+	subID := types.SubscriptionID(req.SubscriptionID)
+	ualog.Debug(ctx, "creating monitored items", ualog.Uint32("sub", uint32(subID)))
 
 	s.SubService.Mu.Lock()
 	sub, ok := s.SubService.Subs[subID]
@@ -191,7 +194,7 @@ func (s *MonitoredItemService) CreateMonitoredItems(ctx context.Context, sc *uas
 	}
 
 	sess := s.SubService.srv.Session(ctx, req.RequestHeader)
-	if sub.Session.AuthTokenID.String() != sess.AuthTokenID.String() {
+	if !sub.session.IsSameAs(sess) {
 		return nil, errors.New("not your subscription, bro")
 	}
 
@@ -220,7 +223,7 @@ func (s *MonitoredItemService) CreateMonitoredItems(ctx context.Context, sc *uas
 
 		ualog.Debug(ctx, "adding monitored item to subscription",
 			ualog.Any(ualog.NodeIdKey, nodeid),
-			ualog.Uint32("sub", subID),
+			ualog.Uint32("sub", uint32(subID)),
 			ualog.Uint32("item_id", item.ID),
 			ualog.Uint32("client", itemreq.RequestedParameters.ClientHandle),
 		)
@@ -287,14 +290,16 @@ func (s *MonitoredItemService) SetMonitoringMode(ctx context.Context, sc *uasc.S
 		id := req.MonitoredItemIDs[i]
 		item, ok := s.Items[id]
 
-		if item.Sub.Session.AuthTokenID.String() != sess.AuthTokenID.String() {
-			results[i] = ua.StatusBadSessionIDInvalid
-		}
-
 		if !ok {
 			results[i] = ua.StatusBadMonitoredItemIDInvalid
 			continue
 		}
+
+		if !item.Sub.session.IsSameAs(sess) {
+			results[i] = ua.StatusBadSessionIDInvalid
+			continue
+		}
+
 		item.Mode = req.MonitoringMode
 		results[i] = ua.StatusOK
 	}
@@ -347,10 +352,12 @@ func (s *MonitoredItemService) DeleteMonitoredItems(ctx context.Context, sc *uas
 		item, ok := s.Items[id]
 		if !ok {
 			results[i] = ua.StatusBadMonitoredItemIDInvalid
+			continue
 		}
 
-		if item.Sub.Session.AuthTokenID.String() != sess.AuthTokenID.String() {
+		if !item.Sub.session.IsSameAs(sess) {
 			results[i] = ua.StatusBadSessionIDInvalid
+			continue
 		}
 
 		// this function gets the lock so we need to do it in the background so it can happen after our lock is released.

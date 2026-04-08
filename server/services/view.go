@@ -1,4 +1,4 @@
-package server
+package services
 
 import (
 	"context"
@@ -22,10 +22,10 @@ var (
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9
 type ViewService struct {
-	srv *Server
+	srv types.Server
 }
 
-func NewViewService(s *Server) *ViewService {
+func NewViewService(s types.Server) *ViewService {
 	return &ViewService{
 		srv: s,
 	}
@@ -78,7 +78,7 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	return resp, nil
 }
 
-func suitableRef(_ context.Context, srv *Server, desc *ua.BrowseDescription, ref types.ReferenceWrapper) bool {
+func SuitableReference(_ context.Context, srv types.Server, desc *ua.BrowseDescription, ref types.ReferenceWrapper) bool {
 	if !suitableDirection(desc.BrowseDirection, ref.IsForward()) {
 		return false
 	}
@@ -106,7 +106,7 @@ func suitableDirection(bd ua.BrowseDirection, isForward bool) bool {
 
 var noNodeID = ua.NewNumericNodeID(0, 0)
 
-func suitableRefType(srv *Server, ref1, ref2 *ua.NodeID, subtypes bool) bool {
+func suitableRefType(srv types.Server, ref1, ref2 *ua.NodeID, subtypes bool) bool {
 	if ref1.Equal(noNodeID) {
 		// refType is not specified in browse description. Return all types
 		return true
@@ -125,7 +125,7 @@ func suitableRefType(srv *Server, ref1, ref2 *ua.NodeID, subtypes bool) bool {
 	return slices.ContainsFunc(oktypes, hasRef2Fn)
 }
 
-func getSubRefs(srv *Server, nid *ua.NodeID) []*ua.NodeID {
+func getSubRefs(srv types.Server, nid *ua.NodeID) []*ua.NodeID {
 	ns, err := srv.Namespace(int(nid.Namespace()))
 	if err != nil {
 		// TODO: return error

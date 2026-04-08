@@ -16,7 +16,7 @@ import (
 	"github.com/gopcua/opcua/ua"
 )
 
-func startServer(ctx context.Context) *server.Server {
+func startServer(ctx context.Context) types.Server {
 	var opts []server.Option
 	port := 4840
 

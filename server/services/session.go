@@ -1,35 +1,41 @@
-package server
+package services
 
 import (
 	"context"
 	"crypto/rand"
-	"slices"
 	"strings"
 	"time"
 
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
 )
 
 const (
-	sessionTimeoutMin     = 100 * time.Millisecond
-	sessionTimeoutMax     = 1 * time.Hour
-	sessionTimeoutDefault = 60 * time.Second
-
 	sessionNonceLength = 32
 )
+
+type SessionBroker interface {
+	Endpoints() []*ua.EndpointDescription
+
+	NewSession(timeout time.Duration, serverNonce []byte, remoteCert []byte) types.Session
+	Session(ctx context.Context, hdr *ua.RequestHeader) types.Session
+	CloseSession(ctx context.Context, authToken *ua.NodeID) error
+}
 
 // SessionService implements the Session Service Set.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.6
 type SessionService struct {
-	srv *Server
+	srv        SessionBroker
+	serverCert []byte
 }
 
-func NewSessionService(s *Server) *SessionService {
+func NewSessionService(s SessionBroker, serverCert []byte) *SessionService {
 	return &SessionService{
-		srv: s,
+		srv:        s,
+		serverCert: serverCert,
 	}
 }
 
@@ -45,22 +51,15 @@ func (s *SessionService) CreateSession(ctx context.Context, sc *uasc.SecureChann
 		return nil, err
 	}
 
-	// New session
-	sess := s.srv.sb.NewSession()
-
-	// Ensure session timeout is reasonable
-	sess.cfg.sessionTimeout = time.Duration(req.RequestedSessionTimeout) * time.Millisecond
-	if sess.cfg.sessionTimeout > sessionTimeoutMax || sess.cfg.sessionTimeout < sessionTimeoutMin {
-		sess.cfg.sessionTimeout = sessionTimeoutDefault
-	}
-
+	requestedTimeout := time.Duration(req.RequestedSessionTimeout) * time.Millisecond
 	nonce := make([]byte, sessionNonceLength)
 	if _, err := rand.Read(nonce); err != nil {
 		ualog.Error(ctx, "failed to create session nonce", ualog.Err(err))
 		return nil, ua.StatusBadInternalError
 	}
-	sess.serverNonce = nonce
-	sess.remoteCertificate = req.ClientCertificate
+
+	// New session
+	sess := s.srv.NewSession(requestedTimeout, nonce, req.ClientCertificate)
 
 	sig, alg, err := sc.NewSessionSignature(req.ClientCertificate, req.ClientNonce)
 	if err != nil {
@@ -70,8 +69,7 @@ func (s *SessionService) CreateSession(ctx context.Context, sc *uasc.SecureChann
 
 	matching_endpoints := make([]*ua.EndpointDescription, 0)
 	reqTrimmedURL, _ := strings.CutSuffix(req.EndpointURL, "/")
-	for i := range s.srv.endpoints {
-		ep := s.srv.endpoints[i]
+	for _, ep := range s.srv.Endpoints() {
 		epTrimmedURL, _ := strings.CutSuffix(ep.EndpointURL, "/")
 		if epTrimmedURL == reqTrimmedURL {
 			matching_endpoints = append(matching_endpoints, ep)
@@ -79,16 +77,16 @@ func (s *SessionService) CreateSession(ctx context.Context, sc *uasc.SecureChann
 	}
 
 	response := &ua.CreateSessionResponse{
-		ResponseHeader:        responseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
-		SessionID:             sess.ID,
-		AuthenticationToken:   sess.AuthTokenID,
-		RevisedSessionTimeout: float64(sess.cfg.sessionTimeout / time.Millisecond),
+		ResponseHeader:        NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
+		SessionID:             sess.ID(),
+		AuthenticationToken:   sess.AuthTokenID(),
+		RevisedSessionTimeout: sess.TimeOutInMillis(),
 		MaxRequestMessageSize: 0, // Not used
 		ServerSignature: &ua.SignatureData{
 			Signature: sig,
 			Algorithm: alg,
 		},
-		ServerCertificate: s.srv.cfg.certificate,
+		ServerCertificate: s.serverCert,
 		ServerNonce:       nonce,
 		ServerEndpoints:   matching_endpoints,
 	}
@@ -106,12 +104,12 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 		return nil, err
 	}
 
-	sess := s.srv.sb.Session(ctx, req.RequestHeader.AuthenticationToken)
+	sess := s.srv.Session(ctx, req.RequestHeader)
 	if sess == nil {
 		return nil, ua.StatusBadSessionIDInvalid
 	}
 
-	err = sc.VerifySessionSignature(sess.remoteCertificate, sess.serverNonce, req.ClientSignature.Signature)
+	err = sc.VerifySessionSignature(sess.RemoteCertificate(), sess.ServerNonce(), req.ClientSignature.Signature)
 	if err != nil {
 		ualog.Error(ctx, "failed to verify session signature", ualog.Err(err))
 		return nil, ua.StatusBadSecurityChecksFailed
@@ -122,28 +120,11 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 		ualog.Error(ctx, "failed to create session nonce", ualog.Err(err))
 		return nil, ua.StatusBadInternalError
 	}
-	sess.serverNonce = nonce
-
-	addMissingBaseLocales := func(locales []string) []string {
-		for idx := range len(locales) {
-			// find out if this locales has a country or region component
-			lang, _, hasSeparator := strings.Cut(locales[idx], "-")
-			if hasSeparator {
-				// if it does, and the language is not present on its own in the locale list
-				if idx == len(locales)-1 || slices.Index(locales[idx+1:], lang) == -1 {
-					// we add the language to the list of locales
-					locales = append(locales, lang)
-				}
-			}
-		}
-
-		return locales
-	}
-
-	sess.cfg.locales = addMissingBaseLocales(req.LocaleIDs)
+	sess.SetServerNonce(nonce)
+	sess.SetLocales(req.LocaleIDs)
 
 	response := &ua.ActivateSessionResponse{
-		ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
+		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
 		ServerNonce:    nonce,
 		// Results:         []ua.StatusCode{},
 		// DiagnosticInfos: []*ua.DiagnosticInfo{},
@@ -162,14 +143,14 @@ func (s *SessionService) CloseSession(ctx context.Context, sc *uasc.SecureChanne
 		return nil, err
 	}
 
-	err = s.srv.sb.Close(ctx, req.RequestHeader.AuthenticationToken)
+	err = s.srv.CloseSession(ctx, req.RequestHeader.AuthenticationToken)
 	if err != nil {
 		return nil, ua.StatusBadSessionIDInvalid
 	}
 
 	//TODO: deal with 'delete subscriptions' field in request
 	response := &ua.CloseSessionResponse{
-		ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
+		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
 	}
 
 	return response, nil

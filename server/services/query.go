@@ -1,8 +1,9 @@
-package server
+package services
 
 import (
 	"context"
 
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -12,10 +13,10 @@ import (
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9
 type QueryService struct {
-	srv *Server
+	srv types.Server
 }
 
-func NewQueryService(s *Server) *QueryService {
+func NewQueryService(s types.Server) *QueryService {
 	return &QueryService{
 		srv: s,
 	}

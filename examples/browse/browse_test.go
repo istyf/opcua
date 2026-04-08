@@ -63,7 +63,7 @@ func TestBrowse(t *testing.T) {
 	}
 }
 
-func populateServer(s *server.Server) {
+func populateServer(s types.Server) {
 	// When the server is created, it will automatically create namespace 0 and populate it with
 	// the core opc ua nodes.
 

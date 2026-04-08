@@ -1,10 +1,9 @@
-package server
+package services
 
 import (
 	"context"
 
 	srvctx "github.com/gopcua/opcua/server/context"
-	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
@@ -15,11 +14,11 @@ import (
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.12
 type MethodService struct {
-	srv        *Server
-	middleware node.MethodMiddleware
+	srv        types.Server
+	middleware types.MethodMiddleware
 }
 
-func NewMethodService(s *Server, middleware node.MethodMiddleware) *MethodService {
+func NewMethodService(s types.Server, middleware types.MethodMiddleware) *MethodService {
 	return &MethodService{
 		srv:        s,
 		middleware: middleware,
@@ -52,14 +51,14 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		ns, err := s.srv.Namespace(int(method.ObjectID.Namespace()))
 		if err != nil {
 			return &ua.CallResponse{
-				ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
+				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
 			}, nil
 		}
 
 		objectNode := ns.Node(method.ObjectID)
 		if objectNode == nil {
 			return &ua.CallResponse{
-				ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusBadNodeIDUnknown),
+				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadNodeIDUnknown),
 			}, nil
 		}
 
@@ -74,7 +73,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 				ualog.String("object", objectNode.BrowseName().String()),
 			)
 			return &ua.CallResponse{
-				ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
+				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
 			}, nil
 		}
 
@@ -101,7 +100,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 
 	response := &ua.CallResponse{
-		ResponseHeader: responseHeader(req.RequestHeader.RequestHandle, status),
+		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, status),
 		// TODO: Support result data ...
 	}
 

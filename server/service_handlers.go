@@ -6,10 +6,10 @@ package server
 
 import (
 	"context"
-	"time"
 
 	"github.com/gopcua/opcua/id"
 	srvctx "github.com/gopcua/opcua/server/context"
+	"github.com/gopcua/opcua/server/services"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -17,10 +17,10 @@ import (
 
 type Handler func(context.Context, *uasc.SecureChannel, ua.Request, uint32) (ua.Response, error)
 
-func (s *Server) initHandlers() {
+func (s *serverImpl) initHandlers() {
 	// s.registerHandlerFunc(id.ServiceFault_Encoding_DefaultBinary, handleServiceFault)
 
-	discovery := NewDiscoveryService(s)
+	discovery := services.NewDiscoveryService(s)
 	s.RegisterHandler(id.FindServersRequest_Encoding_DefaultBinary, discovery.FindServers)
 	s.RegisterHandler(id.FindServersOnNetworkRequest_Encoding_DefaultBinary, discovery.FindServersOnNetwork)
 	s.RegisterHandler(id.GetEndpointsRequest_Encoding_DefaultBinary, discovery.GetEndpoints)
@@ -31,40 +31,40 @@ func (s *Server) initHandlers() {
 	// s.registerHandlerFunc(id.OpenSecureChannelRequest_Encoding_DefaultBinary, handleOpenSecureChannel)
 	// s.registerHandlerFunc(id.CloseSecureChannelRequest_Encoding_DefaultBinary, handleCloseSecureChannel)
 
-	session := NewSessionService(s)
+	session := services.NewSessionService(s, s.cfg.certificate)
 	s.RegisterHandler(id.CreateSessionRequest_Encoding_DefaultBinary, session.CreateSession)
 	s.RegisterHandler(id.ActivateSessionRequest_Encoding_DefaultBinary, session.ActivateSession)
 	s.RegisterHandler(id.CloseSessionRequest_Encoding_DefaultBinary, session.CloseSession)
 	s.RegisterHandler(id.CancelRequest_Encoding_DefaultBinary, session.Cancel)
 
-	node := NewNodeManagementService(s)
+	node := services.NewNodeManagementService(s)
 	s.RegisterHandler(id.AddNodesRequest_Encoding_DefaultBinary, node.AddNodes)
 	s.RegisterHandler(id.AddReferencesRequest_Encoding_DefaultBinary, node.AddReferences)
 	s.RegisterHandler(id.DeleteNodesRequest_Encoding_DefaultBinary, node.DeleteNodes)
 	s.RegisterHandler(id.DeleteReferencesRequest_Encoding_DefaultBinary, node.DeleteReferences)
 
-	view := NewViewService(s)
+	view := services.NewViewService(s)
 	s.RegisterHandler(id.BrowseRequest_Encoding_DefaultBinary, view.Browse)
 	s.RegisterHandler(id.BrowseNextRequest_Encoding_DefaultBinary, view.BrowseNext)
 	s.RegisterHandler(id.TranslateBrowsePathsToNodeIDsRequest_Encoding_DefaultBinary, view.TranslateBrowsePathsToNodeIDs)
 	s.RegisterHandler(id.RegisterNodesRequest_Encoding_DefaultBinary, view.RegisterNodes)
 	s.RegisterHandler(id.UnregisterNodesRequest_Encoding_DefaultBinary, view.UnregisterNodes)
 
-	query := NewQueryService(s)
+	query := services.NewQueryService(s)
 	s.RegisterHandler(id.QueryFirstRequest_Encoding_DefaultBinary, query.QueryFirst)
 	s.RegisterHandler(id.QueryNextRequest_Encoding_DefaultBinary, query.QueryNext)
 
-	attr := NewAttributeService(s)
+	attr := services.NewAttributeService(s)
 	s.RegisterHandler(id.ReadRequest_Encoding_DefaultBinary, attr.Read)
 	s.RegisterHandler(id.HistoryReadRequest_Encoding_DefaultBinary, attr.HistoryRead)
 	s.RegisterHandler(id.WriteRequest_Encoding_DefaultBinary, attr.Write)
 	s.RegisterHandler(id.HistoryUpdateRequest_Encoding_DefaultBinary, attr.HistoryUpdate)
 
-	method := NewMethodService(s, s.cfg.methodCallMiddleware)
+	method := services.NewMethodService(s, s.Config().MethodCallMiddleware())
 	// s.registerHandler(id.CallMethodRequest_Encoding_DefaultBinary, method.CallMethod) // todo(fs): I think this is bogus
 	s.RegisterHandler(id.CallRequest_Encoding_DefaultBinary, method.Call)
 
-	sub := NewSubscriptionService(s)
+	sub := services.NewSubscriptionService(s)
 	s.SubscriptionService = sub
 	s.RegisterHandler(id.CreateSubscriptionRequest_Encoding_DefaultBinary, sub.CreateSubscription)
 	s.RegisterHandler(id.ModifySubscriptionRequest_Encoding_DefaultBinary, sub.ModifySubscription)
@@ -74,7 +74,7 @@ func (s *Server) initHandlers() {
 	s.RegisterHandler(id.TransferSubscriptionsRequest_Encoding_DefaultBinary, sub.TransferSubscriptions)
 	s.RegisterHandler(id.DeleteSubscriptionsRequest_Encoding_DefaultBinary, sub.DeleteSubscriptions)
 
-	item := NewMonitoredItemService(sub)
+	item := services.NewMonitoredItemService(sub)
 	s.MonitoredItemService = item
 	// s.registerHandler(id.MonitoredItemCreateRequest_Encoding_DefaultBinary, item.MonitoredItemCreate)
 	s.RegisterHandler(id.CreateMonitoredItemsRequest_Encoding_DefaultBinary, item.CreateMonitoredItems)
@@ -87,14 +87,14 @@ func (s *Server) initHandlers() {
 }
 
 // This function allows you to overwrite a handler before you call start.
-func (s *Server) RegisterHandler(typeID uint16, h Handler) {
+func (s *serverImpl) RegisterHandler(typeID uint16, h Handler) {
 	_, ok := s.handlers[typeID]
 	if !ok {
 		s.handlers[typeID] = h
 	}
 }
 
-func (s *Server) handleService(ctx context.Context, sc *uasc.SecureChannel, reqID uint32, req ua.Request) {
+func (s *serverImpl) handleService(ctx context.Context, sc *uasc.SecureChannel, reqID uint32, req ua.Request) {
 	ualog.Debug(ctx, "handling service request", ualog.Any("request", req))
 
 	var resp ua.Response
@@ -106,7 +106,7 @@ func (s *Server) handleService(ctx context.Context, sc *uasc.SecureChannel, reqI
 		handlerContext := ctx
 
 		if session := s.sb.Session(ctx, req.Header().AuthenticationToken); session != nil {
-			handlerContext = srvctx.WithPreferedLocales(ctx, session.cfg.locales)
+			handlerContext = srvctx.WithPreferedLocales(ctx, session.Locales())
 		}
 
 		resp, err = h(handlerContext, sc, req, reqID)
@@ -119,9 +119,9 @@ func (s *Server) handleService(ctx context.Context, sc *uasc.SecureChannel, reqI
 
 	if err != nil {
 		if statusCode, ok := err.(ua.StatusCode); ok {
-			resp = &ua.ServiceFault{ResponseHeader: responseHeader(0, statusCode)}
+			resp = &ua.ServiceFault{ResponseHeader: services.NewResponseHeader(0, statusCode)}
 		} else {
-			resp = &ua.ServiceFault{ResponseHeader: responseHeader(0, ua.StatusBadUnexpectedError)}
+			resp = &ua.ServiceFault{ResponseHeader: services.NewResponseHeader(0, ua.StatusBadUnexpectedError)}
 		}
 	}
 
@@ -134,44 +134,3 @@ func (s *Server) handleService(ctx context.Context, sc *uasc.SecureChannel, reqI
 		ualog.Warn(ctx, "unable to send response", ualog.Err(err))
 	}
 }
-
-func responseHeader(reqID uint32, statusCode ua.StatusCode) *ua.ResponseHeader {
-	return &ua.ResponseHeader{
-		Timestamp:          time.Now(),
-		RequestHandle:      reqID,
-		ServiceResult:      statusCode,
-		ServiceDiagnostics: &ua.DiagnosticInfo{},
-		StringTable:        []string{},
-		AdditionalHeader:   ua.NewExtensionObject(nil),
-	}
-}
-
-func serviceUnsupported(hdr *ua.RequestHeader) ua.Response {
-	return &ua.ServiceFault{
-		ResponseHeader: responseHeader(hdr.RequestHandle, ua.StatusBadServiceUnsupported),
-	}
-}
-
-func safeReq[T ua.Request](r ua.Request) (T, error) {
-	var t T
-	req, ok := r.(T)
-	if !ok {
-		//debug.Printf("expected %T, got %T", t, r)
-		return t, ua.StatusBadRequestTypeInvalid
-	}
-	return req, nil
-}
-
-// func handleServiceFault(s *Server, sc *uasc.SecureChannel, r ua.Request) (ua.Response, error) {
-// 	debug.Printf("Handling %T", r)
-
-// 	req, ok := r.(*ua.ServiceFault)
-// 	if !ok {
-// 		debug.Printf("handleServiceFault: Expected *ua.ServiceFault, got %T", r)
-// 		return nil, ua.StatusBadRequestTypeInvalid
-// 	}
-// 	debug.Printf("Got ServiceFault: %s", req.ResponseHeader.ServiceResult)
-
-// 	// No response required
-// 	return nil, nil
-// }

@@ -8,19 +8,16 @@ import (
 	"github.com/gopcua/opcua/ua"
 )
 
-type MethodFunc func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode)
-type MethodMiddleware func(MethodFunc) MethodFunc
-
 type methodNode struct {
 	baseNode
 
 	executable bool
-	call       MethodFunc
+	call       types.MethodFunc
 }
 
 type methodConfig struct {
 	executable bool
-	handler    MethodFunc
+	handler    types.MethodFunc
 }
 
 type methodOption func(*methodConfig)
@@ -31,7 +28,7 @@ func Executable(executable bool) methodOption {
 	}
 }
 
-func WithHandler(handler MethodFunc) methodOption {
+func WithHandler(handler types.MethodFunc) methodOption {
 	return func(cfg *methodConfig) {
 		cfg.handler = handler
 	}
