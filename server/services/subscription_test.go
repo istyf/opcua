@@ -340,6 +340,33 @@ func TestCreateSubscriptionStoresNegotiatedRuntimeParameters(t *testing.T) {
 	service.DeleteSubscription(t.Context(), sub.ID)
 }
 
+func TestSubscriptionCanPublishNotifications(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name              string
+		publishingEnabled bool
+		pendingCount      int
+		want              bool
+	}{
+		{name: "disabled with pending notifications does not publish", publishingEnabled: false, pendingCount: 1, want: false},
+		{name: "disabled with no notifications does not publish", publishingEnabled: false, pendingCount: 0, want: false},
+		{name: "enabled with no notifications does not publish", publishingEnabled: true, pendingCount: 0, want: false},
+		{name: "enabled with pending notifications publishes", publishingEnabled: true, pendingCount: 1, want: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			sub := &Subscription{PublishingEnabled: tt.publishingEnabled}
+			if got := sub.canPublishNotifications(tt.pendingCount); got != tt.want {
+				t.Fatalf("expected %t, got %t", tt.want, got)
+			}
+		})
+	}
+}
+
 type subscriptionTestBackend struct {
 	handlers map[int]Handler
 	session  types.Session

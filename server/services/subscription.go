@@ -428,6 +428,10 @@ func (s *Subscription) keepalive(pubreq types.PubReq) error {
 	return nil
 }
 
+func (s *Subscription) canPublishNotifications(pendingNotificationCount int) bool {
+	return s.PublishingEnabled && pendingNotificationCount > 0
+}
+
 // this function should be run as a go-routine and will handle sending data out
 // to the client at the correct rate assuming there are publish requests queued up.
 // if the function returns it deletes the subscription
@@ -469,7 +473,7 @@ func (s *Subscription) run(ctx context.Context) {
 			case newNotification := <-s.NotifyChannel:
 				publishQueue[newNotification.ClientHandle] = newNotification
 			case <-s.T.C:
-				if len(publishQueue) == 0 {
+				if !s.canPublishNotifications(len(publishQueue)) {
 					// nothing to publish, increment the keepalive counter and send a keepalive if it
 					// has been enough intervals.
 					keepalive_counter++
