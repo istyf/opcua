@@ -170,6 +170,7 @@ type ServerConfig interface {
 
 	MaxNodesPerRead() uint32
 	MinSubscriptionPublishingInterval() time.Duration
+	MinSubscriptionMaxKeepAliveCount() uint32
 
 	MethodCallMiddleware() MethodMiddleware
 }

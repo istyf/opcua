@@ -158,6 +158,16 @@ func MinSubscriptionPublishingInterval(interval time.Duration) Option {
 	}
 }
 
+func MinSubscriptionMaxKeepAliveCount(count uint32) Option {
+	return func(_ context.Context, s *serverConfig) {
+		if count == 0 {
+			s.minSubscriptionMaxKeepAliveCount = services.DefaultMinSubscriptionMaxKeepAliveCount
+			return
+		}
+		s.minSubscriptionMaxKeepAliveCount = count
+	}
+}
+
 func WithMethodMiddleware(mw types.MethodMiddleware) Option {
 	return func(_ context.Context, s *serverConfig) {
 		s.methodCallMiddleware = mw

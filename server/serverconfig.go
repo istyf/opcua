@@ -35,6 +35,7 @@ type serverConfig struct {
 	cap ServerCapabilities
 
 	minSubscriptionPublishingInterval time.Duration
+	minSubscriptionMaxKeepAliveCount  uint32
 
 	methodCallMiddleware types.MethodMiddleware
 }
@@ -79,6 +80,10 @@ func (cfg *serverConfig) MaxNodesPerRead() uint32 {
 
 func (cfg *serverConfig) MinSubscriptionPublishingInterval() time.Duration {
 	return cfg.minSubscriptionPublishingInterval
+}
+
+func (cfg *serverConfig) MinSubscriptionMaxKeepAliveCount() uint32 {
+	return cfg.minSubscriptionMaxKeepAliveCount
 }
 
 func (cfg *serverConfig) ProductName() string {

@@ -36,7 +36,9 @@ func TestCreateSubscriptionRevisesPublishingInterval(t *testing.T) {
 			t.Parallel()
 
 			session := newSubscriptionTestSession()
-			backend := newSubscriptionTestBackend(session, tt.minimum)
+			backend := newSubscriptionTestBackend(session, subscriptionTestConfigOptions{
+				minSubscriptionPublishingInterval: tt.minimum,
+			})
 			service := NewSubscriptionService(backend)
 			sc := newTestSecureChannel(t)
 
@@ -54,6 +56,54 @@ func TestCreateSubscriptionRevisesPublishingInterval(t *testing.T) {
 			}
 			if createResp.RevisedPublishingInterval != tt.want {
 				t.Fatalf("expected revised publishing interval %v, got %v", tt.want, createResp.RevisedPublishingInterval)
+			}
+
+			service.DeleteSubscription(t.Context(), types.SubscriptionID(createResp.SubscriptionID))
+		})
+	}
+}
+
+func TestCreateSubscriptionRevisesMaxKeepAliveCount(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		minimum   uint32
+		requested uint32
+		want      uint32
+	}{
+		{name: "zero uses default smallest supported", requested: 0, want: DefaultMinSubscriptionMaxKeepAliveCount},
+		{name: "below default minimum clamps to default", requested: 1, want: DefaultMinSubscriptionMaxKeepAliveCount},
+		{name: "configured minimum is used for zero request", minimum: 3, requested: 0, want: 3},
+		{name: "configured minimum clamps smaller request", minimum: 3, requested: 1, want: 3},
+		{name: "configured minimum preserves larger request", minimum: 3, requested: 5, want: 5},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			session := newSubscriptionTestSession()
+			backend := newSubscriptionTestBackend(session, subscriptionTestConfigOptions{
+				minSubscriptionMaxKeepAliveCount: tt.minimum,
+			})
+			service := NewSubscriptionService(backend)
+			sc := newTestSecureChannel(t)
+
+			req := newCreateSubscriptionRequest(session, 12)
+			req.RequestedMaxKeepAliveCount = tt.requested
+
+			resp, err := service.CreateSubscription(t.Context(), sc, req, 1)
+			if err != nil {
+				t.Fatalf("create subscription: %v", err)
+			}
+
+			createResp, ok := resp.(*ua.CreateSubscriptionResponse)
+			if !ok {
+				t.Fatalf("expected CreateSubscriptionResponse, got %T", resp)
+			}
+			if createResp.RevisedMaxKeepAliveCount != tt.want {
+				t.Fatalf("expected revised max keepalive count %d, got %d", tt.want, createResp.RevisedMaxKeepAliveCount)
 			}
 
 			service.DeleteSubscription(t.Context(), types.SubscriptionID(createResp.SubscriptionID))
@@ -206,16 +256,29 @@ type subscriptionTestBackend struct {
 	cfg      types.ServerConfig
 }
 
-func newSubscriptionTestBackend(session types.Session, minimumPublishingInterval ...time.Duration) *subscriptionTestBackend {
-	minimum := DefaultMinSubscriptionPublishingInterval
-	if len(minimumPublishingInterval) != 0 && minimumPublishingInterval[0] > 0 {
-		minimum = minimumPublishingInterval[0]
+type subscriptionTestConfigOptions struct {
+	minSubscriptionPublishingInterval time.Duration
+	minSubscriptionMaxKeepAliveCount  uint32
+}
+
+func newSubscriptionTestBackend(session types.Session, options ...subscriptionTestConfigOptions) *subscriptionTestBackend {
+	cfg := subscriptionTestConfig{
+		minSubscriptionPublishingInterval: DefaultMinSubscriptionPublishingInterval,
+		minSubscriptionMaxKeepAliveCount:  DefaultMinSubscriptionMaxKeepAliveCount,
+	}
+	if len(options) != 0 {
+		if options[0].minSubscriptionPublishingInterval > 0 {
+			cfg.minSubscriptionPublishingInterval = options[0].minSubscriptionPublishingInterval
+		}
+		if options[0].minSubscriptionMaxKeepAliveCount > 0 {
+			cfg.minSubscriptionMaxKeepAliveCount = options[0].minSubscriptionMaxKeepAliveCount
+		}
 	}
 
 	return &subscriptionTestBackend{
 		handlers: make(map[int]Handler),
 		session:  session,
-		cfg:      subscriptionTestConfig{minSubscriptionPublishingInterval: minimum},
+		cfg:      cfg,
 	}
 }
 
@@ -298,6 +361,7 @@ func (s *subscriptionTestSession) PublishRequestChannel() chan types.PubReq {
 
 type subscriptionTestConfig struct {
 	minSubscriptionPublishingInterval time.Duration
+	minSubscriptionMaxKeepAliveCount  uint32
 }
 
 func (cfg subscriptionTestConfig) Certificate() []byte {
@@ -334,6 +398,10 @@ func (cfg subscriptionTestConfig) MaxNodesPerRead() uint32 {
 
 func (cfg subscriptionTestConfig) MinSubscriptionPublishingInterval() time.Duration {
 	return cfg.minSubscriptionPublishingInterval
+}
+
+func (cfg subscriptionTestConfig) MinSubscriptionMaxKeepAliveCount() uint32 {
+	return cfg.minSubscriptionMaxKeepAliveCount
 }
 
 func (cfg subscriptionTestConfig) MethodCallMiddleware() types.MethodMiddleware {
