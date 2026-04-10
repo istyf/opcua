@@ -1077,33 +1077,9 @@ func (s *SecureChannel) SendMsgWithContext(ctx context.Context, instance *channe
 	// we need to get a lock on the sequence number so we are sure to send them in the correct order.
 	// encode the message
 	m := instance.newMessage(resp, typeID, reqID)
-	b, err := m.Encode()
-	if err != nil {
+	if _, err := s.writeMessageChunks(ctx, instance, reqID, m, resp); err != nil {
 		return err
 	}
-
-	// encrypt the message prior to sending it
-	// if SecurityMode == None, this returns the byte stream untouched
-	b, err = instance.signAndEncrypt(m, b)
-	if err != nil {
-		return err
-	}
-
-	// send the message
-	n, err := s.c.Write(b)
-	if err != nil {
-		return err
-	}
-
-	// todo(fs): what if len(b) != n? Can this happen?
-	if len(b) != n {
-		return errors.Errorf("uasc: incomplete message %T sent len=%d sent=%d", resp, len(b), n)
-	}
-
-	atomic.AddUint64(&instance.bytesSent, uint64(n))
-	atomic.AddUint32(&instance.messagesSent, 1)
-
-	debug.Printf("uasc %d/%d: send %T with %d bytes", s.c.ID(), reqID, resp, len(b))
 
 	return nil
 }
@@ -1124,36 +1100,12 @@ func (s *SecureChannel) sendResponseWithContext(ctx context.Context, instance *c
 	instance.Lock()
 	defer instance.Unlock()
 
-	// encode the message
 	m := instance.newMessage(resp, typeID, reqID)
-	b, err := m.Encode()
-	if err != nil {
-		log.Printf("Error encoding msg: %v", err)
+
+	if _, err := s.writeMessageChunks(ctx, instance, reqID, m, resp); err != nil {
+		log.Printf("Error sending msg: %v", err)
 		return err
 	}
-
-	// encrypt the message prior to sending it
-	// if SecurityMode == None, this returns the byte stream untouched
-	b, err = instance.signAndEncrypt(m, b)
-	if err != nil {
-		return err
-	}
-
-	// send the message
-	n, err := s.c.Write(b)
-	if err != nil {
-		return err
-	}
-
-	// todo(fs): what if len(b) != n? Can this happen?
-	if len(b) != n {
-		return errors.Errorf("uasc: incomplete message %T sent len=%d sent=%d", resp, len(b), n)
-	}
-
-	atomic.AddUint64(&instance.bytesSent, uint64(n))
-	atomic.AddUint32(&instance.messagesSent, 1)
-
-	debug.Printf("uasc %d/%d: send %T with %d bytes", s.c.ID(), reqID, resp, len(b))
 
 	return nil
 }
@@ -1228,4 +1180,47 @@ func mergeChunks(chunks []*MessageChunk) ([]byte, error) {
 		b = append(b, c.Data...)
 	}
 	return b, nil
+}
+
+func (s *SecureChannel) writeMessageChunks(ctx context.Context, instance *channelInstance, reqID uint32, m *Message, body any) (int, error) {
+	chunks, err := m.EncodeChunks(instance.maxBodySize)
+	if err != nil {
+		return 0, err
+	}
+
+	var total int
+	for i, chunk := range chunks {
+		select {
+		case <-ctx.Done():
+			return total, ctx.Err()
+		default:
+		}
+
+		if i > 0 {
+			number := instance.nextSequenceNumber()
+			binary.LittleEndian.PutUint32(chunk[16:], uint32(number))
+		}
+
+		chunk, err = instance.signAndEncrypt(m, chunk)
+		if err != nil {
+			return total, err
+		}
+
+		n, err := s.c.Write(chunk)
+		if err != nil {
+			return total, err
+		}
+
+		if len(chunk) != n {
+			return total, errors.Errorf("uasc: incomplete message %T chunk sent len=%d sent=%d", body, len(chunk), n)
+		}
+
+		total += n
+		atomic.AddUint64(&instance.bytesSent, uint64(n))
+		atomic.AddUint32(&instance.messagesSent, 1)
+	}
+
+	debug.Printf("uasc %d/%d: send %T with %d bytes in %d chunks", s.c.ID(), reqID, body, total, len(chunks))
+
+	return total, nil
 }
