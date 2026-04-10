@@ -28,7 +28,7 @@ func TestCreateSubscriptionRejectsMissingSession(t *testing.T) {
 		RequestedMaxKeepAliveCount:  10,
 	}
 
-	resp, err := service.CreateSubscription(context.Background(), sc, req, 1)
+	resp, err := service.CreateSubscription(t.Context(), sc, req, 1)
 	if resp != nil {
 		t.Fatalf("expected nil response, got %T", resp)
 	}
@@ -58,7 +58,7 @@ func TestCreateSubscriptionCreatesSubscriptionForValidSession(t *testing.T) {
 		RequestedMaxKeepAliveCount:  10,
 	}
 
-	resp, err := service.CreateSubscription(context.Background(), sc, req, 1)
+	resp, err := service.CreateSubscription(t.Context(), sc, req, 1)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -82,7 +82,7 @@ func TestCreateSubscriptionCreatesSubscriptionForValidSession(t *testing.T) {
 		t.Fatal("expected created subscription to keep the resolved session")
 	}
 
-	service.DeleteSubscription(context.Background(), sub.ID)
+	service.DeleteSubscription(t.Context(), sub.ID)
 }
 
 func TestCreateSubscriptionPanicsWithoutSecureChannel(t *testing.T) {
@@ -108,7 +108,46 @@ func TestCreateSubscriptionPanicsWithoutSecureChannel(t *testing.T) {
 		}
 	}()
 
-	_, _ = service.CreateSubscription(context.Background(), nil, req, 1)
+	_, _ = service.CreateSubscription(t.Context(), nil, req, 1)
+}
+
+func TestCreateSubscriptionDoesNotReuseDeletedIDs(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	firstResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 44), 1)
+	if err != nil {
+		t.Fatalf("create first subscription: %v", err)
+	}
+	firstCreateResp, ok := firstResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", firstResp)
+	}
+
+	firstID := types.SubscriptionID(firstCreateResp.SubscriptionID)
+	service.DeleteSubscription(t.Context(), firstID)
+
+	secondResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 45), 2)
+	if err != nil {
+		t.Fatalf("create second subscription: %v", err)
+	}
+	secondCreateResp, ok := secondResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", secondResp)
+	}
+
+	if secondCreateResp.SubscriptionID == firstCreateResp.SubscriptionID {
+		t.Fatalf("expected a new subscription id, got reused id %d", secondCreateResp.SubscriptionID)
+	}
+	if secondCreateResp.SubscriptionID <= firstCreateResp.SubscriptionID {
+		t.Fatalf("expected monotonic subscription ids, got first=%d second=%d", firstCreateResp.SubscriptionID, secondCreateResp.SubscriptionID)
+	}
+
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(secondCreateResp.SubscriptionID))
 }
 
 type subscriptionTestBackend struct {
@@ -194,6 +233,18 @@ func (s *subscriptionTestSession) IsSameAs(other types.Session) bool {
 
 func (s *subscriptionTestSession) PublishRequestChannel() chan types.PubReq {
 	return s.publishQueue
+}
+
+func newCreateSubscriptionRequest(session *subscriptionTestSession, handle uint32) *ua.CreateSubscriptionRequest {
+	return &ua.CreateSubscriptionRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       handle,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		RequestedPublishingInterval: 250,
+		RequestedLifetimeCount:      30,
+		RequestedMaxKeepAliveCount:  10,
+	}
 }
 
 func newTestSecureChannel(t *testing.T) *uasc.SecureChannel {

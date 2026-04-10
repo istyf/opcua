@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gopcua/opcua/id"
@@ -26,8 +27,9 @@ type SubscriptionService struct {
 	srv SubscriptionServiceBackend
 
 	// pub sub stuff
-	mu   sync.Mutex
-	subs map[types.SubscriptionID]*Subscription
+	mu         sync.Mutex
+	subs       map[types.SubscriptionID]*Subscription
+	previousID atomic.Uint32
 }
 
 func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
@@ -48,6 +50,14 @@ func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
 }
 
 var newSubscriptionServiceLogAttribute = newServiceLogAttributeCreatorForSet("subscription")
+
+func (s *SubscriptionService) NextID() types.SubscriptionID {
+	id := types.SubscriptionID(s.previousID.Add(1))
+	if id == 0 {
+		id = types.SubscriptionID(s.previousID.Add(1))
+	}
+	return id
+}
 
 func (s *SubscriptionService) Get(id types.SubscriptionID) (*Subscription, bool) {
 	s.mu.Lock()
@@ -99,7 +109,7 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	newsubid := types.SubscriptionID(len(s.subs)) + 1
+	newsubid := s.NextID()
 	ualog.Info(ctx, "new subscription created",
 		ualog.Uint32("sub", uint32(newsubid)),
 		ualog.Any("remote", sc.RemoteAddr()),
