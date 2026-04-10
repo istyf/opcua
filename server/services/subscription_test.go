@@ -367,6 +367,47 @@ func TestSubscriptionCanPublishNotifications(t *testing.T) {
 	}
 }
 
+func TestSubscriptionNextPublishBatch(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		maxPerPublish uint32
+		queueSize     int
+		wantBatchSize int
+		wantRemaining int
+		wantMore      bool
+	}{
+		{name: "unlimited publishes everything", maxPerPublish: 0, queueSize: 3, wantBatchSize: 3, wantRemaining: 0, wantMore: false},
+		{name: "limit publishes one batch and keeps the rest", maxPerPublish: 2, queueSize: 5, wantBatchSize: 2, wantRemaining: 3, wantMore: true},
+		{name: "limit equal to queue drains queue", maxPerPublish: 3, queueSize: 3, wantBatchSize: 3, wantRemaining: 0, wantMore: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			sub := &Subscription{MaxNotificationsPerPublish: tt.maxPerPublish}
+			publishQueue := make(map[uint32]*ua.MonitoredItemNotification, tt.queueSize)
+			for i := range tt.queueSize {
+				handle := uint32(i + 1)
+				publishQueue[handle] = &ua.MonitoredItemNotification{ClientHandle: handle}
+			}
+
+			batch, more := sub.nextPublishBatch(publishQueue)
+			if len(batch) != tt.wantBatchSize {
+				t.Fatalf("expected batch size %d, got %d", tt.wantBatchSize, len(batch))
+			}
+			if len(publishQueue) != tt.wantRemaining {
+				t.Fatalf("expected remaining queue size %d, got %d", tt.wantRemaining, len(publishQueue))
+			}
+			if more != tt.wantMore {
+				t.Fatalf("expected more notifications %t, got %t", tt.wantMore, more)
+			}
+		})
+	}
+}
+
 type subscriptionTestBackend struct {
 	handlers map[int]Handler
 	session  types.Session

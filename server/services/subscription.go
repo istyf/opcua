@@ -432,6 +432,24 @@ func (s *Subscription) canPublishNotifications(pendingNotificationCount int) boo
 	return s.PublishingEnabled && pendingNotificationCount > 0
 }
 
+func (s *Subscription) nextPublishBatch(publishQueue map[uint32]*ua.MonitoredItemNotification) ([]*ua.MonitoredItemNotification, bool) {
+	maxCount := len(publishQueue)
+	if s.MaxNotificationsPerPublish > 0 && int(s.MaxNotificationsPerPublish) < maxCount {
+		maxCount = int(s.MaxNotificationsPerPublish)
+	}
+
+	finalItems := make([]*ua.MonitoredItemNotification, 0, maxCount)
+	for clientHandle, notification := range publishQueue {
+		finalItems = append(finalItems, notification)
+		delete(publishQueue, clientHandle)
+		if len(finalItems) == maxCount {
+			break
+		}
+	}
+
+	return finalItems, len(publishQueue) > 0
+}
+
 // this function should be run as a go-routine and will handle sending data out
 // to the client at the correct rate assuming there are publish requests queued up.
 // if the function returns it deletes the subscription
@@ -460,10 +478,8 @@ func (s *Subscription) run(ctx context.Context) {
 	// get a publish request, we'll continue to count intervals without a publish request.
 	//
 	// In L0 and L2, If we get to the lifetime count without a publish request, we'll kill the subscription.
+	publishQueue := make(map[uint32]*ua.MonitoredItemNotification)
 	for {
-		// we don't need to do anything if we don't have at least one thing to publish so lets get that first
-		publishQueue := make(map[uint32]*ua.MonitoredItemNotification)
-
 		// Collect notifications until our publication interval is ready
 	L0:
 		for {
@@ -543,15 +559,10 @@ func (s *Subscription) run(ctx context.Context) {
 		//delete(s.SeqNums, a.SequenceNumber)
 		//}
 
-		final_items := make([]*ua.MonitoredItemNotification, len(publishQueue))
-		i := 0
-		for k := range publishQueue {
-			final_items[i] = publishQueue[k]
-			i++
-		}
+		finalItems, moreNotifications := s.nextPublishBatch(publishQueue)
 
 		dcn := ua.DataChangeNotification{
-			MonitoredItems:  final_items,
+			MonitoredItems:  finalItems,
 			DiagnosticInfos: []*ua.DiagnosticInfo{},
 		}
 		eo := make([]*ua.ExtensionObject, 1)
@@ -575,7 +586,7 @@ func (s *Subscription) run(ctx context.Context) {
 				AdditionalHeader:   ua.NewExtensionObject(nil),
 			},
 			SubscriptionID:           uint32(s.ID),
-			MoreNotifications:        false,
+			MoreNotifications:        moreNotifications,
 			NotificationMessage:      &msg,
 			AvailableSequenceNumbers: []uint32{}, // an empty array indicates taht we don't support retransmission of messages
 			Results:                  []ua.StatusCode{},
