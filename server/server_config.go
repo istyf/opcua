@@ -168,6 +168,16 @@ func MinSubscriptionMaxKeepAliveCount(count uint32) Option {
 	}
 }
 
+func MinSubscriptionLifetimeCount(count uint32) Option {
+	return func(_ context.Context, s *serverConfig) {
+		if count == 0 {
+			s.minSubscriptionLifetimeCount = services.DefaultMinSubscriptionLifetimeCount
+			return
+		}
+		s.minSubscriptionLifetimeCount = count
+	}
+}
+
 func WithMethodMiddleware(mw types.MethodMiddleware) Option {
 	return func(_ context.Context, s *serverConfig) {
 		s.methodCallMiddleware = mw

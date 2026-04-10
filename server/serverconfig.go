@@ -36,6 +36,7 @@ type serverConfig struct {
 
 	minSubscriptionPublishingInterval time.Duration
 	minSubscriptionMaxKeepAliveCount  uint32
+	minSubscriptionLifetimeCount      uint32
 
 	methodCallMiddleware types.MethodMiddleware
 }
@@ -84,6 +85,10 @@ func (cfg *serverConfig) MinSubscriptionPublishingInterval() time.Duration {
 
 func (cfg *serverConfig) MinSubscriptionMaxKeepAliveCount() uint32 {
 	return cfg.minSubscriptionMaxKeepAliveCount
+}
+
+func (cfg *serverConfig) MinSubscriptionLifetimeCount() uint32 {
+	return cfg.minSubscriptionLifetimeCount
 }
 
 func (cfg *serverConfig) ProductName() string {

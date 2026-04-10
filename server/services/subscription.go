@@ -33,6 +33,7 @@ type SubscriptionService struct {
 	previousID            atomic.Uint32
 	minPublishingInterval float64
 	minKeepAliveCount     uint32
+	minLifetimeCount      uint32
 }
 
 func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
@@ -41,6 +42,7 @@ func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
 		subs:                  make(map[types.SubscriptionID]*Subscription),
 		minPublishingInterval: float64(b.Config().MinSubscriptionPublishingInterval() / time.Millisecond),
 		minKeepAliveCount:     b.Config().MinSubscriptionMaxKeepAliveCount(),
+		minLifetimeCount:      b.Config().MinSubscriptionLifetimeCount(),
 	}
 
 	b.RegisterHandler(id.CreateSubscriptionRequest_Encoding_DefaultBinary, ss.CreateSubscription)
@@ -60,6 +62,7 @@ const (
 	DefaultMinSubscriptionPublishingInterval = time.Second
 	defaultMinSupportedPublishingIntervalMS  = float64(DefaultMinSubscriptionPublishingInterval / time.Millisecond)
 	DefaultMinSubscriptionMaxKeepAliveCount  = 10
+	DefaultMinSubscriptionLifetimeCount      = 30
 )
 
 func revisePublishingInterval(requested, minSupported float64) float64 {
@@ -80,6 +83,19 @@ func reviseMaxKeepAliveCount(requested, minSupported uint32) uint32 {
 		return minSupported
 	}
 	return max(requested, minSupported)
+}
+
+func reviseLifetimeCount(requested, minSupported, revisedKeepAliveCount uint32) uint32 {
+	if minSupported == 0 {
+		minSupported = DefaultMinSubscriptionLifetimeCount
+	}
+
+	specMin := revisedKeepAliveCount * 3
+	minLifetime := max(minSupported, specMin)
+	if requested == 0 {
+		return minLifetime
+	}
+	return max(requested, minLifetime)
 }
 
 func (s *SubscriptionService) NextID() types.SubscriptionID {
@@ -152,8 +168,8 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 	sub.Channel = sc
 	sub.ID = newsubid
 	sub.RevisedPublishingInterval = revisePublishingInterval(req.RequestedPublishingInterval, s.minPublishingInterval)
-	sub.RevisedLifetimeCount = req.RequestedLifetimeCount
 	sub.RevisedMaxKeepAliveCount = reviseMaxKeepAliveCount(req.RequestedMaxKeepAliveCount, s.minKeepAliveCount)
+	sub.RevisedLifetimeCount = reviseLifetimeCount(req.RequestedLifetimeCount, s.minLifetimeCount, sub.RevisedMaxKeepAliveCount)
 
 	s.subs[newsubid] = sub
 	sub.running = true
