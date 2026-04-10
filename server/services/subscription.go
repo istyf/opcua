@@ -87,12 +87,19 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 	if err != nil {
 		return nil, err
 	}
+	if sc == nil {
+		panic("subscription service requires a non-nil secure channel")
+	}
+
+	session := s.srv.Session(ctx, r.Header())
+	if session == nil {
+		return nil, ua.StatusBadSessionIDInvalid
+	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	newsubid := types.SubscriptionID(len(s.subs)) + 1
-
 	ualog.Info(ctx, "new subscription created",
 		ualog.Uint32("sub", uint32(newsubid)),
 		ualog.Any("remote", sc.RemoteAddr()),
@@ -100,7 +107,7 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 
 	sub := NewSubscription()
 	sub.srv = s
-	sub.session = s.srv.Session(ctx, r.Header())
+	sub.session = session
 	sub.Channel = sc
 	sub.ID = newsubid
 	sub.RevisedPublishingInterval = max(req.RequestedPublishingInterval, 1000.0)
