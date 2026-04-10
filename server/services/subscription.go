@@ -170,6 +170,9 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 	sub.RevisedPublishingInterval = revisePublishingInterval(req.RequestedPublishingInterval, s.minPublishingInterval)
 	sub.RevisedMaxKeepAliveCount = reviseMaxKeepAliveCount(req.RequestedMaxKeepAliveCount, s.minKeepAliveCount)
 	sub.RevisedLifetimeCount = reviseLifetimeCount(req.RequestedLifetimeCount, s.minLifetimeCount, sub.RevisedMaxKeepAliveCount)
+	sub.MaxNotificationsPerPublish = req.MaxNotificationsPerPublish
+	sub.PublishingEnabled = req.PublishingEnabled
+	sub.Priority = req.Priority
 
 	s.subs[newsubid] = sub
 	sub.running = true
@@ -346,14 +349,17 @@ func (s *SubscriptionService) DeleteSubscriptions(ctx context.Context, sc *uasc.
 // MonitoredItems will send updates on the NotifyChannel to let the background task know that
 // an event has occured that needs to be published.
 type Subscription struct {
-	srv                       *SubscriptionService
-	session                   types.Session
-	ID                        types.SubscriptionID
-	RevisedPublishingInterval float64
-	RevisedLifetimeCount      uint32
-	RevisedMaxKeepAliveCount  uint32
-	Channel                   *uasc.SecureChannel
-	SequenceID                uint32
+	srv                        *SubscriptionService
+	session                    types.Session
+	ID                         types.SubscriptionID
+	RevisedPublishingInterval  float64
+	RevisedLifetimeCount       uint32
+	RevisedMaxKeepAliveCount   uint32
+	MaxNotificationsPerPublish uint32
+	PublishingEnabled          bool
+	Priority                   uint8
+	Channel                    *uasc.SecureChannel
+	SequenceID                 uint32
 	//SeqNums                   map[uint32]struct{}
 	T *time.Ticker
 
@@ -381,6 +387,8 @@ func (s *Subscription) Update(req *ua.ModifySubscriptionRequest) {
 	s.RevisedPublishingInterval = req.RequestedPublishingInterval
 	s.RevisedLifetimeCount = req.RequestedLifetimeCount
 	s.RevisedMaxKeepAliveCount = req.RequestedMaxKeepAliveCount
+	s.MaxNotificationsPerPublish = req.MaxNotificationsPerPublish
+	s.Priority = req.Priority
 }
 
 func (s *Subscription) Start(ctx context.Context) {

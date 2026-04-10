@@ -300,6 +300,46 @@ func TestCreateSubscriptionDoesNotReuseDeletedIDs(t *testing.T) {
 	service.DeleteSubscription(t.Context(), types.SubscriptionID(secondCreateResp.SubscriptionID))
 }
 
+func TestCreateSubscriptionStoresNegotiatedRuntimeParameters(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	req := newCreateSubscriptionRequest(session, 55)
+	req.MaxNotificationsPerPublish = 42
+	req.PublishingEnabled = false
+	req.Priority = 7
+
+	resp, err := service.CreateSubscription(t.Context(), sc, req, 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+
+	createResp, ok := resp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", resp)
+	}
+
+	sub, ok := service.Get(types.SubscriptionID(createResp.SubscriptionID))
+	if !ok {
+		t.Fatal("expected subscription to be registered")
+	}
+	if sub.MaxNotificationsPerPublish != req.MaxNotificationsPerPublish {
+		t.Fatalf("expected max notifications per publish %d, got %d", req.MaxNotificationsPerPublish, sub.MaxNotificationsPerPublish)
+	}
+	if sub.PublishingEnabled != req.PublishingEnabled {
+		t.Fatalf("expected publishing enabled %t, got %t", req.PublishingEnabled, sub.PublishingEnabled)
+	}
+	if sub.Priority != req.Priority {
+		t.Fatalf("expected priority %d, got %d", req.Priority, sub.Priority)
+	}
+
+	service.DeleteSubscription(t.Context(), sub.ID)
+}
+
 type subscriptionTestBackend struct {
 	handlers map[int]Handler
 	session  types.Session
