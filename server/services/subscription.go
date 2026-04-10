@@ -21,7 +21,7 @@ type SubscriptionServiceBackend interface {
 
 // SubscriptionService implements the Subscription Service Set.
 //
-// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.13
+// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.14
 type SubscriptionService struct {
 	srv SubscriptionServiceBackend
 
@@ -78,7 +78,7 @@ func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id types.S
 	s.srv.DeleteSubscription(id)
 }
 
-// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.13.2
+// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.14.2
 func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
 	ctx = ualog.WithAttrs(ctx, newSubscriptionServiceLogAttribute("create"))
 	logServiceRequest(ctx, r)
@@ -103,7 +103,7 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 	sub.session = s.srv.Session(ctx, r.Header())
 	sub.Channel = sc
 	sub.ID = newsubid
-	sub.RevisedPublishingInterval = req.RequestedPublishingInterval
+	sub.RevisedPublishingInterval = max(req.RequestedPublishingInterval, 1000.0)
 	sub.RevisedLifetimeCount = req.RequestedLifetimeCount
 	sub.RevisedMaxKeepAliveCount = req.RequestedMaxKeepAliveCount
 
@@ -121,9 +121,9 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 			AdditionalHeader:   ua.NewExtensionObject(nil),
 		},
 		SubscriptionID:            uint32(newsubid),
-		RevisedPublishingInterval: req.RequestedPublishingInterval,
-		RevisedLifetimeCount:      req.RequestedLifetimeCount,
-		RevisedMaxKeepAliveCount:  req.RequestedMaxKeepAliveCount,
+		RevisedPublishingInterval: sub.RevisedPublishingInterval,
+		RevisedLifetimeCount:      sub.RevisedLifetimeCount,
+		RevisedMaxKeepAliveCount:  sub.RevisedMaxKeepAliveCount,
 	}
 	return resp, nil
 }
