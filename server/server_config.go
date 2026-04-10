@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gopcua/opcua/server/services"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
@@ -144,6 +145,16 @@ func ProductName(name string) Option {
 func SoftwareVersion(name string) Option {
 	return func(_ context.Context, s *serverConfig) {
 		s.softwareVersion = name
+	}
+}
+
+func MinSubscriptionPublishingInterval(interval time.Duration) Option {
+	return func(_ context.Context, s *serverConfig) {
+		if interval <= 0 {
+			s.minSubscriptionPublishingInterval = services.DefaultMinSubscriptionPublishingInterval
+			return
+		}
+		s.minSubscriptionPublishingInterval = interval
 	}
 }
 

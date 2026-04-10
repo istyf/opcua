@@ -18,6 +18,7 @@ type SubscriptionServiceBackend interface {
 	NamespaceProvider
 	SessionProvider
 	SubscriptionDeleter
+	Config() types.ServerConfig
 }
 
 // SubscriptionService implements the Subscription Service Set.
@@ -27,15 +28,17 @@ type SubscriptionService struct {
 	srv SubscriptionServiceBackend
 
 	// pub sub stuff
-	mu         sync.Mutex
-	subs       map[types.SubscriptionID]*Subscription
-	previousID atomic.Uint32
+	mu                    sync.Mutex
+	subs                  map[types.SubscriptionID]*Subscription
+	previousID            atomic.Uint32
+	minPublishingInterval float64
 }
 
 func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
 	ss := &SubscriptionService{
-		srv:  b,
-		subs: make(map[types.SubscriptionID]*Subscription),
+		srv:                   b,
+		subs:                  make(map[types.SubscriptionID]*Subscription),
+		minPublishingInterval: float64(b.Config().MinSubscriptionPublishingInterval() / time.Millisecond),
 	}
 
 	b.RegisterHandler(id.CreateSubscriptionRequest_Encoding_DefaultBinary, ss.CreateSubscription)
@@ -50,6 +53,21 @@ func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
 }
 
 var newSubscriptionServiceLogAttribute = newServiceLogAttributeCreatorForSet("subscription")
+
+const (
+	DefaultMinSubscriptionPublishingInterval = time.Second
+	defaultMinSupportedPublishingIntervalMS  = float64(DefaultMinSubscriptionPublishingInterval / time.Millisecond)
+)
+
+func revisePublishingInterval(requested, minSupported float64) float64 {
+	if minSupported <= 0 {
+		minSupported = defaultMinSupportedPublishingIntervalMS
+	}
+	if requested <= 0 {
+		return minSupported
+	}
+	return max(requested, minSupported)
+}
 
 func (s *SubscriptionService) NextID() types.SubscriptionID {
 	id := types.SubscriptionID(s.previousID.Add(1))
@@ -120,7 +138,7 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 	sub.session = session
 	sub.Channel = sc
 	sub.ID = newsubid
-	sub.RevisedPublishingInterval = max(req.RequestedPublishingInterval, 1000.0)
+	sub.RevisedPublishingInterval = revisePublishingInterval(req.RequestedPublishingInterval, s.minPublishingInterval)
 	sub.RevisedLifetimeCount = req.RequestedLifetimeCount
 	sub.RevisedMaxKeepAliveCount = req.RequestedMaxKeepAliveCount
 

@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/rsa"
+	"time"
 
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
@@ -32,6 +33,8 @@ type serverConfig struct {
 	enabledAuth []authMode
 
 	cap ServerCapabilities
+
+	minSubscriptionPublishingInterval time.Duration
 
 	methodCallMiddleware types.MethodMiddleware
 }
@@ -72,6 +75,10 @@ func (cfg *serverConfig) ManufacturerName() string {
 
 func (cfg *serverConfig) MaxNodesPerRead() uint32 {
 	return cfg.cap.OperationalLimits.MaxNodesPerRead
+}
+
+func (cfg *serverConfig) MinSubscriptionPublishingInterval() time.Duration {
+	return cfg.minSubscriptionPublishingInterval
 }
 
 func (cfg *serverConfig) ProductName() string {

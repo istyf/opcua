@@ -2,14 +2,64 @@ package services
 
 import (
 	"context"
+	"crypto/rsa"
 	"net"
 	"testing"
+	"time"
 
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uacp"
 	"github.com/gopcua/opcua/uasc"
 )
+
+func TestCreateSubscriptionRevisesPublishingInterval(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		minimum   time.Duration
+		requested float64
+		want      float64
+	}{
+		{name: "negative uses default fastest supported", requested: -1, want: defaultMinSupportedPublishingIntervalMS},
+		{name: "zero uses default fastest supported", requested: 0, want: defaultMinSupportedPublishingIntervalMS},
+		{name: "below default minimum clamps to fastest supported", requested: 250, want: defaultMinSupportedPublishingIntervalMS},
+		{name: "above default minimum is preserved", requested: 1500, want: 1500},
+		{name: "configured minimum is used for zero request", minimum: 200 * time.Millisecond, requested: 0, want: 200},
+		{name: "configured minimum clamps positive request", minimum: 200 * time.Millisecond, requested: 150, want: 200},
+		{name: "configured minimum preserves larger request", minimum: 200 * time.Millisecond, requested: 350, want: 350},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			session := newSubscriptionTestSession()
+			backend := newSubscriptionTestBackend(session, tt.minimum)
+			service := NewSubscriptionService(backend)
+			sc := newTestSecureChannel(t)
+
+			req := newCreateSubscriptionRequest(session, 10)
+			req.RequestedPublishingInterval = tt.requested
+
+			resp, err := service.CreateSubscription(t.Context(), sc, req, 1)
+			if err != nil {
+				t.Fatalf("create subscription: %v", err)
+			}
+
+			createResp, ok := resp.(*ua.CreateSubscriptionResponse)
+			if !ok {
+				t.Fatalf("expected CreateSubscriptionResponse, got %T", resp)
+			}
+			if createResp.RevisedPublishingInterval != tt.want {
+				t.Fatalf("expected revised publishing interval %v, got %v", tt.want, createResp.RevisedPublishingInterval)
+			}
+
+			service.DeleteSubscription(t.Context(), types.SubscriptionID(createResp.SubscriptionID))
+		})
+	}
+}
 
 func TestCreateSubscriptionRejectsMissingSession(t *testing.T) {
 	t.Parallel()
@@ -153,12 +203,19 @@ func TestCreateSubscriptionDoesNotReuseDeletedIDs(t *testing.T) {
 type subscriptionTestBackend struct {
 	handlers map[int]Handler
 	session  types.Session
+	cfg      types.ServerConfig
 }
 
-func newSubscriptionTestBackend(session types.Session) *subscriptionTestBackend {
+func newSubscriptionTestBackend(session types.Session, minimumPublishingInterval ...time.Duration) *subscriptionTestBackend {
+	minimum := DefaultMinSubscriptionPublishingInterval
+	if len(minimumPublishingInterval) != 0 && minimumPublishingInterval[0] > 0 {
+		minimum = minimumPublishingInterval[0]
+	}
+
 	return &subscriptionTestBackend{
 		handlers: make(map[int]Handler),
 		session:  session,
+		cfg:      subscriptionTestConfig{minSubscriptionPublishingInterval: minimum},
 	}
 }
 
@@ -175,6 +232,10 @@ func (b *subscriptionTestBackend) Session(context.Context, *ua.RequestHeader) ty
 }
 
 func (b *subscriptionTestBackend) DeleteSubscription(types.SubscriptionID) {}
+
+func (b *subscriptionTestBackend) Config() types.ServerConfig {
+	return b.cfg
+}
 
 type subscriptionTestSession struct {
 	authToken    *ua.NodeID
@@ -233,6 +294,52 @@ func (s *subscriptionTestSession) IsSameAs(other types.Session) bool {
 
 func (s *subscriptionTestSession) PublishRequestChannel() chan types.PubReq {
 	return s.publishQueue
+}
+
+type subscriptionTestConfig struct {
+	minSubscriptionPublishingInterval time.Duration
+}
+
+func (cfg subscriptionTestConfig) Certificate() []byte {
+	return nil
+}
+
+func (cfg subscriptionTestConfig) Endpoints() []string {
+	return nil
+}
+
+func (cfg subscriptionTestConfig) PrivateKey() *rsa.PrivateKey {
+	return nil
+}
+
+func (cfg subscriptionTestConfig) ApplicationURI() string {
+	return ""
+}
+
+func (cfg subscriptionTestConfig) ManufacturerName() string {
+	return ""
+}
+
+func (cfg subscriptionTestConfig) ProductName() string {
+	return ""
+}
+
+func (cfg subscriptionTestConfig) SoftwareVersion() string {
+	return ""
+}
+
+func (cfg subscriptionTestConfig) MaxNodesPerRead() uint32 {
+	return 0
+}
+
+func (cfg subscriptionTestConfig) MinSubscriptionPublishingInterval() time.Duration {
+	return cfg.minSubscriptionPublishingInterval
+}
+
+func (cfg subscriptionTestConfig) MethodCallMiddleware() types.MethodMiddleware {
+	return func(fn types.MethodFunc) types.MethodFunc {
+		return fn
+	}
 }
 
 func newCreateSubscriptionRequest(session *subscriptionTestSession, handle uint32) *ua.CreateSubscriptionRequest {
