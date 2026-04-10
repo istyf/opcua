@@ -71,11 +71,11 @@ func WithBase(opts ...baseOption) func(ua.NodeClass) *baseConfig {
 			applyOption(cfg)
 		}
 
-		if cfg.descriptions == nil {
+		if len(cfg.descriptions) == 0 {
 			cfg.descriptions = []*ua.LocalizedText{ua.NewLocalizedText("")}
 		}
 
-		if cfg.displayNames == nil {
+		if len(cfg.displayNames) == 0 {
 			cfg.displayNames = []*ua.LocalizedText{ua.NewLocalizedText(cfg.browseName.Name)}
 		}
 
