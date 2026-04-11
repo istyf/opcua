@@ -346,6 +346,23 @@ func (s *SubscriptionService) DeleteSubscriptions(ctx context.Context, sc *uasc.
 	defer s.mu.Unlock()
 
 	results := make([]ua.StatusCode, len(req.SubscriptionIDs))
+	if session == nil {
+		for i := range results {
+			results[i] = ua.StatusBadSessionIDInvalid
+		}
+		return &ua.DeleteSubscriptionsResponse{
+			ResponseHeader: &ua.ResponseHeader{
+				Timestamp:          time.Now(),
+				RequestHandle:      req.RequestHeader.RequestHandle,
+				ServiceResult:      ua.StatusOK,
+				ServiceDiagnostics: &ua.DiagnosticInfo{},
+				StringTable:        []string{},
+				AdditionalHeader:   ua.NewExtensionObject(nil),
+			},
+			Results:         results,
+			DiagnosticInfos: []*ua.DiagnosticInfo{},
+		}, nil
+	}
 	for i := range req.SubscriptionIDs {
 
 		subid := types.SubscriptionID(req.SubscriptionIDs[i])

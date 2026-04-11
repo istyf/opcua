@@ -212,8 +212,11 @@ func (s *MonitoredItemService) CreateMonitoredItems(ctx context.Context, sc *uas
 	}
 
 	sess := s.backend.Session(ctx, req.RequestHeader)
+	if sess == nil || sub.session == nil {
+		return nil, ua.StatusBadSessionIDInvalid
+	}
 	if !sub.session.IsSameAs(sess) {
-		return nil, errors.New("not your subscription, bro")
+		return nil, ua.StatusBadSessionIDInvalid
 	}
 
 	for i := range req.ItemsToCreate {
@@ -303,6 +306,23 @@ func (s *MonitoredItemService) SetMonitoringMode(ctx context.Context, sc *uasc.S
 	results := make([]ua.StatusCode, len(req.MonitoredItemIDs))
 
 	sess := s.backend.Session(ctx, req.RequestHeader)
+	if sess == nil {
+		for i := range results {
+			results[i] = ua.StatusBadSessionIDInvalid
+		}
+		return &ua.SetMonitoringModeResponse{
+			ResponseHeader: &ua.ResponseHeader{
+				Timestamp:          time.Now(),
+				RequestHandle:      req.RequestHeader.RequestHandle,
+				ServiceResult:      ua.StatusOK,
+				ServiceDiagnostics: &ua.DiagnosticInfo{},
+				StringTable:        []string{},
+				AdditionalHeader:   ua.NewExtensionObject(nil),
+			},
+			Results:         results,
+			DiagnosticInfos: []*ua.DiagnosticInfo{},
+		}, nil
+	}
 
 	for i := range req.MonitoredItemIDs {
 		id := req.MonitoredItemIDs[i]
@@ -365,6 +385,23 @@ func (s *MonitoredItemService) DeleteMonitoredItems(ctx context.Context, sc *uas
 	sess := s.backend.Session(ctx, req.RequestHeader)
 
 	results := make([]ua.StatusCode, len(req.MonitoredItemIDs))
+	if sess == nil {
+		for i := range results {
+			results[i] = ua.StatusBadSessionIDInvalid
+		}
+		return &ua.DeleteMonitoredItemsResponse{
+			ResponseHeader: &ua.ResponseHeader{
+				Timestamp:          time.Now(),
+				RequestHandle:      req.RequestHeader.RequestHandle,
+				ServiceResult:      ua.StatusOK,
+				ServiceDiagnostics: &ua.DiagnosticInfo{},
+				StringTable:        []string{},
+				AdditionalHeader:   ua.NewExtensionObject(nil),
+			},
+			Results:         results,
+			DiagnosticInfos: []*ua.DiagnosticInfo{},
+		}, nil
+	}
 	for i := range req.MonitoredItemIDs {
 		id := req.MonitoredItemIDs[i]
 		item, ok := s.items[id]

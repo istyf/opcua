@@ -67,6 +67,51 @@ func TestCreateMonitoredItemsChecksSessionOwnership(t *testing.T) {
 	}
 }
 
+func TestCreateMonitoredItemsRejectsMissingSession(t *testing.T) {
+	t.Parallel()
+
+	ownerSession := newSubscriptionTestSession()
+	sub := NewSubscription()
+	sub.ID = 1
+	sub.session = ownerSession
+	sub.RevisedPublishingInterval = 1000
+
+	backend := &monitoredItemTestBackend{
+		session:      nil,
+		subscription: sub,
+	}
+	service := NewMonitoredItemService(backend)
+
+	req := &ua.CreateMonitoredItemsRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       2,
+			AuthenticationToken: ownerSession.AuthTokenID(),
+		},
+		SubscriptionID: uint32(sub.ID),
+		ItemsToCreate: []*ua.MonitoredItemCreateRequest{
+			{
+				ItemToMonitor: &ua.ReadValueID{
+					NodeID:      ua.NewNumericNodeID(1, 4321),
+					AttributeID: ua.AttributeIDValue,
+				},
+				RequestedParameters: &ua.MonitoringParameters{
+					ClientHandle:     100,
+					SamplingInterval: 1000,
+					QueueSize:        1,
+				},
+			},
+		},
+	}
+
+	resp, err := service.CreateMonitoredItems(t.Context(), nil, req, 1)
+	if resp != nil {
+		t.Fatalf("expected nil response, got %T", resp)
+	}
+	if err != ua.StatusBadSessionIDInvalid {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSessionIDInvalid, err)
+	}
+}
+
 type monitoredItemTestBackend struct {
 	session      types.Session
 	subscription *Subscription

@@ -414,6 +414,47 @@ func TestCreateSubscriptionRespectsPerSessionSubscriptionLimit(t *testing.T) {
 	service.DeleteSubscription(t.Context(), types.SubscriptionID(thirdCreateResp.SubscriptionID))
 }
 
+func TestDeleteSubscriptionsRejectsMissingSession(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	createResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 65), 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+	created, ok := createResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", createResp)
+	}
+
+	backend.session = nil
+	resp, err := service.DeleteSubscriptions(t.Context(), sc, &ua.DeleteSubscriptionsRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       66,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		SubscriptionIDs: []uint32{created.SubscriptionID},
+	}, 2)
+	if err != nil {
+		t.Fatalf("expected no handler error, got %v", err)
+	}
+
+	deleteResp, ok := resp.(*ua.DeleteSubscriptionsResponse)
+	if !ok {
+		t.Fatalf("expected DeleteSubscriptionsResponse, got %T", resp)
+	}
+	if len(deleteResp.Results) != 1 || deleteResp.Results[0] != ua.StatusBadSessionIDInvalid {
+		t.Fatalf("expected bad session result, got %#v", deleteResp.Results)
+	}
+
+	backend.session = session
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(created.SubscriptionID))
+}
+
 func TestSubscriptionCanPublishNotifications(t *testing.T) {
 	t.Parallel()
 
