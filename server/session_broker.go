@@ -113,7 +113,10 @@ func (s *session) ID() *ua.NodeID {
 }
 
 func (s *session) IsSameAs(other types.Session) bool {
-	return s.authTokenID.String() != other.AuthTokenID().String()
+	if s == nil || other == nil || s.authTokenID == nil || other.AuthTokenID() == nil {
+		return false
+	}
+	return s.authTokenID.String() == other.AuthTokenID().String()
 }
 
 func (s *session) Locales() []string {
