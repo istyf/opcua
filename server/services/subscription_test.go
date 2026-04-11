@@ -434,6 +434,32 @@ func TestSubscriptionShouldSendKeepalive(t *testing.T) {
 	}
 }
 
+func TestSubscriptionShouldTimeout(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		lifetimeCount uint32
+		elapsedCount  int
+		want          bool
+	}{
+		{name: "below threshold does not timeout", lifetimeCount: 5, elapsedCount: 4, want: false},
+		{name: "at threshold times out", lifetimeCount: 5, elapsedCount: 5, want: true},
+		{name: "above threshold times out", lifetimeCount: 5, elapsedCount: 6, want: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			sub := &Subscription{RevisedLifetimeCount: tt.lifetimeCount}
+			if got := sub.shouldTimeout(tt.elapsedCount); got != tt.want {
+				t.Fatalf("expected %t, got %t", tt.want, got)
+			}
+		})
+	}
+}
+
 type subscriptionTestBackend struct {
 	handlers map[int]Handler
 	session  types.Session

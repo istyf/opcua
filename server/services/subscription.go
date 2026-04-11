@@ -436,6 +436,10 @@ func (s *Subscription) shouldSendKeepalive(keepaliveCount int) bool {
 	return keepaliveCount >= int(s.RevisedMaxKeepAliveCount)
 }
 
+func (s *Subscription) shouldTimeout(lifetimeCount int) bool {
+	return lifetimeCount >= int(s.RevisedLifetimeCount)
+}
+
 func (s *Subscription) nextPublishBatch(publishQueue map[uint32]*ua.MonitoredItemNotification) ([]*ua.MonitoredItemNotification, bool) {
 	maxCount := len(publishQueue)
 	if s.MaxNotificationsPerPublish > 0 && int(s.MaxNotificationsPerPublish) < maxCount {
@@ -508,7 +512,7 @@ func (s *Subscription) run(ctx context.Context) {
 							}
 						default:
 							lifetime_counter++
-							if lifetime_counter > int(s.RevisedLifetimeCount) {
+							if s.shouldTimeout(lifetime_counter) {
 								ualog.Warn(ctx, "subscription timed out")
 								return
 							}
@@ -539,7 +543,7 @@ func (s *Subscription) run(ctx context.Context) {
 			case <-s.T.C:
 				// we had another tick without a publish request.
 				lifetime_counter++
-				if lifetime_counter > int(s.RevisedLifetimeCount) {
+				if s.shouldTimeout(lifetime_counter) {
 					ualog.Warn(ctx, "subscription timed out")
 					return
 				}
