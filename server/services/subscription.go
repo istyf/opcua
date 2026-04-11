@@ -452,7 +452,7 @@ func (s *Subscription) keepalive(pubreq types.PubReq) error {
 	eo := make([]*ua.ExtensionObject, 0)
 
 	msg := ua.NotificationMessage{
-		SequenceNumber:   s.SequenceID + 1, // not sure why but ua expert wants the next sequence number on keepalives.
+		SequenceNumber:   s.nextKeepaliveSequenceNumber(),
 		PublishTime:      time.Now(),
 		NotificationData: eo,
 	}
@@ -490,6 +490,13 @@ func (s *Subscription) shouldSendKeepalive(keepaliveCount int) bool {
 
 func (s *Subscription) shouldTimeout(lifetimeCount int) bool {
 	return lifetimeCount >= int(s.RevisedLifetimeCount)
+}
+
+func (s *Subscription) nextKeepaliveSequenceNumber() uint32 {
+	if s.SequenceID == 0 {
+		return 1
+	}
+	return s.SequenceID + 1
 }
 
 func (s *Subscription) nextPublishBatch(publishQueue map[uint32]*ua.MonitoredItemNotification) ([]*ua.MonitoredItemNotification, bool) {

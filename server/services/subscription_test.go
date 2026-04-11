@@ -575,6 +575,30 @@ func TestSubscriptionShouldTimeout(t *testing.T) {
 	}
 }
 
+func TestSubscriptionNextKeepaliveSequenceNumber(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		sequenceID uint32
+		want       uint32
+	}{
+		{name: "first keepalive uses sequence one", sequenceID: 0, want: 1},
+		{name: "later keepalive uses next sequence number", sequenceID: 7, want: 8},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			sub := &Subscription{SequenceID: tt.sequenceID}
+			if got := sub.nextKeepaliveSequenceNumber(); got != tt.want {
+				t.Fatalf("expected %d, got %d", tt.want, got)
+			}
+		})
+	}
+}
+
 type subscriptionTestBackend struct {
 	handlers map[int]Handler
 	session  types.Session
