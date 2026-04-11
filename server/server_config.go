@@ -148,6 +148,18 @@ func SoftwareVersion(name string) Option {
 	}
 }
 
+func MaxSubscriptions(count uint32) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.maxSubscriptions = count
+	}
+}
+
+func MaxSubscriptionsPerSession(count uint32) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.maxSubscriptionsPerSession = count
+	}
+}
+
 func MinSubscriptionPublishingInterval(interval time.Duration) Option {
 	return func(_ context.Context, s *serverConfig) {
 		if interval <= 0 {

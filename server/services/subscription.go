@@ -28,21 +28,25 @@ type SubscriptionService struct {
 	srv SubscriptionServiceBackend
 
 	// pub sub stuff
-	mu                    sync.Mutex
-	subs                  map[types.SubscriptionID]*Subscription
-	previousID            atomic.Uint32
-	minPublishingInterval float64
-	minKeepAliveCount     uint32
-	minLifetimeCount      uint32
+	mu                         sync.Mutex
+	subs                       map[types.SubscriptionID]*Subscription
+	previousID                 atomic.Uint32
+	minPublishingInterval      float64
+	minKeepAliveCount          uint32
+	minLifetimeCount           uint32
+	maxSubscriptions           uint32
+	maxSubscriptionsPerSession uint32
 }
 
 func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
 	ss := &SubscriptionService{
-		srv:                   b,
-		subs:                  make(map[types.SubscriptionID]*Subscription),
-		minPublishingInterval: float64(b.Config().MinSubscriptionPublishingInterval() / time.Millisecond),
-		minKeepAliveCount:     b.Config().MinSubscriptionMaxKeepAliveCount(),
-		minLifetimeCount:      b.Config().MinSubscriptionLifetimeCount(),
+		srv:                        b,
+		subs:                       make(map[types.SubscriptionID]*Subscription),
+		minPublishingInterval:      float64(b.Config().MinSubscriptionPublishingInterval() / time.Millisecond),
+		minKeepAliveCount:          b.Config().MinSubscriptionMaxKeepAliveCount(),
+		minLifetimeCount:           b.Config().MinSubscriptionLifetimeCount(),
+		maxSubscriptions:           b.Config().MaxSubscriptions(),
+		maxSubscriptionsPerSession: b.Config().MaxSubscriptionsPerSession(),
 	}
 
 	b.RegisterHandler(id.CreateSubscriptionRequest_Encoding_DefaultBinary, ss.CreateSubscription)
@@ -106,6 +110,33 @@ func (s *SubscriptionService) NextID() types.SubscriptionID {
 	return id
 }
 
+func sameSession(left, right types.Session) bool {
+	if left == nil || right == nil {
+		return false
+	}
+	return left.AuthTokenID().String() == right.AuthTokenID().String()
+}
+
+func (s *SubscriptionService) exceedsSubscriptionLimits(session types.Session) bool {
+	if s.maxSubscriptions > 0 && len(s.subs) >= int(s.maxSubscriptions) {
+		return true
+	}
+	if s.maxSubscriptionsPerSession == 0 {
+		return false
+	}
+
+	count := 0
+	for _, sub := range s.subs {
+		if sub != nil && sameSession(sub.session, session) {
+			count++
+			if count >= int(s.maxSubscriptionsPerSession) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (s *SubscriptionService) Get(id types.SubscriptionID) (*Subscription, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -155,6 +186,10 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	if s.exceedsSubscriptionLimits(session) {
+		return nil, ua.StatusBadTooManySubscriptions
+	}
 
 	newsubid := s.NextID()
 	ualog.Info(ctx, "new subscription created",

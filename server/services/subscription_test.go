@@ -340,6 +340,80 @@ func TestCreateSubscriptionStoresNegotiatedRuntimeParameters(t *testing.T) {
 	service.DeleteSubscription(t.Context(), sub.ID)
 }
 
+func TestCreateSubscriptionRespectsServerSubscriptionLimit(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session, subscriptionTestConfigOptions{
+		maxSubscriptions: 1,
+	})
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	firstResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 60), 1)
+	if err != nil {
+		t.Fatalf("create first subscription: %v", err)
+	}
+	firstCreateResp, ok := firstResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", firstResp)
+	}
+
+	secondResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 61), 2)
+	if secondResp != nil {
+		t.Fatalf("expected nil response, got %T", secondResp)
+	}
+	if err != ua.StatusBadTooManySubscriptions {
+		t.Fatalf("expected %v, got %v", ua.StatusBadTooManySubscriptions, err)
+	}
+
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(firstCreateResp.SubscriptionID))
+}
+
+func TestCreateSubscriptionRespectsPerSessionSubscriptionLimit(t *testing.T) {
+	t.Parallel()
+
+	firstSession := newSubscriptionTestSession()
+	secondSession := newSubscriptionTestSession()
+	secondSession.authToken = ua.NewNumericNodeID(1, 303)
+
+	backend := newSubscriptionTestBackend(firstSession, subscriptionTestConfigOptions{
+		maxSubscriptionsPerSession: 1,
+	})
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	firstResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(firstSession, 62), 1)
+	if err != nil {
+		t.Fatalf("create first subscription: %v", err)
+	}
+	firstCreateResp, ok := firstResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", firstResp)
+	}
+
+	secondResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(firstSession, 63), 2)
+	if secondResp != nil {
+		t.Fatalf("expected nil response, got %T", secondResp)
+	}
+	if err != ua.StatusBadTooManySubscriptions {
+		t.Fatalf("expected %v, got %v", ua.StatusBadTooManySubscriptions, err)
+	}
+
+	backend.session = secondSession
+	thirdResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(secondSession, 64), 3)
+	if err != nil {
+		t.Fatalf("create subscription for different session: %v", err)
+	}
+	thirdCreateResp, ok := thirdResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", thirdResp)
+	}
+
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(firstCreateResp.SubscriptionID))
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(thirdCreateResp.SubscriptionID))
+}
+
 func TestSubscriptionCanPublishNotifications(t *testing.T) {
 	t.Parallel()
 
@@ -467,6 +541,8 @@ type subscriptionTestBackend struct {
 }
 
 type subscriptionTestConfigOptions struct {
+	maxSubscriptions                  uint32
+	maxSubscriptionsPerSession        uint32
 	minSubscriptionPublishingInterval time.Duration
 	minSubscriptionMaxKeepAliveCount  uint32
 	minSubscriptionLifetimeCount      uint32
@@ -474,11 +550,15 @@ type subscriptionTestConfigOptions struct {
 
 func newSubscriptionTestBackend(session types.Session, options ...subscriptionTestConfigOptions) *subscriptionTestBackend {
 	cfg := subscriptionTestConfig{
+		maxSubscriptions:                  0,
+		maxSubscriptionsPerSession:        0,
 		minSubscriptionPublishingInterval: DefaultMinSubscriptionPublishingInterval,
 		minSubscriptionMaxKeepAliveCount:  DefaultMinSubscriptionMaxKeepAliveCount,
 		minSubscriptionLifetimeCount:      DefaultMinSubscriptionLifetimeCount,
 	}
 	if len(options) != 0 {
+		cfg.maxSubscriptions = options[0].maxSubscriptions
+		cfg.maxSubscriptionsPerSession = options[0].maxSubscriptionsPerSession
 		if options[0].minSubscriptionPublishingInterval > 0 {
 			cfg.minSubscriptionPublishingInterval = options[0].minSubscriptionPublishingInterval
 		}
@@ -575,6 +655,8 @@ func (s *subscriptionTestSession) PublishRequestChannel() chan types.PubReq {
 }
 
 type subscriptionTestConfig struct {
+	maxSubscriptions                  uint32
+	maxSubscriptionsPerSession        uint32
 	minSubscriptionPublishingInterval time.Duration
 	minSubscriptionMaxKeepAliveCount  uint32
 	minSubscriptionLifetimeCount      uint32
@@ -610,6 +692,14 @@ func (cfg subscriptionTestConfig) SoftwareVersion() string {
 
 func (cfg subscriptionTestConfig) MaxNodesPerRead() uint32 {
 	return 0
+}
+
+func (cfg subscriptionTestConfig) MaxSubscriptions() uint32 {
+	return cfg.maxSubscriptions
+}
+
+func (cfg subscriptionTestConfig) MaxSubscriptionsPerSession() uint32 {
+	return cfg.maxSubscriptionsPerSession
 }
 
 func (cfg subscriptionTestConfig) MinSubscriptionPublishingInterval() time.Duration {

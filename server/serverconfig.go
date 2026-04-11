@@ -34,6 +34,8 @@ type serverConfig struct {
 
 	cap ServerCapabilities
 
+	maxSubscriptions                  uint32
+	maxSubscriptionsPerSession        uint32
 	minSubscriptionPublishingInterval time.Duration
 	minSubscriptionMaxKeepAliveCount  uint32
 	minSubscriptionLifetimeCount      uint32
@@ -77,6 +79,14 @@ func (cfg *serverConfig) ManufacturerName() string {
 
 func (cfg *serverConfig) MaxNodesPerRead() uint32 {
 	return cfg.cap.OperationalLimits.MaxNodesPerRead
+}
+
+func (cfg *serverConfig) MaxSubscriptions() uint32 {
+	return cfg.maxSubscriptions
+}
+
+func (cfg *serverConfig) MaxSubscriptionsPerSession() uint32 {
+	return cfg.maxSubscriptionsPerSession
 }
 
 func (cfg *serverConfig) MinSubscriptionPublishingInterval() time.Duration {
