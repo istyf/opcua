@@ -408,6 +408,32 @@ func TestSubscriptionNextPublishBatch(t *testing.T) {
 	}
 }
 
+func TestSubscriptionShouldSendKeepalive(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name           string
+		maxKeepAlive   uint32
+		keepaliveCount int
+		want           bool
+	}{
+		{name: "below threshold does not send", maxKeepAlive: 3, keepaliveCount: 2, want: false},
+		{name: "at threshold sends", maxKeepAlive: 3, keepaliveCount: 3, want: true},
+		{name: "above threshold sends", maxKeepAlive: 3, keepaliveCount: 4, want: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			sub := &Subscription{RevisedMaxKeepAliveCount: tt.maxKeepAlive}
+			if got := sub.shouldSendKeepalive(tt.keepaliveCount); got != tt.want {
+				t.Fatalf("expected %t, got %t", tt.want, got)
+			}
+		})
+	}
+}
+
 type subscriptionTestBackend struct {
 	handlers map[int]Handler
 	session  types.Session

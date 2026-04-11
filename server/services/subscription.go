@@ -432,6 +432,10 @@ func (s *Subscription) canPublishNotifications(pendingNotificationCount int) boo
 	return s.PublishingEnabled && pendingNotificationCount > 0
 }
 
+func (s *Subscription) shouldSendKeepalive(keepaliveCount int) bool {
+	return keepaliveCount >= int(s.RevisedMaxKeepAliveCount)
+}
+
 func (s *Subscription) nextPublishBatch(publishQueue map[uint32]*ua.MonitoredItemNotification) ([]*ua.MonitoredItemNotification, bool) {
 	maxCount := len(publishQueue)
 	if s.MaxNotificationsPerPublish > 0 && int(s.MaxNotificationsPerPublish) < maxCount {
@@ -493,7 +497,7 @@ func (s *Subscription) run(ctx context.Context) {
 					// nothing to publish, increment the keepalive counter and send a keepalive if it
 					// has been enough intervals.
 					keepalive_counter++
-					if keepalive_counter > int(s.RevisedMaxKeepAliveCount) {
+					if s.shouldSendKeepalive(keepalive_counter) {
 						keepalive_counter = 0
 						select {
 						case pubreq := <-s.session.PublishRequestChannel():
