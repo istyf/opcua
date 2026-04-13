@@ -346,6 +346,36 @@ func TestBrowseReturnsBadBrowseDirectionInvalid(t *testing.T) {
 	}
 }
 
+func TestBrowseReturnsBadReferenceTypeIDInvalid(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+	backend.nodes[ua.NewNumericNodeID(0, 85).String()] = viewTestNode{
+		id:        ua.NewNumericNodeID(0, 85),
+		nodeClass: ua.NodeClassObject,
+	}
+
+	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 54},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{
+				NodeID:          ua.NewNumericNodeID(1, 1234),
+				BrowseDirection: ua.BrowseDirectionForward,
+				ReferenceTypeID: ua.NewNumericNodeID(0, 85),
+			},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	browseResp := resp.(*ua.BrowseResponse)
+	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadReferenceTypeIDInvalid {
+		t.Fatalf("expected %s, got %s", ua.StatusBadReferenceTypeIDInvalid, got)
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace
@@ -431,7 +461,8 @@ func (ns *viewTestNamespace) NewQualifiedName(name string) *ua.QualifiedName {
 func (ns *viewTestNamespace) NextAvailableID() *ua.NodeID { return ua.NewNumericNodeID(1, 1) }
 
 type viewTestNode struct {
-	id *ua.NodeID
+	id        *ua.NodeID
+	nodeClass ua.NodeClass
 }
 
 func (n viewTestNode) ID() *ua.NodeID { return n.id }
@@ -442,7 +473,12 @@ func (n viewTestNode) DisplayName(context.Context) *ua.LocalizedText {
 	return ua.NewLocalizedText(n.id.String())
 }
 
-func (n viewTestNode) NodeClass() ua.NodeClass { return ua.NodeClassObject }
+func (n viewTestNode) NodeClass() ua.NodeClass {
+	if n.nodeClass == 0 {
+		return ua.NodeClassObject
+	}
+	return n.nodeClass
+}
 
 func (n viewTestNode) AddComponent(types.Node) types.Node { return nil }
 

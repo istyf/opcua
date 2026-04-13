@@ -88,6 +88,10 @@ func isValidBrowseDirection(direction ua.BrowseDirection) bool {
 	}
 }
 
+func isAllReferences(referenceTypeID *ua.NodeID) bool {
+	return referenceTypeID == nil || referenceTypeID.Equal(noNodeID)
+}
+
 func newBrowseResponse(requestHandle uint32, resultCount int) *ua.BrowseResponse {
 	return &ua.BrowseResponse{
 		ResponseHeader: &ua.ResponseHeader{
@@ -109,6 +113,12 @@ func (s *ViewService) browseNode(ctx context.Context, desc *ua.BrowseDescription
 	}
 	if !isValidBrowseDirection(desc.BrowseDirection) {
 		return &ua.BrowseResult{StatusCode: ua.StatusBadBrowseDirectionInvalid}
+	}
+	if !isAllReferences(desc.ReferenceTypeID) {
+		refType := s.backend.Node(desc.ReferenceTypeID)
+		if refType == nil || refType.NodeClass() != ua.NodeClassReferenceType {
+			return &ua.BrowseResult{StatusCode: ua.StatusBadReferenceTypeIDInvalid}
+		}
 	}
 
 	ns, err := s.backend.Namespace(int(desc.NodeID.Namespace()))
