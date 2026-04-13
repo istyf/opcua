@@ -79,6 +79,77 @@ func TestBrowseReturnsResultsInRequestOrder(t *testing.T) {
 	}
 }
 
+func TestBrowsePreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+
+	validNodeID := ua.NewNumericNodeID(1, 1001)
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.Equal(validNodeID) {
+				return viewTestNode{id: id}
+			}
+			return nil
+		},
+		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
+			return &ua.BrowseResult{
+				StatusCode: ua.StatusOK,
+				References: []*ua.ReferenceDescription{
+					{BrowseName: &ua.QualifiedName{Name: "valid"}},
+				},
+			}
+		},
+	}
+
+	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 56},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: nil},
+			{NodeID: ua.NewNumericNodeID(9, 9009)},
+			{
+				NodeID:          validNodeID,
+				BrowseDirection: ua.BrowseDirectionForward,
+				ResultMask:      uint32(ua.BrowseResultMaskBrowseName),
+			},
+			{
+				NodeID:          validNodeID,
+				BrowseDirection: ua.BrowseDirectionInvalid,
+			},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	browseResp, ok := resp.(*ua.BrowseResponse)
+	if !ok {
+		t.Fatalf("expected BrowseResponse, got %T", resp)
+	}
+	if len(browseResp.Results) != 4 {
+		t.Fatalf("expected 4 results, got %d", len(browseResp.Results))
+	}
+	if len(browseResp.DiagnosticInfos) != 0 {
+		t.Fatalf("expected empty diagnostics, got %d entries", len(browseResp.DiagnosticInfos))
+	}
+	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadNodeIDInvalid {
+		t.Fatalf("expected first result to be %s, got %s", ua.StatusBadNodeIDInvalid, got)
+	}
+	if got := browseResp.Results[1].StatusCode; got != ua.StatusBadNodeIDUnknown {
+		t.Fatalf("expected second result to be %s, got %s", ua.StatusBadNodeIDUnknown, got)
+	}
+	if got := browseResp.Results[2].StatusCode; got != ua.StatusOK {
+		t.Fatalf("expected third result to be %s, got %s", ua.StatusOK, got)
+	}
+	if got := browseResp.Results[2].References[0].BrowseName.Name; got != "valid" {
+		t.Fatalf("expected third result browse name to be valid, got %q", got)
+	}
+	if got := browseResp.Results[3].StatusCode; got != ua.StatusBadBrowseDirectionInvalid {
+		t.Fatalf("expected fourth result to be %s, got %s", ua.StatusBadBrowseDirectionInvalid, got)
+	}
+}
+
 func TestBrowseRequestedMaxReferencesPerNodeZeroReturnsAllReferences(t *testing.T) {
 	t.Parallel()
 
