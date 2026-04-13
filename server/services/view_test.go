@@ -785,6 +785,59 @@ func TestSuitableRefType(t *testing.T) {
 	}
 }
 
+func TestSuitableReferenceNodeClassMask(t *testing.T) {
+	t.Parallel()
+
+	ref := viewTestReference{
+		refType:    ua.NewNumericNodeID(0, id.Organizes),
+		isForward:  true,
+		targetNode: viewTestNode{id: ua.NewNumericNodeID(1, 2001), nodeClass: ua.NodeClassObject},
+	}
+	srv := &viewTestServer{
+		namespaces: map[int]types.NameSpace{
+			0: &viewTestNamespace{
+				nodeFn: func(id *ua.NodeID) types.Node {
+					if id.Equal(ref.refType) {
+						return viewTestReferenceTypeNode{
+							viewTestNode: viewTestNode{id: id, nodeClass: ua.NodeClassReferenceType},
+							symmetric:    false,
+						}
+					}
+					return nil
+				},
+			},
+		},
+	}
+
+	tests := []struct {
+		name string
+		mask uint32
+		want bool
+	}{
+		{name: "zero mask matches all classes", mask: 0, want: true},
+		{name: "matching object bit passes", mask: uint32(ua.NodeClassObject), want: true},
+		{name: "non matching variable bit fails", mask: uint32(ua.NodeClassVariable), want: false},
+		{name: "combined mask containing object passes", mask: uint32(ua.NodeClassObject | ua.NodeClassVariable), want: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			desc := &ua.BrowseDescription{
+				NodeID:          ua.NewNumericNodeID(1, 1001),
+				BrowseDirection: ua.BrowseDirectionForward,
+				ReferenceTypeID: ua.NewNumericNodeID(0, 0),
+				IncludeSubtypes: true,
+				NodeClassMask:   tt.mask,
+			}
+			if got := SuitableReference(t.Context(), srv, desc, ref); got != tt.want {
+				t.Fatalf("expected %t, got %t", tt.want, got)
+			}
+		})
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace
