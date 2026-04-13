@@ -30,8 +30,27 @@ func TestSessionAuthenticatedUserZeroValue(t *testing.T) {
 
 	sess := &session{}
 
+	if sess.Activated() {
+		t.Fatal("expected new session to start inactive")
+	}
 	if sess.AuthenticatedUser() != nil {
 		t.Fatalf("expected unauthenticated session to expose nil authenticated user, got %#v", sess.AuthenticatedUser())
+	}
+}
+
+func TestSessionSetActivated(t *testing.T) {
+	t.Parallel()
+
+	sess := &session{}
+
+	sess.SetActivated(true)
+	if !sess.Activated() {
+		t.Fatal("expected session to be active after SetActivated(true)")
+	}
+
+	sess.SetActivated(false)
+	if sess.Activated() {
+		t.Fatal("expected session to be inactive after SetActivated(false)")
 	}
 }
 

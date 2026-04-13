@@ -1400,6 +1400,7 @@ type subscriptionTestSession struct {
 	remoteCert   []byte
 	serverNonce  []byte
 	timeoutMs    float64
+	activated    bool
 	publishQueue chan types.PubReq
 }
 
@@ -1442,6 +1443,14 @@ func (s *subscriptionTestSession) SetServerNonce(nonce []byte) {
 
 func (s *subscriptionTestSession) TimeOutInMillis() float64 {
 	return s.timeoutMs
+}
+
+func (s *subscriptionTestSession) Activated() bool {
+	return s.activated
+}
+
+func (s *subscriptionTestSession) SetActivated(activated bool) {
+	s.activated = activated
 }
 
 func (s *subscriptionTestSession) IsSameAs(other types.Session) bool {

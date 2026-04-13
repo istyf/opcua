@@ -29,6 +29,7 @@ type session struct {
 	authTokenID       *ua.NodeID
 	serverNonce       []byte
 	remoteCertificate []byte
+	activated         bool
 	authenticatedUser *auth.AuthenticatedUser
 
 	PublishRequests chan types.PubReq
@@ -173,4 +174,12 @@ func (s *session) TimeOutInMillis() float64 {
 	}
 
 	return float64(ms) + (float64(fractions) / float64(time.Millisecond))
+}
+
+func (s *session) Activated() bool {
+	return s.activated
+}
+
+func (s *session) SetActivated(activated bool) {
+	s.activated = activated
 }

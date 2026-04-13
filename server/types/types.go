@@ -204,6 +204,9 @@ type Session interface {
 
 	TimeOutInMillis() float64
 
+	Activated() bool
+	SetActivated(bool)
+
 	IsSameAs(Session) bool
 
 	AuthenticatedUser() *auth.AuthenticatedUser

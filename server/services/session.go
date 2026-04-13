@@ -103,6 +103,17 @@ func (s *SessionService) CreateSession(ctx context.Context, sc *uasc.SecureChann
 	return response, nil
 }
 
+// ActivateSession activates an existing session.
+//
+// Session activation semantics in this server are:
+//   - a newly created session starts inactive
+//   - a successful anonymous activation marks the session active and leaves the
+//     authenticated user unset
+//   - a successful username/password activation will mark the session active
+//     and attach an authenticated user in later authentication work
+//   - a later successful activation refreshes the active session state instead
+//     of creating a new session
+//
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.6.3
 func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
 	ctx = ualog.WithAttrs(ctx, newSessionServiceLogAttribute("activate"))
@@ -131,6 +142,7 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 	}
 	sess.SetServerNonce(nonce)
 	sess.SetLocales(req.LocaleIDs)
+	sess.SetActivated(true)
 
 	response := &ua.ActivateSessionResponse{
 		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
