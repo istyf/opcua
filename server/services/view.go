@@ -2,9 +2,13 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"slices"
+	"strconv"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gopcua/opcua/id"
@@ -31,12 +35,22 @@ type ViewServiceBackend interface {
 type ViewService struct {
 	backend             ViewServiceBackend
 	maxBrowseOperations uint32
+
+	continuationMu     sync.Mutex
+	continuationPoints map[string]browseContinuation
+	nextContinuationID atomic.Uint64
+}
+
+type browseContinuation struct {
+	references []*ua.ReferenceDescription
+	pageSize   uint32
 }
 
 func NewViewService(b ViewServiceBackend) *ViewService {
 	vs := &ViewService{
 		backend:             b,
 		maxBrowseOperations: b.Config().MaxBrowseOperationsPerCall(),
+		continuationPoints:  make(map[string]browseContinuation),
 	}
 
 	b.RegisterHandler(id.BrowseRequest_Encoding_DefaultBinary, vs.Browse)
@@ -107,6 +121,94 @@ func newBrowseResponse(requestHandle uint32, resultCount int) *ua.BrowseResponse
 	}
 }
 
+func newBrowseNextResponse(requestHandle uint32, resultCount int) *ua.BrowseNextResponse {
+	return &ua.BrowseNextResponse{
+		ResponseHeader: &ua.ResponseHeader{
+			Timestamp:          time.Now(),
+			RequestHandle:      requestHandle,
+			ServiceResult:      ua.StatusOK,
+			ServiceDiagnostics: &ua.DiagnosticInfo{},
+			StringTable:        []string{},
+			AdditionalHeader:   ua.NewExtensionObject(nil),
+		},
+		Results:         make([]*ua.BrowseResult, resultCount),
+		DiagnosticInfos: []*ua.DiagnosticInfo{},
+	}
+}
+
+func (s *ViewService) newContinuationPoint() []byte {
+	id := s.nextContinuationID.Add(1)
+	return []byte(strconv.FormatUint(id, 10))
+}
+
+func (s *ViewService) storeBrowseContinuation(references []*ua.ReferenceDescription, pageSize uint32) []byte {
+	if len(references) == 0 {
+		return nil
+	}
+	token := s.newContinuationPoint()
+	s.continuationMu.Lock()
+	s.continuationPoints[string(token)] = browseContinuation{
+		references: references,
+		pageSize:   pageSize,
+	}
+	s.continuationMu.Unlock()
+	return token
+}
+
+func (s *ViewService) takeBrowseContinuation(token []byte) (browseContinuation, bool) {
+	s.continuationMu.Lock()
+	defer s.continuationMu.Unlock()
+
+	key := string(token)
+	cont, ok := s.continuationPoints[key]
+	if ok {
+		delete(s.continuationPoints, key)
+	}
+	return cont, ok
+}
+
+func (s *ViewService) releaseBrowseContinuation(token []byte) {
+	s.continuationMu.Lock()
+	delete(s.continuationPoints, string(token))
+	s.continuationMu.Unlock()
+}
+
+func (s *ViewService) applyBrowseReferenceLimit(result *ua.BrowseResult, requestedMax uint32) *ua.BrowseResult {
+	if result == nil || result.StatusCode != ua.StatusOK || requestedMax == 0 || len(result.References) <= int(requestedMax) {
+		return result
+	}
+
+	limited := &ua.BrowseResult{
+		StatusCode: result.StatusCode,
+		References: append([]*ua.ReferenceDescription(nil), result.References[:requestedMax]...),
+	}
+	limited.ContinuationPoint = s.storeBrowseContinuation(
+		append([]*ua.ReferenceDescription(nil), result.References[requestedMax:]...),
+		requestedMax,
+	)
+	return limited
+}
+
+func (s *ViewService) resumeBrowseContinuation(token []byte) *ua.BrowseResult {
+	cont, ok := s.takeBrowseContinuation(token)
+	if !ok {
+		return &ua.BrowseResult{StatusCode: ua.StatusBadContinuationPointInvalid}
+	}
+
+	result := &ua.BrowseResult{StatusCode: ua.StatusOK}
+	if cont.pageSize == 0 || len(cont.references) <= int(cont.pageSize) {
+		result.References = cont.references
+		return result
+	}
+
+	result.References = append([]*ua.ReferenceDescription(nil), cont.references[:cont.pageSize]...)
+	result.ContinuationPoint = s.storeBrowseContinuation(
+		append([]*ua.ReferenceDescription(nil), cont.references[cont.pageSize:]...),
+		cont.pageSize,
+	)
+	return result
+}
+
 func (s *ViewService) browseNode(ctx context.Context, desc *ua.BrowseDescription) *ua.BrowseResult {
 	if desc == nil || desc.NodeID == nil {
 		return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDInvalid}
@@ -168,10 +270,10 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			ualog.Any(ualog.NodeIdKey, br.NodeID),
 			ualog.Any("dir", br.BrowseDirection),
 			ualog.Any("subtypes", br.IncludeSubtypes),
-			ualog.String("ref", br.ReferenceTypeID.String()),
+			ualog.String("ref", fmt.Sprint(br.ReferenceTypeID)),
 		)
 
-		resp.Results[i] = s.browseNode(ctx, br)
+		resp.Results[i] = s.applyBrowseReferenceLimit(s.browseNode(ctx, br), req.RequestedMaxReferencesPerNode)
 	}
 
 	return resp, nil
@@ -257,8 +359,24 @@ func (s *ViewService) BrowseNext(ctx context.Context, sc *uasc.SecureChannel, r 
 	if err != nil {
 		return nil, err
 	}
+	if len(req.ContinuationPoints) == 0 {
+		return nil, ua.StatusBadNothingToDo
+	}
+	if s.maxBrowseOperations > 0 && uint32(len(req.ContinuationPoints)) > s.maxBrowseOperations {
+		return nil, ua.StatusBadTooManyOperations
+	}
+	if req.ReleaseContinuationPoints {
+		for _, token := range req.ContinuationPoints {
+			s.releaseBrowseContinuation(token)
+		}
+		return newBrowseNextResponse(req.RequestHeader.RequestHandle, 0), nil
+	}
 
-	return serviceUnsupported(req.RequestHeader), nil
+	resp := newBrowseNextResponse(req.RequestHeader.RequestHandle, len(req.ContinuationPoints))
+	for i, token := range req.ContinuationPoints {
+		resp.Results[i] = s.resumeBrowseContinuation(token)
+	}
+	return resp, nil
 }
 
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9.4

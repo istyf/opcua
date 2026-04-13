@@ -76,6 +76,235 @@ func TestBrowseReturnsResultsInRequestOrder(t *testing.T) {
 	}
 }
 
+func TestBrowseRequestedMaxReferencesPerNodeZeroReturnsAllReferences(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+	nodeID := ua.NewNumericNodeID(1, 1001)
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.Equal(nodeID) {
+				return viewTestNode{id: id}
+			}
+			return nil
+		},
+		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
+			return &ua.BrowseResult{
+				StatusCode: ua.StatusOK,
+				References: []*ua.ReferenceDescription{
+					{BrowseName: &ua.QualifiedName{Name: "one"}},
+					{BrowseName: &ua.QualifiedName{Name: "two"}},
+					{BrowseName: &ua.QualifiedName{Name: "three"}},
+				},
+			}
+		},
+	}
+
+	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader:                 &ua.RequestHeader{RequestHandle: 40},
+		RequestedMaxReferencesPerNode: 0,
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: nodeID},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	browseResp := resp.(*ua.BrowseResponse)
+	if len(browseResp.Results[0].References) != 3 {
+		t.Fatalf("expected 3 references, got %d", len(browseResp.Results[0].References))
+	}
+	if len(browseResp.Results[0].ContinuationPoint) != 0 {
+		t.Fatal("expected no continuation point when max references is zero")
+	}
+}
+
+func TestBrowseTruncatesResultsAndReturnsContinuationPoint(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+	nodeID := ua.NewNumericNodeID(1, 1001)
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.Equal(nodeID) {
+				return viewTestNode{id: id}
+			}
+			return nil
+		},
+		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
+			return &ua.BrowseResult{
+				StatusCode: ua.StatusOK,
+				References: []*ua.ReferenceDescription{
+					{BrowseName: &ua.QualifiedName{Name: "one"}},
+					{BrowseName: &ua.QualifiedName{Name: "two"}},
+					{BrowseName: &ua.QualifiedName{Name: "three"}},
+				},
+			}
+		},
+	}
+
+	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader:                 &ua.RequestHeader{RequestHandle: 40},
+		RequestedMaxReferencesPerNode: 2,
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: nodeID},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	browseResp := resp.(*ua.BrowseResponse)
+	if len(browseResp.Results[0].References) != 2 {
+		t.Fatalf("expected 2 references, got %d", len(browseResp.Results[0].References))
+	}
+	if got := browseResp.Results[0].References[0].BrowseName.Name; got != "one" {
+		t.Fatalf("expected first returned reference to be one, got %q", got)
+	}
+	if len(browseResp.Results[0].ContinuationPoint) == 0 {
+		t.Fatal("expected continuation point for truncated browse result")
+	}
+}
+
+func TestBrowseNextReturnsNextReferenceBatch(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+	nodeID := ua.NewNumericNodeID(1, 1001)
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.Equal(nodeID) {
+				return viewTestNode{id: id}
+			}
+			return nil
+		},
+		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
+			return &ua.BrowseResult{
+				StatusCode: ua.StatusOK,
+				References: []*ua.ReferenceDescription{
+					{BrowseName: &ua.QualifiedName{Name: "one"}},
+					{BrowseName: &ua.QualifiedName{Name: "two"}},
+					{BrowseName: &ua.QualifiedName{Name: "three"}},
+				},
+			}
+		},
+	}
+
+	browseResp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader:                 &ua.RequestHeader{RequestHandle: 41},
+		RequestedMaxReferencesPerNode: 2,
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: nodeID},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	firstBatch := browseResp.(*ua.BrowseResponse).Results[0]
+	resp, err := service.BrowseNext(t.Context(), nil, &ua.BrowseNextRequest{
+		RequestHeader:             &ua.RequestHeader{RequestHandle: 42},
+		ContinuationPoints:        [][]byte{firstBatch.ContinuationPoint},
+		ReleaseContinuationPoints: false,
+	}, 2)
+	if err != nil {
+		t.Fatalf("browse next: %v", err)
+	}
+
+	nextResp := resp.(*ua.BrowseNextResponse)
+	if len(nextResp.Results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(nextResp.Results))
+	}
+	if len(nextResp.Results[0].References) != 1 {
+		t.Fatalf("expected 1 remaining reference, got %d", len(nextResp.Results[0].References))
+	}
+	if got := nextResp.Results[0].References[0].BrowseName.Name; got != "three" {
+		t.Fatalf("expected remaining reference to be three, got %q", got)
+	}
+	if len(nextResp.Results[0].ContinuationPoint) != 0 {
+		t.Fatal("expected continuation point to be exhausted after final batch")
+	}
+}
+
+func TestBrowseNextReleaseContinuationPointsReturnsEmptyResults(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+	nodeID := ua.NewNumericNodeID(1, 1001)
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.Equal(nodeID) {
+				return viewTestNode{id: id}
+			}
+			return nil
+		},
+		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
+			return &ua.BrowseResult{
+				StatusCode: ua.StatusOK,
+				References: []*ua.ReferenceDescription{
+					{BrowseName: &ua.QualifiedName{Name: "one"}},
+					{BrowseName: &ua.QualifiedName{Name: "two"}},
+				},
+			}
+		},
+	}
+
+	browseResp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader:                 &ua.RequestHeader{RequestHandle: 43},
+		RequestedMaxReferencesPerNode: 1,
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: nodeID},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	firstBatch := browseResp.(*ua.BrowseResponse).Results[0]
+	resp, err := service.BrowseNext(t.Context(), nil, &ua.BrowseNextRequest{
+		RequestHeader:             &ua.RequestHeader{RequestHandle: 44},
+		ContinuationPoints:        [][]byte{firstBatch.ContinuationPoint},
+		ReleaseContinuationPoints: true,
+	}, 2)
+	if err != nil {
+		t.Fatalf("browse next release: %v", err)
+	}
+
+	nextResp := resp.(*ua.BrowseNextResponse)
+	if len(nextResp.Results) != 0 {
+		t.Fatalf("expected empty results when releasing continuation points, got %d", len(nextResp.Results))
+	}
+	if len(nextResp.DiagnosticInfos) != 0 {
+		t.Fatalf("expected empty diagnostics when releasing continuation points, got %d", len(nextResp.DiagnosticInfos))
+	}
+}
+
+func TestBrowseNextReturnsBadContinuationPointInvalid(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+
+	resp, err := service.BrowseNext(t.Context(), nil, &ua.BrowseNextRequest{
+		RequestHeader:             &ua.RequestHeader{RequestHandle: 45},
+		ContinuationPoints:        [][]byte{[]byte("missing")},
+		ReleaseContinuationPoints: false,
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse next: %v", err)
+	}
+
+	nextResp := resp.(*ua.BrowseNextResponse)
+	if got := nextResp.Results[0].StatusCode; got != ua.StatusBadContinuationPointInvalid {
+		t.Fatalf("expected %s, got %s", ua.StatusBadContinuationPointInvalid, got)
+	}
+}
+
 func TestBrowseReturnsBadNodeIDInvalidForNilNodeID(t *testing.T) {
 	t.Parallel()
 
