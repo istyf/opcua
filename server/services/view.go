@@ -33,8 +33,9 @@ type ViewServiceBackend interface {
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9
 type ViewService struct {
-	backend             ViewServiceBackend
-	maxBrowseOperations uint32
+	backend               ViewServiceBackend
+	maxBrowseOperations   uint32
+	maxContinuationPoints uint32
 
 	continuationMu     sync.Mutex
 	continuationPoints map[string]browseContinuation
@@ -48,9 +49,10 @@ type browseContinuation struct {
 
 func NewViewService(b ViewServiceBackend) *ViewService {
 	vs := &ViewService{
-		backend:             b,
-		maxBrowseOperations: b.Config().MaxBrowseOperationsPerCall(),
-		continuationPoints:  make(map[string]browseContinuation),
+		backend:               b,
+		maxBrowseOperations:   b.Config().MaxBrowseOperationsPerCall(),
+		maxContinuationPoints: b.Config().MaxBrowseContinuationPoints(),
+		continuationPoints:    make(map[string]browseContinuation),
 	}
 
 	b.RegisterHandler(id.BrowseRequest_Encoding_DefaultBinary, vs.Browse)
@@ -141,18 +143,23 @@ func (s *ViewService) newContinuationPoint() []byte {
 	return []byte(strconv.FormatUint(id, 10))
 }
 
-func (s *ViewService) storeBrowseContinuation(references []*ua.ReferenceDescription, pageSize uint32) []byte {
+func (s *ViewService) storeBrowseContinuation(references []*ua.ReferenceDescription, pageSize uint32) ([]byte, bool) {
 	if len(references) == 0 {
-		return nil
+		return nil, true
 	}
-	token := s.newContinuationPoint()
 	s.continuationMu.Lock()
+	defer s.continuationMu.Unlock()
+
+	if s.maxContinuationPoints > 0 && uint32(len(s.continuationPoints)) >= s.maxContinuationPoints {
+		return nil, false
+	}
+
+	token := s.newContinuationPoint()
 	s.continuationPoints[string(token)] = browseContinuation{
 		references: references,
 		pageSize:   pageSize,
 	}
-	s.continuationMu.Unlock()
-	return token
+	return token, true
 }
 
 func (s *ViewService) takeBrowseContinuation(token []byte) (browseContinuation, bool) {
@@ -182,10 +189,14 @@ func (s *ViewService) applyBrowseReferenceLimit(result *ua.BrowseResult, request
 		StatusCode: result.StatusCode,
 		References: append([]*ua.ReferenceDescription(nil), result.References[:requestedMax]...),
 	}
-	limited.ContinuationPoint = s.storeBrowseContinuation(
+	token, ok := s.storeBrowseContinuation(
 		append([]*ua.ReferenceDescription(nil), result.References[requestedMax:]...),
 		requestedMax,
 	)
+	if !ok {
+		return &ua.BrowseResult{StatusCode: ua.StatusBadNoContinuationPoints}
+	}
+	limited.ContinuationPoint = token
 	return limited
 }
 
@@ -202,10 +213,14 @@ func (s *ViewService) resumeBrowseContinuation(token []byte) *ua.BrowseResult {
 	}
 
 	result.References = append([]*ua.ReferenceDescription(nil), cont.references[:cont.pageSize]...)
-	result.ContinuationPoint = s.storeBrowseContinuation(
+	nextToken, ok := s.storeBrowseContinuation(
 		append([]*ua.ReferenceDescription(nil), cont.references[cont.pageSize:]...),
 		cont.pageSize,
 	)
+	if !ok {
+		return &ua.BrowseResult{StatusCode: ua.StatusBadNoContinuationPoints}
+	}
+	result.ContinuationPoint = nextToken
 	return result
 }
 

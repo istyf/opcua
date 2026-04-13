@@ -170,6 +170,7 @@ type ServerConfig interface {
 
 	MaxNodesPerRead() uint32
 	MaxBrowseOperationsPerCall() uint32
+	MaxBrowseContinuationPoints() uint32
 	MaxSubscriptions() uint32
 	MaxSubscriptionsPerSession() uint32
 	MaxSubscriptionOperationsPerCall() uint32

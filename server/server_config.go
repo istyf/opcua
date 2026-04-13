@@ -156,6 +156,14 @@ func MaxBrowseOperationsPerCall(count uint32) Option {
 	}
 }
 
+// MaxBrowseContinuationPoints limits the number of browse continuation points
+// that may be held by the server at one time. A value of 0 disables the limit.
+func MaxBrowseContinuationPoints(count uint32) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.maxBrowseContinuationPoints = count
+	}
+}
+
 // MaxSubscriptions limits the total number of subscriptions on the server.
 // A value of 0 disables the limit.
 func MaxSubscriptions(count uint32) Option {

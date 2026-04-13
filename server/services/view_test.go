@@ -305,6 +305,59 @@ func TestBrowseNextReturnsBadContinuationPointInvalid(t *testing.T) {
 	}
 }
 
+func TestBrowseReturnsBadNoContinuationPointsWhenCapacityIsExhausted(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend(viewTestConfig{
+		maxBrowseContinuationPoints: 1,
+	})
+	service := NewViewService(backend)
+	firstNodeID := ua.NewNumericNodeID(1, 1001)
+	secondNodeID := ua.NewNumericNodeID(1, 1002)
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			switch {
+			case id.Equal(firstNodeID), id.Equal(secondNodeID):
+				return viewTestNode{id: id}
+			default:
+				return nil
+			}
+		},
+		browseFn: func(_ context.Context, desc *ua.BrowseDescription) *ua.BrowseResult {
+			return &ua.BrowseResult{
+				StatusCode: ua.StatusOK,
+				References: []*ua.ReferenceDescription{
+					{BrowseName: &ua.QualifiedName{Name: desc.NodeID.String() + "-one"}},
+					{BrowseName: &ua.QualifiedName{Name: desc.NodeID.String() + "-two"}},
+				},
+			}
+		},
+	}
+
+	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader:                 &ua.RequestHeader{RequestHandle: 46},
+		RequestedMaxReferencesPerNode: 1,
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: firstNodeID},
+			{NodeID: secondNodeID},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	browseResp := resp.(*ua.BrowseResponse)
+	if got := browseResp.Results[0].StatusCode; got != ua.StatusOK {
+		t.Fatalf("expected first result to succeed, got %s", got)
+	}
+	if len(browseResp.Results[0].ContinuationPoint) == 0 {
+		t.Fatal("expected first result to allocate continuation point")
+	}
+	if got := browseResp.Results[1].StatusCode; got != ua.StatusBadNoContinuationPoints {
+		t.Fatalf("expected %s, got %s", ua.StatusBadNoContinuationPoints, got)
+	}
+}
+
 func TestBrowseReturnsBadNodeIDInvalidForNilNodeID(t *testing.T) {
 	t.Parallel()
 
@@ -753,7 +806,8 @@ func (n viewTestNode) Attribute(context.Context, ua.AttributeID) (*types.AttrVal
 func (n viewTestNode) SetAttribute(context.Context, ua.AttributeID, *ua.DataValue) error { return nil }
 
 type viewTestConfig struct {
-	maxBrowseOperationsPerCall uint32
+	maxBrowseOperationsPerCall  uint32
+	maxBrowseContinuationPoints uint32
 }
 
 func (cfg viewTestConfig) Certificate() []byte { return nil }
@@ -774,6 +828,10 @@ func (cfg viewTestConfig) MaxNodesPerRead() uint32 { return 0 }
 
 func (cfg viewTestConfig) MaxBrowseOperationsPerCall() uint32 {
 	return cfg.maxBrowseOperationsPerCall
+}
+
+func (cfg viewTestConfig) MaxBrowseContinuationPoints() uint32 {
+	return cfg.maxBrowseContinuationPoints
 }
 
 func (cfg viewTestConfig) MaxSubscriptions() uint32 { return 0 }

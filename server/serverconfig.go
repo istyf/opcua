@@ -34,6 +34,7 @@ type serverConfig struct {
 
 	cap ServerCapabilities
 
+	maxBrowseContinuationPoints       uint32
 	maxBrowseOperationsPerCall        uint32
 	maxSubscriptions                  uint32
 	maxSubscriptionsPerSession        uint32
@@ -85,6 +86,10 @@ func (cfg *serverConfig) MaxNodesPerRead() uint32 {
 
 func (cfg *serverConfig) MaxBrowseOperationsPerCall() uint32 {
 	return cfg.maxBrowseOperationsPerCall
+}
+
+func (cfg *serverConfig) MaxBrowseContinuationPoints() uint32 {
+	return cfg.maxBrowseContinuationPoints
 }
 
 func (cfg *serverConfig) MaxSubscriptions() uint32 {
