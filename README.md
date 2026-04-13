@@ -211,6 +211,41 @@ The current focus is on the OPC UA Binary protocol over TCP. No other protocols 
 |                | User Name Password               | Untested  |             |
 |                | X509 Certificate                 | Untested  |             |
 
+### Server Username/Password Authentication
+
+Register a username/password authenticator during server creation, advertise the
+`UserName` auth mode, and pair it with a secure channel policy so credentials are
+not sent over `SecurityPolicy#None`:
+
+```go
+opts := []server.Option{
+	server.EndPoint("localhost", 4840),
+	server.Certificate(serverCert),
+	server.PrivateKey(serverKey),
+	server.EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSignAndEncrypt),
+	server.EnableAuthMode(ua.UserTokenTypeAnonymous),
+	server.EnableAuthMode(ua.UserTokenTypeUserName),
+	server.WithUserNameAuthenticator(func(ctx context.Context, req *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+		if req.UserName != "alice" || req.Password != "secret" {
+			return nil, auth.ErrInvalidCredentials
+		}
+		return &auth.AuthenticatedUser{
+			UserName: req.UserName,
+			Subject:  "local:alice",
+		}, nil
+	}),
+}
+
+srv := server.New(ctx, opts...)
+if err := srv.Start(ctx); err != nil {
+	log.Fatal(err)
+}
+```
+
+After a successful `ActivateSession`, the returned `auth.AuthenticatedUser` is
+stored on the server-side session and can be read back through the session
+interface. Role assignment is not part of this feature yet.
+
 
 ### Services
 
