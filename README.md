@@ -232,8 +232,8 @@ Here is the current set of supported services. For low-level access use the clie
 |                             | AddReferences                 |        |        |              |
 |                             | DeleteNodes                   |        |        |              |
 |                             | DeleteReferences              |        |        |              |
-| View Service Set            | Browse                        | Yes    | Yes    |              |
-|                             | BrowseNext                    | Yes    |        |              |
+| View Service Set            | Browse                        | Yes    | Yes**    |  |
+|                             | BrowseNext                    | Yes    | Yes    |  |
 |                             | TranslateBrowsePathsToNodeIds |        |        |              |
 |                             | RegisterNodes                 | Yes    |        |              |
 |                             | UnregisterNodes               | Yes    |        |              |
@@ -258,6 +258,7 @@ Here is the current set of supported services. For low-level access use the clie
 |                             | TransferSubscriptions         |        |        |              |
 
 * not all encryption schemes are fully functional at this time
+** empty view supported; non-empty views are rejected
 
 
 ## Authors

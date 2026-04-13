@@ -300,9 +300,11 @@ func (s *ViewService) browseNode(ctx context.Context, desc *ua.BrowseDescription
 	return result
 }
 
-// Browse returns one BrowseResult per BrowseDescription in request order and
-// leaves service-level validation to explicit follow-up checks as spec support
-// is expanded.
+// Browse implements OPC UA Part 4 §5.9.2 for the currently supported server model.
+// It validates request- and operation-level parameters, applies result masks and
+// per-node reference limits, and creates continuation points for truncated results.
+// Only the empty view is currently supported; non-empty views are rejected with
+// view-specific service errors instead of being silently ignored.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9.2
 func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
@@ -443,6 +445,10 @@ func getSubtypeRefs(srv types.Server, nid *ua.NodeID, visited map[string]struct{
 	return refs
 }
 
+// BrowseNext resumes or releases continuation points created by Browse.
+// It preserves request order, validates continuation point tokens per operation,
+// and enforces the same batch limit as Browse.
+//
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9.3
 func (s *ViewService) BrowseNext(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
 	ctx = ualog.WithAttrs(ctx, newViewServiceLogAttribute("browse next"))
