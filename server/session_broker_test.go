@@ -3,6 +3,7 @@ package server
 import (
 	"testing"
 
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -38,11 +39,11 @@ func TestSessionSetAuthenticatedUser(t *testing.T) {
 	t.Parallel()
 
 	sess := &session{}
-	first := &AuthenticatedUser{
+	first := &auth.AuthenticatedUser{
 		UserName: "alice",
 		Subject:  "user:alice",
 	}
-	second := &AuthenticatedUser{
+	second := &auth.AuthenticatedUser{
 		UserName: "bob",
 		Subject:  "user:bob",
 	}

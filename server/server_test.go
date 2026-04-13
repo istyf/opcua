@@ -7,6 +7,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -198,14 +199,14 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 
 	cfg := &serverConfig{}
 	authErr := errors.New("auth failed")
-	expected := &AuthenticatedUser{
+	expected := &auth.AuthenticatedUser{
 		UserName: "alice",
 		Subject:  "user:alice",
 		Attributes: map[string]any{
 			"department": "ops",
 		},
 	}
-	auth := func(_ context.Context, req *UserNameAuthenticationRequest) (*AuthenticatedUser, error) {
+	auth := func(_ context.Context, req *UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
 		if req == nil {
 			t.Fatal("expected request to be forwarded to authenticator")
 		}

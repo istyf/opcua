@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/schema"
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -204,6 +205,8 @@ type Session interface {
 	TimeOutInMillis() float64
 
 	IsSameAs(Session) bool
+
+	AuthenticatedUser() *auth.AuthenticatedUser
 
 	PublishRequestChannel() chan PubReq
 }

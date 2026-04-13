@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
@@ -28,7 +29,7 @@ type session struct {
 	authTokenID       *ua.NodeID
 	serverNonce       []byte
 	remoteCertificate []byte
-	authenticatedUser *AuthenticatedUser
+	authenticatedUser *auth.AuthenticatedUser
 
 	PublishRequests chan types.PubReq
 }
@@ -155,11 +156,11 @@ func (s *session) SetServerNonce(nonce []byte) {
 	s.serverNonce = nonce
 }
 
-func (s *session) AuthenticatedUser() *AuthenticatedUser {
+func (s *session) AuthenticatedUser() *auth.AuthenticatedUser {
 	return s.authenticatedUser
 }
 
-func (s *session) SetAuthenticatedUser(user *AuthenticatedUser) {
+func (s *session) SetAuthenticatedUser(user *auth.AuthenticatedUser) {
 	s.authenticatedUser = user
 }
 

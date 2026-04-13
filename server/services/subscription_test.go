@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uacp"
@@ -1445,6 +1446,10 @@ func (s *subscriptionTestSession) TimeOutInMillis() float64 {
 
 func (s *subscriptionTestSession) IsSameAs(other types.Session) bool {
 	return other != nil && s.authToken.String() == other.AuthTokenID().String()
+}
+
+func (s *subscriptionTestSession) AuthenticatedUser() *auth.AuthenticatedUser {
+	return nil
 }
 
 func (s *subscriptionTestSession) PublishRequestChannel() chan types.PubReq {
