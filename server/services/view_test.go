@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"errors"
 	"iter"
+	"slices"
 	"testing"
 	"time"
 
@@ -1187,12 +1188,7 @@ func (r viewTestReferences) All() iter.Seq[types.ReferenceWrapper] {
 }
 
 func (r viewTestReferences) Contains(match func(types.ReferenceWrapper) bool) bool {
-	for _, item := range r.items {
-		if match(item) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(r.items, match)
 }
 
 func (r viewTestReferences) Count() int { return len(r.items) }
