@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"testing"
@@ -152,5 +153,28 @@ func TestValidateEnabledSecureChannelMode(t *testing.T) {
 	}
 	if err := validate(ua.SecurityPolicyURIAes256Sha256RsaPss, ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
 		t.Fatalf("expected globally supported but disabled mode to return %v, got %v", ua.StatusBadSecurityModeRejected, err)
+	}
+}
+
+func TestEnableSecuritySkipsDuplicates(t *testing.T) {
+	t.Parallel()
+
+	cfg := &serverConfig{}
+	ctx := context.Background()
+
+	EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
+	EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
+	EnableSecurity(ua.SecurityPolicyURIBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
+
+	if len(cfg.enabledSec) != 1 {
+		t.Fatalf("expected 1 enabled security entry after duplicate registrations, got %d", len(cfg.enabledSec))
+	}
+
+	entry := cfg.enabledSec[0]
+	if entry.secPolicy != ua.SecurityPolicyURIBasic256Sha256 {
+		t.Fatalf("expected policy %q, got %q", ua.SecurityPolicyURIBasic256Sha256, entry.secPolicy)
+	}
+	if entry.secMode != ua.MessageSecurityModeSignAndEncrypt {
+		t.Fatalf("expected mode %v, got %v", ua.MessageSecurityModeSignAndEncrypt, entry.secMode)
 	}
 }
