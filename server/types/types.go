@@ -163,6 +163,11 @@ type ServerConfig interface {
 	Certificate() []byte
 	Endpoints() []string
 	PrivateKey() *rsa.PrivateKey
+
+	// UserNameAuthenticator returns the callback used to authenticate decoded
+	// username/password credentials during ActivateSession. A nil callback means
+	// username/password activation is not available even if the mode is
+	// advertised.
 	UserNameAuthenticator() auth.UserNameAuthenticator
 
 	ApplicationURI() string
@@ -205,11 +210,16 @@ type Session interface {
 
 	TimeOutInMillis() float64
 
+	// Activated reports whether ActivateSession has completed successfully for
+	// the session.
 	Activated() bool
 	SetActivated(bool)
 
 	IsSameAs(Session) bool
 
+	// AuthenticatedUser returns the user context stored by a successful
+	// username/password activation. Anonymous or not-yet-activated sessions
+	// return nil.
 	AuthenticatedUser() *auth.AuthenticatedUser
 
 	PublishRequestChannel() chan PubReq

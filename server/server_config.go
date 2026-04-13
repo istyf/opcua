@@ -134,6 +134,12 @@ func EnableAuthMode(tokenType ua.UserTokenType) Option {
 
 // WithUserNameAuthenticator registers the callback used to verify decoded
 // username/password credentials during ActivateSession.
+//
+// The callback receives the decoded credentials together with the session
+// identifiers for the activation attempt. On success, the returned user
+// context is stored on the activated session and can be read back through the
+// session interface. This option does not assign OPC UA roles yet; that will
+// come in later authorization work.
 func WithUserNameAuthenticator(authenticator auth.UserNameAuthenticator) Option {
 	return func(_ context.Context, s *serverConfig) {
 		s.userNameAuthenticator = authenticator
