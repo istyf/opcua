@@ -161,6 +161,178 @@ func TestCreateSubscriptionRevisesLifetimeCount(t *testing.T) {
 	}
 }
 
+func TestModifySubscriptionRevisesParametersAndUpdatesRuntimeState(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session, subscriptionTestConfigOptions{
+		minSubscriptionPublishingInterval: 200 * time.Millisecond,
+		minSubscriptionMaxKeepAliveCount:  3,
+		minSubscriptionLifetimeCount:      20,
+	})
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	createResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 70), 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+	created, ok := createResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", createResp)
+	}
+
+	resp, err := service.ModifySubscription(t.Context(), sc, &ua.ModifySubscriptionRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       71,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		SubscriptionID:              created.SubscriptionID,
+		RequestedPublishingInterval: 150,
+		RequestedLifetimeCount:      5,
+		RequestedMaxKeepAliveCount:  1,
+		MaxNotificationsPerPublish:  7,
+		Priority:                    9,
+	}, 2)
+	if err != nil {
+		t.Fatalf("modify subscription: %v", err)
+	}
+
+	modified, ok := resp.(*ua.ModifySubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected ModifySubscriptionResponse, got %T", resp)
+	}
+	if modified.RevisedPublishingInterval != 200 {
+		t.Fatalf("expected revised publishing interval 200, got %v", modified.RevisedPublishingInterval)
+	}
+	if modified.RevisedMaxKeepAliveCount != 3 {
+		t.Fatalf("expected revised max keepalive count 3, got %d", modified.RevisedMaxKeepAliveCount)
+	}
+	if modified.RevisedLifetimeCount != 20 {
+		t.Fatalf("expected revised lifetime count 20, got %d", modified.RevisedLifetimeCount)
+	}
+
+	sub, ok := service.Get(types.SubscriptionID(created.SubscriptionID))
+	if !ok {
+		t.Fatal("expected subscription to exist")
+	}
+	if sub.RevisedPublishingInterval != modified.RevisedPublishingInterval {
+		t.Fatalf("expected runtime revised publishing interval %v, got %v", modified.RevisedPublishingInterval, sub.RevisedPublishingInterval)
+	}
+	if sub.RevisedMaxKeepAliveCount != modified.RevisedMaxKeepAliveCount {
+		t.Fatalf("expected runtime revised max keepalive count %d, got %d", modified.RevisedMaxKeepAliveCount, sub.RevisedMaxKeepAliveCount)
+	}
+	if sub.RevisedLifetimeCount != modified.RevisedLifetimeCount {
+		t.Fatalf("expected runtime revised lifetime count %d, got %d", modified.RevisedLifetimeCount, sub.RevisedLifetimeCount)
+	}
+	if sub.MaxNotificationsPerPublish != 7 {
+		t.Fatalf("expected runtime max notifications per publish 7, got %d", sub.MaxNotificationsPerPublish)
+	}
+	if sub.Priority != 9 {
+		t.Fatalf("expected runtime priority 9, got %d", sub.Priority)
+	}
+
+	service.DeleteSubscription(t.Context(), sub.ID)
+}
+
+func TestModifySubscriptionRejectsMissingSession(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	createResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 72), 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+	created, ok := createResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", createResp)
+	}
+
+	backend.session = nil
+	resp, err := service.ModifySubscription(t.Context(), sc, &ua.ModifySubscriptionRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       73,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		SubscriptionID: created.SubscriptionID,
+	}, 2)
+	if resp != nil {
+		t.Fatalf("expected nil response, got %T", resp)
+	}
+	if err != ua.StatusBadSessionIDInvalid {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSessionIDInvalid, err)
+	}
+
+	backend.session = session
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(created.SubscriptionID))
+}
+
+func TestModifySubscriptionRejectsUnknownSubscription(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	resp, err := service.ModifySubscription(t.Context(), sc, &ua.ModifySubscriptionRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       74,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		SubscriptionID: 999,
+	}, 1)
+	if resp != nil {
+		t.Fatalf("expected nil response, got %T", resp)
+	}
+	if err != ua.StatusBadSubscriptionIDInvalid {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSubscriptionIDInvalid, err)
+	}
+}
+
+func TestModifySubscriptionRejectsDifferentSession(t *testing.T) {
+	t.Parallel()
+
+	ownerSession := newSubscriptionTestSession()
+	otherSession := newSubscriptionTestSession()
+	otherSession.authToken = ua.NewNumericNodeID(1, 505)
+
+	backend := newSubscriptionTestBackend(ownerSession)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	createResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(ownerSession, 75), 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+	created, ok := createResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", createResp)
+	}
+
+	backend.session = otherSession
+	resp, err := service.ModifySubscription(t.Context(), sc, &ua.ModifySubscriptionRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       76,
+			AuthenticationToken: otherSession.AuthTokenID(),
+		},
+		SubscriptionID: created.SubscriptionID,
+	}, 2)
+	if resp != nil {
+		t.Fatalf("expected nil response, got %T", resp)
+	}
+	if err != ua.StatusBadSessionIDInvalid {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSessionIDInvalid, err)
+	}
+
+	backend.session = ownerSession
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(created.SubscriptionID))
+}
+
 func TestCreateSubscriptionRejectsMissingSession(t *testing.T) {
 	t.Parallel()
 
@@ -596,6 +768,118 @@ func TestSubscriptionNextKeepaliveSequenceNumber(t *testing.T) {
 				t.Fatalf("expected %d, got %d", tt.want, got)
 			}
 		})
+	}
+}
+
+func TestSubscriptionApplyModifyRequestResetsTickerOnIntervalChange(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.RevisedPublishingInterval = 1000
+	sub.resetTicker()
+	originalTicker := sub.T
+	t.Cleanup(func() {
+		if sub.T != nil {
+			sub.T.Stop()
+		}
+	})
+
+	sub.applyModifyRequest(&ua.ModifySubscriptionRequest{
+		RequestedPublishingInterval: 500,
+		RequestedLifetimeCount:      30,
+		RequestedMaxKeepAliveCount:  10,
+		MaxNotificationsPerPublish:  3,
+		Priority:                    2,
+	})
+
+	if sub.T == nil {
+		t.Fatal("expected ticker to be initialized")
+	}
+	if sub.T == originalTicker {
+		t.Fatal("expected ticker to be replaced when publishing interval changes")
+	}
+	if sub.RevisedPublishingInterval != 500 {
+		t.Fatalf("expected revised publishing interval 500, got %v", sub.RevisedPublishingInterval)
+	}
+}
+
+func TestSubscriptionApplyModifyRequestKeepsTickerWhenIntervalIsUnchanged(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.RevisedPublishingInterval = 1000
+	sub.resetTicker()
+	originalTicker := sub.T
+	t.Cleanup(func() {
+		if sub.T != nil {
+			sub.T.Stop()
+		}
+	})
+
+	sub.applyModifyRequest(&ua.ModifySubscriptionRequest{
+		RequestedPublishingInterval: 1000,
+		RequestedLifetimeCount:      40,
+		RequestedMaxKeepAliveCount:  12,
+		MaxNotificationsPerPublish:  4,
+		Priority:                    3,
+	})
+
+	if sub.T != originalTicker {
+		t.Fatal("expected ticker to stay the same when publishing interval is unchanged")
+	}
+	if sub.RevisedLifetimeCount != 40 {
+		t.Fatalf("expected revised lifetime count 40, got %d", sub.RevisedLifetimeCount)
+	}
+	if sub.RevisedMaxKeepAliveCount != 12 {
+		t.Fatalf("expected revised max keepalive count 12, got %d", sub.RevisedMaxKeepAliveCount)
+	}
+}
+
+func TestSubscriptionApplyModifyRequestPreservesPendingNotificationsAndCounters(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.RevisedPublishingInterval = 1000
+	sub.keepaliveCounter = 2
+	sub.lifetimeCounter = 5
+	sub.publishQueue[11] = &ua.MonitoredItemNotification{ClientHandle: 11}
+	sub.publishQueue[22] = &ua.MonitoredItemNotification{ClientHandle: 22}
+	sub.resetTicker()
+	originalTicker := sub.T
+	t.Cleanup(func() {
+		if sub.T != nil {
+			sub.T.Stop()
+		}
+	})
+
+	sub.applyModifyRequest(&ua.ModifySubscriptionRequest{
+		RequestedPublishingInterval: 500,
+		RequestedLifetimeCount:      40,
+		RequestedMaxKeepAliveCount:  12,
+		MaxNotificationsPerPublish:  4,
+		Priority:                    3,
+	})
+
+	if sub.T == nil {
+		t.Fatal("expected ticker to be initialized")
+	}
+	if sub.T == originalTicker {
+		t.Fatal("expected ticker to be replaced when publishing interval changes")
+	}
+	if sub.keepaliveCounter != 2 {
+		t.Fatalf("expected keepalive counter 2, got %d", sub.keepaliveCounter)
+	}
+	if sub.lifetimeCounter != 5 {
+		t.Fatalf("expected lifetime counter 5, got %d", sub.lifetimeCounter)
+	}
+	if len(sub.publishQueue) != 2 {
+		t.Fatalf("expected two queued notifications to be preserved, got %d", len(sub.publishQueue))
+	}
+	if _, ok := sub.publishQueue[11]; !ok {
+		t.Fatal("expected queued notification for client handle 11 to be preserved")
+	}
+	if _, ok := sub.publishQueue[22]; !ok {
+		t.Fatal("expected queued notification for client handle 22 to be preserved")
 	}
 }
 

@@ -108,6 +108,22 @@ func reviseLifetimeCount(requested, minSupported, revisedKeepAliveCount uint32) 
 	return max(requested, minLifetime)
 }
 
+func newModifySubscriptionResponse(requestHandle uint32, revisedPublishingInterval float64, revisedLifetimeCount, revisedMaxKeepAliveCount uint32) *ua.ModifySubscriptionResponse {
+	return &ua.ModifySubscriptionResponse{
+		ResponseHeader: &ua.ResponseHeader{
+			Timestamp:          time.Now(),
+			RequestHandle:      requestHandle,
+			ServiceResult:      ua.StatusOK,
+			ServiceDiagnostics: &ua.DiagnosticInfo{},
+			StringTable:        []string{},
+			AdditionalHeader:   ua.NewExtensionObject(nil),
+		},
+		RevisedPublishingInterval: revisedPublishingInterval,
+		RevisedLifetimeCount:      revisedLifetimeCount,
+		RevisedMaxKeepAliveCount:  revisedMaxKeepAliveCount,
+	}
+}
+
 func (s *SubscriptionService) NextID() types.SubscriptionID {
 	id := types.SubscriptionID(s.previousID.Add(1))
 	if id == 0 {
@@ -236,7 +252,11 @@ func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.S
 	return resp, nil
 }
 
-// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.13.3
+// ModifySubscription revises the requested values using the same rules as
+// CreateSubscription, applies the negotiated values to the live subscription,
+// and returns the revised values to the client.
+//
+// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.14.3
 func (s *SubscriptionService) ModifySubscription(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
 	ctx = ualog.WithAttrs(ctx, newSubscriptionServiceLogAttribute("modify"))
 	logServiceRequest(ctx, r)
@@ -245,10 +265,44 @@ func (s *SubscriptionService) ModifySubscription(ctx context.Context, sc *uasc.S
 	if err != nil {
 		return nil, err
 	}
+	session := s.srv.Session(ctx, req.RequestHeader)
+	if session == nil {
+		return nil, ua.StatusBadSessionIDInvalid
+	}
 
-	// When this gets implemented, be sure to check the subscription session vs the request session!
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
-	return serviceUnsupported(req.RequestHeader), nil
+	subscriptionID := types.SubscriptionID(req.SubscriptionID)
+	sub, ok := s.subs[subscriptionID]
+	if !ok {
+		return nil, ua.StatusBadSubscriptionIDInvalid
+	}
+	if !sameSession(sub.session, session) {
+		return nil, ua.StatusBadSessionIDInvalid
+	}
+
+	revisedPublishingInterval := revisePublishingInterval(req.RequestedPublishingInterval, s.minPublishingInterval)
+	revisedMaxKeepAliveCount := reviseMaxKeepAliveCount(req.RequestedMaxKeepAliveCount, s.minKeepAliveCount)
+	revisedLifetimeCount := reviseLifetimeCount(req.RequestedLifetimeCount, s.minLifetimeCount, revisedMaxKeepAliveCount)
+
+	revisedReq := &ua.ModifySubscriptionRequest{
+		RequestedPublishingInterval: revisedPublishingInterval,
+		RequestedLifetimeCount:      revisedLifetimeCount,
+		RequestedMaxKeepAliveCount:  revisedMaxKeepAliveCount,
+		MaxNotificationsPerPublish:  req.MaxNotificationsPerPublish,
+		Priority:                    req.Priority,
+	}
+	done := make(chan struct{})
+	sub.ModifyChannel <- subscriptionModify{req: revisedReq, done: done}
+	<-done
+
+	return newModifySubscriptionResponse(
+		req.RequestHeader.RequestHandle,
+		revisedPublishingInterval,
+		revisedLifetimeCount,
+		revisedMaxKeepAliveCount,
+	), nil
 }
 
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.13.4
@@ -422,7 +476,12 @@ type Subscription struct {
 	T *time.Ticker
 
 	NotifyChannel chan *ua.MonitoredItemNotification
-	ModifyChannel chan *ua.ModifySubscriptionRequest
+	ModifyChannel chan subscriptionModify
+
+	// Runtime state owned by the subscription goroutine.
+	publishQueue     map[uint32]*ua.MonitoredItemNotification
+	keepaliveCounter int
+	lifetimeCounter  int
 
 	// the running flag and shutdown channel are used to signal the background task that it should stop.
 	// multiple places can kill the subscription so make sure you check the running flag using the mutex
@@ -432,11 +491,17 @@ type Subscription struct {
 	shutdown chan struct{}
 }
 
+type subscriptionModify struct {
+	req  *ua.ModifySubscriptionRequest
+	done chan struct{}
+}
+
 func NewSubscription() *Subscription {
 	return &Subscription{
 		//SeqNums:       map[uint32]struct{}{},
 		NotifyChannel: make(chan *ua.MonitoredItemNotification, 100),
-		ModifyChannel: make(chan *ua.ModifySubscriptionRequest, 2),
+		ModifyChannel: make(chan subscriptionModify, 2),
+		publishQueue:  make(map[uint32]*ua.MonitoredItemNotification),
 		shutdown:      make(chan struct{}),
 	}
 }
@@ -447,6 +512,23 @@ func (s *Subscription) Update(req *ua.ModifySubscriptionRequest) {
 	s.RevisedMaxKeepAliveCount = req.RequestedMaxKeepAliveCount
 	s.MaxNotificationsPerPublish = req.MaxNotificationsPerPublish
 	s.Priority = req.Priority
+}
+
+func (s *Subscription) resetTicker() {
+	if s.T != nil {
+		s.T.Stop()
+	}
+	s.T = time.NewTicker(time.Millisecond * time.Duration(s.RevisedPublishingInterval))
+}
+
+func (s *Subscription) applyModifyRequest(req *ua.ModifySubscriptionRequest) {
+	intervalChanged := s.RevisedPublishingInterval != req.RequestedPublishingInterval
+	s.Update(req)
+	if intervalChanged {
+		// The revised publishing interval must affect the running subscription,
+		// not just the stored state returned by ModifySubscription.
+		s.resetTicker()
+	}
 }
 
 func (s *Subscription) Start(ctx context.Context) {
@@ -533,10 +615,7 @@ func (s *Subscription) run(ctx context.Context) {
 		s.srv.DeleteSubscription(ctx, s.ID)
 	}()
 
-	keepalive_counter := 0
-	lifetime_counter := 0
-	//TODO: if a sub is modified, this ticker time may need to change.
-	s.T = time.NewTicker(time.Millisecond * time.Duration(s.RevisedPublishingInterval))
+	s.resetTicker()
 	defer s.T.Stop()
 
 	// This is the master run event loop.  It has effectively 3 states that it can be in.  The first two are designated with
@@ -551,7 +630,6 @@ func (s *Subscription) run(ctx context.Context) {
 	// get a publish request, we'll continue to count intervals without a publish request.
 	//
 	// In L0 and L2, If we get to the lifetime count without a publish request, we'll kill the subscription.
-	publishQueue := make(map[uint32]*ua.MonitoredItemNotification)
 	for {
 		// Collect notifications until our publication interval is ready
 	L0:
@@ -560,14 +638,14 @@ func (s *Subscription) run(ctx context.Context) {
 			case <-s.shutdown:
 				return
 			case newNotification := <-s.NotifyChannel:
-				publishQueue[newNotification.ClientHandle] = newNotification
+				s.publishQueue[newNotification.ClientHandle] = newNotification
 			case <-s.T.C:
-				if !s.canPublishNotifications(len(publishQueue)) {
+				if !s.canPublishNotifications(len(s.publishQueue)) {
 					// nothing to publish, increment the keepalive counter and send a keepalive if it
 					// has been enough intervals.
-					keepalive_counter++
-					if s.shouldSendKeepalive(keepalive_counter) {
-						keepalive_counter = 0
+					s.keepaliveCounter++
+					if s.shouldSendKeepalive(s.keepaliveCounter) {
+						s.keepaliveCounter = 0
 						select {
 						case pubreq := <-s.session.PublishRequestChannel():
 							err := s.keepalive(pubreq)
@@ -576,8 +654,8 @@ func (s *Subscription) run(ctx context.Context) {
 								return
 							}
 						default:
-							lifetime_counter++
-							if s.shouldTimeout(lifetime_counter) {
+							s.lifetimeCounter++
+							if s.shouldTimeout(s.lifetimeCounter) {
 								ualog.Warn(ctx, "subscription timed out")
 								return
 							}
@@ -588,7 +666,8 @@ func (s *Subscription) run(ctx context.Context) {
 				// we have things to publish so we'll break out to do that.
 				break L0
 			case update := <-s.ModifyChannel:
-				s.Update(update)
+				s.applyModifyRequest(update.req)
+				close(update.done)
 			}
 		}
 		var pubreq types.PubReq
@@ -603,19 +682,22 @@ func (s *Subscription) run(ctx context.Context) {
 				// once we get a publish request, we should move on to publish them back
 				break L2
 			case newNotification := <-s.NotifyChannel:
-				publishQueue[newNotification.ClientHandle] = newNotification
+				s.publishQueue[newNotification.ClientHandle] = newNotification
 
 			case <-s.T.C:
 				// we had another tick without a publish request.
-				lifetime_counter++
-				if s.shouldTimeout(lifetime_counter) {
+				s.lifetimeCounter++
+				if s.shouldTimeout(s.lifetimeCounter) {
 					ualog.Warn(ctx, "subscription timed out")
 					return
 				}
+			case update := <-s.ModifyChannel:
+				s.applyModifyRequest(update.req)
+				close(update.done)
 			}
 		}
-		lifetime_counter = 0
-		keepalive_counter = 0
+		s.lifetimeCounter = 0
+		s.keepaliveCounter = 0
 
 		s.SequenceID++
 		if s.SequenceID == 0 {
@@ -632,7 +714,7 @@ func (s *Subscription) run(ctx context.Context) {
 		//delete(s.SeqNums, a.SequenceNumber)
 		//}
 
-		finalItems, moreNotifications := s.nextPublishBatch(publishQueue)
+		finalItems, moreNotifications := s.nextPublishBatch(s.publishQueue)
 
 		dcn := ua.DataChangeNotification{
 			MonitoredItems:  finalItems,
@@ -672,7 +754,7 @@ func (s *Subscription) run(ctx context.Context) {
 			return
 		}
 
-		ualog.Debug(ctx, "published items", ualog.Int("count", len(publishQueue)))
+		ualog.Debug(ctx, "published items", ualog.Int("count", len(s.publishQueue)))
 
 		// wait till we've got a publish request.
 	}
