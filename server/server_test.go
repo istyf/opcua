@@ -31,6 +31,28 @@ func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 			},
 		},
 		{
+			name: "none security with sign mode is rejected",
+			cfg: &serverConfig{
+				enabledSec: []security{{
+					secPolicy: ua.SecurityPolicyURINone,
+					secMode:   ua.MessageSecurityModeSign,
+				}},
+			},
+			wantErr: `cannot start server: invalid secure endpoint config: security policy "http://opcfoundation.org/UA/SecurityPolicy#None" cannot be used with "MessageSecurityModeSign"`,
+		},
+		{
+			name: "secure policy with none mode is rejected",
+			cfg: &serverConfig{
+				certificate: []byte("cert"),
+				privateKey:  key,
+				enabledSec: []security{{
+					secPolicy: ua.SecurityPolicyURIBasic256Sha256,
+					secMode:   ua.MessageSecurityModeNone,
+				}},
+			},
+			wantErr: `cannot start server: invalid secure endpoint config: security policy "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256" can only be used with "MessageSecurityModeSign" or "MessageSecurityModeSignAndEncrypt"`,
+		},
+		{
 			name: "secure endpoint without certificate is rejected",
 			cfg: &serverConfig{
 				privateKey: key,

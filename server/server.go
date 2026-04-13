@@ -251,10 +251,24 @@ func (s *serverImpl) Start(ctx context.Context) error {
 
 func validateConfiguredSecureEndpoints(cfg *serverConfig) error {
 	for _, sec := range cfg.enabledSec {
-		if sec.secPolicy == ua.SecurityPolicyURINone {
-			continue
-		}
 		switch {
+		case sec.secPolicy == ua.SecurityPolicyURINone && sec.secMode != ua.MessageSecurityModeNone:
+			return fmt.Errorf(
+				"cannot start server: invalid secure endpoint config: security policy %q cannot be used with %q",
+				sec.secPolicy,
+				sec.secMode,
+			)
+		case sec.secPolicy != ua.SecurityPolicyURINone &&
+			sec.secMode != ua.MessageSecurityModeSign &&
+			sec.secMode != ua.MessageSecurityModeSignAndEncrypt:
+			return fmt.Errorf(
+				"cannot start server: invalid secure endpoint config: security policy %q can only be used with %q or %q",
+				sec.secPolicy,
+				ua.MessageSecurityModeSign,
+				ua.MessageSecurityModeSignAndEncrypt,
+			)
+		case sec.secPolicy == ua.SecurityPolicyURINone:
+			continue
 		case len(cfg.certificate) == 0:
 			return errors.New("cannot start server: secure endpoints require a certificate")
 		case cfg.privateKey == nil:
