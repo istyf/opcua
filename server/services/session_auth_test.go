@@ -343,3 +343,88 @@ func TestDecodeUserNamePassword(t *testing.T) {
 		})
 	}
 }
+
+func TestResolveUserTokenSecurityPolicyURI(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name             string
+		policy           *ua.UserTokenPolicy
+		secureChannelURI string
+		want             string
+		wantErr          error
+	}{
+		{
+			name: "explicit token policy uri is used",
+			policy: &ua.UserTokenPolicy{
+				PolicyID:          "username_basic256sha256",
+				TokenType:         ua.UserTokenTypeUserName,
+				SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+			},
+			secureChannelURI: ua.SecurityPolicyURIAes128Sha256RsaOaep,
+			want:             ua.SecurityPolicyURIBasic256Sha256,
+		},
+		{
+			name: "empty token policy uri falls back to secure channel policy",
+			policy: &ua.UserTokenPolicy{
+				PolicyID:  "username_default",
+				TokenType: ua.UserTokenTypeUserName,
+			},
+			secureChannelURI: ua.SecurityPolicyURIBasic256Sha256,
+			want:             ua.SecurityPolicyURIBasic256Sha256,
+		},
+		{
+			name: "none token policy uri is allowed explicitly",
+			policy: &ua.UserTokenPolicy{
+				PolicyID:          "anonymous_none",
+				TokenType:         ua.UserTokenTypeAnonymous,
+				SecurityPolicyURI: ua.SecurityPolicyURINone,
+			},
+			secureChannelURI: ua.SecurityPolicyURIBasic256Sha256,
+			want:             ua.SecurityPolicyURINone,
+		},
+		{
+			name:             "nil policy is invalid",
+			secureChannelURI: ua.SecurityPolicyURIBasic256Sha256,
+			wantErr:          ua.StatusBadIdentityTokenInvalid,
+		},
+		{
+			name: "empty effective policy is invalid",
+			policy: &ua.UserTokenPolicy{
+				PolicyID:  "username_default",
+				TokenType: ua.UserTokenTypeUserName,
+			},
+			wantErr: ua.StatusBadIdentityTokenInvalid,
+		},
+		{
+			name: "unsupported explicit token policy uri is rejected",
+			policy: &ua.UserTokenPolicy{
+				PolicyID:          "username_custom",
+				TokenType:         ua.UserTokenTypeUserName,
+				SecurityPolicyURI: "http://example.invalid/unsupported",
+			},
+			secureChannelURI: ua.SecurityPolicyURIBasic256Sha256,
+			wantErr:          ua.StatusBadIdentityTokenRejected,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := resolveUserTokenSecurityPolicyURI(tt.policy, tt.secureChannelURI)
+			if tt.wantErr != nil {
+				if err != tt.wantErr {
+					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if got != tt.want {
+				t.Fatalf("expected policy uri %q, got %q", tt.want, got)
+			}
+		})
+	}
+}

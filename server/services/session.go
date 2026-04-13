@@ -140,7 +140,12 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 		return nil, err
 	}
 
-	if _, err := resolveUserTokenPolicy(token, s.srv.Endpoints()); err != nil {
+	policy, err := resolveUserTokenPolicy(token, s.srv.Endpoints())
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := resolveUserTokenSecurityPolicyURI(policy, sc.SecurityPolicyURI()); err != nil {
 		return nil, err
 	}
 

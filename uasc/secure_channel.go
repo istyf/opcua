@@ -598,6 +598,13 @@ func (s *SecureChannel) LocalEndpoint() string {
 	return s.endpointURL
 }
 
+func (s *SecureChannel) SecurityPolicyURI() string {
+	if s == nil || s.cfg == nil {
+		return ""
+	}
+	return s.cfg.SecurityPolicyURI
+}
+
 func (s *SecureChannel) Open(ctx context.Context) error {
 	return s.open(ctx, nil, ua.SecurityTokenRequestTypeIssue)
 }

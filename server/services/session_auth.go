@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"encoding/binary"
+	"slices"
 
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uapolicy"
@@ -108,4 +109,24 @@ func decodeUserNamePassword(token *ua.UserNameIdentityToken, policyURI string, p
 	}
 
 	return string(passwordBytes), nil
+}
+
+func resolveUserTokenSecurityPolicyURI(policy *ua.UserTokenPolicy, secureChannelPolicyURI string) (string, error) {
+	if policy == nil {
+		return "", ua.StatusBadIdentityTokenInvalid
+	}
+
+	policyURI := policy.SecurityPolicyURI
+	if policyURI == "" {
+		policyURI = secureChannelPolicyURI
+	}
+
+	if policyURI == "" {
+		return "", ua.StatusBadIdentityTokenInvalid
+	}
+	if !slices.Contains(uapolicy.SupportedPolicies(), policyURI) {
+		return "", ua.StatusBadIdentityTokenRejected
+	}
+
+	return policyURI, nil
 }
