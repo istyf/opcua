@@ -28,6 +28,7 @@ type session struct {
 	authTokenID       *ua.NodeID
 	serverNonce       []byte
 	remoteCertificate []byte
+	authenticatedUser *AuthenticatedUser
 
 	PublishRequests chan types.PubReq
 }
@@ -152,6 +153,14 @@ func (s *session) ServerNonce() []byte {
 
 func (s *session) SetServerNonce(nonce []byte) {
 	s.serverNonce = nonce
+}
+
+func (s *session) AuthenticatedUser() *AuthenticatedUser {
+	return s.authenticatedUser
+}
+
+func (s *session) SetAuthenticatedUser(user *AuthenticatedUser) {
+	s.authenticatedUser = user
 }
 
 func (s *session) TimeOutInMillis() float64 {
