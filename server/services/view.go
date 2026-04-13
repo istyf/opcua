@@ -17,10 +17,6 @@ import (
 	"github.com/gopcua/opcua/uasc"
 )
 
-var (
-	hasSubtype = ua.NewNumericNodeID(0, id.HasSubtype)
-)
-
 type ViewServiceBackend interface {
 	HandlerRegistrator
 	NamespaceProvider

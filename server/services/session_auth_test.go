@@ -1,9 +1,13 @@
 package services
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"encoding/binary"
 	"testing"
 
 	"github.com/gopcua/opcua/ua"
+	"github.com/gopcua/opcua/uapolicy"
 )
 
 func TestDecodeUserIdentityToken(t *testing.T) {
@@ -208,6 +212,133 @@ func TestResolveUserTokenPolicy(t *testing.T) {
 			}
 			if got.PolicyID != tt.wantID {
 				t.Fatalf("expected policy %q, got %q", tt.wantID, got.PolicyID)
+			}
+		})
+	}
+}
+
+func TestDecodeUserNamePassword(t *testing.T) {
+	t.Parallel()
+
+	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("failed to generate test key: %v", err)
+	}
+
+	serverNonce := []byte("12345678901234567890123456789012")
+
+	encrypt := func(t *testing.T, policyURI, password string, nonce []byte) []byte {
+		t.Helper()
+
+		algo, err := uapolicy.Asymmetric(policyURI, nil, &serverKey.PublicKey)
+		if err != nil {
+			t.Fatalf("failed to build encrypt-only algorithm: %v", err)
+		}
+
+		secret := make([]byte, 4)
+		binary.LittleEndian.PutUint32(secret, uint32(len(password)+len(nonce)))
+		secret = append(secret, []byte(password)...)
+		secret = append(secret, nonce...)
+
+		encrypted, err := algo.Encrypt(secret)
+		if err != nil {
+			t.Fatalf("failed to encrypt test password: %v", err)
+		}
+
+		return encrypted
+	}
+
+	tests := []struct {
+		name        string
+		token       *ua.UserNameIdentityToken
+		policyURI   string
+		privateKey  *rsa.PrivateKey
+		serverNonce []byte
+		want        string
+		wantErr     error
+	}{
+		{
+			name: "none policy uses plaintext password bytes",
+			token: &ua.UserNameIdentityToken{
+				UserName: "alice",
+				Password: []byte("secret"),
+			},
+			policyURI:   ua.SecurityPolicyURINone,
+			serverNonce: serverNonce,
+			want:        "secret",
+		},
+		{
+			name: "encrypted password is decrypted and nonce verified",
+			token: &ua.UserNameIdentityToken{
+				UserName: "alice",
+				Password: encrypt(t, ua.SecurityPolicyURIBasic256Sha256, "secret", serverNonce),
+			},
+			policyURI:   ua.SecurityPolicyURIBasic256Sha256,
+			privateKey:  serverKey,
+			serverNonce: serverNonce,
+			want:        "secret",
+		},
+		{
+			name: "missing private key is invalid",
+			token: &ua.UserNameIdentityToken{
+				UserName: "alice",
+				Password: []byte("secret"),
+			},
+			policyURI:   ua.SecurityPolicyURIBasic256Sha256,
+			serverNonce: serverNonce,
+			wantErr:     ua.StatusBadIdentityTokenInvalid,
+		},
+		{
+			name: "malformed encrypted payload is invalid",
+			token: &ua.UserNameIdentityToken{
+				UserName: "alice",
+				Password: encrypt(t, ua.SecurityPolicyURIBasic256Sha256, "secret", serverNonce)[:8],
+			},
+			policyURI:   ua.SecurityPolicyURIBasic256Sha256,
+			privateKey:  serverKey,
+			serverNonce: serverNonce,
+			wantErr:     ua.StatusBadIdentityTokenInvalid,
+		},
+		{
+			name: "nonce mismatch is rejected",
+			token: &ua.UserNameIdentityToken{
+				UserName: "alice",
+				Password: encrypt(t, ua.SecurityPolicyURIBasic256Sha256, "secret", serverNonce),
+			},
+			policyURI:   ua.SecurityPolicyURIBasic256Sha256,
+			privateKey:  serverKey,
+			serverNonce: []byte("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
+			wantErr:     ua.StatusBadNonceInvalid,
+		},
+		{
+			name: "unsupported policy is rejected",
+			token: &ua.UserNameIdentityToken{
+				UserName: "alice",
+				Password: []byte("secret"),
+			},
+			policyURI:   "http://example.invalid/unsupported",
+			privateKey:  serverKey,
+			serverNonce: serverNonce,
+			wantErr:     ua.StatusBadIdentityTokenRejected,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := decodeUserNamePassword(tt.token, tt.policyURI, tt.privateKey, tt.serverNonce)
+			if tt.wantErr != nil {
+				if err != tt.wantErr {
+					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if got != tt.want {
+				t.Fatalf("expected password %q, got %q", tt.want, got)
 			}
 		})
 	}
