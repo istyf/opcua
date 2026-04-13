@@ -220,6 +220,76 @@ func TestValidateIncomingOpenSecureChannelRequest(t *testing.T) {
 	}
 }
 
+func TestValidateIncomingOpenSecureChannelPolicyDoesNotActivateChannel(t *testing.T) {
+	t.Parallel()
+
+	serverChannel := &SecureChannel{
+		kind:      server,
+		cfg:       &Config{},
+		instances: make(map[uint32][]*channelInstance),
+	}
+	serverChannel.openingInstance = newChannelInstance(serverChannel)
+	serverChannel.cfg.ServerSecurityPolicyValidator = func(string) error {
+		return ua.StatusBadSecurityPolicyRejected
+	}
+
+	err := serverChannel.validateIncomingOpenSecureChannelPolicy(ua.SecurityPolicyURIBasic256Sha256)
+	if err != ua.StatusBadSecurityPolicyRejected {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityPolicyRejected, err)
+	}
+	if serverChannel.activeInstance != nil {
+		t.Fatalf("expected active instance to remain nil after policy rejection")
+	}
+	if len(serverChannel.instances) != 0 {
+		t.Fatalf("expected no registered channel instances after policy rejection, got %d", len(serverChannel.instances))
+	}
+	if serverChannel.openingInstance == nil || serverChannel.openingInstance.state != channelOpening {
+		t.Fatalf("expected opening instance to remain in opening state after policy rejection")
+	}
+}
+
+func TestHandleOpenSecureChannelRequestRejectsDisabledModeBeforeActivation(t *testing.T) {
+	t.Parallel()
+
+	serverChannel := &SecureChannel{
+		kind:      server,
+		cfg:       &Config{SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256},
+		instances: make(map[uint32][]*channelInstance),
+	}
+	serverChannel.openingInstance = newChannelInstance(serverChannel)
+	serverChannel.cfg.ServerOpenSecureChannelValidator = func(_ string, mode ua.MessageSecurityMode) error {
+		if mode != ua.MessageSecurityModeSignAndEncrypt {
+			return ua.StatusBadSecurityModeRejected
+		}
+		return nil
+	}
+
+	req := &ua.OpenSecureChannelRequest{
+		RequestHeader: &ua.RequestHeader{
+			AuthenticationToken: ua.NewTwoByteNodeID(0),
+			RequestHandle:       1,
+			AdditionalHeader:    ua.NewExtensionObject(nil),
+		},
+		ClientProtocolVersion: 0,
+		RequestType:           ua.SecurityTokenRequestTypeIssue,
+		SecurityMode:          ua.MessageSecurityModeSign,
+	}
+
+	err := serverChannel.handleOpenSecureChannelRequest(1, req)
+	if err != ua.StatusBadSecurityModeRejected {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
+	}
+	if serverChannel.activeInstance != nil {
+		t.Fatalf("expected active instance to remain nil after mode rejection")
+	}
+	if len(serverChannel.instances) != 0 {
+		t.Fatalf("expected no registered channel instances after mode rejection, got %d", len(serverChannel.instances))
+	}
+	if serverChannel.openingInstance == nil || serverChannel.openingInstance.state != channelOpening {
+		t.Fatalf("expected opening instance to remain in opening state after mode rejection")
+	}
+}
+
 func TestCloseSecureChannelVerifyAndDecrypt(t *testing.T) {
 	tests := []struct {
 		name   string
