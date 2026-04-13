@@ -229,6 +229,48 @@ func TestBrowseRejectsViewParameterMismatch(t *testing.T) {
 	}
 }
 
+func TestBrowseRejectsUnsupportedViewTimestamp(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+
+	_, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 50},
+		View: &ua.ViewDescription{
+			ViewID:    ua.NewNumericNodeID(1, 5002),
+			Timestamp: time.Unix(1, 0),
+		},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: ua.NewNumericNodeID(1, 1001)},
+		},
+	}, 1)
+	if err != ua.StatusBadViewTimestampInvalid {
+		t.Fatalf("expected %s, got %v", ua.StatusBadViewTimestampInvalid, err)
+	}
+}
+
+func TestBrowseRejectsUnsupportedViewVersion(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+
+	_, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 51},
+		View: &ua.ViewDescription{
+			ViewID:      ua.NewNumericNodeID(1, 5003),
+			ViewVersion: 1,
+		},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: ua.NewNumericNodeID(1, 1001)},
+		},
+	}, 1)
+	if err != ua.StatusBadViewVersionInvalid {
+		t.Fatalf("expected %s, got %v", ua.StatusBadViewVersionInvalid, err)
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace

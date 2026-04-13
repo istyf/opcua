@@ -70,6 +70,12 @@ func validateBrowseView(view *ua.ViewDescription) error {
 	if view.ViewID == nil || view.ViewID.Equal(noNodeID) {
 		return ua.StatusBadViewParameterMismatch
 	}
+	if !view.Timestamp.IsZero() {
+		return ua.StatusBadViewTimestampInvalid
+	}
+	if view.ViewVersion != 0 {
+		return ua.StatusBadViewVersionInvalid
+	}
 	return ua.StatusBadViewIDUnknown
 }
 
