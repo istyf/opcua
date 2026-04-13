@@ -103,6 +103,9 @@ func (s *ViewService) browseNode(ctx context.Context, desc *ua.BrowseDescription
 	if err != nil {
 		return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDUnknown}
 	}
+	if ns.Node(desc.NodeID) == nil {
+		return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDUnknown}
+	}
 
 	result := ns.Browse(ctx, desc)
 	if result == nil {

@@ -21,6 +21,12 @@ func TestBrowseReturnsResultsInRequestOrder(t *testing.T) {
 	secondNodeID := ua.NewNumericNodeID(2, 2002)
 
 	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.Equal(firstNodeID) {
+				return viewTestNode{id: firstNodeID}
+			}
+			return nil
+		},
 		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
 			return &ua.BrowseResult{StatusCode: ua.StatusOK, References: []*ua.ReferenceDescription{
 				{BrowseName: &ua.QualifiedName{Name: "first"}},
@@ -28,6 +34,12 @@ func TestBrowseReturnsResultsInRequestOrder(t *testing.T) {
 		},
 	}
 	backend.namespaces[2] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.Equal(secondNodeID) {
+				return viewTestNode{id: secondNodeID}
+			}
+			return nil
+		},
 		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
 			return &ua.BrowseResult{StatusCode: ua.StatusOK, References: []*ua.ReferenceDescription{
 				{BrowseName: &ua.QualifiedName{Name: "second"}},
@@ -113,7 +125,14 @@ func TestBrowseReturnsBadInternalErrorWhenNamespaceBrowseReturnsNil(t *testing.T
 
 	backend := newViewTestBackend()
 	service := NewViewService(backend)
-	backend.namespaces[1] = &viewTestNamespace{}
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.IntID() == 1001 {
+				return viewTestNode{id: id}
+			}
+			return nil
+		},
+	}
 
 	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
 		RequestHeader: &ua.RequestHeader{RequestHandle: 44},
@@ -172,6 +191,12 @@ func TestBrowseAcceptsEmptyViewDescription(t *testing.T) {
 	backend := newViewTestBackend()
 	service := NewViewService(backend)
 	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.IntID() == 1001 {
+				return viewTestNode{id: id}
+			}
+			return nil
+		},
 		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
 			return &ua.BrowseResult{StatusCode: ua.StatusOK}
 		},
@@ -271,6 +296,31 @@ func TestBrowseRejectsUnsupportedViewVersion(t *testing.T) {
 	}
 }
 
+func TestBrowseReturnsBadNodeIDUnknownForMissingNodeInKnownNamespace(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(*ua.NodeID) types.Node { return nil },
+	}
+
+	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 52},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: ua.NewNumericNodeID(1, 1234)},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	browseResp := resp.(*ua.BrowseResponse)
+	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadNodeIDUnknown {
+		t.Fatalf("expected %s, got %s", ua.StatusBadNodeIDUnknown, got)
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace
@@ -315,6 +365,7 @@ func (b *viewTestBackend) Config() types.ServerConfig {
 }
 
 type viewTestNamespace struct {
+	nodeFn   func(*ua.NodeID) types.Node
 	browseFn func(context.Context, *ua.BrowseDescription) *ua.BrowseResult
 }
 
@@ -322,7 +373,12 @@ func (ns *viewTestNamespace) Name() string { return "test" }
 
 func (ns *viewTestNamespace) AddNode(n types.Node) types.Node { return n }
 
-func (ns *viewTestNamespace) Node(*ua.NodeID) types.Node { return nil }
+func (ns *viewTestNamespace) Node(id *ua.NodeID) types.Node {
+	if ns.nodeFn == nil {
+		return nil
+	}
+	return ns.nodeFn(id)
+}
 
 func (ns *viewTestNamespace) Browse(ctx context.Context, req *ua.BrowseDescription) *ua.BrowseResult {
 	if ns.browseFn == nil {
@@ -348,6 +404,34 @@ func (ns *viewTestNamespace) NewQualifiedName(name string) *ua.QualifiedName {
 }
 
 func (ns *viewTestNamespace) NextAvailableID() *ua.NodeID { return ua.NewNumericNodeID(1, 1) }
+
+type viewTestNode struct {
+	id *ua.NodeID
+}
+
+func (n viewTestNode) ID() *ua.NodeID { return n.id }
+
+func (n viewTestNode) BrowseName() *ua.QualifiedName { return &ua.QualifiedName{Name: n.id.String()} }
+
+func (n viewTestNode) DisplayName(context.Context) *ua.LocalizedText {
+	return ua.NewLocalizedText(n.id.String())
+}
+
+func (n viewTestNode) NodeClass() ua.NodeClass { return ua.NodeClassObject }
+
+func (n viewTestNode) AddComponent(types.Node) types.Node { return nil }
+
+func (n viewTestNode) AddComponents(...types.Node) types.Node { return nil }
+
+func (n viewTestNode) AddRef(types.ReferenceWrapper) {}
+
+func (n viewTestNode) References() types.ReferenceCollection { return nil }
+
+func (n viewTestNode) Attribute(context.Context, ua.AttributeID) (*types.AttrValue, error) {
+	return nil, nil
+}
+
+func (n viewTestNode) SetAttribute(context.Context, ua.AttributeID, *ua.DataValue) error { return nil }
 
 type viewTestConfig struct {
 	maxBrowseOperationsPerCall uint32
