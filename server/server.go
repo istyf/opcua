@@ -7,6 +7,7 @@ package server
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"net"
 	"slices"
@@ -218,6 +219,9 @@ func (s *serverImpl) Start(ctx context.Context) error {
 	if len(s.Config().Endpoints()) == 0 {
 		return fmt.Errorf("cannot start server: no endpoints defined")
 	}
+	if err := validateConfiguredSecureEndpoints(s.cfg); err != nil {
+		return err
+	}
 
 	// Register all service handlers
 	s.initHandlers()
@@ -242,6 +246,21 @@ func (s *serverImpl) Start(ctx context.Context) error {
 	go s.acceptAndRegister(ctx, s.l)
 	go s.monitorConnections(ctx)
 
+	return nil
+}
+
+func validateConfiguredSecureEndpoints(cfg *serverConfig) error {
+	for _, sec := range cfg.enabledSec {
+		if sec.secPolicy == ua.SecurityPolicyURINone {
+			continue
+		}
+		switch {
+		case len(cfg.certificate) == 0:
+			return errors.New("cannot start server: secure endpoints require a certificate")
+		case cfg.privateKey == nil:
+			return errors.New("cannot start server: secure endpoints require a private key")
+		}
+	}
 	return nil
 }
 
