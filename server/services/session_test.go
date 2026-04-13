@@ -4,7 +4,10 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/binary"
+	"math/big"
 	"net"
 	"testing"
 	"time"
@@ -284,6 +287,256 @@ func TestActivateSessionReactivationReplacesAuthenticatedUser(t *testing.T) {
 	}
 }
 
+func TestActivateSessionRejectsFailurePaths(t *testing.T) {
+	t.Parallel()
+
+	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("failed to generate test key: %v", err)
+	}
+
+	tests := []struct {
+		name    string
+		backend *sessionServiceTestBackend
+		req     *ua.ActivateSessionRequest
+		wantErr error
+	}{
+		{
+			name: "missing session",
+			backend: &sessionServiceTestBackend{
+				endpoints: []*ua.EndpointDescription{{
+					UserIdentityTokens: []*ua.UserTokenPolicy{{
+						PolicyID:          "anonymous_none",
+						TokenType:         ua.UserTokenTypeAnonymous,
+						SecurityPolicyURI: ua.SecurityPolicyURINone,
+					}},
+				}},
+			},
+			req: &ua.ActivateSessionRequest{
+				RequestHeader: &ua.RequestHeader{
+					RequestHandle:       1,
+					AuthenticationToken: ua.NewNumericNodeID(1, 999),
+				},
+				ClientSignature: &ua.SignatureData{},
+				UserIdentityToken: ua.NewExtensionObject(&ua.AnonymousIdentityToken{
+					PolicyID: "anonymous_none",
+				}),
+			},
+			wantErr: ua.StatusBadSessionIDInvalid,
+		},
+		{
+			name: "no username authenticator configured",
+			backend: &sessionServiceTestBackend{
+				session: newSessionServiceTestSession(),
+				endpoints: []*ua.EndpointDescription{{
+					UserIdentityTokens: []*ua.UserTokenPolicy{{
+						PolicyID:          "username_none",
+						TokenType:         ua.UserTokenTypeUserName,
+						SecurityPolicyURI: ua.SecurityPolicyURINone,
+					}},
+				}},
+				cfg: sessionServiceTestConfig{},
+			},
+			req: &ua.ActivateSessionRequest{
+				RequestHeader: &ua.RequestHeader{
+					RequestHandle:       2,
+					AuthenticationToken: ua.NewNumericNodeID(1, 101),
+				},
+				ClientSignature: &ua.SignatureData{},
+				UserIdentityToken: ua.NewExtensionObject(&ua.UserNameIdentityToken{
+					PolicyID: "username_none",
+					UserName: "alice",
+					Password: []byte("secret"),
+				}),
+			},
+			wantErr: ua.StatusBadIdentityTokenRejected,
+		},
+		{
+			name: "invalid credentials",
+			backend: &sessionServiceTestBackend{
+				session: newSessionServiceTestSession(),
+				endpoints: []*ua.EndpointDescription{{
+					UserIdentityTokens: []*ua.UserTokenPolicy{{
+						PolicyID:          "username_none",
+						TokenType:         ua.UserTokenTypeUserName,
+						SecurityPolicyURI: ua.SecurityPolicyURINone,
+					}},
+				}},
+				cfg: sessionServiceTestConfig{
+					authenticator: func(context.Context, *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+						return nil, auth.ErrInvalidCredentials
+					},
+				},
+			},
+			req: &ua.ActivateSessionRequest{
+				RequestHeader: &ua.RequestHeader{
+					RequestHandle:       3,
+					AuthenticationToken: ua.NewNumericNodeID(1, 101),
+				},
+				ClientSignature: &ua.SignatureData{},
+				UserIdentityToken: ua.NewExtensionObject(&ua.UserNameIdentityToken{
+					PolicyID: "username_none",
+					UserName: "alice",
+					Password: []byte("secret"),
+				}),
+			},
+			wantErr: ua.StatusBadIdentityTokenRejected,
+		},
+		{
+			name: "malformed token",
+			backend: &sessionServiceTestBackend{
+				session: newSessionServiceTestSession(),
+			},
+			req: &ua.ActivateSessionRequest{
+				RequestHeader: &ua.RequestHeader{
+					RequestHandle:       4,
+					AuthenticationToken: ua.NewNumericNodeID(1, 101),
+				},
+				ClientSignature:   &ua.SignatureData{},
+				UserIdentityToken: ua.NewExtensionObject(nil),
+			},
+			wantErr: ua.StatusBadIdentityTokenInvalid,
+		},
+		{
+			name: "unsupported token type",
+			backend: &sessionServiceTestBackend{
+				session: newSessionServiceTestSession(),
+			},
+			req: &ua.ActivateSessionRequest{
+				RequestHeader: &ua.RequestHeader{
+					RequestHandle:       5,
+					AuthenticationToken: ua.NewNumericNodeID(1, 101),
+				},
+				ClientSignature: &ua.SignatureData{},
+				UserIdentityToken: ua.NewExtensionObject(&ua.X509IdentityToken{
+					PolicyID:        "x509_basic256sha256",
+					CertificateData: []byte("cert"),
+				}),
+			},
+			wantErr: ua.StatusBadIdentityTokenRejected,
+		},
+		{
+			name: "unknown token policy",
+			backend: &sessionServiceTestBackend{
+				session: newSessionServiceTestSession(),
+				endpoints: []*ua.EndpointDescription{{
+					UserIdentityTokens: []*ua.UserTokenPolicy{{
+						PolicyID:          "username_none",
+						TokenType:         ua.UserTokenTypeUserName,
+						SecurityPolicyURI: ua.SecurityPolicyURINone,
+					}},
+				}},
+			},
+			req: &ua.ActivateSessionRequest{
+				RequestHeader: &ua.RequestHeader{
+					RequestHandle:       6,
+					AuthenticationToken: ua.NewNumericNodeID(1, 101),
+				},
+				ClientSignature: &ua.SignatureData{},
+				UserIdentityToken: ua.NewExtensionObject(&ua.UserNameIdentityToken{
+					PolicyID: "username_unknown",
+					UserName: "alice",
+					Password: []byte("secret"),
+				}),
+			},
+			wantErr: ua.StatusBadIdentityTokenRejected,
+		},
+		{
+			name: "decryption failure",
+			backend: &sessionServiceTestBackend{
+				session: newSessionServiceTestSession(),
+				endpoints: []*ua.EndpointDescription{{
+					UserIdentityTokens: []*ua.UserTokenPolicy{{
+						PolicyID:          "username_basic256sha256",
+						TokenType:         ua.UserTokenTypeUserName,
+						SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+					}},
+				}},
+				cfg: sessionServiceTestConfig{
+					privateKey: serverKey,
+					authenticator: func(context.Context, *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+						t.Fatal("did not expect malformed encrypted password to call authenticator")
+						return nil, nil
+					},
+				},
+			},
+			req: &ua.ActivateSessionRequest{
+				RequestHeader: &ua.RequestHeader{
+					RequestHandle:       7,
+					AuthenticationToken: ua.NewNumericNodeID(1, 101),
+				},
+				ClientSignature: &ua.SignatureData{},
+				UserIdentityToken: ua.NewExtensionObject(&ua.UserNameIdentityToken{
+					PolicyID:            "username_basic256sha256",
+					UserName:            "alice",
+					Password:            []byte("not-encrypted"),
+					EncryptionAlgorithm: mustSessionServiceDecryptOnlyAlgorithm(t, serverKey, ua.SecurityPolicyURIBasic256Sha256).EncryptionURI(),
+				}),
+			},
+			wantErr: ua.StatusBadIdentityTokenInvalid,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			service := NewSessionService(tt.backend, nil)
+			sc := newSessionServiceTestSecureChannel(t)
+
+			_, err := service.ActivateSession(t.Context(), sc, tt.req, 0)
+			if err != tt.wantErr {
+				t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestActivateSessionRejectsBadClientSignature(t *testing.T) {
+	t.Parallel()
+
+	serverCert, serverKey := mustSessionServiceTestCertificate(t, "urn:gopcua:test:server")
+	clientCert, _ := mustSessionServiceTestCertificate(t, "urn:gopcua:test:client")
+
+	session := newSessionServiceTestSession()
+	session.remoteCert = clientCert
+
+	backend := &sessionServiceTestBackend{
+		session: session,
+		endpoints: []*ua.EndpointDescription{{
+			UserIdentityTokens: []*ua.UserTokenPolicy{{
+				PolicyID:          "anonymous_none",
+				TokenType:         ua.UserTokenTypeAnonymous,
+				SecurityPolicyURI: ua.SecurityPolicyURINone,
+			}},
+		}},
+	}
+
+	service := NewSessionService(backend, serverCert)
+	sc := newSessionServiceTestSecureChannelWithConfig(t, &uasc.Config{
+		SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+		SecurityMode:      ua.MessageSecurityModeSign,
+		Certificate:       serverCert,
+		LocalKey:          serverKey,
+	})
+
+	req := &ua.ActivateSessionRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       10,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		ClientSignature: &ua.SignatureData{Signature: []byte("bad-signature")},
+		UserIdentityToken: ua.NewExtensionObject(&ua.AnonymousIdentityToken{
+			PolicyID: "anonymous_none",
+		}),
+	}
+
+	_, err := service.ActivateSession(t.Context(), sc, req, 0)
+	if err != ua.StatusBadSecurityChecksFailed {
+		t.Fatalf("expected error %v, got %v", ua.StatusBadSecurityChecksFailed, err)
+	}
+}
+
 type sessionServiceTestBackend struct {
 	cfg       sessionServiceTestConfig
 	endpoints []*ua.EndpointDescription
@@ -299,18 +552,22 @@ func (b *sessionServiceTestBackend) Config() types.ServerConfig { return b.cfg }
 func (*sessionServiceTestBackend) NewSession(time.Duration, []byte, []byte) types.Session { return nil }
 
 func (b *sessionServiceTestBackend) Session(context.Context, *ua.RequestHeader) types.Session {
+	if b.session == nil {
+		return nil
+	}
 	return b.session
 }
 
 func (*sessionServiceTestBackend) CloseSession(context.Context, *ua.NodeID) error { return nil }
 
 type sessionServiceTestSession struct {
-	authToken *ua.NodeID
-	id        *ua.NodeID
-	locales   []string
-	nonce     []byte
-	active    bool
-	user      *auth.AuthenticatedUser
+	authToken  *ua.NodeID
+	id         *ua.NodeID
+	locales    []string
+	nonce      []byte
+	remoteCert []byte
+	active     bool
+	user       *auth.AuthenticatedUser
 }
 
 func newSessionServiceTestSession() *sessionServiceTestSession {
@@ -326,7 +583,7 @@ func (s *sessionServiceTestSession) AuthTokenID() *ua.NodeID     { return s.auth
 func (s *sessionServiceTestSession) ID() *ua.NodeID              { return s.id }
 func (s *sessionServiceTestSession) Locales() []string           { return s.locales }
 func (s *sessionServiceTestSession) SetLocales(locales []string) { s.locales = locales }
-func (s *sessionServiceTestSession) RemoteCertificate() []byte   { return nil }
+func (s *sessionServiceTestSession) RemoteCertificate() []byte   { return s.remoteCert }
 func (s *sessionServiceTestSession) ServerNonce() []byte         { return s.nonce }
 func (s *sessionServiceTestSession) SetServerNonce(nonce []byte) { s.nonce = nonce }
 func (s *sessionServiceTestSession) TimeOutInMillis() float64    { return 60000 }
@@ -370,13 +627,19 @@ func (cfg sessionServiceTestConfig) MethodCallMiddleware() types.MethodMiddlewar
 func newSessionServiceTestSecureChannel(t *testing.T) *uasc.SecureChannel {
 	t.Helper()
 
+	return newSessionServiceTestSecureChannelWithConfig(t, &uasc.Config{
+		SecurityPolicyURI: ua.SecurityPolicyURINone,
+		SecurityMode:      ua.MessageSecurityModeNone,
+	})
+}
+
+func newSessionServiceTestSecureChannelWithConfig(t *testing.T, cfg *uasc.Config) *uasc.SecureChannel {
+	t.Helper()
+
 	sc, err := uasc.NewSecureChannel(
 		"opc.tcp://127.0.0.1:4840",
 		&uacp.Conn{TCPConn: new(net.TCPConn)},
-		&uasc.Config{
-			SecurityPolicyURI: ua.SecurityPolicyURINone,
-			SecurityMode:      ua.MessageSecurityModeNone,
-		},
+		cfg,
 		make(chan error, 1),
 	)
 	if err != nil {
@@ -414,4 +677,32 @@ func encryptSessionServiceTestPassword(t *testing.T, privateKey *rsa.PrivateKey,
 	}
 
 	return encrypted
+}
+
+func mustSessionServiceTestCertificate(t *testing.T, uri string) ([]byte, *rsa.PrivateKey) {
+	t.Helper()
+
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate rsa key: %v", err)
+	}
+
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(time.Now().UnixNano()),
+		Subject: pkix.Name{
+			CommonName: uri,
+		},
+		NotBefore:             time.Now().Add(-time.Hour),
+		NotAfter:              time.Now().Add(time.Hour),
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	der, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
+	if err != nil {
+		t.Fatalf("create certificate: %v", err)
+	}
+
+	return der, priv
 }
