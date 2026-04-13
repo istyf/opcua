@@ -185,12 +185,33 @@ func TestEnableSecurityRejectsUnsupportedServerPolicy(t *testing.T) {
 	t.Parallel()
 
 	cfg := &serverConfig{}
-	ctx := context.Background()
+	ctx := t.Context()
 
 	EnableSecurity("Basic128Rsa15", ua.MessageSecurityModeSign)(ctx, cfg)
 
 	if len(cfg.enabledSec) != 0 {
 		t.Fatalf("expected deprecated server policy registration to be ignored, got %d entries", len(cfg.enabledSec))
+	}
+}
+
+func TestEnableAuthModeSkipsDuplicates(t *testing.T) {
+	t.Parallel()
+
+	cfg := &serverConfig{}
+
+	EnableAuthMode(ua.UserTokenTypeAnonymous)(t.Context(), cfg)
+	EnableAuthMode(ua.UserTokenTypeAnonymous)(t.Context(), cfg)
+	EnableAuthMode(ua.UserTokenTypeUserName)(t.Context(), cfg)
+	EnableAuthMode(ua.UserTokenTypeUserName)(t.Context(), cfg)
+
+	if len(cfg.enabledAuth) != 2 {
+		t.Fatalf("expected 2 enabled auth modes after duplicate registrations, got %d", len(cfg.enabledAuth))
+	}
+	if cfg.enabledAuth[0].tokenType != ua.UserTokenTypeAnonymous {
+		t.Fatalf("expected first auth mode %v, got %v", ua.UserTokenTypeAnonymous, cfg.enabledAuth[0].tokenType)
+	}
+	if cfg.enabledAuth[1].tokenType != ua.UserTokenTypeUserName {
+		t.Fatalf("expected second auth mode %v, got %v", ua.UserTokenTypeUserName, cfg.enabledAuth[1].tokenType)
 	}
 }
 
@@ -228,5 +249,97 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 	}
 	if result != expected {
 		t.Fatalf("expected authenticator result %#v, got %#v", expected, result)
+	}
+}
+
+func TestInitEndpointsAdvertisesConfiguredAuthModes(t *testing.T) {
+	t.Parallel()
+
+	srv := &serverImpl{
+		cfg: &serverConfig{
+			applicationURI:  "urn:gopcua:test:server",
+			applicationName: "Test Server",
+			certificate:     []byte("cert"),
+			endpoints:       []string{"opc.tcp://localhost:4840"},
+			enabledSec: []security{
+				{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
+				{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+			},
+			enabledAuth: []authMode{
+				{tokenType: ua.UserTokenTypeAnonymous},
+				{tokenType: ua.UserTokenTypeUserName},
+			},
+		},
+	}
+
+	srv.initEndpoints()
+
+	endpoints := srv.Endpoints()
+	if len(endpoints) != 2 {
+		t.Fatalf("expected 2 endpoints, got %d", len(endpoints))
+	}
+
+	for _, ep := range endpoints {
+		policies := make(map[string]*ua.UserTokenPolicy, len(ep.UserIdentityTokens))
+		for _, token := range ep.UserIdentityTokens {
+			policies[token.PolicyID] = token
+		}
+
+		anonymous, ok := policies["anonymous_none"]
+		if !ok {
+			t.Fatalf("expected endpoint %s/%s to advertise anonymous_none", ep.SecurityPolicyURI, ep.SecurityMode)
+		}
+		if anonymous.TokenType != ua.UserTokenTypeAnonymous {
+			t.Fatalf("expected anonymous policy token type %v, got %v", ua.UserTokenTypeAnonymous, anonymous.TokenType)
+		}
+		if anonymous.SecurityPolicyURI != ua.SecurityPolicyURINone {
+			t.Fatalf("expected anonymous policy URI %q, got %q", ua.SecurityPolicyURINone, anonymous.SecurityPolicyURI)
+		}
+
+		userName, ok := policies["username_basic256sha256"]
+		if !ok {
+			t.Fatalf("expected endpoint %s/%s to advertise username_basic256sha256", ep.SecurityPolicyURI, ep.SecurityMode)
+		}
+		if userName.TokenType != ua.UserTokenTypeUserName {
+			t.Fatalf("expected username policy token type %v, got %v", ua.UserTokenTypeUserName, userName.TokenType)
+		}
+		if userName.SecurityPolicyURI != ua.SecurityPolicyURIBasic256Sha256 {
+			t.Fatalf("expected username policy URI %q, got %q", ua.SecurityPolicyURIBasic256Sha256, userName.SecurityPolicyURI)
+		}
+		if _, exists := policies["username_none"]; exists {
+			t.Fatalf("did not expect endpoint %s/%s to advertise username_none", ep.SecurityPolicyURI, ep.SecurityMode)
+		}
+	}
+}
+
+func TestInitEndpointsOmitsUserNameWithoutSecurePolicy(t *testing.T) {
+	t.Parallel()
+
+	srv := &serverImpl{
+		cfg: &serverConfig{
+			applicationURI:  "urn:gopcua:test:server",
+			applicationName: "Test Server",
+			endpoints:       []string{"opc.tcp://localhost:4840"},
+			enabledSec: []security{
+				{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
+			},
+			enabledAuth: []authMode{
+				{tokenType: ua.UserTokenTypeAnonymous},
+				{tokenType: ua.UserTokenTypeUserName},
+			},
+		},
+	}
+
+	srv.initEndpoints()
+
+	endpoints := srv.Endpoints()
+	if len(endpoints) != 1 {
+		t.Fatalf("expected 1 endpoint, got %d", len(endpoints))
+	}
+	if len(endpoints[0].UserIdentityTokens) != 1 {
+		t.Fatalf("expected only anonymous auth to be advertised, got %d user token policies", len(endpoints[0].UserIdentityTokens))
+	}
+	if endpoints[0].UserIdentityTokens[0].PolicyID != "anonymous_none" {
+		t.Fatalf("expected only anonymous_none policy, got %q", endpoints[0].UserIdentityTokens[0].PolicyID)
 	}
 }

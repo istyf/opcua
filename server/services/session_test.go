@@ -154,6 +154,68 @@ func TestActivateSessionAnonymousClearsAuthenticatedUser(t *testing.T) {
 	}
 }
 
+func TestActivateSessionAnonymousSucceedsAlongsideUserNamePolicy(t *testing.T) {
+	t.Parallel()
+
+	session := newSessionServiceTestSession()
+	backend := &sessionServiceTestBackend{
+		session: session,
+		endpoints: []*ua.EndpointDescription{{
+			UserIdentityTokens: []*ua.UserTokenPolicy{
+				{
+					PolicyID:          "anonymous_none",
+					TokenType:         ua.UserTokenTypeAnonymous,
+					SecurityPolicyURI: ua.SecurityPolicyURINone,
+				},
+				{
+					PolicyID:          "username_basic256sha256",
+					TokenType:         ua.UserTokenTypeUserName,
+					SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+				},
+			},
+		}},
+		cfg: sessionServiceTestConfig{
+			authenticator: func(context.Context, *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+				t.Fatal("did not expect anonymous activation to call the username authenticator")
+				return nil, nil
+			},
+		},
+	}
+
+	service := NewSessionService(backend, nil)
+	sc := newSessionServiceTestSecureChannel(t)
+
+	req := &ua.ActivateSessionRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       8,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		ClientSignature: &ua.SignatureData{},
+		UserIdentityToken: ua.NewExtensionObject(&ua.AnonymousIdentityToken{
+			PolicyID: "anonymous_none",
+		}),
+	}
+
+	resp, err := service.ActivateSession(t.Context(), sc, req, 0)
+	if err != nil {
+		t.Fatalf("activate session: %v", err)
+	}
+
+	activateResp, ok := resp.(*ua.ActivateSessionResponse)
+	if !ok {
+		t.Fatalf("expected *ua.ActivateSessionResponse, got %T", resp)
+	}
+	if activateResp.ResponseHeader.ServiceResult != ua.StatusOK {
+		t.Fatalf("expected service result %v, got %v", ua.StatusOK, activateResp.ResponseHeader.ServiceResult)
+	}
+	if !session.Activated() {
+		t.Fatal("expected session to be marked activated")
+	}
+	if session.AuthenticatedUser() != nil {
+		t.Fatalf("expected anonymous activation to leave authenticated user unset, got %#v", session.AuthenticatedUser())
+	}
+}
+
 func TestActivateSessionReactivationReplacesAuthenticatedUser(t *testing.T) {
 	t.Parallel()
 
