@@ -203,8 +203,10 @@ The current focus is on the OPC UA Binary protocol over TCP. No other protocols 
 |                | SOAP-HTTP WS-SC UA XML-UA Binary |           | not planned |
 | Encryption     | None                             | Yes       |             |
 |                | Basic128Rsa15                    |           | intentionally unsupported |
-|                | Basic256                         | Untested  |             |
-|                | Basic256Sha256                   | Untested  |             |
+|                | Basic256                         | Yes       |  |
+|                | Basic256Sha256                   | Yes       |  |
+|                | Aes128_Sha256_RsaOaep           | Yes       |  |
+|                | Aes256_Sha256_RsaPss            | Yes       |  |
 | Authentication | Anonymous                        | Yes       |             |
 |                | User Name Password               | Untested  |             |
 |                | X509 Certificate                 | Untested  |             |
@@ -222,8 +224,8 @@ Here is the current set of supported services. For low-level access use the clie
 |                             | GetEndpoints                  | Yes    |        |              |
 |                             | RegisterServer                |        |        |              |
 |                             | RegisterServer2               |        |        |              |
-| Secure Channel Service Set  | OpenSecureChannel             | Yes    | Yes*   |              |
-|                             | CloseSecureChannel            | Yes    | Yes*   |              |
+| Secure Channel Service Set  | OpenSecureChannel             | Yes    | Yes    | `None`, `Basic256`, `Basic256Sha256`, `Aes128_Sha256_RsaOaep`, and `Aes256_Sha256_RsaPss`; `Basic128Rsa15` intentionally unsupported |
+|                             | CloseSecureChannel            | Yes    | Yes    | same secure-channel policy support as `OpenSecureChannel` |
 | Session Service Set         | CreateSession                 | Yes    | Yes    |              |
 |                             | CloseSession                  | Yes    | Yes    |              |
 |                             | ActivateSession               | Yes    | Yes    |              |
@@ -232,7 +234,7 @@ Here is the current set of supported services. For low-level access use the clie
 |                             | AddReferences                 |        |        |              |
 |                             | DeleteNodes                   |        |        |              |
 |                             | DeleteReferences              |        |        |              |
-| View Service Set            | Browse                        | Yes    | Yes**    |  |
+| View Service Set            | Browse                        | Yes    | Yes*    |  |
 |                             | BrowseNext                    | Yes    | Yes    |  |
 |                             | TranslateBrowsePathsToNodeIds |        |        |              |
 |                             | RegisterNodes                 | Yes    |        |              |
@@ -257,8 +259,7 @@ Here is the current set of supported services. For low-level access use the clie
 |                             | DeleteSubscriptions           | Yes    | Yes    |              |
 |                             | TransferSubscriptions         |        |        |              |
 
-* not all encryption schemes are fully functional at this time
-** empty view supported; non-empty views are rejected
+* empty view supported; non-empty views are rejected
 
 
 ## Authors
