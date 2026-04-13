@@ -107,3 +107,44 @@ func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateEnabledSecureChannelPolicy(t *testing.T) {
+	t.Parallel()
+
+	validate := validateEnabledSecureChannelPolicy([]security{
+		{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
+		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+	})
+
+	if err := validate(ua.SecurityPolicyURINone); err != nil {
+		t.Fatalf("expected none policy to be accepted, got %v", err)
+	}
+	if err := validate(ua.SecurityPolicyURIBasic256Sha256); err != nil {
+		t.Fatalf("expected Basic256Sha256 policy to be accepted, got %v", err)
+	}
+	if err := validate(ua.SecurityPolicyURIBasic256); err != ua.StatusBadSecurityPolicyRejected {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityPolicyRejected, err)
+	}
+}
+
+func TestValidateEnabledSecureChannelMode(t *testing.T) {
+	t.Parallel()
+
+	validate := validateEnabledSecureChannelMode([]security{
+		{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
+		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+	})
+
+	if err := validate(ua.SecurityPolicyURINone, ua.MessageSecurityModeNone); err != nil {
+		t.Fatalf("expected none mode to be accepted, got %v", err)
+	}
+	if err := validate(ua.SecurityPolicyURIBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt); err != nil {
+		t.Fatalf("expected configured secure mode to be accepted, got %v", err)
+	}
+	if err := validate(ua.SecurityPolicyURIBasic256Sha256, ua.MessageSecurityModeSign); err != ua.StatusBadSecurityModeRejected {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
+	}
+	if err := validate(ua.SecurityPolicyURIBasic256, ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
+	}
+}

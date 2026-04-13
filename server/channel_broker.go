@@ -46,14 +46,38 @@ func newChannelBroker() *channelBroker {
 	}
 }
 
+func validateEnabledSecureChannelPolicy(enabled []security) func(string) error {
+	return func(policy string) error {
+		for _, sec := range enabled {
+			if sec.secPolicy == policy {
+				return nil
+			}
+		}
+		return ua.StatusBadSecurityPolicyRejected
+	}
+}
+
+func validateEnabledSecureChannelMode(enabled []security) func(string, ua.MessageSecurityMode) error {
+	return func(policy string, mode ua.MessageSecurityMode) error {
+		for _, sec := range enabled {
+			if sec.secPolicy == policy && sec.secMode == mode {
+				return nil
+			}
+		}
+		return ua.StatusBadSecurityModeRejected
+	}
+}
+
 // RegisterConn connects a new UACP connection to the channel broker's list
 // of connections and starts waiting for data on it.  Data is pushed onto the broker's
 // Response channel
 // Blocks until the context is done, the connection closes, or a critical error
-func (c *channelBroker) RegisterConn(ctx context.Context, conn *uacp.Conn, localCert []byte, localKey *rsa.PrivateKey) error {
+func (c *channelBroker) RegisterConn(ctx context.Context, conn *uacp.Conn, localCert []byte, localKey *rsa.PrivateKey, enabled []security) error {
 	cfg := defaultChannelConfig()
 	cfg.Certificate = localCert
 	cfg.LocalKey = localKey
+	cfg.ServerSecurityPolicyValidator = validateEnabledSecureChannelPolicy(enabled)
+	cfg.ServerOpenSecureChannelValidator = validateEnabledSecureChannelMode(enabled)
 
 	c.mu.Lock()
 	c.secureChannelID++

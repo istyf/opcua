@@ -150,6 +150,76 @@ func TestNewRequestMessage(t *testing.T) {
 	}
 }
 
+func TestValidateIncomingOpenSecureChannelPolicy(t *testing.T) {
+	t.Parallel()
+
+	serverChannel := &SecureChannel{
+		kind: server,
+		cfg: &Config{
+			ServerSecurityPolicyValidator: func(policy string) error {
+				if policy != ua.SecurityPolicyURIBasic256Sha256 {
+					return ua.StatusBadSecurityPolicyRejected
+				}
+				return nil
+			},
+		},
+	}
+
+	if err := serverChannel.validateIncomingOpenSecureChannelPolicy(ua.SecurityPolicyURIBasic256Sha256); err != nil {
+		t.Fatalf("expected policy to be accepted, got %v", err)
+	}
+	if err := serverChannel.validateIncomingOpenSecureChannelPolicy(ua.SecurityPolicyURIBasic256); err != ua.StatusBadSecurityPolicyRejected {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityPolicyRejected, err)
+	}
+
+	clientChannel := &SecureChannel{
+		kind: client,
+		cfg: &Config{
+			ServerSecurityPolicyValidator: func(string) error {
+				return ua.StatusBadSecurityPolicyRejected
+			},
+		},
+	}
+	if err := clientChannel.validateIncomingOpenSecureChannelPolicy(ua.SecurityPolicyURIBasic256); err != nil {
+		t.Fatalf("expected client channel to ignore server policy validator, got %v", err)
+	}
+}
+
+func TestValidateIncomingOpenSecureChannelRequest(t *testing.T) {
+	t.Parallel()
+
+	serverChannel := &SecureChannel{
+		kind: server,
+		cfg: &Config{
+			ServerOpenSecureChannelValidator: func(policy string, mode ua.MessageSecurityMode) error {
+				if policy != ua.SecurityPolicyURIBasic256Sha256 || mode != ua.MessageSecurityModeSignAndEncrypt {
+					return ua.StatusBadSecurityModeRejected
+				}
+				return nil
+			},
+		},
+	}
+
+	if err := serverChannel.validateIncomingOpenSecureChannelRequest(ua.SecurityPolicyURIBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt); err != nil {
+		t.Fatalf("expected policy/mode to be accepted, got %v", err)
+	}
+	if err := serverChannel.validateIncomingOpenSecureChannelRequest(ua.SecurityPolicyURIBasic256Sha256, ua.MessageSecurityModeSign); err != ua.StatusBadSecurityModeRejected {
+		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
+	}
+
+	clientChannel := &SecureChannel{
+		kind: client,
+		cfg: &Config{
+			ServerOpenSecureChannelValidator: func(string, ua.MessageSecurityMode) error {
+				return ua.StatusBadSecurityModeRejected
+			},
+		},
+	}
+	if err := clientChannel.validateIncomingOpenSecureChannelRequest(ua.SecurityPolicyURIBasic256Sha256, ua.MessageSecurityModeSign); err != nil {
+		t.Fatalf("expected client channel to ignore server request validator, got %v", err)
+	}
+}
+
 func TestSignAndEncryptVerifyAndDecrypt(t *testing.T) {
 	buildSecPolicy := func(bits int, uri string) *uapolicy.EncryptionAlgorithm {
 		t.Helper()

@@ -253,6 +253,20 @@ func (s *SecureChannel) getActiveChannelInstance() (*channelInstance, error) {
 	return s.activeInstance, nil
 }
 
+func (s *SecureChannel) validateIncomingOpenSecureChannelPolicy(policy string) error {
+	if s.kind != server || s.cfg.ServerSecurityPolicyValidator == nil {
+		return nil
+	}
+	return s.cfg.ServerSecurityPolicyValidator(policy)
+}
+
+func (s *SecureChannel) validateIncomingOpenSecureChannelRequest(policy string, mode ua.MessageSecurityMode) error {
+	if s.kind != server || s.cfg.ServerOpenSecureChannelValidator == nil {
+		return nil
+	}
+	return s.cfg.ServerOpenSecureChannelValidator(policy, mode)
+}
+
 func (s *SecureChannel) dispatcher() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -474,6 +488,10 @@ func (s *SecureChannel) readChunk() (*MessageChunk, error) {
 
 		if s.openingInstance == nil {
 			return nil, errors.Errorf("sechan: invalid state. openingInstance is nil.")
+		}
+
+		if err := s.validateIncomingOpenSecureChannelPolicy(m.SecurityPolicyURI); err != nil {
+			return nil, err
 		}
 
 		s.cfg.SecurityPolicyURI = m.SecurityPolicyURI
@@ -746,6 +764,10 @@ func (s *SecureChannel) handleOpenSecureChannelRequest(reqID uint32, svc ua.Requ
 
 	s.cfg.Lifetime = req.RequestedLifetime
 	s.cfg.SecurityMode = req.SecurityMode
+
+	if err := s.validateIncomingOpenSecureChannelRequest(s.cfg.SecurityPolicyURI, req.SecurityMode); err != nil {
+		return err
+	}
 
 	// I had to do the encryption setup in the chunk decoding logic because you have to
 	// decrypt the thing before you even know you have an open message.

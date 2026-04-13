@@ -80,6 +80,15 @@ type Config struct {
 	// RequestTimeout is timeout duration for all synchronous requests over SecureChannel.
 	// If the Server doesn't respond within RequestTimeout time, Client returns StatusBadTimeout
 	RequestTimeout time.Duration
+
+	// ServerSecurityPolicyValidator validates the security policy requested by an
+	// incoming OpenSecureChannel message. It is only used by server channels.
+	ServerSecurityPolicyValidator func(string) error
+
+	// ServerOpenSecureChannelValidator validates the negotiated security policy and
+	// message security mode from an incoming OpenSecureChannel request. It is only
+	// used by server channels.
+	ServerOpenSecureChannelValidator func(string, ua.MessageSecurityMode) error
 }
 
 // SessionConfig is a set of common configurations used in Session.
