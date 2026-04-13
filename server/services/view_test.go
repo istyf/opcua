@@ -4,9 +4,12 @@ import (
 	"context"
 	"crypto/rsa"
 	"errors"
+	"iter"
 	"testing"
 	"time"
 
+	"github.com/gopcua/opcua/id"
+	"github.com/gopcua/opcua/schema"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 )
@@ -717,6 +720,71 @@ func TestSuitableDirection(t *testing.T) {
 	}
 }
 
+func TestSuitableRefType(t *testing.T) {
+	t.Parallel()
+
+	hierarchical := ua.NewNumericNodeID(0, id.HierarchicalReferences)
+	organizes := ua.NewNumericNodeID(0, id.Organizes)
+	hasComponent := ua.NewNumericNodeID(0, id.HasComponent)
+	srv := &viewTestServer{
+		namespaces: map[int]types.NameSpace{
+			0: &viewTestNamespace{
+				nodeFn: func(nodeID *ua.NodeID) types.Node {
+					switch {
+					case nodeID.Equal(hierarchical):
+						return viewTestReferenceTypeNode{
+							viewTestNode: viewTestNode{
+								id:        hierarchical,
+								nodeClass: ua.NodeClassReferenceType,
+								refs: viewTestReferences{
+									items: []types.ReferenceWrapper{
+										viewTestReference{
+											refType:    ua.NewNumericNodeID(0, id.HasSubtype),
+											isForward:  true,
+											targetNode: viewTestReferenceTypeNode{viewTestNode: viewTestNode{id: organizes, nodeClass: ua.NodeClassReferenceType}},
+										},
+										viewTestReference{
+											refType:    ua.NewNumericNodeID(0, id.HasSubtype),
+											isForward:  true,
+											targetNode: viewTestReferenceTypeNode{viewTestNode: viewTestNode{id: hasComponent, nodeClass: ua.NodeClassReferenceType}},
+										},
+									},
+								},
+							},
+							symmetric: false,
+						}
+					case nodeID.Equal(organizes):
+						return viewTestReferenceTypeNode{
+							viewTestNode: viewTestNode{id: organizes, nodeClass: ua.NodeClassReferenceType},
+							symmetric:    false,
+						}
+					case nodeID.Equal(hasComponent):
+						return viewTestReferenceTypeNode{
+							viewTestNode: viewTestNode{id: hasComponent, nodeClass: ua.NodeClassReferenceType},
+							symmetric:    false,
+						}
+					default:
+						return nil
+					}
+				},
+			},
+		},
+	}
+
+	if !suitableRefType(srv, hierarchical, hierarchical, false) {
+		t.Fatal("expected exact reference type match to succeed")
+	}
+	if suitableRefType(srv, hierarchical, organizes, false) {
+		t.Fatal("expected subtype to fail when includeSubtypes is false")
+	}
+	if !suitableRefType(srv, hierarchical, organizes, true) {
+		t.Fatal("expected subtype to match when includeSubtypes is true")
+	}
+	if suitableRefType(srv, hierarchical, ua.NewNumericNodeID(0, id.HasTypeDefinition), true) {
+		t.Fatal("expected unrelated reference type not to match")
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace
@@ -804,6 +872,7 @@ func (ns *viewTestNamespace) NextAvailableID() *ua.NodeID { return ua.NewNumeric
 type viewTestNode struct {
 	id        *ua.NodeID
 	nodeClass ua.NodeClass
+	refs      types.ReferenceCollection
 }
 
 func (n viewTestNode) ID() *ua.NodeID { return n.id }
@@ -827,13 +896,141 @@ func (n viewTestNode) AddComponents(...types.Node) types.Node { return nil }
 
 func (n viewTestNode) AddRef(types.ReferenceWrapper) {}
 
-func (n viewTestNode) References() types.ReferenceCollection { return nil }
+func (n viewTestNode) References() types.ReferenceCollection { return n.refs }
 
 func (n viewTestNode) Attribute(context.Context, ua.AttributeID) (*types.AttrValue, error) {
 	return nil, nil
 }
 
 func (n viewTestNode) SetAttribute(context.Context, ua.AttributeID, *ua.DataValue) error { return nil }
+
+type viewTestReferenceTypeNode struct {
+	viewTestNode
+	symmetric bool
+}
+
+func (n viewTestReferenceTypeNode) DataType() *ua.ExpandedNodeID { return &ua.ExpandedNodeID{} }
+
+func (n viewTestReferenceTypeNode) IsAbstract() bool { return false }
+
+func (n viewTestReferenceTypeNode) IsSymetrical() bool { return n.symmetric }
+
+type viewTestReference struct {
+	refType    *ua.NodeID
+	isForward  bool
+	targetNode types.Node
+}
+
+func (r viewTestReference) NodeClass() ua.NodeClass { return r.targetNode.NodeClass() }
+
+func (r viewTestReference) IsForward() bool { return r.isForward }
+
+func (r viewTestReference) IsReferenceType(refType uint32) bool {
+	return r.refType.Namespace() == 0 && r.refType.IntID() == refType
+}
+
+func (r viewTestReference) ReferenceType() *ua.NodeID { return r.refType }
+
+func (r viewTestReference) TargetNodeID() *ua.ExpandedNodeID {
+	return &ua.ExpandedNodeID{NodeID: r.targetNode.ID()}
+}
+
+func (r viewTestReference) TargetsNode(other types.Node) bool {
+	return other != nil && r.targetNode.ID().Equal(other.ID())
+}
+
+func (r viewTestReference) Copy(context.Context) *ua.ReferenceDescription {
+	return &ua.ReferenceDescription{
+		ReferenceTypeID: r.refType,
+		IsForward:       r.isForward,
+		NodeID:          &ua.ExpandedNodeID{NodeID: r.targetNode.ID()},
+		NodeClass:       r.targetNode.NodeClass(),
+	}
+}
+
+type viewTestReferences struct {
+	items []types.ReferenceWrapper
+}
+
+func (r viewTestReferences) All() iter.Seq[types.ReferenceWrapper] {
+	return func(yield func(types.ReferenceWrapper) bool) {
+		for _, item := range r.items {
+			if !yield(item) {
+				return
+			}
+		}
+	}
+}
+
+func (r viewTestReferences) Contains(match func(types.ReferenceWrapper) bool) bool {
+	for _, item := range r.items {
+		if match(item) {
+			return true
+		}
+	}
+	return false
+}
+
+func (r viewTestReferences) Count() int { return len(r.items) }
+
+func (r viewTestReferences) Find(matching func(types.ReferenceWrapper) bool) iter.Seq[types.ReferenceWrapper] {
+	return func(yield func(types.ReferenceWrapper) bool) {
+		for _, item := range r.items {
+			if matching(item) && !yield(item) {
+				return
+			}
+		}
+	}
+}
+
+type viewTestServer struct {
+	namespaces map[int]types.NameSpace
+}
+
+func (s *viewTestServer) ImportNodeSet(context.Context, *schema.UANodeSet) error { return nil }
+
+func (s *viewTestServer) AddNamespace(ns types.NameSpace) int {
+	id := int(ns.ID())
+	s.namespaces[id] = ns
+	return id
+}
+
+func (s *viewTestServer) Namespace(id int) (types.NameSpace, error) {
+	ns, ok := s.namespaces[id]
+	if !ok {
+		return nil, errors.New("namespace not found")
+	}
+	return ns, nil
+}
+
+func (s *viewTestServer) Namespaces() []types.NameSpace { return nil }
+
+func (s *viewTestServer) Node(id *ua.NodeID) types.Node {
+	if id == nil {
+		return nil
+	}
+	ns, ok := s.namespaces[int(id.Namespace())]
+	if !ok {
+		return nil
+	}
+	return ns.Node(id)
+}
+
+func (s *viewTestServer) ChangeNotification(context.Context, *ua.NodeID) {}
+
+func (s *viewTestServer) DeleteSubscription(types.SubscriptionID) {}
+
+func (s *viewTestServer) Config() types.ServerConfig { return viewTestConfig{} }
+
+func (s *viewTestServer) Endpoints() []*ua.EndpointDescription { return nil }
+
+func (s *viewTestServer) Session(context.Context, *ua.RequestHeader) types.Session { return nil }
+
+func (s *viewTestServer) Status() *ua.ServerStatusDataType { return nil }
+
+func (s *viewTestServer) Close(context.Context) error { return nil }
+
+func (s *viewTestServer) Start(context.Context) error { return nil }
 
 type viewTestConfig struct {
 	maxBrowseOperationsPerCall  uint32

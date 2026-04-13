@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -334,6 +333,9 @@ func suitableDirection(bd ua.BrowseDirection, isForward, isSymmetric bool) bool 
 var noNodeID = ua.NewNumericNodeID(0, 0)
 
 func suitableRefType(srv types.Server, ref1, ref2 *ua.NodeID, subtypes bool) bool {
+	if ref1 == nil || ref2 == nil {
+		return false
+	}
 	if ref1.Equal(noNodeID) {
 		// refType is not specified in browse description. Return all types
 		return true
@@ -341,21 +343,24 @@ func suitableRefType(srv types.Server, ref1, ref2 *ua.NodeID, subtypes bool) boo
 	if ref1.Equal(ref2) {
 		return true
 	}
-	hasRef2Fn := func(nid *ua.NodeID) bool { return nid.Equal(ref2) }
-	hasSubtypeFn := func(nid *ua.NodeID) bool { return nid.Equal(hasSubtype) }
-	oktypes := getSubRefs(srv, ref1)
-	if !subtypes && slices.ContainsFunc(oktypes, hasSubtypeFn) {
-		for n := slices.IndexFunc(oktypes, hasSubtypeFn); n > 0; {
-			oktypes = slices.Delete(oktypes, n, n+1)
-		}
+	if !subtypes {
+		return false
 	}
-	return slices.ContainsFunc(oktypes, hasRef2Fn)
+	return referenceTypeHasSubtype(srv, ref1, ref2)
 }
 
-func getSubRefs(srv types.Server, nid *ua.NodeID) []*ua.NodeID {
+func referenceTypeHasSubtype(srv types.Server, requested, candidate *ua.NodeID) bool {
+	for _, nid := range getSubtypeRefs(srv, requested, nil) {
+		if nid.Equal(candidate) {
+			return true
+		}
+	}
+	return false
+}
+
+func getSubtypeRefs(srv types.Server, nid *ua.NodeID, visited map[string]struct{}) []*ua.NodeID {
 	ns, err := srv.Namespace(int(nid.Namespace()))
 	if err != nil {
-		// TODO: return error
 		return nil
 	}
 
@@ -363,14 +368,27 @@ func getSubRefs(srv types.Server, nid *ua.NodeID) []*ua.NodeID {
 	if node == nil {
 		return nil
 	}
+	refsCollection := node.References()
+	if refsCollection == nil {
+		return nil
+	}
+	if visited == nil {
+		visited = make(map[string]struct{})
+	}
+	key := nid.String()
+	if _, ok := visited[key]; ok {
+		return nil
+	}
+	visited[key] = struct{}{}
 
-	refs := make([]*ua.NodeID, 0, node.References().Count())
+	refs := make([]*ua.NodeID, 0, refsCollection.Count())
 
-	for ref := range node.References().Find(func(r types.ReferenceWrapper) bool {
+	for ref := range refsCollection.Find(func(r types.ReferenceWrapper) bool {
 		return r.IsReferenceType(id.HasSubtype) && r.IsForward()
 	}) {
-		refs = append(refs, ref.TargetNodeID().NodeID)
-		refs = append(refs, getSubRefs(srv, ref.TargetNodeID().NodeID)...)
+		target := ref.TargetNodeID().NodeID
+		refs = append(refs, target)
+		refs = append(refs, getSubtypeRefs(srv, target, visited)...)
 	}
 
 	return refs
