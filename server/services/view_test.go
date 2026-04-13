@@ -214,6 +214,35 @@ func TestBrowseAcceptsEmptyViewDescription(t *testing.T) {
 	}
 }
 
+func TestBrowseAcceptsNilViewDescription(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.IntID() == 1001 {
+				return viewTestNode{id: id}
+			}
+			return nil
+		},
+		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
+			return &ua.BrowseResult{StatusCode: ua.StatusOK}
+		},
+	}
+
+	_, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 47},
+		View:          nil,
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: ua.NewNumericNodeID(1, 1001)},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+}
+
 func TestBrowseRejectsUnsupportedViewID(t *testing.T) {
 	t.Parallel()
 
