@@ -55,9 +55,7 @@ func main() {
 		server.EnableSecurity("None", ua.MessageSecurityModeNone),
 		server.EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSignAndEncrypt),
 		/*
-				These security modes are not implemented yet.
-			server.EnableSecurity("Basic128Rsa15", ua.MessageSecurityModeSign),
-			server.EnableSecurity("Basic128Rsa15", ua.MessageSecurityModeSignAndEncrypt),
+			Additional secure server modes currently supported:
 			server.EnableSecurity("Basic256", ua.MessageSecurityModeSign),
 			server.EnableSecurity("Basic256", ua.MessageSecurityModeSignAndEncrypt),
 			server.EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSign),
@@ -65,6 +63,8 @@ func main() {
 			server.EnableSecurity("Aes128_Sha256_RsaOaep", ua.MessageSecurityModeSignAndEncrypt),
 			server.EnableSecurity("Aes256_Sha256_RsaPss", ua.MessageSecurityModeSign),
 			server.EnableSecurity("Aes256_Sha256_RsaPss", ua.MessageSecurityModeSignAndEncrypt),
+
+			Basic128Rsa15 is intentionally unsupported on the server because it is deprecated.
 		*/
 	)
 

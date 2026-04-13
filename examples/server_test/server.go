@@ -46,8 +46,6 @@ func main() {
 
 	opts = append(opts,
 		server.EnableSecurity("None", ua.MessageSecurityModeNone),
-		server.EnableSecurity("Basic128Rsa15", ua.MessageSecurityModeSign),
-		server.EnableSecurity("Basic128Rsa15", ua.MessageSecurityModeSignAndEncrypt),
 		server.EnableSecurity("Basic256", ua.MessageSecurityModeSign),
 		server.EnableSecurity("Basic256", ua.MessageSecurityModeSignAndEncrypt),
 		server.EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSignAndEncrypt),
