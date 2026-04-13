@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/gopcua/opcua/server/attrs"
 	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/refs"
+	"github.com/gopcua/opcua/server/services"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
@@ -115,34 +117,28 @@ func (ns *MapNamespace) Browse(ctx context.Context, bd *ua.BrowseDescription) *u
 	)
 
 	if bd.NodeID.IntID() != ns.objectsFolder.ID().IntID() {
-		refs := make([]*ua.ReferenceDescription, 0)
 		return &ua.BrowseResult{
 			StatusCode: ua.StatusGood,
-			References: refs,
+			References: []*ua.ReferenceDescription{},
 		}
 	}
 
-	refs := make([]*ua.ReferenceDescription, len(ns.data))
+	refsOut := make([]*ua.ReferenceDescription, 0, len(ns.data))
 
 	hasComponentRef := ua.NewNumericNodeID(0, id.HasComponent)
 
 	for key := range ns.data {
-		expnewid := ua.NewStringExpandedNodeID(ns.id, key)
-
-		refs = append(refs, &ua.ReferenceDescription{
-			ReferenceTypeID: hasComponentRef,
-			IsForward:       true,
-			NodeID:          expnewid,
-			BrowseName:      ns.NewQualifiedName(key),
-			DisplayName:     ua.NewLocalizedText(key),
-			NodeClass:       ua.NodeClassVariable, // when support is added for nested maps, this will be NodeClassObject
-			TypeDefinition:  expnewid,
-		})
+		target := ns.nodeForKey(key)
+		ref := refs.NewReferenceDescription(target, hasComponentRef, true)
+		if !services.SuitableReference(ctx, ns.srv, bd, ref) {
+			continue
+		}
+		refsOut = append(refsOut, ref.Copy(ctx))
 	}
 
 	return &ua.BrowseResult{
 		StatusCode: ua.StatusGood,
-		References: refs,
+		References: refsOut,
 	}
 }
 
@@ -363,7 +359,19 @@ func (ns *MapNamespace) AddNode(n types.Node) types.Node {
 	panic("not implemented")
 }
 func (ns *MapNamespace) Node(id *ua.NodeID) types.Node {
-	panic("not implemented")
+	if id == nil {
+		return nil
+	}
+	if id.IntID() == ns.objectsFolder.ID().IntID() {
+		return ns.objectsFolder
+	}
+	if id.IntID() != 0 {
+		return nil
+	}
+	if _, ok := ns.data[id.StringID()]; !ok {
+		return nil
+	}
+	return ns.nodeForKey(id.StringID())
 }
 func (ns *MapNamespace) Objects() types.ObjectNode {
 	return ns.objectsFolder
@@ -375,4 +383,42 @@ func (ns *MapNamespace) NewQualifiedName(name string) *ua.QualifiedName {
 
 func (ns *MapNamespace) NextAvailableID() *ua.NodeID {
 	panic("not implemented")
+}
+
+func (ns *MapNamespace) nodeForKey(key string) types.Node {
+	return mapNamespaceNode{
+		id:          ua.NewStringNodeID(ns.id, key),
+		browseName:  ns.NewQualifiedName(key),
+		displayName: ua.NewLocalizedText(key),
+	}
+}
+
+type mapNamespaceNode struct {
+	id          *ua.NodeID
+	browseName  *ua.QualifiedName
+	displayName *ua.LocalizedText
+}
+
+func (n mapNamespaceNode) ID() *ua.NodeID { return n.id }
+
+func (n mapNamespaceNode) BrowseName() *ua.QualifiedName { return n.browseName }
+
+func (n mapNamespaceNode) DisplayName(context.Context) *ua.LocalizedText { return n.displayName }
+
+func (n mapNamespaceNode) NodeClass() ua.NodeClass { return ua.NodeClassVariable }
+
+func (n mapNamespaceNode) AddComponent(types.Node) types.Node { return nil }
+
+func (n mapNamespaceNode) AddComponents(...types.Node) types.Node { return nil }
+
+func (n mapNamespaceNode) AddRef(types.ReferenceWrapper) {}
+
+func (n mapNamespaceNode) References() types.ReferenceCollection { return nil }
+
+func (n mapNamespaceNode) Attribute(context.Context, ua.AttributeID) (*types.AttrValue, error) {
+	return nil, errors.New("map namespace nodes do not provide direct node attributes")
+}
+
+func (n mapNamespaceNode) SetAttribute(context.Context, ua.AttributeID, *ua.DataValue) error {
+	return errors.New("map namespace nodes do not support direct node attribute writes")
 }
