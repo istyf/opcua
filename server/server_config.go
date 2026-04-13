@@ -164,6 +164,15 @@ func MaxSubscriptionsPerSession(count uint32) Option {
 	}
 }
 
+// MaxSubscriptionOperationsPerCall limits the number of subscription IDs a
+// batched subscription service call may include. A value of 0 disables the
+// limit.
+func MaxSubscriptionOperationsPerCall(count uint32) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.maxSubscriptionOperationsPerCall = count
+	}
+}
+
 // MinSubscriptionPublishingInterval sets the smallest supported publishing
 // interval for subscriptions. Values less than or equal to 0 restore the
 // default minimum.

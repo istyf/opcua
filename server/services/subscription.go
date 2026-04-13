@@ -36,6 +36,7 @@ type SubscriptionService struct {
 	minLifetimeCount           uint32
 	maxSubscriptions           uint32
 	maxSubscriptionsPerSession uint32
+	maxSubscriptionOperations  uint32
 }
 
 func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
@@ -47,6 +48,7 @@ func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
 		minLifetimeCount:           b.Config().MinSubscriptionLifetimeCount(),
 		maxSubscriptions:           b.Config().MaxSubscriptions(),
 		maxSubscriptionsPerSession: b.Config().MaxSubscriptionsPerSession(),
+		maxSubscriptionOperations:  b.Config().MaxSubscriptionOperationsPerCall(),
 	}
 
 	b.RegisterHandler(id.CreateSubscriptionRequest_Encoding_DefaultBinary, ss.CreateSubscription)
@@ -121,6 +123,21 @@ func newModifySubscriptionResponse(requestHandle uint32, revisedPublishingInterv
 		RevisedPublishingInterval: revisedPublishingInterval,
 		RevisedLifetimeCount:      revisedLifetimeCount,
 		RevisedMaxKeepAliveCount:  revisedMaxKeepAliveCount,
+	}
+}
+
+func newSetPublishingModeResponse(requestHandle uint32, results []ua.StatusCode) *ua.SetPublishingModeResponse {
+	return &ua.SetPublishingModeResponse{
+		ResponseHeader: &ua.ResponseHeader{
+			Timestamp:          time.Now(),
+			RequestHandle:      requestHandle,
+			ServiceResult:      ua.StatusOK,
+			ServiceDiagnostics: &ua.DiagnosticInfo{},
+			StringTable:        []string{},
+			AdditionalHeader:   ua.NewExtensionObject(nil),
+		},
+		Results:         results,
+		DiagnosticInfos: []*ua.DiagnosticInfo{},
 	}
 }
 
@@ -305,7 +322,11 @@ func (s *SubscriptionService) ModifySubscription(ctx context.Context, sc *uasc.S
 	), nil
 }
 
-// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.13.4
+// SetPublishingMode enables or disables publishing for the requested
+// subscriptions, while preserving queued notifications and leaving keep-alive
+// processing active for disabled subscriptions.
+//
+// https://reference.opcfoundation.org/Core/Part4/v105/docs/5.14.4
 func (s *SubscriptionService) SetPublishingMode(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
 	ctx = ualog.WithAttrs(ctx, newSubscriptionServiceLogAttribute("set publishing mode"))
 	logServiceRequest(ctx, r)
@@ -314,9 +335,44 @@ func (s *SubscriptionService) SetPublishingMode(ctx context.Context, sc *uasc.Se
 	if err != nil {
 		return nil, err
 	}
+	if len(req.SubscriptionIDs) == 0 {
+		return nil, ua.StatusBadNothingToDo
+	}
+	if s.maxSubscriptionOperations > 0 && uint32(len(req.SubscriptionIDs)) > s.maxSubscriptionOperations {
+		return nil, ua.StatusBadTooManyOperations
+	}
 
-	// When this gets implemented, be sure to check the subscription session vs the request session!
-	return serviceUnsupported(req.RequestHeader), nil
+	session := s.srv.Session(ctx, req.RequestHeader)
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	results := make([]ua.StatusCode, len(req.SubscriptionIDs))
+	if session == nil {
+		for i := range results {
+			results[i] = ua.StatusBadSessionIDInvalid
+		}
+		return newSetPublishingModeResponse(req.RequestHeader.RequestHandle, results), nil
+	}
+
+	for i, id := range req.SubscriptionIDs {
+		sub, ok := s.subs[types.SubscriptionID(id)]
+		if !ok {
+			results[i] = ua.StatusBadSubscriptionIDInvalid
+			continue
+		}
+		if !sameSession(sub.session, session) {
+			results[i] = ua.StatusBadSessionIDInvalid
+			continue
+		}
+
+		done := make(chan struct{})
+		sub.SetPublishingModeChannel <- subscriptionPublishingMode{enabled: req.PublishingEnabled, done: done}
+		<-done
+		results[i] = ua.StatusOK
+	}
+
+	return newSetPublishingModeResponse(req.RequestHeader.RequestHandle, results), nil
 }
 
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.13.5
@@ -475,8 +531,9 @@ type Subscription struct {
 	//SeqNums                   map[uint32]struct{}
 	T *time.Ticker
 
-	NotifyChannel chan *ua.MonitoredItemNotification
-	ModifyChannel chan subscriptionModify
+	NotifyChannel            chan *ua.MonitoredItemNotification
+	ModifyChannel            chan subscriptionModify
+	SetPublishingModeChannel chan subscriptionPublishingMode
 
 	// Runtime state owned by the subscription goroutine.
 	publishQueue     map[uint32]*ua.MonitoredItemNotification
@@ -496,13 +553,19 @@ type subscriptionModify struct {
 	done chan struct{}
 }
 
+type subscriptionPublishingMode struct {
+	enabled bool
+	done    chan struct{}
+}
+
 func NewSubscription() *Subscription {
 	return &Subscription{
 		//SeqNums:       map[uint32]struct{}{},
-		NotifyChannel: make(chan *ua.MonitoredItemNotification, 100),
-		ModifyChannel: make(chan subscriptionModify, 2),
-		publishQueue:  make(map[uint32]*ua.MonitoredItemNotification),
-		shutdown:      make(chan struct{}),
+		NotifyChannel:            make(chan *ua.MonitoredItemNotification, 100),
+		ModifyChannel:            make(chan subscriptionModify, 2),
+		SetPublishingModeChannel: make(chan subscriptionPublishingMode, 2),
+		publishQueue:             make(map[uint32]*ua.MonitoredItemNotification),
+		shutdown:                 make(chan struct{}),
 	}
 }
 
@@ -529,6 +592,10 @@ func (s *Subscription) applyModifyRequest(req *ua.ModifySubscriptionRequest) {
 		// not just the stored state returned by ModifySubscription.
 		s.resetTicker()
 	}
+}
+
+func (s *Subscription) applySetPublishingMode(enabled bool) {
+	s.PublishingEnabled = enabled
 }
 
 func (s *Subscription) Start(ctx context.Context) {
@@ -668,6 +735,9 @@ func (s *Subscription) run(ctx context.Context) {
 			case update := <-s.ModifyChannel:
 				s.applyModifyRequest(update.req)
 				close(update.done)
+			case update := <-s.SetPublishingModeChannel:
+				s.applySetPublishingMode(update.enabled)
+				close(update.done)
 			}
 		}
 		var pubreq types.PubReq
@@ -693,6 +763,9 @@ func (s *Subscription) run(ctx context.Context) {
 				}
 			case update := <-s.ModifyChannel:
 				s.applyModifyRequest(update.req)
+				close(update.done)
+			case update := <-s.SetPublishingModeChannel:
+				s.applySetPublishingMode(update.enabled)
 				close(update.done)
 			}
 		}

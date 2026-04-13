@@ -333,6 +333,364 @@ func TestModifySubscriptionRejectsDifferentSession(t *testing.T) {
 	service.DeleteSubscription(t.Context(), types.SubscriptionID(created.SubscriptionID))
 }
 
+func TestSetPublishingModeUpdatesRuntimeSubscription(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	createReq := newCreateSubscriptionRequest(session, 80)
+	createReq.PublishingEnabled = true
+
+	createResp, err := service.CreateSubscription(t.Context(), sc, createReq, 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+	created, ok := createResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", createResp)
+	}
+
+	resp, err := service.SetPublishingMode(t.Context(), sc, &ua.SetPublishingModeRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       81,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		PublishingEnabled: false,
+		SubscriptionIDs:   []uint32{created.SubscriptionID},
+	}, 2)
+	if err != nil {
+		t.Fatalf("set publishing mode: %v", err)
+	}
+
+	setResp, ok := resp.(*ua.SetPublishingModeResponse)
+	if !ok {
+		t.Fatalf("expected SetPublishingModeResponse, got %T", resp)
+	}
+	if len(setResp.Results) != 1 || setResp.Results[0] != ua.StatusOK {
+		t.Fatalf("expected single ok result, got %#v", setResp.Results)
+	}
+
+	sub, ok := service.Get(types.SubscriptionID(created.SubscriptionID))
+	if !ok {
+		t.Fatal("expected subscription to exist")
+	}
+	if sub.PublishingEnabled {
+		t.Fatal("expected publishing to be disabled on the runtime subscription")
+	}
+
+	service.DeleteSubscription(t.Context(), sub.ID)
+}
+
+func TestSetPublishingModeRejectsMissingSession(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	createResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 82), 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+	created, ok := createResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", createResp)
+	}
+
+	backend.session = nil
+	resp, err := service.SetPublishingMode(t.Context(), sc, &ua.SetPublishingModeRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       83,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		PublishingEnabled: false,
+		SubscriptionIDs:   []uint32{created.SubscriptionID},
+	}, 2)
+	if err != nil {
+		t.Fatalf("set publishing mode: %v", err)
+	}
+
+	setResp, ok := resp.(*ua.SetPublishingModeResponse)
+	if !ok {
+		t.Fatalf("expected SetPublishingModeResponse, got %T", resp)
+	}
+	if len(setResp.Results) != 1 || setResp.Results[0] != ua.StatusBadSessionIDInvalid {
+		t.Fatalf("expected single bad session result, got %#v", setResp.Results)
+	}
+
+	backend.session = session
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(created.SubscriptionID))
+}
+
+func TestSetPublishingModeRejectsUnknownSubscription(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	resp, err := service.SetPublishingMode(t.Context(), sc, &ua.SetPublishingModeRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       84,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		PublishingEnabled: false,
+		SubscriptionIDs:   []uint32{999},
+	}, 1)
+	if err != nil {
+		t.Fatalf("set publishing mode: %v", err)
+	}
+
+	setResp, ok := resp.(*ua.SetPublishingModeResponse)
+	if !ok {
+		t.Fatalf("expected SetPublishingModeResponse, got %T", resp)
+	}
+	if len(setResp.Results) != 1 || setResp.Results[0] != ua.StatusBadSubscriptionIDInvalid {
+		t.Fatalf("expected single bad subscription result, got %#v", setResp.Results)
+	}
+}
+
+func TestSetPublishingModeRejectsDifferentSession(t *testing.T) {
+	t.Parallel()
+
+	owner := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(owner)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	createResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(owner, 85), 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+	created, ok := createResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", createResp)
+	}
+
+	other := newSubscriptionTestSession()
+	other.authToken = ua.NewNumericNodeID(1, 303)
+	backend.session = other
+
+	resp, err := service.SetPublishingMode(t.Context(), sc, &ua.SetPublishingModeRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       86,
+			AuthenticationToken: other.AuthTokenID(),
+		},
+		PublishingEnabled: false,
+		SubscriptionIDs:   []uint32{created.SubscriptionID},
+	}, 2)
+	if err != nil {
+		t.Fatalf("set publishing mode: %v", err)
+	}
+
+	setResp, ok := resp.(*ua.SetPublishingModeResponse)
+	if !ok {
+		t.Fatalf("expected SetPublishingModeResponse, got %T", resp)
+	}
+	if len(setResp.Results) != 1 || setResp.Results[0] != ua.StatusBadSessionIDInvalid {
+		t.Fatalf("expected single bad session result, got %#v", setResp.Results)
+	}
+
+	backend.session = owner
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(created.SubscriptionID))
+}
+
+func TestSetPublishingModeRejectsEmptySubscriptionList(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	_, err := service.SetPublishingMode(t.Context(), sc, &ua.SetPublishingModeRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       87,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		PublishingEnabled: false,
+		SubscriptionIDs:   nil,
+	}, 1)
+	if err != ua.StatusBadNothingToDo {
+		t.Fatalf("expected %s, got %v", ua.StatusBadNothingToDo, err)
+	}
+}
+
+func TestSetPublishingModeRejectsTooManyOperations(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session, subscriptionTestConfigOptions{
+		maxSubscriptionOperationsPerCall: 1,
+	})
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	firstResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 88), 1)
+	if err != nil {
+		t.Fatalf("create first subscription: %v", err)
+	}
+	first, ok := firstResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", firstResp)
+	}
+
+	secondResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 89), 2)
+	if err != nil {
+		t.Fatalf("create second subscription: %v", err)
+	}
+	second, ok := secondResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", secondResp)
+	}
+
+	_, err = service.SetPublishingMode(t.Context(), sc, &ua.SetPublishingModeRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       90,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		PublishingEnabled: false,
+		SubscriptionIDs:   []uint32{first.SubscriptionID, second.SubscriptionID},
+	}, 3)
+	if err != ua.StatusBadTooManyOperations {
+		t.Fatalf("expected %s, got %v", ua.StatusBadTooManyOperations, err)
+	}
+
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(first.SubscriptionID))
+	service.DeleteSubscription(t.Context(), types.SubscriptionID(second.SubscriptionID))
+}
+
+func TestSetPublishingModeMixedBatchResults(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	firstResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 91), 1)
+	if err != nil {
+		t.Fatalf("create first subscription: %v", err)
+	}
+	first, ok := firstResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", firstResp)
+	}
+
+	secondResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 92), 2)
+	if err != nil {
+		t.Fatalf("create second subscription: %v", err)
+	}
+	second, ok := secondResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", secondResp)
+	}
+
+	resp, err := service.SetPublishingMode(t.Context(), sc, &ua.SetPublishingModeRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       93,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		PublishingEnabled: false,
+		SubscriptionIDs:   []uint32{first.SubscriptionID, 999, second.SubscriptionID},
+	}, 3)
+	if err != nil {
+		t.Fatalf("set publishing mode: %v", err)
+	}
+
+	setResp, ok := resp.(*ua.SetPublishingModeResponse)
+	if !ok {
+		t.Fatalf("expected SetPublishingModeResponse, got %T", resp)
+	}
+	want := []ua.StatusCode{ua.StatusOK, ua.StatusBadSubscriptionIDInvalid, ua.StatusOK}
+	if len(setResp.Results) != len(want) {
+		t.Fatalf("expected %d results, got %d", len(want), len(setResp.Results))
+	}
+	for i := range want {
+		if setResp.Results[i] != want[i] {
+			t.Fatalf("expected result %d to be %s, got %s", i, want[i], setResp.Results[i])
+		}
+	}
+
+	firstSub, ok := service.Get(types.SubscriptionID(first.SubscriptionID))
+	if !ok {
+		t.Fatal("expected first subscription to exist")
+	}
+	if firstSub.PublishingEnabled {
+		t.Fatal("expected first subscription publishing to be disabled")
+	}
+
+	secondSub, ok := service.Get(types.SubscriptionID(second.SubscriptionID))
+	if !ok {
+		t.Fatal("expected second subscription to exist")
+	}
+	if secondSub.PublishingEnabled {
+		t.Fatal("expected second subscription publishing to be disabled")
+	}
+
+	service.DeleteSubscription(t.Context(), firstSub.ID)
+	service.DeleteSubscription(t.Context(), secondSub.ID)
+}
+
+func TestSetPublishingModePreservesRequestOrderWithDuplicateIDs(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session)
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	createResp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 94), 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+	created, ok := createResp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", createResp)
+	}
+
+	resp, err := service.SetPublishingMode(t.Context(), sc, &ua.SetPublishingModeRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       95,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		PublishingEnabled: false,
+		SubscriptionIDs:   []uint32{created.SubscriptionID, 999, created.SubscriptionID},
+	}, 2)
+	if err != nil {
+		t.Fatalf("set publishing mode: %v", err)
+	}
+
+	setResp, ok := resp.(*ua.SetPublishingModeResponse)
+	if !ok {
+		t.Fatalf("expected SetPublishingModeResponse, got %T", resp)
+	}
+	want := []ua.StatusCode{ua.StatusOK, ua.StatusBadSubscriptionIDInvalid, ua.StatusOK}
+	if len(setResp.Results) != len(want) {
+		t.Fatalf("expected %d results, got %d", len(want), len(setResp.Results))
+	}
+	for i := range want {
+		if setResp.Results[i] != want[i] {
+			t.Fatalf("expected result %d to be %s, got %s", i, want[i], setResp.Results[i])
+		}
+	}
+
+	sub, ok := service.Get(types.SubscriptionID(created.SubscriptionID))
+	if !ok {
+		t.Fatal("expected subscription to exist")
+	}
+	if sub.PublishingEnabled {
+		t.Fatal("expected publishing to be disabled after duplicate-id batch")
+	}
+
+	service.DeleteSubscription(t.Context(), sub.ID)
+}
+
 func TestCreateSubscriptionRejectsMissingSession(t *testing.T) {
 	t.Parallel()
 
@@ -835,6 +1193,93 @@ func TestSubscriptionApplyModifyRequestKeepsTickerWhenIntervalIsUnchanged(t *tes
 	}
 }
 
+func TestSubscriptionApplySetPublishingMode(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.PublishingEnabled = true
+
+	sub.applySetPublishingMode(false)
+
+	if sub.PublishingEnabled {
+		t.Fatal("expected publishing to be disabled")
+	}
+}
+
+func TestSubscriptionApplySetPublishingModePreservesPendingNotifications(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.PublishingEnabled = true
+	sub.publishQueue[11] = &ua.MonitoredItemNotification{ClientHandle: 11}
+	sub.publishQueue[22] = &ua.MonitoredItemNotification{ClientHandle: 22}
+
+	sub.applySetPublishingMode(false)
+
+	if sub.PublishingEnabled {
+		t.Fatal("expected publishing to be disabled")
+	}
+	if len(sub.publishQueue) != 2 {
+		t.Fatalf("expected two queued notifications to be preserved, got %d", len(sub.publishQueue))
+	}
+	if _, ok := sub.publishQueue[11]; !ok {
+		t.Fatal("expected queued notification for client handle 11 to be preserved")
+	}
+	if _, ok := sub.publishQueue[22]; !ok {
+		t.Fatal("expected queued notification for client handle 22 to be preserved")
+	}
+}
+
+func TestSubscriptionDisabledPublishingStillFollowsKeepalivePath(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.PublishingEnabled = false
+	sub.RevisedMaxKeepAliveCount = 3
+	sub.publishQueue[11] = &ua.MonitoredItemNotification{ClientHandle: 11}
+
+	if sub.canPublishNotifications(len(sub.publishQueue)) {
+		t.Fatal("expected disabled subscription not to publish notifications")
+	}
+	if !sub.shouldSendKeepalive(3) {
+		t.Fatal("expected keepalive threshold to still apply while publishing is disabled")
+	}
+}
+
+func TestSubscriptionReenablingPublishingResumesQueuedNotifications(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.PublishingEnabled = false
+	sub.MaxNotificationsPerPublish = 1
+	sub.publishQueue[11] = &ua.MonitoredItemNotification{ClientHandle: 11}
+	sub.publishQueue[22] = &ua.MonitoredItemNotification{ClientHandle: 22}
+
+	if sub.canPublishNotifications(len(sub.publishQueue)) {
+		t.Fatal("expected disabled subscription not to publish notifications")
+	}
+
+	sub.applySetPublishingMode(true)
+
+	if !sub.PublishingEnabled {
+		t.Fatal("expected publishing to be re-enabled")
+	}
+	if !sub.canPublishNotifications(len(sub.publishQueue)) {
+		t.Fatal("expected queued notifications to become publishable after re-enabling")
+	}
+
+	batch, more := sub.nextPublishBatch(sub.publishQueue)
+	if len(batch) != 1 {
+		t.Fatalf("expected batch size 1 after re-enabling, got %d", len(batch))
+	}
+	if !more {
+		t.Fatal("expected more notifications to remain after the first resumed publish batch")
+	}
+	if len(sub.publishQueue) != 1 {
+		t.Fatalf("expected one queued notification to remain, got %d", len(sub.publishQueue))
+	}
+}
+
 func TestSubscriptionApplyModifyRequestPreservesPendingNotificationsAndCounters(t *testing.T) {
 	t.Parallel()
 
@@ -892,6 +1337,7 @@ type subscriptionTestBackend struct {
 type subscriptionTestConfigOptions struct {
 	maxSubscriptions                  uint32
 	maxSubscriptionsPerSession        uint32
+	maxSubscriptionOperationsPerCall  uint32
 	minSubscriptionPublishingInterval time.Duration
 	minSubscriptionMaxKeepAliveCount  uint32
 	minSubscriptionLifetimeCount      uint32
@@ -901,6 +1347,7 @@ func newSubscriptionTestBackend(session types.Session, options ...subscriptionTe
 	cfg := subscriptionTestConfig{
 		maxSubscriptions:                  0,
 		maxSubscriptionsPerSession:        0,
+		maxSubscriptionOperationsPerCall:  0,
 		minSubscriptionPublishingInterval: DefaultMinSubscriptionPublishingInterval,
 		minSubscriptionMaxKeepAliveCount:  DefaultMinSubscriptionMaxKeepAliveCount,
 		minSubscriptionLifetimeCount:      DefaultMinSubscriptionLifetimeCount,
@@ -908,6 +1355,7 @@ func newSubscriptionTestBackend(session types.Session, options ...subscriptionTe
 	if len(options) != 0 {
 		cfg.maxSubscriptions = options[0].maxSubscriptions
 		cfg.maxSubscriptionsPerSession = options[0].maxSubscriptionsPerSession
+		cfg.maxSubscriptionOperationsPerCall = options[0].maxSubscriptionOperationsPerCall
 		if options[0].minSubscriptionPublishingInterval > 0 {
 			cfg.minSubscriptionPublishingInterval = options[0].minSubscriptionPublishingInterval
 		}
@@ -1006,6 +1454,7 @@ func (s *subscriptionTestSession) PublishRequestChannel() chan types.PubReq {
 type subscriptionTestConfig struct {
 	maxSubscriptions                  uint32
 	maxSubscriptionsPerSession        uint32
+	maxSubscriptionOperationsPerCall  uint32
 	minSubscriptionPublishingInterval time.Duration
 	minSubscriptionMaxKeepAliveCount  uint32
 	minSubscriptionLifetimeCount      uint32
@@ -1049,6 +1498,10 @@ func (cfg subscriptionTestConfig) MaxSubscriptions() uint32 {
 
 func (cfg subscriptionTestConfig) MaxSubscriptionsPerSession() uint32 {
 	return cfg.maxSubscriptionsPerSession
+}
+
+func (cfg subscriptionTestConfig) MaxSubscriptionOperationsPerCall() uint32 {
+	return cfg.maxSubscriptionOperationsPerCall
 }
 
 func (cfg subscriptionTestConfig) MinSubscriptionPublishingInterval() time.Duration {

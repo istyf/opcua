@@ -36,6 +36,7 @@ type serverConfig struct {
 
 	maxSubscriptions                  uint32
 	maxSubscriptionsPerSession        uint32
+	maxSubscriptionOperationsPerCall  uint32
 	minSubscriptionPublishingInterval time.Duration
 	minSubscriptionMaxKeepAliveCount  uint32
 	minSubscriptionLifetimeCount      uint32
@@ -87,6 +88,10 @@ func (cfg *serverConfig) MaxSubscriptions() uint32 {
 
 func (cfg *serverConfig) MaxSubscriptionsPerSession() uint32 {
 	return cfg.maxSubscriptionsPerSession
+}
+
+func (cfg *serverConfig) MaxSubscriptionOperationsPerCall() uint32 {
+	return cfg.maxSubscriptionOperationsPerCall
 }
 
 func (cfg *serverConfig) MinSubscriptionPublishingInterval() time.Duration {

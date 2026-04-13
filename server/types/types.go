@@ -171,6 +171,7 @@ type ServerConfig interface {
 	MaxNodesPerRead() uint32
 	MaxSubscriptions() uint32
 	MaxSubscriptionsPerSession() uint32
+	MaxSubscriptionOperationsPerCall() uint32
 	MinSubscriptionPublishingInterval() time.Duration
 	MinSubscriptionMaxKeepAliveCount() uint32
 	MinSubscriptionLifetimeCount() uint32
