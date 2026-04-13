@@ -21,6 +21,14 @@ import (
 	"github.com/gopcua/opcua/uasc"
 )
 
+var supportedServerSecurityPolicies = []string{
+	ua.SecurityPolicyURINone,
+	ua.SecurityPolicyURIBasic256,
+	ua.SecurityPolicyURIBasic256Sha256,
+	ua.SecurityPolicyURIAes128Sha256RsaOaep,
+	ua.SecurityPolicyURIAes256Sha256RsaPss,
+}
+
 // Option is an option function type to modify the configuration.
 type Option func(context.Context, *serverConfig)
 
@@ -72,6 +80,13 @@ func EnableSecurity(secPolicy string, secMode ua.MessageSecurityMode) Option {
 		if !ok {
 			ualog.Error(ctx, "unable to add endpoint security mode to config",
 				ualog.String(ualog.ErrorKey, "unsupported policy"),
+				ualog.String("policy", secPolicy),
+			)
+			return
+		}
+		if !slices.Contains(supportedServerSecurityPolicies, secPolicy) {
+			ualog.Error(ctx, "unable to add endpoint security mode to config",
+				ualog.String(ualog.ErrorKey, "unsupported server policy"),
 				ualog.String("policy", secPolicy),
 			)
 			return

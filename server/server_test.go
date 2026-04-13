@@ -178,3 +178,16 @@ func TestEnableSecuritySkipsDuplicates(t *testing.T) {
 		t.Fatalf("expected mode %v, got %v", ua.MessageSecurityModeSignAndEncrypt, entry.secMode)
 	}
 }
+
+func TestEnableSecurityRejectsUnsupportedServerPolicy(t *testing.T) {
+	t.Parallel()
+
+	cfg := &serverConfig{}
+	ctx := context.Background()
+
+	EnableSecurity("Basic128Rsa15", ua.MessageSecurityModeSign)(ctx, cfg)
+
+	if len(cfg.enabledSec) != 0 {
+		t.Fatalf("expected deprecated server policy registration to be ignored, got %d entries", len(cfg.enabledSec))
+	}
+}

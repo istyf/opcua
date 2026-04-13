@@ -35,8 +35,6 @@ func TestSecureChannelConnectMatrix(t *testing.T) {
 		policy string
 		mode   ua.MessageSecurityMode
 	}{
-		{name: "basic128rsa15-sign", policy: "Basic128Rsa15", mode: ua.MessageSecurityModeSign},
-		{name: "basic128rsa15-signandencrypt", policy: "Basic128Rsa15", mode: ua.MessageSecurityModeSignAndEncrypt},
 		{name: "basic256-sign", policy: "Basic256", mode: ua.MessageSecurityModeSign},
 		{name: "basic256-signandencrypt", policy: "Basic256", mode: ua.MessageSecurityModeSignAndEncrypt},
 		{name: "basic256sha256-sign", policy: "Basic256Sha256", mode: ua.MessageSecurityModeSign},
@@ -241,8 +239,6 @@ func mustGetEndpoints(t *testing.T, ctx context.Context, endpoint string) []*ua.
 func allSecureChannelMatrixEntries() []security {
 	return []security{
 		{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
-		{secPolicy: ua.SecurityPolicyURIBasic128Rsa15, secMode: ua.MessageSecurityModeSign},
-		{secPolicy: ua.SecurityPolicyURIBasic128Rsa15, secMode: ua.MessageSecurityModeSignAndEncrypt},
 		{secPolicy: ua.SecurityPolicyURIBasic256, secMode: ua.MessageSecurityModeSign},
 		{secPolicy: ua.SecurityPolicyURIBasic256, secMode: ua.MessageSecurityModeSignAndEncrypt},
 		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSign},

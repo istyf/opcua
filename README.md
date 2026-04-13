@@ -202,7 +202,7 @@ The current focus is on the OPC UA Binary protocol over TCP. No other protocols 
 |                | SOAP-HTTP WS-SC UA XML           |           | not planned |
 |                | SOAP-HTTP WS-SC UA XML-UA Binary |           | not planned |
 | Encryption     | None                             | Yes       |             |
-|                | Basic128Rsa15                    | Untested  |             |
+|                | Basic128Rsa15                    |           | intentionally unsupported |
 |                | Basic256                         | Untested  |             |
 |                | Basic256Sha256                   | Untested  |             |
 | Authentication | Anonymous                        | Yes       |             |
