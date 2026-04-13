@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rsa"
 	"encoding/binary"
+	"errors"
 	"slices"
 
 	"github.com/gopcua/opcua/server/auth"
@@ -214,11 +215,26 @@ func authenticateUserIdentity(
 			Password:            password,
 		})
 		if err != nil {
-			return nil, ua.StatusBadIdentityTokenRejected
+			return nil, statusCodeForUserNameAuthenticatorError(err)
 		}
 
 		return user, nil
 	default:
 		return nil, ua.StatusBadIdentityTokenInvalid
+	}
+}
+
+func statusCodeForUserNameAuthenticatorError(err error) error {
+	switch {
+	case err == nil:
+		return nil
+	case errors.Is(err, auth.ErrInvalidCredentials):
+		return ua.StatusBadIdentityTokenRejected
+	case errors.Is(err, auth.ErrUnsupportedAuthentication):
+		return ua.StatusBadIdentityTokenRejected
+	case errors.Is(err, auth.ErrBackendUnavailable):
+		return ua.StatusBadResourceUnavailable
+	default:
+		return ua.StatusBadInternalError
 	}
 }

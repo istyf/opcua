@@ -2,8 +2,15 @@ package auth
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gopcua/opcua/ua"
+)
+
+var (
+	ErrInvalidCredentials        = errors.New("invalid credentials")
+	ErrBackendUnavailable        = errors.New("backend unavailable")
+	ErrUnsupportedAuthentication = errors.New("unsupported authentication")
 )
 
 // AuthenticatedUser contains the authenticated identity information attached to

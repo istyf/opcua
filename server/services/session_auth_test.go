@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/binary"
+	"errors"
 	"testing"
 
 	"github.com/gopcua/opcua/server/auth"
@@ -749,6 +750,45 @@ func TestAuthenticateUserIdentity(t *testing.T) {
 			},
 			wantErr: ua.StatusBadIdentityTokenRejected,
 		},
+		{
+			name: "invalid credentials are rejected",
+			token: &ua.UserNameIdentityToken{
+				PolicyID:            "username_basic256sha256",
+				UserName:            "alice",
+				Password:            encrypt(t, "secret", serverNonce),
+				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
+			},
+			authenticator: func(context.Context, *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+				return nil, auth.ErrInvalidCredentials
+			},
+			wantErr: ua.StatusBadIdentityTokenRejected,
+		},
+		{
+			name: "backend unavailable maps to resource unavailable",
+			token: &ua.UserNameIdentityToken{
+				PolicyID:            "username_basic256sha256",
+				UserName:            "alice",
+				Password:            encrypt(t, "secret", serverNonce),
+				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
+			},
+			authenticator: func(context.Context, *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+				return nil, auth.ErrBackendUnavailable
+			},
+			wantErr: ua.StatusBadResourceUnavailable,
+		},
+		{
+			name: "unexpected authenticator errors map to internal error",
+			token: &ua.UserNameIdentityToken{
+				PolicyID:            "username_basic256sha256",
+				UserName:            "alice",
+				Password:            encrypt(t, "secret", serverNonce),
+				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
+			},
+			authenticator: func(context.Context, *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+				return nil, errors.New("database exploded")
+			},
+			wantErr: ua.StatusBadInternalError,
+		},
 	}
 
 	for _, tt := range tests {
@@ -776,6 +816,33 @@ func TestAuthenticateUserIdentity(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Fatalf("expected authenticated user %#v, got %#v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestStatusCodeForUserNameAuthenticatorError(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		err     error
+		wantErr error
+	}{
+		{name: "nil passes through", wantErr: nil},
+		{name: "invalid credentials", err: auth.ErrInvalidCredentials, wantErr: ua.StatusBadIdentityTokenRejected},
+		{name: "unsupported authentication", err: auth.ErrUnsupportedAuthentication, wantErr: ua.StatusBadIdentityTokenRejected},
+		{name: "backend unavailable", err: auth.ErrBackendUnavailable, wantErr: ua.StatusBadResourceUnavailable},
+		{name: "unexpected error", err: errors.New("boom"), wantErr: ua.StatusBadInternalError},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := statusCodeForUserNameAuthenticatorError(tt.err)
+			if got != tt.wantErr {
+				t.Fatalf("expected error %v, got %v", tt.wantErr, got)
 			}
 		})
 	}
