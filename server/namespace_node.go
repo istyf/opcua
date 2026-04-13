@@ -155,8 +155,15 @@ func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *
 	if n == nil {
 		return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDUnknown}
 	}
+	refsCollection := n.References()
+	if refsCollection == nil {
+		return &ua.BrowseResult{
+			StatusCode: ua.StatusGood,
+			References: []*ua.ReferenceDescription{},
+		}
+	}
 
-	references := make([]*ua.ReferenceDescription, 0, n.References().Count())
+	references := make([]*ua.ReferenceDescription, 0, refsCollection.Count())
 
 	validReferences := func(r types.ReferenceWrapper) bool {
 
@@ -168,7 +175,7 @@ func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *
 		return true
 	}
 
-	for r := range n.References().Find(validReferences) {
+	for r := range refsCollection.Find(validReferences) {
 		rf := r.Copy(ctx)
 
 		if rf.ReferenceTypeID.IntID() == id.HasTypeDefinition && rf.IsForward {
