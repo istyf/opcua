@@ -428,3 +428,214 @@ func TestResolveUserTokenSecurityPolicyURI(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateUserNameEncryptionAlgorithm(t *testing.T) {
+	t.Parallel()
+
+	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("failed to generate test key: %v", err)
+	}
+
+	basic256sha256, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, serverKey, nil)
+	if err != nil {
+		t.Fatalf("failed to build decrypt-only algorithm: %v", err)
+	}
+
+	tests := []struct {
+		name       string
+		token      *ua.UserNameIdentityToken
+		policyURI  string
+		privateKey *rsa.PrivateKey
+		wantErr    error
+	}{
+		{
+			name: "none policy requires empty encryption algorithm",
+			token: &ua.UserNameIdentityToken{
+				EncryptionAlgorithm: "",
+			},
+			policyURI: ua.SecurityPolicyURINone,
+		},
+		{
+			name: "none policy rejects non-empty encryption algorithm",
+			token: &ua.UserNameIdentityToken{
+				EncryptionAlgorithm: "plain",
+			},
+			policyURI: ua.SecurityPolicyURINone,
+			wantErr:   ua.StatusBadIdentityTokenInvalid,
+		},
+		{
+			name: "secure policy requires matching encryption algorithm uri",
+			token: &ua.UserNameIdentityToken{
+				EncryptionAlgorithm: basic256sha256.EncryptionURI(),
+			},
+			policyURI:  ua.SecurityPolicyURIBasic256Sha256,
+			privateKey: serverKey,
+		},
+		{
+			name: "secure policy rejects mismatched encryption algorithm uri",
+			token: &ua.UserNameIdentityToken{
+				EncryptionAlgorithm: "http://example.invalid/algorithm",
+			},
+			policyURI:  ua.SecurityPolicyURIBasic256Sha256,
+			privateKey: serverKey,
+			wantErr:    ua.StatusBadIdentityTokenInvalid,
+		},
+		{
+			name: "secure policy without private key is invalid",
+			token: &ua.UserNameIdentityToken{
+				EncryptionAlgorithm: basic256sha256.EncryptionURI(),
+			},
+			policyURI: ua.SecurityPolicyURIBasic256Sha256,
+			wantErr:   ua.StatusBadIdentityTokenInvalid,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := validateUserNameEncryptionAlgorithm(tt.token, tt.policyURI, tt.privateKey)
+			if tt.wantErr != nil {
+				if err != tt.wantErr {
+					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+		})
+	}
+}
+
+func TestValidateUserNameIdentityToken(t *testing.T) {
+	t.Parallel()
+
+	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("failed to generate test key: %v", err)
+	}
+
+	serverNonce := []byte("12345678901234567890123456789012")
+	endpoints := []*ua.EndpointDescription{
+		{
+			UserIdentityTokens: []*ua.UserTokenPolicy{
+				{
+					PolicyID:          "username_basic256sha256",
+					TokenType:         ua.UserTokenTypeUserName,
+					SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+				},
+			},
+		},
+	}
+
+	encrypt := func(t *testing.T, password string, nonce []byte) []byte {
+		t.Helper()
+
+		algo, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, nil, &serverKey.PublicKey)
+		if err != nil {
+			t.Fatalf("failed to build encrypt-only algorithm: %v", err)
+		}
+
+		secret := make([]byte, 4)
+		binary.LittleEndian.PutUint32(secret, uint32(len(password)+len(nonce)))
+		secret = append(secret, []byte(password)...)
+		secret = append(secret, nonce...)
+
+		encrypted, err := algo.Encrypt(secret)
+		if err != nil {
+			t.Fatalf("failed to encrypt test password: %v", err)
+		}
+
+		return encrypted
+	}
+
+	decryptOnly, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, serverKey, nil)
+	if err != nil {
+		t.Fatalf("failed to build decrypt-only algorithm: %v", err)
+	}
+
+	tests := []struct {
+		name                   string
+		token                  *ua.UserNameIdentityToken
+		secureChannelPolicyURI string
+		privateKey             *rsa.PrivateKey
+		serverNonce            []byte
+		want                   string
+		wantErr                error
+	}{
+		{
+			name: "valid encrypted username token is accepted",
+			token: &ua.UserNameIdentityToken{
+				PolicyID:            "username_basic256sha256",
+				UserName:            "alice",
+				Password:            encrypt(t, "secret", serverNonce),
+				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
+			},
+			secureChannelPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+			privateKey:             serverKey,
+			serverNonce:            serverNonce,
+			want:                   "secret",
+		},
+		{
+			name: "unknown policy id is rejected",
+			token: &ua.UserNameIdentityToken{
+				PolicyID:            "username_unknown",
+				UserName:            "alice",
+				Password:            []byte("secret"),
+				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
+			},
+			secureChannelPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+			privateKey:             serverKey,
+			serverNonce:            serverNonce,
+			wantErr:                ua.StatusBadIdentityTokenRejected,
+		},
+		{
+			name: "mismatched encryption algorithm is invalid",
+			token: &ua.UserNameIdentityToken{
+				PolicyID:            "username_basic256sha256",
+				UserName:            "alice",
+				Password:            encrypt(t, "secret", serverNonce),
+				EncryptionAlgorithm: "http://example.invalid/algorithm",
+			},
+			secureChannelPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+			privateKey:             serverKey,
+			serverNonce:            serverNonce,
+			wantErr:                ua.StatusBadIdentityTokenInvalid,
+		},
+		{
+			name: "nonce mismatch is rejected",
+			token: &ua.UserNameIdentityToken{
+				PolicyID:            "username_basic256sha256",
+				UserName:            "alice",
+				Password:            encrypt(t, "secret", serverNonce),
+				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
+			},
+			secureChannelPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+			privateKey:             serverKey,
+			serverNonce:            []byte("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"),
+			wantErr:                ua.StatusBadNonceInvalid,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := validateUserNameIdentityToken(tt.token, endpoints, tt.secureChannelPolicyURI, tt.privateKey, tt.serverNonce)
+			if tt.wantErr != nil {
+				if err != tt.wantErr {
+					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if got != tt.want {
+				t.Fatalf("expected password %q, got %q", tt.want, got)
+			}
+		})
+	}
+}

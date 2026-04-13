@@ -21,6 +21,7 @@ func TestBrowse(t *testing.T) {
 		ctx,
 		server.EndPoint("localhost", 4840),
 		server.EnableSecurity("None", ua.MessageSecurityModeNone),
+		server.EnableAuthMode(ua.UserTokenTypeAnonymous),
 	)
 
 	populateServer(s)

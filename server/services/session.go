@@ -20,6 +20,7 @@ const (
 type SessionServiceBackend interface {
 	HandlerRegistrator
 	EndpointsProvider
+	Config() types.ServerConfig
 
 	NewSession(timeout time.Duration, serverNonce []byte, remoteCert []byte) types.Session
 	Session(ctx context.Context, hdr *ua.RequestHeader) types.Session
@@ -147,6 +148,18 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 
 	if _, err := resolveUserTokenSecurityPolicyURI(policy, sc.SecurityPolicyURI()); err != nil {
 		return nil, err
+	}
+
+	if userToken, ok := token.(*ua.UserNameIdentityToken); ok {
+		if _, err := validateUserNameIdentityToken(
+			userToken,
+			s.srv.Endpoints(),
+			sc.SecurityPolicyURI(),
+			s.srv.Config().PrivateKey(),
+			sess.ServerNonce(),
+		); err != nil {
+			return nil, err
+		}
 	}
 
 	nonce := make([]byte, sessionNonceLength)

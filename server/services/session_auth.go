@@ -130,3 +130,53 @@ func resolveUserTokenSecurityPolicyURI(policy *ua.UserTokenPolicy, secureChannel
 
 	return policyURI, nil
 }
+
+func validateUserNameIdentityToken(token *ua.UserNameIdentityToken, endpoints []*ua.EndpointDescription, secureChannelPolicyURI string, privateKey *rsa.PrivateKey, serverNonce []byte) (string, error) {
+	if token == nil {
+		return "", ua.StatusBadIdentityTokenInvalid
+	}
+
+	policy, err := resolveUserTokenPolicy(token, endpoints)
+	if err != nil {
+		return "", err
+	}
+
+	policyURI, err := resolveUserTokenSecurityPolicyURI(policy, secureChannelPolicyURI)
+	if err != nil {
+		return "", err
+	}
+
+	if err := validateUserNameEncryptionAlgorithm(token, policyURI, privateKey); err != nil {
+		return "", err
+	}
+
+	return decodeUserNamePassword(token, policyURI, privateKey, serverNonce)
+}
+
+func validateUserNameEncryptionAlgorithm(token *ua.UserNameIdentityToken, policyURI string, privateKey *rsa.PrivateKey) error {
+	if token == nil {
+		return ua.StatusBadIdentityTokenInvalid
+	}
+
+	if policyURI == ua.SecurityPolicyURINone {
+		if token.EncryptionAlgorithm != "" {
+			return ua.StatusBadIdentityTokenInvalid
+		}
+		return nil
+	}
+
+	if privateKey == nil {
+		return ua.StatusBadIdentityTokenInvalid
+	}
+
+	algo, err := uapolicy.Asymmetric(policyURI, privateKey, nil)
+	if err != nil {
+		return ua.StatusBadIdentityTokenRejected
+	}
+
+	if token.EncryptionAlgorithm != algo.EncryptionURI() {
+		return ua.StatusBadIdentityTokenInvalid
+	}
+
+	return nil
+}
