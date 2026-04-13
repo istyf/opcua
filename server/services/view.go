@@ -47,6 +47,43 @@ func NewViewService(b ViewServiceBackend) *ViewService {
 
 var newViewServiceLogAttribute = newServiceLogAttributeCreatorForSet("view")
 
+func newBrowseResponse(requestHandle uint32, resultCount int) *ua.BrowseResponse {
+	return &ua.BrowseResponse{
+		ResponseHeader: &ua.ResponseHeader{
+			Timestamp:          time.Now(),
+			RequestHandle:      requestHandle,
+			ServiceResult:      ua.StatusOK,
+			ServiceDiagnostics: &ua.DiagnosticInfo{},
+			StringTable:        []string{},
+			AdditionalHeader:   ua.NewExtensionObject(nil),
+		},
+		Results:         make([]*ua.BrowseResult, resultCount),
+		DiagnosticInfos: []*ua.DiagnosticInfo{},
+	}
+}
+
+func (s *ViewService) browseNode(ctx context.Context, desc *ua.BrowseDescription) *ua.BrowseResult {
+	if desc == nil || desc.NodeID == nil {
+		return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDInvalid}
+	}
+
+	ns, err := s.backend.Namespace(int(desc.NodeID.Namespace()))
+	if err != nil {
+		return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDUnknown}
+	}
+
+	result := ns.Browse(ctx, desc)
+	if result == nil {
+		return &ua.BrowseResult{StatusCode: ua.StatusBadInternalError}
+	}
+
+	return result
+}
+
+// Browse returns one BrowseResult per BrowseDescription in request order and
+// leaves service-level validation to explicit follow-up checks as spec support
+// is expanded.
+//
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9.2
 func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
 	ctx = ualog.WithAttrs(ctx, newViewServiceLogAttribute("browse"))
@@ -57,19 +94,7 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		return nil, err
 	}
 
-	resp := &ua.BrowseResponse{
-		ResponseHeader: &ua.ResponseHeader{
-			Timestamp:          time.Now(),
-			RequestHandle:      req.RequestHeader.RequestHandle,
-			ServiceResult:      ua.StatusOK,
-			ServiceDiagnostics: &ua.DiagnosticInfo{},
-			StringTable:        []string{},
-			AdditionalHeader:   ua.NewExtensionObject(nil),
-		},
-		Results: make([]*ua.BrowseResult, len(req.NodesToBrowse)),
-
-		DiagnosticInfos: []*ua.DiagnosticInfo{{}},
-	}
+	resp := newBrowseResponse(req.RequestHeader.RequestHandle, len(req.NodesToBrowse))
 
 	for i := range req.NodesToBrowse {
 		br := req.NodesToBrowse[i]
@@ -80,13 +105,7 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			ualog.String("ref", br.ReferenceTypeID.String()),
 		)
 
-		ns, err := s.backend.Namespace(int(br.NodeID.Namespace()))
-		if err != nil {
-			resp.Results[i] = &ua.BrowseResult{StatusCode: ua.StatusBad}
-			continue
-		}
-
-		resp.Results[i] = ns.Browse(ctx, br)
+		resp.Results[i] = s.browseNode(ctx, br)
 	}
 
 	return resp, nil
