@@ -148,18 +148,25 @@ func SoftwareVersion(name string) Option {
 	}
 }
 
+// MaxSubscriptions limits the total number of subscriptions on the server.
+// A value of 0 disables the limit.
 func MaxSubscriptions(count uint32) Option {
 	return func(_ context.Context, s *serverConfig) {
 		s.maxSubscriptions = count
 	}
 }
 
+// MaxSubscriptionsPerSession limits the number of subscriptions owned by a
+// single session. A value of 0 disables the limit.
 func MaxSubscriptionsPerSession(count uint32) Option {
 	return func(_ context.Context, s *serverConfig) {
 		s.maxSubscriptionsPerSession = count
 	}
 }
 
+// MinSubscriptionPublishingInterval sets the smallest supported publishing
+// interval for subscriptions. Values less than or equal to 0 restore the
+// default minimum.
 func MinSubscriptionPublishingInterval(interval time.Duration) Option {
 	return func(_ context.Context, s *serverConfig) {
 		if interval <= 0 {
@@ -170,6 +177,8 @@ func MinSubscriptionPublishingInterval(interval time.Duration) Option {
 	}
 }
 
+// MinSubscriptionMaxKeepAliveCount sets the smallest supported keepalive count
+// for subscriptions. A value of 0 restores the default minimum.
 func MinSubscriptionMaxKeepAliveCount(count uint32) Option {
 	return func(_ context.Context, s *serverConfig) {
 		if count == 0 {
@@ -180,6 +189,8 @@ func MinSubscriptionMaxKeepAliveCount(count uint32) Option {
 	}
 }
 
+// MinSubscriptionLifetimeCount sets the smallest supported lifetime count for
+// subscriptions. A value of 0 restores the default minimum.
 func MinSubscriptionLifetimeCount(count uint32) Option {
 	return func(_ context.Context, s *serverConfig) {
 		if count == 0 {

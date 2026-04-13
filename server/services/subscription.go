@@ -63,10 +63,16 @@ func NewSubscriptionService(b SubscriptionServiceBackend) *SubscriptionService {
 var newSubscriptionServiceLogAttribute = newServiceLogAttributeCreatorForSet("subscription")
 
 const (
+	// DefaultMinSubscriptionPublishingInterval is the default smallest supported
+	// publishing interval used when the server config does not override it.
 	DefaultMinSubscriptionPublishingInterval = time.Second
 	defaultMinSupportedPublishingIntervalMS  = float64(DefaultMinSubscriptionPublishingInterval / time.Millisecond)
-	DefaultMinSubscriptionMaxKeepAliveCount  = 10
-	DefaultMinSubscriptionLifetimeCount      = 30
+	// DefaultMinSubscriptionMaxKeepAliveCount is the default smallest supported
+	// keepalive count used when the server config does not override it.
+	DefaultMinSubscriptionMaxKeepAliveCount = 10
+	// DefaultMinSubscriptionLifetimeCount is the default smallest supported
+	// lifetime count used when the server config does not override it.
+	DefaultMinSubscriptionLifetimeCount = 30
 )
 
 func revisePublishingInterval(requested, minSupported float64) float64 {
