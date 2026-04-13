@@ -321,6 +321,31 @@ func TestBrowseReturnsBadNodeIDUnknownForMissingNodeInKnownNamespace(t *testing.
 	}
 }
 
+func TestBrowseReturnsBadBrowseDirectionInvalid(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+
+	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 53},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{
+				NodeID:          ua.NewNumericNodeID(1, 1234),
+				BrowseDirection: ua.BrowseDirectionInvalid,
+			},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	browseResp := resp.(*ua.BrowseResponse)
+	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadBrowseDirectionInvalid {
+		t.Fatalf("expected %s, got %s", ua.StatusBadBrowseDirectionInvalid, got)
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace

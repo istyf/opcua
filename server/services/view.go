@@ -79,6 +79,15 @@ func validateBrowseView(view *ua.ViewDescription) error {
 	return ua.StatusBadViewIDUnknown
 }
 
+func isValidBrowseDirection(direction ua.BrowseDirection) bool {
+	switch direction {
+	case ua.BrowseDirectionForward, ua.BrowseDirectionInverse, ua.BrowseDirectionBoth:
+		return true
+	default:
+		return false
+	}
+}
+
 func newBrowseResponse(requestHandle uint32, resultCount int) *ua.BrowseResponse {
 	return &ua.BrowseResponse{
 		ResponseHeader: &ua.ResponseHeader{
@@ -97,6 +106,9 @@ func newBrowseResponse(requestHandle uint32, resultCount int) *ua.BrowseResponse
 func (s *ViewService) browseNode(ctx context.Context, desc *ua.BrowseDescription) *ua.BrowseResult {
 	if desc == nil || desc.NodeID == nil {
 		return &ua.BrowseResult{StatusCode: ua.StatusBadNodeIDInvalid}
+	}
+	if !isValidBrowseDirection(desc.BrowseDirection) {
+		return &ua.BrowseResult{StatusCode: ua.StatusBadBrowseDirectionInvalid}
 	}
 
 	ns, err := s.backend.Namespace(int(desc.NodeID.Namespace()))
