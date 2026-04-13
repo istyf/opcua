@@ -295,7 +295,7 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 }
 
 func SuitableReference(_ context.Context, srv types.Server, desc *ua.BrowseDescription, ref types.ReferenceWrapper) bool {
-	if !suitableDirection(desc.BrowseDirection, ref.IsForward()) {
+	if !suitableDirection(desc.BrowseDirection, ref.IsForward(), isSymmetricReferenceType(srv, ref.ReferenceType())) {
 		return false
 	}
 	if !suitableRefType(srv, desc.ReferenceTypeID, ref.ReferenceType(), desc.IncludeSubtypes) {
@@ -307,13 +307,24 @@ func SuitableReference(_ context.Context, srv types.Server, desc *ua.BrowseDescr
 	return true
 }
 
-func suitableDirection(bd ua.BrowseDirection, isForward bool) bool {
+func isSymmetricReferenceType(srv types.Server, refTypeID *ua.NodeID) bool {
+	if srv == nil || refTypeID == nil {
+		return false
+	}
+	refType, ok := srv.Node(refTypeID).(types.ReferenceTypeNode)
+	if !ok {
+		return false
+	}
+	return refType.IsSymetrical()
+}
+
+func suitableDirection(bd ua.BrowseDirection, isForward, isSymmetric bool) bool {
 	switch {
 	case bd == ua.BrowseDirectionBoth:
 		return true
 	case bd == ua.BrowseDirectionForward && isForward:
 		return true
-	case bd == ua.BrowseDirectionInverse && !isForward:
+	case bd == ua.BrowseDirectionInverse && !isForward && !isSymmetric:
 		return true
 	default:
 		return false

@@ -687,6 +687,36 @@ func TestBrowseReturnsBadReferenceTypeIDInvalid(t *testing.T) {
 	}
 }
 
+func TestSuitableDirection(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		direction   ua.BrowseDirection
+		isForward   bool
+		isSymmetric bool
+		want        bool
+	}{
+		{name: "forward matches forward reference", direction: ua.BrowseDirectionForward, isForward: true, want: true},
+		{name: "forward rejects inverse reference", direction: ua.BrowseDirectionForward, isForward: false, want: false},
+		{name: "inverse matches inverse non symmetric reference", direction: ua.BrowseDirectionInverse, isForward: false, want: true},
+		{name: "inverse rejects forward reference", direction: ua.BrowseDirectionInverse, isForward: true, want: false},
+		{name: "both matches forward reference", direction: ua.BrowseDirectionBoth, isForward: true, want: true},
+		{name: "both matches inverse reference", direction: ua.BrowseDirectionBoth, isForward: false, want: true},
+		{name: "inverse rejects symmetric reference", direction: ua.BrowseDirectionInverse, isForward: false, isSymmetric: true, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := suitableDirection(tt.direction, tt.isForward, tt.isSymmetric); got != tt.want {
+				t.Fatalf("expected %t, got %t", tt.want, got)
+			}
+		})
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace
