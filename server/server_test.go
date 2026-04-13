@@ -125,6 +125,9 @@ func TestValidateEnabledSecureChannelPolicy(t *testing.T) {
 	if err := validate(ua.SecurityPolicyURIBasic256); err != ua.StatusBadSecurityPolicyRejected {
 		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityPolicyRejected, err)
 	}
+	if err := validate(ua.SecurityPolicyURIAes256Sha256RsaPss); err != ua.StatusBadSecurityPolicyRejected {
+		t.Fatalf("expected globally supported but disabled policy to return %v, got %v", ua.StatusBadSecurityPolicyRejected, err)
+	}
 }
 
 func TestValidateEnabledSecureChannelMode(t *testing.T) {
@@ -146,5 +149,8 @@ func TestValidateEnabledSecureChannelMode(t *testing.T) {
 	}
 	if err := validate(ua.SecurityPolicyURIBasic256, ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
 		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
+	}
+	if err := validate(ua.SecurityPolicyURIAes256Sha256RsaPss, ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
+		t.Fatalf("expected globally supported but disabled mode to return %v, got %v", ua.StatusBadSecurityModeRejected, err)
 	}
 }
