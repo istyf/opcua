@@ -220,6 +220,87 @@ func TestValidateIncomingOpenSecureChannelRequest(t *testing.T) {
 	}
 }
 
+func TestCloseSecureChannelVerifyAndDecrypt(t *testing.T) {
+	tests := []struct {
+		name   string
+		uri    string
+		mode   ua.MessageSecurityMode
+		keyLen int
+	}{
+		{name: "basic128rsa15-sign", uri: ua.SecurityPolicyURIBasic128Rsa15, mode: ua.MessageSecurityModeSign, keyLen: 2048},
+		{name: "basic128rsa15-signandencrypt", uri: ua.SecurityPolicyURIBasic128Rsa15, mode: ua.MessageSecurityModeSignAndEncrypt, keyLen: 2048},
+		{name: "basic256-sign", uri: ua.SecurityPolicyURIBasic256, mode: ua.MessageSecurityModeSign, keyLen: 2048},
+		{name: "basic256-signandencrypt", uri: ua.SecurityPolicyURIBasic256, mode: ua.MessageSecurityModeSignAndEncrypt, keyLen: 2048},
+		{name: "basic256sha256-sign", uri: ua.SecurityPolicyURIBasic256Sha256, mode: ua.MessageSecurityModeSign, keyLen: 4096},
+		{name: "basic256sha256-signandencrypt", uri: ua.SecurityPolicyURIBasic256Sha256, mode: ua.MessageSecurityModeSignAndEncrypt, keyLen: 4096},
+		{name: "aes128-sha256-rsaoaep-sign", uri: ua.SecurityPolicyURIAes128Sha256RsaOaep, mode: ua.MessageSecurityModeSign, keyLen: 4096},
+		{name: "aes128-sha256-rsaoaep-signandencrypt", uri: ua.SecurityPolicyURIAes128Sha256RsaOaep, mode: ua.MessageSecurityModeSignAndEncrypt, keyLen: 4096},
+		{name: "aes256-sha256-rsapss-sign", uri: ua.SecurityPolicyURIAes256Sha256RsaPss, mode: ua.MessageSecurityModeSign, keyLen: 4096},
+		{name: "aes256-sha256-rsapss-signandencrypt", uri: ua.SecurityPolicyURIAes256Sha256RsaPss, mode: ua.MessageSecurityModeSignAndEncrypt, keyLen: 4096},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			senderAlgo, receiverAlgo := newSymmetricTestAlgorithms(t, tt.uri, tt.keyLen)
+			sender := &SecureChannel{
+				cfg: &Config{
+					SecurityPolicyURI: tt.uri,
+					SecurityMode:      tt.mode,
+				},
+			}
+			receiver := &SecureChannel{
+				cfg: &Config{
+					SecurityPolicyURI: tt.uri,
+					SecurityMode:      tt.mode,
+				},
+			}
+			senderInstance := &channelInstance{
+				sc:              sender,
+				algo:            senderAlgo,
+				sequenceNumber:  0,
+				securityTokenID: 1,
+				secureChannelID: 1,
+			}
+			receiverInstance := &channelInstance{
+				sc:              receiver,
+				algo:            receiverAlgo,
+				sequenceNumber:  0,
+				securityTokenID: 1,
+				secureChannelID: 1,
+			}
+
+			msg := senderInstance.newMessage(
+				&ua.CloseSecureChannelRequest{
+					RequestHeader: &ua.RequestHeader{
+						AuthenticationToken: ua.NewTwoByteNodeID(0),
+						Timestamp:           time.Date(2018, time.August, 10, 23, 0, 0, 0, time.UTC),
+						RequestHandle:       1,
+						AdditionalHeader:    ua.NewExtensionObject(nil),
+					},
+				},
+				id.CloseSecureChannelRequest_Encoding_DefaultBinary,
+				1,
+			)
+
+			raw, err := msg.Encode()
+			require.NoError(t, err)
+
+			cipher, err := senderInstance.signAndEncrypt(msg, raw)
+			require.NoError(t, err)
+
+			chunk := new(MessageChunk)
+			_, err = chunk.Decode(cipher)
+			require.NoError(t, err)
+
+			plain, err := receiverInstance.verifyAndDecrypt(chunk, cipher)
+			require.NoError(t, err)
+
+			headerLength := 12 + chunk.SymmetricSecurityHeader.Len()
+			require.Equal(t, raw[headerLength:], plain)
+		})
+	}
+}
+
 func TestSignAndEncryptVerifyAndDecrypt(t *testing.T) {
 	buildSecPolicy := func(bits int, uri string) *uapolicy.EncryptionAlgorithm {
 		t.Helper()
@@ -366,6 +447,36 @@ func TestSignAndEncryptVerifyAndDecrypt(t *testing.T) {
 			require.Equal(t, tt.b[headerLength:], plain, "header not equal")
 		})
 	}
+}
+
+func newSymmetricTestAlgorithms(t *testing.T, uri string, bits int) (*uapolicy.EncryptionAlgorithm, *uapolicy.EncryptionAlgorithm) {
+	t.Helper()
+
+	certPEM, keyPEM, err := uatest.GenerateCert("localhost", bits, 24*time.Hour)
+	require.NoError(t, err)
+
+	block, _ := pem.Decode(keyPEM)
+	pk, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	require.NoError(t, err)
+
+	certBlock, _ := pem.Decode(certPEM)
+	remoteCert, err := x509.ParseCertificate(certBlock.Bytes)
+	require.NoError(t, err)
+
+	remoteKey := remoteCert.PublicKey.(*rsa.PublicKey)
+	asym, err := uapolicy.Asymmetric(uri, pk, remoteKey)
+	require.NoError(t, err)
+
+	localNonce, err := asym.MakeNonce()
+	require.NoError(t, err)
+	remoteNonce, err := asym.MakeNonce()
+	require.NoError(t, err)
+
+	sender, err := uapolicy.Symmetric(uri, localNonce, remoteNonce)
+	require.NoError(t, err)
+	receiver, err := uapolicy.Symmetric(uri, remoteNonce, localNonce)
+	require.NoError(t, err)
+	return sender, receiver
 }
 
 func TestNewSecureChannel(t *testing.T) {
