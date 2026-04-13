@@ -135,7 +135,12 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 		return nil, ua.StatusBadSecurityChecksFailed
 	}
 
-	if _, err := decodeUserIdentityToken(req.UserIdentityToken); err != nil {
+	token, err := decodeUserIdentityToken(req.UserIdentityToken)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := resolveUserTokenPolicy(token, s.srv.Endpoints()); err != nil {
 		return nil, err
 	}
 

@@ -106,3 +106,109 @@ func TestDecodeUserIdentityToken(t *testing.T) {
 		})
 	}
 }
+
+func TestResolveUserTokenPolicy(t *testing.T) {
+	t.Parallel()
+
+	endpoints := []*ua.EndpointDescription{
+		{
+			UserIdentityTokens: []*ua.UserTokenPolicy{
+				{
+					PolicyID:          "anonymous_none",
+					TokenType:         ua.UserTokenTypeAnonymous,
+					SecurityPolicyURI: ua.SecurityPolicyURINone,
+				},
+				{
+					PolicyID:          "username_basic256sha256",
+					TokenType:         ua.UserTokenTypeUserName,
+					SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+				},
+			},
+		},
+		{
+			UserIdentityTokens: []*ua.UserTokenPolicy{
+				{
+					PolicyID:          "username_aes128",
+					TokenType:         ua.UserTokenTypeUserName,
+					SecurityPolicyURI: ua.SecurityPolicyURIAes128Sha256RsaOaep,
+				},
+			},
+		},
+	}
+
+	tests := []struct {
+		name    string
+		token   any
+		wantID  string
+		wantErr error
+	}{
+		{
+			name: "anonymous token matches advertised policy",
+			token: &ua.AnonymousIdentityToken{
+				PolicyID: "anonymous_none",
+			},
+			wantID: "anonymous_none",
+		},
+		{
+			name: "username token matches advertised policy",
+			token: &ua.UserNameIdentityToken{
+				PolicyID: "username_basic256sha256",
+				UserName: "alice",
+			},
+			wantID: "username_basic256sha256",
+		},
+		{
+			name: "empty policy id is invalid",
+			token: &ua.UserNameIdentityToken{
+				UserName: "alice",
+			},
+			wantErr: ua.StatusBadIdentityTokenInvalid,
+		},
+		{
+			name: "unknown policy id is rejected",
+			token: &ua.UserNameIdentityToken{
+				PolicyID: "username_unknown",
+				UserName: "alice",
+			},
+			wantErr: ua.StatusBadIdentityTokenRejected,
+		},
+		{
+			name: "policy id with wrong token type is rejected",
+			token: &ua.UserNameIdentityToken{
+				PolicyID: "anonymous_none",
+				UserName: "alice",
+			},
+			wantErr: ua.StatusBadIdentityTokenRejected,
+		},
+		{
+			name: "unsupported decoded token type is invalid",
+			token: &ua.X509IdentityToken{
+				PolicyID: "x509_basic256sha256",
+			},
+			wantErr: ua.StatusBadIdentityTokenInvalid,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := resolveUserTokenPolicy(tt.token, endpoints)
+			if tt.wantErr != nil {
+				if err != tt.wantErr {
+					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if got == nil {
+				t.Fatal("expected matching user token policy, got nil")
+			}
+			if got.PolicyID != tt.wantID {
+				t.Fatalf("expected policy %q, got %q", tt.wantID, got.PolicyID)
+			}
+		})
+	}
+}
