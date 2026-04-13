@@ -166,6 +166,69 @@ func TestBrowseRejectsTooManyOperations(t *testing.T) {
 	}
 }
 
+func TestBrowseAcceptsEmptyViewDescription(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+	backend.namespaces[1] = &viewTestNamespace{
+		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
+			return &ua.BrowseResult{StatusCode: ua.StatusOK}
+		},
+	}
+
+	_, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 47},
+		View:          &ua.ViewDescription{ViewID: ua.NewNumericNodeID(0, 0)},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: ua.NewNumericNodeID(1, 1001)},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+}
+
+func TestBrowseRejectsUnsupportedViewID(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+
+	_, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 48},
+		View: &ua.ViewDescription{
+			ViewID: ua.NewNumericNodeID(1, 5001),
+		},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: ua.NewNumericNodeID(1, 1001)},
+		},
+	}, 1)
+	if err != ua.StatusBadViewIDUnknown {
+		t.Fatalf("expected %s, got %v", ua.StatusBadViewIDUnknown, err)
+	}
+}
+
+func TestBrowseRejectsViewParameterMismatch(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+
+	_, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 49},
+		View: &ua.ViewDescription{
+			Timestamp: time.Unix(1, 0),
+		},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: ua.NewNumericNodeID(1, 1001)},
+		},
+	}, 1)
+	if err != ua.StatusBadViewParameterMismatch {
+		t.Fatalf("expected %s, got %v", ua.StatusBadViewParameterMismatch, err)
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace

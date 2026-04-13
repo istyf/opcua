@@ -50,6 +50,29 @@ func NewViewService(b ViewServiceBackend) *ViewService {
 
 var newViewServiceLogAttribute = newServiceLogAttributeCreatorForSet("view")
 
+func isEmptyViewDescription(view *ua.ViewDescription) bool {
+	if view == nil {
+		return true
+	}
+	if view.ViewID != nil && !view.ViewID.Equal(noNodeID) {
+		return false
+	}
+	return view.Timestamp.IsZero() && view.ViewVersion == 0
+}
+
+func validateBrowseView(view *ua.ViewDescription) error {
+	if isEmptyViewDescription(view) {
+		return nil
+	}
+	if view == nil {
+		return nil
+	}
+	if view.ViewID == nil || view.ViewID.Equal(noNodeID) {
+		return ua.StatusBadViewParameterMismatch
+	}
+	return ua.StatusBadViewIDUnknown
+}
+
 func newBrowseResponse(requestHandle uint32, resultCount int) *ua.BrowseResponse {
 	return &ua.BrowseResponse{
 		ResponseHeader: &ua.ResponseHeader{
@@ -101,6 +124,9 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 	if s.maxBrowseOperations > 0 && uint32(len(req.NodesToBrowse)) > s.maxBrowseOperations {
 		return nil, ua.StatusBadTooManyOperations
+	}
+	if err := validateBrowseView(req.View); err != nil {
+		return nil, err
 	}
 
 	resp := newBrowseResponse(req.RequestHeader.RequestHandle, len(req.NodesToBrowse))
