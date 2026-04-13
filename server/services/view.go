@@ -137,6 +137,53 @@ func newBrowseNextResponse(requestHandle uint32, resultCount int) *ua.BrowseNext
 	}
 }
 
+func trimReferenceDescriptionByResultMask(ref *ua.ReferenceDescription, mask uint32) *ua.ReferenceDescription {
+	if ref == nil {
+		return nil
+	}
+	if mask == uint32(ua.BrowseResultMaskAll) {
+		return ref
+	}
+
+	trimmed := &ua.ReferenceDescription{}
+	trimmed.NodeID = ref.NodeID
+	if mask&uint32(ua.BrowseResultMaskReferenceTypeID) != 0 {
+		trimmed.ReferenceTypeID = ref.ReferenceTypeID
+	}
+	if mask&uint32(ua.BrowseResultMaskIsForward) != 0 {
+		trimmed.IsForward = ref.IsForward
+	}
+	if mask&uint32(ua.BrowseResultMaskNodeClass) != 0 {
+		trimmed.NodeClass = ref.NodeClass
+	}
+	if mask&uint32(ua.BrowseResultMaskBrowseName) != 0 {
+		trimmed.BrowseName = ref.BrowseName
+	}
+	if mask&uint32(ua.BrowseResultMaskDisplayName) != 0 {
+		trimmed.DisplayName = ref.DisplayName
+	}
+	if mask&uint32(ua.BrowseResultMaskTypeDefinition) != 0 {
+		trimmed.TypeDefinition = ref.TypeDefinition
+	}
+	return trimmed
+}
+
+func applyBrowseResultMask(result *ua.BrowseResult, mask uint32) *ua.BrowseResult {
+	if result == nil || len(result.References) == 0 {
+		return result
+	}
+
+	trimmed := &ua.BrowseResult{
+		StatusCode:        result.StatusCode,
+		ContinuationPoint: result.ContinuationPoint,
+		References:        make([]*ua.ReferenceDescription, len(result.References)),
+	}
+	for i, ref := range result.References {
+		trimmed.References[i] = trimReferenceDescriptionByResultMask(ref, mask)
+	}
+	return trimmed
+}
+
 func (s *ViewService) newContinuationPoint() []byte {
 	id := s.nextContinuationID.Add(1)
 	return []byte(strconv.FormatUint(id, 10))
@@ -287,7 +334,9 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			ualog.String("ref", fmt.Sprint(br.ReferenceTypeID)),
 		)
 
-		resp.Results[i] = s.applyBrowseReferenceLimit(s.browseNode(ctx, br), req.RequestedMaxReferencesPerNode)
+		result := s.browseNode(ctx, br)
+		result = applyBrowseResultMask(result, br.ResultMask)
+		resp.Results[i] = s.applyBrowseReferenceLimit(result, req.RequestedMaxReferencesPerNode)
 	}
 
 	return resp, nil

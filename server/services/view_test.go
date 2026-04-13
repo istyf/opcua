@@ -53,8 +53,8 @@ func TestBrowseReturnsResultsInRequestOrder(t *testing.T) {
 	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
 		RequestHeader: &ua.RequestHeader{RequestHandle: 41},
 		NodesToBrowse: []*ua.BrowseDescription{
-			{NodeID: firstNodeID},
-			{NodeID: secondNodeID},
+			{NodeID: firstNodeID, ResultMask: uint32(ua.BrowseResultMaskBrowseName)},
+			{NodeID: secondNodeID, ResultMask: uint32(ua.BrowseResultMaskBrowseName)},
 		},
 	}, 1)
 	if err != nil {
@@ -153,7 +153,7 @@ func TestBrowseTruncatesResultsAndReturnsContinuationPoint(t *testing.T) {
 		RequestHeader:                 &ua.RequestHeader{RequestHandle: 40},
 		RequestedMaxReferencesPerNode: 2,
 		NodesToBrowse: []*ua.BrowseDescription{
-			{NodeID: nodeID},
+			{NodeID: nodeID, ResultMask: uint32(ua.BrowseResultMaskBrowseName)},
 		},
 	}, 1)
 	if err != nil {
@@ -201,7 +201,7 @@ func TestBrowseNextReturnsNextReferenceBatch(t *testing.T) {
 		RequestHeader:                 &ua.RequestHeader{RequestHandle: 41},
 		RequestedMaxReferencesPerNode: 2,
 		NodesToBrowse: []*ua.BrowseDescription{
-			{NodeID: nodeID},
+			{NodeID: nodeID, ResultMask: uint32(ua.BrowseResultMaskBrowseName)},
 		},
 	}, 1)
 	if err != nil {
@@ -782,6 +782,105 @@ func TestSuitableRefType(t *testing.T) {
 	}
 	if suitableRefType(srv, hierarchical, ua.NewNumericNodeID(0, id.HasTypeDefinition), true) {
 		t.Fatal("expected unrelated reference type not to match")
+	}
+}
+
+func TestTrimReferenceDescriptionByResultMask(t *testing.T) {
+	t.Parallel()
+
+	ref := &ua.ReferenceDescription{
+		ReferenceTypeID: ua.NewNumericNodeID(0, id.Organizes),
+		IsForward:       true,
+		NodeID:          ua.NewNumericExpandedNodeID(1, 2001),
+		BrowseName:      &ua.QualifiedName{Name: "target"},
+		DisplayName:     ua.NewLocalizedText("Target"),
+		NodeClass:       ua.NodeClassObject,
+		TypeDefinition:  ua.NewNumericExpandedNodeID(0, id.BaseObjectType),
+	}
+
+	trimmed := trimReferenceDescriptionByResultMask(ref, uint32(ua.BrowseResultMaskBrowseName|ua.BrowseResultMaskTypeDefinition))
+
+	if trimmed.ReferenceTypeID != nil {
+		t.Fatal("expected reference type to be omitted")
+	}
+	if trimmed.BrowseName == nil || trimmed.BrowseName.Name != "target" {
+		t.Fatal("expected browse name to be preserved")
+	}
+	if trimmed.TypeDefinition == nil || !trimmed.TypeDefinition.NodeID.Equal(ua.NewNumericNodeID(0, id.BaseObjectType)) {
+		t.Fatal("expected type definition to be preserved")
+	}
+	if trimmed.DisplayName != nil {
+		t.Fatal("expected display name to be omitted")
+	}
+	if trimmed.NodeID == nil || !trimmed.NodeID.NodeID.Equal(ua.NewNumericNodeID(1, 2001)) {
+		t.Fatal("expected target node id to always be preserved")
+	}
+}
+
+func TestBrowseAppliesResultMask(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+	nodeID := ua.NewNumericNodeID(1, 1001)
+	backend.namespaces[1] = &viewTestNamespace{
+		nodeFn: func(id *ua.NodeID) types.Node {
+			if id.Equal(nodeID) {
+				return viewTestNode{id: id}
+			}
+			return nil
+		},
+		browseFn: func(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
+			return &ua.BrowseResult{
+				StatusCode: ua.StatusOK,
+				References: []*ua.ReferenceDescription{
+					{
+						ReferenceTypeID: ua.NewNumericNodeID(0, id.Organizes),
+						IsForward:       true,
+						NodeID:          ua.NewNumericExpandedNodeID(1, 2001),
+						BrowseName:      &ua.QualifiedName{Name: "target"},
+						DisplayName:     ua.NewLocalizedText("Target"),
+						NodeClass:       ua.NodeClassObject,
+						TypeDefinition:  ua.NewNumericExpandedNodeID(0, id.BaseObjectType),
+					},
+				},
+			}
+		},
+	}
+
+	resp, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 55},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{
+				NodeID:          nodeID,
+				BrowseDirection: ua.BrowseDirectionForward,
+				ResultMask:      uint32(ua.BrowseResultMaskBrowseName | ua.BrowseResultMaskNodeClass),
+			},
+		},
+	}, 1)
+	if err != nil {
+		t.Fatalf("browse: %v", err)
+	}
+
+	browseResp := resp.(*ua.BrowseResponse)
+	ref := browseResp.Results[0].References[0]
+	if ref.BrowseName == nil || ref.BrowseName.Name != "target" {
+		t.Fatal("expected browse name to be present")
+	}
+	if ref.NodeClass != ua.NodeClassObject {
+		t.Fatalf("expected node class %s, got %s", ua.NodeClassObject, ref.NodeClass)
+	}
+	if ref.ReferenceTypeID != nil {
+		t.Fatal("expected reference type id to be omitted by result mask")
+	}
+	if ref.DisplayName != nil {
+		t.Fatal("expected display name to be omitted by result mask")
+	}
+	if ref.NodeID == nil || !ref.NodeID.NodeID.Equal(ua.NewNumericNodeID(1, 2001)) {
+		t.Fatal("expected target node id to be preserved by result mask")
+	}
+	if ref.TypeDefinition != nil {
+		t.Fatal("expected type definition to be omitted by result mask")
 	}
 }
 
