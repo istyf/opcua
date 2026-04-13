@@ -154,6 +154,74 @@ func TestActivateSessionAnonymousClearsAuthenticatedUser(t *testing.T) {
 	}
 }
 
+func TestActivateSessionReactivationReplacesAuthenticatedUser(t *testing.T) {
+	t.Parallel()
+
+	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("failed to generate test key: %v", err)
+	}
+
+	users := map[string]*auth.AuthenticatedUser{
+		"alice": {UserName: "alice", Subject: "user:alice"},
+		"bob":   {UserName: "bob", Subject: "user:bob"},
+	}
+
+	session := newSessionServiceTestSession()
+	backend := &sessionServiceTestBackend{
+		session: session,
+		endpoints: []*ua.EndpointDescription{{
+			UserIdentityTokens: []*ua.UserTokenPolicy{{
+				PolicyID:          "username_basic256sha256",
+				TokenType:         ua.UserTokenTypeUserName,
+				SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+			}},
+		}},
+		cfg: sessionServiceTestConfig{
+			privateKey: serverKey,
+			authenticator: func(_ context.Context, req *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+				return users[req.UserName], nil
+			},
+		},
+	}
+
+	service := NewSessionService(backend, nil)
+	sc := newSessionServiceTestSecureChannel(t)
+	decryptOnly := mustSessionServiceDecryptOnlyAlgorithm(t, serverKey, ua.SecurityPolicyURIBasic256Sha256)
+
+	activate := func(t *testing.T, userName, password string) {
+		t.Helper()
+
+		req := &ua.ActivateSessionRequest{
+			RequestHeader: &ua.RequestHeader{
+				RequestHandle:       99,
+				AuthenticationToken: session.AuthTokenID(),
+			},
+			ClientSignature: &ua.SignatureData{},
+			UserIdentityToken: ua.NewExtensionObject(&ua.UserNameIdentityToken{
+				PolicyID:            "username_basic256sha256",
+				UserName:            userName,
+				Password:            encryptSessionServiceTestPassword(t, serverKey, ua.SecurityPolicyURIBasic256Sha256, password, session.ServerNonce()),
+				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
+			}),
+		}
+
+		if _, err := service.ActivateSession(t.Context(), sc, req, 0); err != nil {
+			t.Fatalf("activate session as %s: %v", userName, err)
+		}
+	}
+
+	activate(t, "alice", "first-secret")
+	if session.AuthenticatedUser() != users["alice"] {
+		t.Fatalf("expected first activation to store %#v, got %#v", users["alice"], session.AuthenticatedUser())
+	}
+
+	activate(t, "bob", "second-secret")
+	if session.AuthenticatedUser() != users["bob"] {
+		t.Fatalf("expected reactivation to replace authenticated user with %#v, got %#v", users["bob"], session.AuthenticatedUser())
+	}
+}
+
 type sessionServiceTestBackend struct {
 	cfg       sessionServiceTestConfig
 	endpoints []*ua.EndpointDescription

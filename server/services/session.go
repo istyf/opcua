@@ -119,6 +119,8 @@ func (s *SessionService) CreateSession(ctx context.Context, sc *uasc.SecureChann
 //     and attach an authenticated user in later authentication work
 //   - a later successful activation refreshes the active session state instead
 //     of creating a new session
+//   - if a later successful activation presents a different user identity, the
+//     session keeps the newest authenticated user
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.6.3
 func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
