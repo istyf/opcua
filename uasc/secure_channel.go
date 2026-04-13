@@ -10,6 +10,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/binary"
+	"encoding/hex"
 	"io"
 	"log"
 	"math"
@@ -420,7 +421,8 @@ func (s *SecureChannel) Receive(ctx context.Context) *MessageBody {
 			// handlers and check them periodically to time them out.
 			_, body, err := ua.DecodeService(b)
 			if err != nil {
-				msg.Err = err
+				prefixLen := min(48, len(b))
+				msg.Err = errors.Errorf("decode service failed: %s. payload-prefix=%s", err, hex.EncodeToString(b[:prefixLen]))
 				return msg
 			}
 
@@ -486,36 +488,8 @@ func (s *SecureChannel) readChunk() (*MessageChunk, error) {
 			return nil, ua.StatusBadDecodingError // todo(dh): check if this is the correct error
 		}
 
-		if s.openingInstance == nil {
-			return nil, errors.Errorf("sechan: invalid state. openingInstance is nil.")
-		}
-
-		if err := s.validateIncomingOpenSecureChannelPolicy(m.SecurityPolicyURI); err != nil {
+		if err := s.prepareOpeningInstanceForOpen(m); err != nil {
 			return nil, err
-		}
-
-		s.cfg.SecurityPolicyURI = m.SecurityPolicyURI
-		if m.SecurityPolicyURI != ua.SecurityPolicyURINone {
-			s.cfg.RemoteCertificate = m.AsymmetricSecurityHeader.SenderCertificate
-			debug.Printf("uasc %d: setting securityPolicy to %s", s.c.ID(), m.SecurityPolicyURI)
-
-			remoteCert, err := x509.ParseCertificate(s.cfg.RemoteCertificate)
-			if err != nil {
-				return nil, err
-			}
-			remoteKey, ok := remoteCert.PublicKey.(*rsa.PublicKey)
-			if !ok {
-				return nil, ua.StatusBadCertificateInvalid
-			}
-			algo, err := uapolicy.Asymmetric(s.cfg.SecurityPolicyURI, s.openingInstance.sc.cfg.LocalKey, remoteKey)
-			if err != nil {
-				return nil, err
-			}
-
-			s.openingInstance.algo = algo
-
-			// For OpenSecureChannel asymmetric encryption is always used
-			s.cfg.SecurityMode = ua.MessageSecurityModeSignAndEncrypt
 		}
 
 		decryptWith = s.openingInstance
@@ -540,6 +514,41 @@ func (s *SecureChannel) readChunk() (*MessageChunk, error) {
 	m.Data = m.Data[n:]
 
 	return m, nil
+}
+
+func (s *SecureChannel) prepareOpeningInstanceForOpen(m *MessageChunk) error {
+	if s.openingInstance == nil {
+		return errors.Errorf("sechan: invalid state. openingInstance is nil.")
+	}
+
+	if err := s.validateIncomingOpenSecureChannelPolicy(m.SecurityPolicyURI); err != nil {
+		return err
+	}
+
+	s.cfg.SecurityPolicyURI = m.SecurityPolicyURI
+	s.openingInstance.securityPolicy = m.SecurityPolicyURI
+	if m.SecurityPolicyURI == ua.SecurityPolicyURINone {
+		return nil
+	}
+
+	s.cfg.RemoteCertificate = m.AsymmetricSecurityHeader.SenderCertificate
+	debug.Printf("uasc %d: setting securityPolicy to %s", s.c.ID(), m.SecurityPolicyURI)
+
+	remoteCert, err := x509.ParseCertificate(s.cfg.RemoteCertificate)
+	if err != nil {
+		return err
+	}
+	remoteKey, ok := remoteCert.PublicKey.(*rsa.PublicKey)
+	if !ok {
+		return ua.StatusBadCertificateInvalid
+	}
+	algo, err := uapolicy.Asymmetric(s.cfg.SecurityPolicyURI, s.openingInstance.sc.cfg.LocalKey, remoteKey)
+	if err != nil {
+		return err
+	}
+
+	s.openingInstance.algo = algo
+	return nil
 }
 
 // verifyAndDecrypt verifies and optionally decrypts a message. if `instance` is given, then it will only use that
@@ -764,6 +773,7 @@ func (s *SecureChannel) handleOpenSecureChannelRequest(reqID uint32, svc ua.Requ
 
 	s.cfg.Lifetime = req.RequestedLifetime
 	s.cfg.SecurityMode = req.SecurityMode
+	s.openingInstance.securityMode = req.SecurityMode
 
 	if err := s.validateIncomingOpenSecureChannelRequest(s.cfg.SecurityPolicyURI, req.SecurityMode); err != nil {
 		return err

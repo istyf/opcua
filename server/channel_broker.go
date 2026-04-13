@@ -14,6 +14,14 @@ import (
 	"github.com/gopcua/opcua/uasc"
 )
 
+func sendSecureChannelError(conn *uacp.Conn, err error) {
+	status, ok := err.(ua.StatusCode)
+	if !ok {
+		return
+	}
+	conn.SendError(status)
+}
+
 type channelBroker struct {
 	endpoints map[string]*ua.EndpointDescription
 
@@ -124,6 +132,8 @@ outer:
 				ualog.Warn(ctx, "secure channel closed")
 				break outer
 			} else if msg.Err != nil {
+				sendSecureChannelError(conn, msg.Err)
+				_ = conn.Close()
 				ualog.Error(ctx, "secure channel error", ualog.Err(msg.Err))
 				break outer
 			}

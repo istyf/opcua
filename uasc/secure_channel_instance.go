@@ -30,6 +30,8 @@ type channelInstance struct {
 	state           instanceState
 	createdAt       time.Time
 	revisedLifetime time.Duration
+	securityMode    ua.MessageSecurityMode
+	securityPolicy  string
 	secureChannelID uint32
 	securityTokenID uint32
 	sequenceNumber  uint32
@@ -43,10 +45,15 @@ type channelInstance struct {
 }
 
 func newChannelInstance(sc *SecureChannel) *channelInstance {
-	return &channelInstance{
+	instance := &channelInstance{
 		sc:    sc,
 		state: channelOpening,
 	}
+	if sc != nil && sc.cfg != nil {
+		instance.securityMode = sc.cfg.SecurityMode
+		instance.securityPolicy = sc.cfg.SecurityPolicyURI
+	}
+	return instance
 }
 
 func (c *channelInstance) nextSequenceNumber() uint32 {
@@ -72,6 +79,7 @@ func (c *channelInstance) newRequestMessage(req ua.Request, reqID uint32, authTo
 		AuthenticationToken: authToken,
 		Timestamp:           c.sc.timeNow(),
 		RequestHandle:       reqID, // TODO: can I cheat like this?
+		AdditionalHeader:    ua.NewExtensionObject(nil),
 	}
 
 	if timeout > 0 && timeout < c.sc.cfg.RequestTimeout {
@@ -95,14 +103,14 @@ func (c *channelInstance) newMessage(srv any, typeID uint16, requestID uint32) *
 		//
 		// See https://github.com/gopcua/opcua/issues/259
 		thumbprint := c.sc.cfg.Thumbprint
-		if c.sc.cfg.SecurityMode == ua.MessageSecurityModeNone {
+		if c.securityMode == ua.MessageSecurityModeNone {
 			thumbprint = nil
 		}
 
 		return &Message{
 			MessageHeader: &MessageHeader{
 				Header:                   NewHeader(MessageTypeOpenSecureChannel, ChunkTypeFinal, c.secureChannelID),
-				AsymmetricSecurityHeader: NewAsymmetricSecurityHeader(c.sc.cfg.SecurityPolicyURI, c.sc.cfg.Certificate, thumbprint),
+				AsymmetricSecurityHeader: NewAsymmetricSecurityHeader(c.securityPolicy, c.sc.cfg.Certificate, thumbprint),
 				SequenceHeader:           NewSequenceHeader(sequenceNumber, requestID),
 			},
 			TypeID:  ua.NewFourByteExpandedNodeID(0, typeID),
@@ -154,12 +162,13 @@ func (c *channelInstance) SetMaximumBodySize(chunkSize int) {
 // data signed and encrypted per the security policy information from the
 // secure channel.
 func (c *channelInstance) signAndEncrypt(m *Message, b []byte) ([]byte, error) {
-	// Nothing to do
-	if c.sc.cfg.SecurityMode == ua.MessageSecurityModeNone {
+	isAsymmetric := m.MessageHeader.AsymmetricSecurityHeader != nil
+	if c.algo == nil {
 		return b, nil
 	}
-
-	isAsymmetric := m.MessageHeader.AsymmetricSecurityHeader != nil
+	if c.securityMode == ua.MessageSecurityModeNone && !isAsymmetric {
+		return b, nil
+	}
 
 	var headerLength int
 
@@ -170,7 +179,7 @@ func (c *channelInstance) signAndEncrypt(m *Message, b []byte) ([]byte, error) {
 	}
 
 	var encryptedLength int
-	if c.sc.cfg.SecurityMode == ua.MessageSecurityModeSignAndEncrypt || isAsymmetric {
+	if c.securityMode == ua.MessageSecurityModeSignAndEncrypt || isAsymmetric {
 		plaintextBlockSize := c.algo.PlaintextBlockSize()
 		extraPadding := c.algo.RemoteSignatureLength() > 256
 		paddingBytes := 1
@@ -201,7 +210,7 @@ func (c *channelInstance) signAndEncrypt(m *Message, b []byte) ([]byte, error) {
 
 	b = append(b, signature...)
 	p := b[headerLength:]
-	if c.sc.cfg.SecurityMode == ua.MessageSecurityModeSignAndEncrypt || isAsymmetric {
+	if c.securityMode == ua.MessageSecurityModeSignAndEncrypt || isAsymmetric {
 		p, err = c.algo.Encrypt(p)
 		if err != nil {
 			return nil, ua.StatusBadSecurityChecksFailed
@@ -211,11 +220,13 @@ func (c *channelInstance) signAndEncrypt(m *Message, b []byte) ([]byte, error) {
 }
 
 func (c *channelInstance) verifyAndDecrypt(m *MessageChunk, r []byte) ([]byte, error) {
-	if c.sc.cfg.SecurityMode == ua.MessageSecurityModeNone {
+	isAsymmetric := m.AsymmetricSecurityHeader != nil
+	if c.algo == nil {
 		return m.Data, nil
 	}
-
-	isAsymmetric := m.AsymmetricSecurityHeader != nil
+	if c.securityMode == ua.MessageSecurityModeNone && !isAsymmetric {
+		return m.Data, nil
+	}
 
 	headerLength := 12
 
@@ -228,7 +239,7 @@ func (c *channelInstance) verifyAndDecrypt(m *MessageChunk, r []byte) ([]byte, e
 	b := make([]byte, len(r))
 	copy(b, r)
 
-	if c.sc.cfg.SecurityMode == ua.MessageSecurityModeSignAndEncrypt || isAsymmetric {
+	if c.securityMode == ua.MessageSecurityModeSignAndEncrypt || isAsymmetric {
 		p, err := c.algo.Decrypt(b[headerLength:])
 		if err != nil {
 			return nil, ua.StatusBadSecurityChecksFailed
@@ -244,7 +255,7 @@ func (c *channelInstance) verifyAndDecrypt(m *MessageChunk, r []byte) ([]byte, e
 	}
 
 	var paddingLength int
-	if c.sc.cfg.SecurityMode == ua.MessageSecurityModeSignAndEncrypt || isAsymmetric {
+	if c.securityMode == ua.MessageSecurityModeSignAndEncrypt || isAsymmetric {
 		paddingLength = int(messageToVerify[len(messageToVerify)-1])
 		if c.algo.SignatureLength() > 256 {
 			paddingLength <<= 8
