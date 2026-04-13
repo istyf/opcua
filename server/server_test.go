@@ -198,11 +198,18 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 
 	cfg := &serverConfig{}
 	authErr := errors.New("auth failed")
-	auth := func(_ context.Context, req *UserNameAuthenticationRequest) (any, error) {
+	expected := &AuthenticatedUser{
+		UserName: "alice",
+		Subject:  "user:alice",
+		Attributes: map[string]any{
+			"department": "ops",
+		},
+	}
+	auth := func(_ context.Context, req *UserNameAuthenticationRequest) (*AuthenticatedUser, error) {
 		if req == nil {
 			t.Fatal("expected request to be forwarded to authenticator")
 		}
-		return "principal", authErr
+		return expected, authErr
 	}
 
 	WithUserNameAuthenticator(auth)(t.Context(), cfg)
@@ -218,7 +225,7 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 	if !errors.Is(err, authErr) {
 		t.Fatalf("expected authenticator error %v, got %v", authErr, err)
 	}
-	if result != "principal" {
-		t.Fatalf("expected authenticator result %q, got %#v", "principal", result)
+	if result != expected {
+		t.Fatalf("expected authenticator result %#v, got %#v", expected, result)
 	}
 }
