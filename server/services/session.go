@@ -135,6 +135,10 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 		return nil, ua.StatusBadSecurityChecksFailed
 	}
 
+	if _, err := decodeUserIdentityToken(req.UserIdentityToken); err != nil {
+		return nil, err
+	}
+
 	nonce := make([]byte, sessionNonceLength)
 	if _, err := rand.Read(nonce); err != nil {
 		ualog.Error(ctx, "failed to create session nonce", ualog.Err(err))
