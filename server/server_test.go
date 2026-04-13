@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"errors"
 	"testing"
 
 	"github.com/gopcua/opcua/ua"
@@ -189,5 +190,35 @@ func TestEnableSecurityRejectsUnsupportedServerPolicy(t *testing.T) {
 
 	if len(cfg.enabledSec) != 0 {
 		t.Fatalf("expected deprecated server policy registration to be ignored, got %d entries", len(cfg.enabledSec))
+	}
+}
+
+func TestWithUserNameAuthenticator(t *testing.T) {
+	t.Parallel()
+
+	cfg := &serverConfig{}
+	authErr := errors.New("auth failed")
+	auth := func(_ context.Context, req *UserNameAuthenticationRequest) (any, error) {
+		if req == nil {
+			t.Fatal("expected request to be forwarded to authenticator")
+		}
+		return "principal", authErr
+	}
+
+	WithUserNameAuthenticator(auth)(t.Context(), cfg)
+
+	if cfg.userNameAuthenticator == nil {
+		t.Fatal("expected username authenticator to be stored on config")
+	}
+
+	result, err := cfg.userNameAuthenticator(t.Context(), &UserNameAuthenticationRequest{
+		UserName: "alice",
+		Password: "secret",
+	})
+	if !errors.Is(err, authErr) {
+		t.Fatalf("expected authenticator error %v, got %v", authErr, err)
+	}
+	if result != "principal" {
+		t.Fatalf("expected authenticator result %q, got %#v", "principal", result)
 	}
 }

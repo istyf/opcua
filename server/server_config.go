@@ -131,6 +131,14 @@ func EnableAuthMode(tokenType ua.UserTokenType) Option {
 	}
 }
 
+// WithUserNameAuthenticator registers the callback used to verify decoded
+// username/password credentials during ActivateSession.
+func WithUserNameAuthenticator(auth UserNameAuthenticator) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.userNameAuthenticator = auth
+	}
+}
+
 func defaultChannelConfig() *uasc.Config {
 	return &uasc.Config{
 		SecurityPolicyURI: ua.SecurityPolicyURINone,

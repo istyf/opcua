@@ -43,7 +43,8 @@ type serverConfig struct {
 	minSubscriptionMaxKeepAliveCount  uint32
 	minSubscriptionLifetimeCount      uint32
 
-	methodCallMiddleware types.MethodMiddleware
+	methodCallMiddleware  types.MethodMiddleware
+	userNameAuthenticator UserNameAuthenticator
 }
 
 var capabilities = ServerCapabilities{
