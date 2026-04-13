@@ -169,6 +169,7 @@ type ServerConfig interface {
 	SoftwareVersion() string
 
 	MaxNodesPerRead() uint32
+	MaxBrowseOperationsPerCall() uint32
 	MaxSubscriptions() uint32
 	MaxSubscriptionsPerSession() uint32
 	MaxSubscriptionOperationsPerCall() uint32

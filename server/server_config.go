@@ -148,6 +148,14 @@ func SoftwareVersion(name string) Option {
 	}
 }
 
+// MaxBrowseOperationsPerCall limits the number of nodes a Browse request may
+// include. A value of 0 disables the limit.
+func MaxBrowseOperationsPerCall(count uint32) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.maxBrowseOperationsPerCall = count
+	}
+}
+
 // MaxSubscriptions limits the total number of subscriptions on the server.
 // A value of 0 disables the limit.
 func MaxSubscriptions(count uint32) Option {

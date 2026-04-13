@@ -1492,6 +1492,10 @@ func (cfg subscriptionTestConfig) MaxNodesPerRead() uint32 {
 	return 0
 }
 
+func (cfg subscriptionTestConfig) MaxBrowseOperationsPerCall() uint32 {
+	return 0
+}
+
 func (cfg subscriptionTestConfig) MaxSubscriptions() uint32 {
 	return cfg.maxSubscriptions
 }

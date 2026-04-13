@@ -22,18 +22,21 @@ type ViewServiceBackend interface {
 	HandlerRegistrator
 	NamespaceProvider
 	NodeProvider
+	Config() types.ServerConfig
 }
 
 // ViewService implements the View Service Set.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.9
 type ViewService struct {
-	backend ViewServiceBackend
+	backend             ViewServiceBackend
+	maxBrowseOperations uint32
 }
 
 func NewViewService(b ViewServiceBackend) *ViewService {
 	vs := &ViewService{
-		backend: b,
+		backend:             b,
+		maxBrowseOperations: b.Config().MaxBrowseOperationsPerCall(),
 	}
 
 	b.RegisterHandler(id.BrowseRequest_Encoding_DefaultBinary, vs.Browse)
@@ -95,6 +98,9 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 	if len(req.NodesToBrowse) == 0 {
 		return nil, ua.StatusBadNothingToDo
+	}
+	if s.maxBrowseOperations > 0 && uint32(len(req.NodesToBrowse)) > s.maxBrowseOperations {
+		return nil, ua.StatusBadTooManyOperations
 	}
 
 	resp := newBrowseResponse(req.RequestHeader.RequestHandle, len(req.NodesToBrowse))

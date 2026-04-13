@@ -2,8 +2,10 @@ package services
 
 import (
 	"context"
+	"crypto/rsa"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
@@ -144,17 +146,43 @@ func TestBrowseRejectsEmptyNodesToBrowse(t *testing.T) {
 	}
 }
 
+func TestBrowseRejectsTooManyOperations(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend(viewTestConfig{
+		maxBrowseOperationsPerCall: 1,
+	})
+	service := NewViewService(backend)
+
+	_, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 46},
+		NodesToBrowse: []*ua.BrowseDescription{
+			{NodeID: ua.NewNumericNodeID(1, 1001)},
+			{NodeID: ua.NewNumericNodeID(1, 1002)},
+		},
+	}, 1)
+	if err != ua.StatusBadTooManyOperations {
+		t.Fatalf("expected %s, got %v", ua.StatusBadTooManyOperations, err)
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace
 	nodes      map[string]types.Node
+	cfg        viewTestConfig
 }
 
-func newViewTestBackend() *viewTestBackend {
+func newViewTestBackend(options ...viewTestConfig) *viewTestBackend {
+	cfg := viewTestConfig{}
+	if len(options) > 0 {
+		cfg = options[0]
+	}
 	return &viewTestBackend{
 		handlers:   make(map[int]Handler),
 		namespaces: make(map[int]types.NameSpace),
 		nodes:      make(map[string]types.Node),
+		cfg:        cfg,
 	}
 }
 
@@ -175,6 +203,10 @@ func (b *viewTestBackend) Node(id *ua.NodeID) types.Node {
 		return nil
 	}
 	return b.nodes[id.String()]
+}
+
+func (b *viewTestBackend) Config() types.ServerConfig {
+	return b.cfg
 }
 
 type viewTestNamespace struct {
@@ -211,3 +243,41 @@ func (ns *viewTestNamespace) NewQualifiedName(name string) *ua.QualifiedName {
 }
 
 func (ns *viewTestNamespace) NextAvailableID() *ua.NodeID { return ua.NewNumericNodeID(1, 1) }
+
+type viewTestConfig struct {
+	maxBrowseOperationsPerCall uint32
+}
+
+func (cfg viewTestConfig) Certificate() []byte { return nil }
+
+func (cfg viewTestConfig) Endpoints() []string { return nil }
+
+func (cfg viewTestConfig) PrivateKey() *rsa.PrivateKey { return nil }
+
+func (cfg viewTestConfig) ApplicationURI() string { return "" }
+
+func (cfg viewTestConfig) ManufacturerName() string { return "" }
+
+func (cfg viewTestConfig) ProductName() string { return "" }
+
+func (cfg viewTestConfig) SoftwareVersion() string { return "" }
+
+func (cfg viewTestConfig) MaxNodesPerRead() uint32 { return 0 }
+
+func (cfg viewTestConfig) MaxBrowseOperationsPerCall() uint32 {
+	return cfg.maxBrowseOperationsPerCall
+}
+
+func (cfg viewTestConfig) MaxSubscriptions() uint32 { return 0 }
+
+func (cfg viewTestConfig) MaxSubscriptionsPerSession() uint32 { return 0 }
+
+func (cfg viewTestConfig) MaxSubscriptionOperationsPerCall() uint32 { return 0 }
+
+func (cfg viewTestConfig) MinSubscriptionPublishingInterval() time.Duration { return 0 }
+
+func (cfg viewTestConfig) MinSubscriptionMaxKeepAliveCount() uint32 { return 0 }
+
+func (cfg viewTestConfig) MinSubscriptionLifetimeCount() uint32 { return 0 }
+
+func (cfg viewTestConfig) MethodCallMiddleware() types.MethodMiddleware { return nil }
