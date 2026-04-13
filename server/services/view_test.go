@@ -129,6 +129,21 @@ func TestBrowseReturnsBadInternalErrorWhenNamespaceBrowseReturnsNil(t *testing.T
 	}
 }
 
+func TestBrowseRejectsEmptyNodesToBrowse(t *testing.T) {
+	t.Parallel()
+
+	backend := newViewTestBackend()
+	service := NewViewService(backend)
+
+	_, err := service.Browse(t.Context(), nil, &ua.BrowseRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 45},
+		NodesToBrowse: nil,
+	}, 1)
+	if err != ua.StatusBadNothingToDo {
+		t.Fatalf("expected %s, got %v", ua.StatusBadNothingToDo, err)
+	}
+}
+
 type viewTestBackend struct {
 	handlers   map[int]Handler
 	namespaces map[int]types.NameSpace

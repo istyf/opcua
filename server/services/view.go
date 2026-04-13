@@ -93,6 +93,9 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	if err != nil {
 		return nil, err
 	}
+	if len(req.NodesToBrowse) == 0 {
+		return nil, ua.StatusBadNothingToDo
+	}
 
 	resp := newBrowseResponse(req.RequestHeader.RequestHandle, len(req.NodesToBrowse))
 
