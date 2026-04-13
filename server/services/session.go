@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/id"
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
@@ -33,6 +34,10 @@ type SessionServiceBackend interface {
 type SessionService struct {
 	srv        SessionServiceBackend
 	serverCert []byte
+}
+
+type authenticatedUserSetter interface {
+	SetAuthenticatedUser(*auth.AuthenticatedUser)
 }
 
 func NewSessionService(b SessionServiceBackend, serverCert []byte) *SessionService {
@@ -150,16 +155,21 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 		return nil, err
 	}
 
-	if userToken, ok := token.(*ua.UserNameIdentityToken); ok {
-		if _, err := validateUserNameIdentityToken(
-			userToken,
-			s.srv.Endpoints(),
-			sc.SecurityPolicyURI(),
-			s.srv.Config().PrivateKey(),
-			sess.ServerNonce(),
-		); err != nil {
-			return nil, err
-		}
+	user, err := authenticateUserIdentity(
+		ctx,
+		sess,
+		token,
+		s.srv.Endpoints(),
+		sc.SecurityPolicyURI(),
+		s.srv.Config().PrivateKey(),
+		sess.ServerNonce(),
+		s.srv.Config().UserNameAuthenticator(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if setter, ok := sess.(authenticatedUserSetter); ok {
+		setter.SetAuthenticatedUser(user)
 	}
 
 	nonce := make([]byte, sessionNonceLength)

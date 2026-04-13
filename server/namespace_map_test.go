@@ -8,6 +8,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
@@ -174,6 +175,8 @@ func (mapNamespaceTestConfig) Certificate() []byte { return nil }
 func (mapNamespaceTestConfig) Endpoints() []string { return nil }
 
 func (mapNamespaceTestConfig) PrivateKey() *rsa.PrivateKey { return nil }
+
+func (mapNamespaceTestConfig) UserNameAuthenticator() auth.UserNameAuthenticator { return nil }
 
 func (mapNamespaceTestConfig) ApplicationURI() string { return "" }
 

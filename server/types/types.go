@@ -163,6 +163,7 @@ type ServerConfig interface {
 	Certificate() []byte
 	Endpoints() []string
 	PrivateKey() *rsa.PrivateKey
+	UserNameAuthenticator() auth.UserNameAuthenticator
 
 	ApplicationURI() string
 	ManufacturerName() string

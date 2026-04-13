@@ -206,20 +206,20 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 			"department": "ops",
 		},
 	}
-	auth := func(_ context.Context, req *UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+	authenticator := func(_ context.Context, req *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
 		if req == nil {
 			t.Fatal("expected request to be forwarded to authenticator")
 		}
 		return expected, authErr
 	}
 
-	WithUserNameAuthenticator(auth)(t.Context(), cfg)
+	WithUserNameAuthenticator(authenticator)(t.Context(), cfg)
 
 	if cfg.userNameAuthenticator == nil {
 		t.Fatal("expected username authenticator to be stored on config")
 	}
 
-	result, err := cfg.userNameAuthenticator(t.Context(), &UserNameAuthenticationRequest{
+	result, err := cfg.userNameAuthenticator(t.Context(), &auth.UserNameAuthenticationRequest{
 		UserName: "alice",
 		Password: "secret",
 	})

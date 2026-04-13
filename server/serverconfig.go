@@ -4,6 +4,7 @@ import (
 	"crypto/rsa"
 	"time"
 
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 )
@@ -44,7 +45,7 @@ type serverConfig struct {
 	minSubscriptionLifetimeCount      uint32
 
 	methodCallMiddleware  types.MethodMiddleware
-	userNameAuthenticator UserNameAuthenticator
+	userNameAuthenticator auth.UserNameAuthenticator
 }
 
 var capabilities = ServerCapabilities{
@@ -127,4 +128,8 @@ func (cfg *serverConfig) SoftwareVersion() string {
 
 func (cfg *serverConfig) MethodCallMiddleware() types.MethodMiddleware {
 	return cfg.methodCallMiddleware
+}
+
+func (cfg *serverConfig) UserNameAuthenticator() auth.UserNameAuthenticator {
+	return cfg.userNameAuthenticator
 }

@@ -1486,6 +1486,10 @@ func (cfg subscriptionTestConfig) PrivateKey() *rsa.PrivateKey {
 	return nil
 }
 
+func (cfg subscriptionTestConfig) UserNameAuthenticator() auth.UserNameAuthenticator {
+	return nil
+}
+
 func (cfg subscriptionTestConfig) ApplicationURI() string {
 	return ""
 }

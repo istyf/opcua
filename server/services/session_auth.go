@@ -2,10 +2,13 @@ package services
 
 import (
 	"bytes"
+	"context"
 	"crypto/rsa"
 	"encoding/binary"
 	"slices"
 
+	"github.com/gopcua/opcua/server/auth"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uapolicy"
 )
@@ -179,4 +182,43 @@ func validateUserNameEncryptionAlgorithm(token *ua.UserNameIdentityToken, policy
 	}
 
 	return nil
+}
+
+func authenticateUserIdentity(
+	ctx context.Context,
+	session types.Session,
+	token any,
+	endpoints []*ua.EndpointDescription,
+	secureChannelPolicyURI string,
+	privateKey *rsa.PrivateKey,
+	serverNonce []byte,
+	authenticator auth.UserNameAuthenticator,
+) (*auth.AuthenticatedUser, error) {
+	switch tok := token.(type) {
+	case *ua.AnonymousIdentityToken:
+		return nil, nil
+	case *ua.UserNameIdentityToken:
+		if authenticator == nil {
+			return nil, ua.StatusBadIdentityTokenRejected
+		}
+
+		password, err := validateUserNameIdentityToken(tok, endpoints, secureChannelPolicyURI, privateKey, serverNonce)
+		if err != nil {
+			return nil, err
+		}
+
+		user, err := authenticator(ctx, &auth.UserNameAuthenticationRequest{
+			SessionID:           session.ID(),
+			AuthenticationToken: session.AuthTokenID(),
+			UserName:            tok.UserName,
+			Password:            password,
+		})
+		if err != nil {
+			return nil, ua.StatusBadIdentityTokenRejected
+		}
+
+		return user, nil
+	default:
+		return nil, ua.StatusBadIdentityTokenInvalid
+	}
 }

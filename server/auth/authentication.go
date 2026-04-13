@@ -1,5 +1,11 @@
 package auth
 
+import (
+	"context"
+
+	"github.com/gopcua/opcua/ua"
+)
+
 // AuthenticatedUser contains the authenticated identity information attached to
 // a session after successful user authentication.
 //
@@ -12,3 +18,19 @@ type AuthenticatedUser struct {
 
 	Attributes map[string]any
 }
+
+// UserNameAuthenticationRequest contains the decoded username and password from
+// an ActivateSession request together with the session being activated.
+type UserNameAuthenticationRequest struct {
+	SessionID           *ua.NodeID
+	AuthenticationToken *ua.NodeID
+	UserName            string
+	Password            string
+}
+
+// UserNameAuthenticator verifies a decoded username/password pair during
+// ActivateSession.
+//
+// Returning a non-nil error rejects the activation. On success, the callback
+// returns the authenticated user context to store on the session.
+type UserNameAuthenticator func(context.Context, *UserNameAuthenticationRequest) (*AuthenticatedUser, error)

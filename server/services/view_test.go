@@ -10,6 +10,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 )
@@ -1265,6 +1266,8 @@ func (cfg viewTestConfig) Certificate() []byte { return nil }
 func (cfg viewTestConfig) Endpoints() []string { return nil }
 
 func (cfg viewTestConfig) PrivateKey() *rsa.PrivateKey { return nil }
+
+func (cfg viewTestConfig) UserNameAuthenticator() auth.UserNameAuthenticator { return nil }
 
 func (cfg viewTestConfig) ApplicationURI() string { return "" }
 

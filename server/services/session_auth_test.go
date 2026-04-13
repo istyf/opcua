@@ -1,11 +1,14 @@
 package services
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/binary"
 	"testing"
 
+	"github.com/gopcua/opcua/server/auth"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uapolicy"
 )
@@ -639,3 +642,157 @@ func TestValidateUserNameIdentityToken(t *testing.T) {
 		})
 	}
 }
+
+func TestAuthenticateUserIdentity(t *testing.T) {
+	t.Parallel()
+
+	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("failed to generate test key: %v", err)
+	}
+
+	serverNonce := []byte("12345678901234567890123456789012")
+	endpoints := []*ua.EndpointDescription{
+		{
+			UserIdentityTokens: []*ua.UserTokenPolicy{
+				{
+					PolicyID:          "anonymous_none",
+					TokenType:         ua.UserTokenTypeAnonymous,
+					SecurityPolicyURI: ua.SecurityPolicyURINone,
+				},
+				{
+					PolicyID:          "username_basic256sha256",
+					TokenType:         ua.UserTokenTypeUserName,
+					SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+				},
+			},
+		},
+	}
+
+	encrypt := func(t *testing.T, password string, nonce []byte) []byte {
+		t.Helper()
+
+		algo, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, nil, &serverKey.PublicKey)
+		if err != nil {
+			t.Fatalf("failed to build encrypt-only algorithm: %v", err)
+		}
+
+		secret := make([]byte, 4)
+		binary.LittleEndian.PutUint32(secret, uint32(len(password)+len(nonce)))
+		secret = append(secret, []byte(password)...)
+		secret = append(secret, nonce...)
+
+		encrypted, err := algo.Encrypt(secret)
+		if err != nil {
+			t.Fatalf("failed to encrypt test password: %v", err)
+		}
+
+		return encrypted
+	}
+
+	decryptOnly, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, serverKey, nil)
+	if err != nil {
+		t.Fatalf("failed to build decrypt-only algorithm: %v", err)
+	}
+
+	session := new(sessionAuthTestSession)
+	expectedUser := &auth.AuthenticatedUser{
+		UserName: "alice",
+		Subject:  "user:alice",
+	}
+
+	tests := []struct {
+		name          string
+		token         any
+		authenticator auth.UserNameAuthenticator
+		want          *auth.AuthenticatedUser
+		wantErr       error
+	}{
+		{
+			name: "anonymous token bypasses authenticator",
+			token: &ua.AnonymousIdentityToken{
+				PolicyID: "anonymous_none",
+			},
+		},
+		{
+			name: "username token calls authenticator with decoded password",
+			token: &ua.UserNameIdentityToken{
+				PolicyID:            "username_basic256sha256",
+				UserName:            "alice",
+				Password:            encrypt(t, "secret", serverNonce),
+				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
+			},
+			authenticator: func(_ context.Context, req *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
+				if req.SessionID == nil || req.SessionID.String() != session.ID().String() {
+					t.Fatalf("expected session id %q, got %#v", session.ID(), req.SessionID)
+				}
+				if req.AuthenticationToken == nil || req.AuthenticationToken.String() != session.AuthTokenID().String() {
+					t.Fatalf("expected auth token %q, got %#v", session.AuthTokenID(), req.AuthenticationToken)
+				}
+				if req.UserName != "alice" {
+					t.Fatalf("expected username %q, got %q", "alice", req.UserName)
+				}
+				if req.Password != "secret" {
+					t.Fatalf("expected password %q, got %q", "secret", req.Password)
+				}
+				return expectedUser, nil
+			},
+			want: expectedUser,
+		},
+		{
+			name: "username token without authenticator is rejected",
+			token: &ua.UserNameIdentityToken{
+				PolicyID:            "username_basic256sha256",
+				UserName:            "alice",
+				Password:            encrypt(t, "secret", serverNonce),
+				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
+			},
+			wantErr: ua.StatusBadIdentityTokenRejected,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := authenticateUserIdentity(
+				t.Context(),
+				session,
+				tt.token,
+				endpoints,
+				ua.SecurityPolicyURIBasic256Sha256,
+				serverKey,
+				serverNonce,
+				tt.authenticator,
+			)
+			if tt.wantErr != nil {
+				if err != tt.wantErr {
+					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if got != tt.want {
+				t.Fatalf("expected authenticated user %#v, got %#v", tt.want, got)
+			}
+		})
+	}
+}
+
+type sessionAuthTestSession struct{}
+
+func (*sessionAuthTestSession) AuthTokenID() *ua.NodeID                    { return ua.NewNumericNodeID(1, 1) }
+func (*sessionAuthTestSession) ID() *ua.NodeID                             { return ua.NewNumericNodeID(1, 2) }
+func (*sessionAuthTestSession) Locales() []string                          { return nil }
+func (*sessionAuthTestSession) SetLocales([]string)                        {}
+func (*sessionAuthTestSession) RemoteCertificate() []byte                  { return nil }
+func (*sessionAuthTestSession) ServerNonce() []byte                        { return nil }
+func (*sessionAuthTestSession) SetServerNonce([]byte)                      {}
+func (*sessionAuthTestSession) TimeOutInMillis() float64                   { return 0 }
+func (*sessionAuthTestSession) Activated() bool                            { return false }
+func (*sessionAuthTestSession) SetActivated(bool)                          {}
+func (*sessionAuthTestSession) IsSameAs(types.Session) bool                { return false }
+func (*sessionAuthTestSession) AuthenticatedUser() *auth.AuthenticatedUser { return nil }
+func (*sessionAuthTestSession) PublishRequestChannel() chan types.PubReq   { return nil }

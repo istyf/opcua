@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/services"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
@@ -133,9 +134,9 @@ func EnableAuthMode(tokenType ua.UserTokenType) Option {
 
 // WithUserNameAuthenticator registers the callback used to verify decoded
 // username/password credentials during ActivateSession.
-func WithUserNameAuthenticator(auth UserNameAuthenticator) Option {
+func WithUserNameAuthenticator(authenticator auth.UserNameAuthenticator) Option {
 	return func(_ context.Context, s *serverConfig) {
-		s.userNameAuthenticator = auth
+		s.userNameAuthenticator = authenticator
 	}
 }
 
