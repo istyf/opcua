@@ -21,6 +21,17 @@ import (
 
 type nsIDLookup map[uint16]uint16
 
+// ImportNodeSet imports nodes, attributes, and references from a NodeSet2
+// document into the server.
+//
+// For imported DataType nodes, this includes loading modern
+// AttributeIDDataTypeDefinition metadata from UADataType.Definition when the
+// NodeSet provides enough information to classify and convert the definition.
+// Malformed or unsupported definitions are logged and omitted for that node
+// without aborting the full import.
+//
+// The importer intentionally does not populate the legacy Definition property;
+// the supported metadata surface is the DataTypeDefinition attribute.
 func (s *serverImpl) ImportNodeSet(ctx context.Context, nodes *schema.UANodeSet) error {
 	idLookup, err := s.namespacesImportNodeSet(nodes)
 	if err != nil {
@@ -91,6 +102,15 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 		return []*ua.LocalizedText{ua.NewLocalizedText(defaultText)}
 	}
 
+	aliases := map[string]string{}
+	if nodes.Aliases != nil {
+		aliases = make(map[string]string, len(nodes.Aliases.Alias))
+		for i := range nodes.Aliases.Alias {
+			alias := nodes.Aliases.Alias[i]
+			aliases[alias.AliasAttr] = alias.Value
+		}
+	}
+
 	mustParseAndConvertNodeID := func(nodeID string) *ua.NodeID {
 		nid := ua.MustParseNodeID(nodeID)
 		if correctNS, ok := (*nsID)[nid.Namespace()]; ok {
@@ -98,6 +118,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 		}
 		return nid
 	}
+	resolveImportedNodeID := newImportedNodeIDResolver(aliases, nsID)
 
 	valueFromSchema := func(v *schema.Value) any {
 		if v == nil {
@@ -266,8 +287,6 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 		displayNames := localizedTextsFromSchema(dt.DisplayName, browseName.Name)
 		descriptions := localizedTextsFromSchema(dt.Description, "")
 
-		// TODO: Add support for loading data type definitions
-
 		n := node.NewDataTypeNode(
 			node.WithBase(
 				node.WithID(nid),
@@ -277,6 +296,21 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			),
 			node.WithAbstractType(dt.IsAbstractAttr),
 		)
+		if definition, err := importSchemaDataTypeDefinition(dt, resolveImportedNodeID); err != nil {
+			ualog.Warn(ctx, "failed to import data type definition",
+				ualog.String("node_id", nid.String()),
+				ualog.String("browse_name", dt.BrowseNameAttr),
+				ualog.Err(err),
+			)
+		} else if definition != nil {
+			if err := n.SetAttribute(ctx, ua.AttributeIDDataTypeDefinition, values.DataValueFromValue(definition)); err != nil {
+				ualog.Warn(ctx, "failed to attach data type definition",
+					ualog.String("node_id", nid.String()),
+					ualog.String("browse_name", dt.BrowseNameAttr),
+					ualog.Err(err),
+				)
+			}
+		}
 
 		ns.AddNode(n)
 	}
@@ -583,9 +617,11 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		reftypes[rt.NodeIdAttr] = rt     // sometimes they use node id
 	}
 
-	for i := range nodes.Aliases.Alias {
-		alias := nodes.Aliases.Alias[i]
-		aliases[alias.AliasAttr] = alias.Value
+	if nodes.Aliases != nil {
+		for i := range nodes.Aliases.Alias {
+			alias := nodes.Aliases.Alias[i]
+			aliases[alias.AliasAttr] = alias.Value
+		}
 	}
 
 	// any of the aliases could be reference types, so we have to check them all and add them to the reftypes map
@@ -624,6 +660,20 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		}
 	}
 
+	resolveReferenceType := func(browseName, refType string) *schema.UAReferenceType {
+		rt, ok := reftypes[refType]
+		if ok && rt != nil {
+			return rt
+		}
+
+		ualog.Error(ctx, "unable to find reference type",
+			ualog.String("ref_type", refType),
+			ualog.String("browse_name", browseName),
+		)
+		failures++
+		return nil
+	}
+
 	// the first thing we have to do is go thorugh and define all the nodes.
 	// set up the reference types.
 	for i := range nodes.UAReferenceType {
@@ -653,10 +703,14 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 				v := true
 				ref.IsForwardAttr = &v
 			}
-			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
+			reftype := resolveReferenceType(rt.BrowseNameAttr, ref.ReferenceTypeAttr)
+			if reftype == nil {
+				continue
+			}
+			reftypeid := mustParseAndConvertNodeID(reftype.NodeIdAttr)
 			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 
-			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
+			if !reftype.SymmetricAttr {
 				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
@@ -672,30 +726,36 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			ualog.Info(ctx, "doing basedatatype")
 		}
 
-		for rid := range dt.References.Reference {
-			ref := dt.References.Reference[rid]
-			refnodeid := mustParseAndConvertNodeID(ref.Value)
-			n := s.Node(refnodeid)
-			if n == nil {
-				ualog.Error(ctx, "unable to find node",
-					ualog.String("value", ref.Value),
-					ualog.String("ref_type", ref.ReferenceTypeAttr),
-					ualog.String("browse_name", dt.BrowseNameAttr),
-				)
-				failures++
-				continue
-			}
+		if dt.References != nil {
+			for rid := range dt.References.Reference {
+				ref := dt.References.Reference[rid]
+				refnodeid := mustParseAndConvertNodeID(ref.Value)
+				n := s.Node(refnodeid)
+				if n == nil {
+					ualog.Error(ctx, "unable to find node",
+						ualog.String("value", ref.Value),
+						ualog.String("ref_type", ref.ReferenceTypeAttr),
+						ualog.String("browse_name", dt.BrowseNameAttr),
+					)
+					failures++
+					continue
+				}
 
-			if ref.IsForwardAttr == nil {
-				v := true
-				ref.IsForwardAttr = &v
-			}
+				if ref.IsForwardAttr == nil {
+					v := true
+					ref.IsForwardAttr = &v
+				}
 
-			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
-			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
+				reftype := resolveReferenceType(dt.BrowseNameAttr, ref.ReferenceTypeAttr)
+				if reftype == nil {
+					continue
+				}
+				reftypeid := mustParseAndConvertNodeID(reftype.NodeIdAttr)
+				node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 
-			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
-				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
+				if !reftype.SymmetricAttr {
+					n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
+				}
 			}
 		}
 	}
@@ -723,10 +783,14 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 				v := true
 				ref.IsForwardAttr = &v
 			}
-			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
+			reftype := resolveReferenceType(ot.BrowseNameAttr, ref.ReferenceTypeAttr)
+			if reftype == nil {
+				continue
+			}
+			reftypeid := mustParseAndConvertNodeID(reftype.NodeIdAttr)
 			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
 
-			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
+			if !reftype.SymmetricAttr {
 				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
@@ -755,9 +819,13 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 				v := true
 				ref.IsForwardAttr = &v
 			}
-			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
+			reftype := resolveReferenceType(ot.BrowseNameAttr, ref.ReferenceTypeAttr)
+			if reftype == nil {
+				continue
+			}
+			reftypeid := mustParseAndConvertNodeID(reftype.NodeIdAttr)
 			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
-			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
+			if !reftype.SymmetricAttr {
 				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
@@ -786,9 +854,13 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 				v := true
 				ref.IsForwardAttr = &v
 			}
-			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
+			reftype := resolveReferenceType(ot.BrowseNameAttr, ref.ReferenceTypeAttr)
+			if reftype == nil {
+				continue
+			}
+			reftypeid := mustParseAndConvertNodeID(reftype.NodeIdAttr)
 			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
-			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
+			if !reftype.SymmetricAttr {
 				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
@@ -817,9 +889,13 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 				v := true
 				ref.IsForwardAttr = &v
 			}
-			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
+			reftype := resolveReferenceType(ot.BrowseNameAttr, ref.ReferenceTypeAttr)
+			if reftype == nil {
+				continue
+			}
+			reftypeid := mustParseAndConvertNodeID(reftype.NodeIdAttr)
 			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
-			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
+			if !reftype.SymmetricAttr {
 				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
@@ -851,9 +927,13 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 				v := true
 				ref.IsForwardAttr = &v
 			}
-			reftypeid := mustParseAndConvertNodeID(reftypes[ref.ReferenceTypeAttr].NodeIdAttr)
+			reftype := resolveReferenceType(ot.BrowseNameAttr, ref.ReferenceTypeAttr)
+			if reftype == nil {
+				continue
+			}
+			reftypeid := mustParseAndConvertNodeID(reftype.NodeIdAttr)
 			node.AddRef(refs.NewReferenceDescription(n, refs.TypeID(reftypeid.IntID()), *ref.IsForwardAttr))
-			if !reftypes[ref.ReferenceTypeAttr].SymmetricAttr {
+			if !reftype.SymmetricAttr {
 				n.AddRef(refs.NewReferenceDescription(node, refs.TypeID(reftypeid.IntID()), !*ref.IsForwardAttr))
 			}
 		}
