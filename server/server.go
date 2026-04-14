@@ -39,6 +39,7 @@ type serverImpl struct {
 	status     *ua.ServerStatusDataType
 	endpoints  []*ua.EndpointDescription
 	namespaces []types.NameSpace
+	closeOnce  sync.Once
 
 	l  *uacp.Listener
 	cb *channelBroker
@@ -245,8 +246,14 @@ func (s *serverImpl) Start(ctx context.Context) error {
 
 	go s.acceptAndRegister(ctx, s.l)
 	go s.monitorConnections(ctx)
+	go s.closeOnStartContextDone(ctx)
 
 	return nil
+}
+
+func (s *serverImpl) closeOnStartContextDone(ctx context.Context) {
+	<-ctx.Done()
+	_ = s.Close(context.WithoutCancel(ctx))
 }
 
 func validateConfiguredSecureEndpoints(cfg *serverConfig) error {
@@ -287,15 +294,22 @@ func (s *serverImpl) setServerState(state ua.ServerState) {
 // Close gracefully shuts the server down by closing all open connections,
 // and stops listening on all endpoints
 func (s *serverImpl) Close(ctx context.Context) error {
-	s.setServerState(ua.ServerStateShutdown)
+	var err error
+	s.closeOnce.Do(func() {
+		s.setServerState(ua.ServerStateShutdown)
 
-	// Close the listener, preventing new sessions from starting
-	if s.l != nil {
-		s.l.Close()
-	}
+		// Close the listener, preventing new sessions from starting
+		if s.l != nil {
+			s.l.Close()
+		}
 
-	// Shut down all secure channels and UACP connections
-	return s.cb.Close(ctx)
+		// Shut down all secure channels and UACP connections
+		if s.cb != nil {
+			err = s.cb.Close(ctx)
+		}
+	})
+
+	return err
 }
 
 func (s *serverImpl) CloseSession(ctx context.Context, authToken *ua.NodeID) error {

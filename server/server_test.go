@@ -6,10 +6,63 @@ import (
 	"crypto/rsa"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/ua"
 )
+
+func TestStartContextCancellationClosesServer(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(t.Context())
+	srv := &serverImpl{
+		cb: newChannelBroker(),
+		status: &ua.ServerStatusDataType{
+			State: ua.ServerStateRunning,
+		},
+	}
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		srv.closeOnStartContextDone(ctx)
+	}()
+
+	cancel()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for start-context shutdown goroutine")
+	}
+
+	if got := srv.Status().State; got != ua.ServerStateShutdown {
+		t.Fatalf("expected server state %v after start-context cancellation, got %v", ua.ServerStateShutdown, got)
+	}
+}
+
+func TestCloseIsIdempotent(t *testing.T) {
+	t.Parallel()
+
+	srv := &serverImpl{
+		cb: newChannelBroker(),
+		status: &ua.ServerStatusDataType{
+			State: ua.ServerStateRunning,
+		},
+	}
+
+	if err := srv.Close(t.Context()); err != nil {
+		t.Fatalf("first close returned error: %v", err)
+	}
+	if err := srv.Close(t.Context()); err != nil {
+		t.Fatalf("second close returned error: %v", err)
+	}
+
+	if got := srv.Status().State; got != ua.ServerStateShutdown {
+		t.Fatalf("expected server state %v after repeated close, got %v", ua.ServerStateShutdown, got)
+	}
+}
 
 func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 	t.Parallel()
