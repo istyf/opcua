@@ -92,11 +92,6 @@ func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.A
 	switch attr {
 	case ua.AttributeIDNodeID:
 		a = &types.AttrValue{Value: values.DataValueFromValue(id)}
-	case ua.AttributeIDEventNotifier:
-		// TODO: this is a hack to force the EventNotifier to false for everything.
-		// If at some point someone or something needs to use this, this will have to go away and be
-		// fixed properly.
-		a = &types.AttrValue{Value: values.DataValueFromValue(byte(0))}
 	case ua.AttributeIDNodeClass:
 		a, err = n.Attribute(ctx, attr)
 		if err != nil {
