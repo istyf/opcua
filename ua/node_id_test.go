@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/gopcua/opcua/errors"
+	"github.com/gopcua/opcua/id"
 	"github.com/stretchr/testify/require"
 )
 
@@ -133,6 +134,36 @@ func TestBufferWriteStructNilNodeID(t *testing.T) {
 	})
 	require.NoError(t, buf.Error())
 	require.Empty(t, buf.Bytes())
+}
+
+func TestReferenceDescriptionEncodeWithOmittedOptionalFields(t *testing.T) {
+	t.Parallel()
+
+	ref := &ReferenceDescription{
+		NodeID:     NewNumericExpandedNodeID(1, 2001),
+		BrowseName: &QualifiedName{Name: "target"},
+		NodeClass:  NodeClassObject,
+	}
+
+	encoded, err := ref.Encode()
+	require.NoError(t, err)
+
+	var decoded ReferenceDescription
+	_, err = Decode(encoded, &decoded)
+	require.NoError(t, err)
+	require.NotNil(t, decoded.ReferenceTypeID)
+	require.Equal(t, NewTwoByteNodeID(0).String(), decoded.ReferenceTypeID.String())
+	require.NotNil(t, decoded.NodeID)
+	require.Equal(t, NewNumericNodeID(1, 2001).String(), decoded.NodeID.NodeID.String())
+	require.NotNil(t, decoded.BrowseName)
+	require.Equal(t, "target", decoded.BrowseName.Name)
+	require.NotNil(t, decoded.DisplayName)
+	require.Empty(t, decoded.DisplayName.Text)
+	require.Equal(t, NodeClassObject, decoded.NodeClass)
+	require.NotNil(t, decoded.TypeDefinition)
+	require.NotNil(t, decoded.TypeDefinition.NodeID)
+	require.Equal(t, NewTwoByteNodeID(0).String(), decoded.TypeDefinition.NodeID.String())
+	require.NotEqual(t, NewNumericNodeID(0, id.Organizes).String(), decoded.ReferenceTypeID.String())
 }
 
 func BenchmarkReflectDecode(b *testing.B) {
