@@ -246,6 +246,16 @@ After a successful `ActivateSession`, the returned `auth.AuthenticatedUser` is
 stored on the server-side session and can be read back through the session
 interface. Role assignment is not part of this feature yet.
 
+### Server NodeSet2 DataType Definitions
+
+`ImportNodeSet(...)` now loads modern `DataTypeDefinition` metadata from
+`UADataType.Definition` into the imported DataType node's
+`AttributeIDDataTypeDefinition` attribute when the NodeSet provides enough
+information for conversion.
+
+This currently supports imported structure, union, enum, and option-set
+definitions through the normal browse/read surface. The importer intentionally
+does not populate the legacy `Definition` property.
 
 ### Services
 
