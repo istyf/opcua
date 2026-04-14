@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"io"
 	"math"
+	"reflect"
 	"time"
 
 	"github.com/gopcua/opcua/errors"
@@ -298,9 +299,15 @@ func (b *Buffer) WriteStruct(w any) {
 	if b.err != nil {
 		return
 	}
+	if w == nil {
+		return
+	}
 	var d []byte
 	switch x := w.(type) {
 	case BinaryEncoder:
+		if isNilValue(reflect.ValueOf(x)) {
+			return
+		}
 		d, b.err = x.Encode()
 	default:
 		d, b.err = Encode(w)

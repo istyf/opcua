@@ -27,15 +27,37 @@ type BinaryEncoder interface {
 var binaryEncoder = reflect.TypeFor[BinaryEncoder]()
 
 func isBinaryEncoder(val reflect.Value) bool {
+	if !val.IsValid() {
+		return false
+	}
 	return val.Type().Implements(binaryEncoder)
 }
 
+func isNilValue(val reflect.Value) bool {
+	if !val.IsValid() {
+		return true
+	}
+
+	switch val.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
+		return val.IsNil()
+	default:
+		return false
+	}
+}
+
 func Encode(v any) ([]byte, error) {
+	if v == nil {
+		return nil, nil
+	}
 	val := reflect.ValueOf(v)
 	return encode(val, val.Type().String())
 }
 
 func encode(val reflect.Value, name string) ([]byte, error) {
+	if !val.IsValid() {
+		return nil, nil
+	}
 	if debugCodec {
 		fmt.Printf("encode: %s has type %s and is a %s\n", name, val.Type(), val.Type().Kind())
 	}
@@ -43,6 +65,9 @@ func encode(val reflect.Value, name string) ([]byte, error) {
 	buf := NewBuffer(nil)
 	switch {
 	case isBinaryEncoder(val):
+		if isNilValue(val) {
+			return nil, nil
+		}
 		v := val.Interface().(BinaryEncoder)
 		return dump(v.Encode())
 

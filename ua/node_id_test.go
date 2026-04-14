@@ -112,6 +112,29 @@ func TestNodeID(t *testing.T) {
 	RunCodecTest(t, cases)
 }
 
+func TestEncodeNilNodeID(t *testing.T) {
+	t.Parallel()
+
+	var n *NodeID
+
+	got, err := Encode(n)
+	require.NoError(t, err)
+	require.Nil(t, got)
+}
+
+func TestBufferWriteStructNilNodeID(t *testing.T) {
+	t.Parallel()
+
+	var n *NodeID
+	buf := NewBuffer(nil)
+
+	require.NotPanics(t, func() {
+		buf.WriteStruct(n)
+	})
+	require.NoError(t, buf.Error())
+	require.Empty(t, buf.Bytes())
+}
+
 func BenchmarkReflectDecode(b *testing.B) {
 	data := []byte{
 		// mask
