@@ -45,15 +45,15 @@ func main() {
 	var opts []server.Option
 
 	opts = append(opts,
-		server.EnableSecurity("None", ua.MessageSecurityModeNone),
-		server.EnableSecurity("Basic256", ua.MessageSecurityModeSign),
-		server.EnableSecurity("Basic256", ua.MessageSecurityModeSignAndEncrypt),
-		server.EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSignAndEncrypt),
-		server.EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSign),
-		server.EnableSecurity("Aes128_Sha256_RsaOaep", ua.MessageSecurityModeSign),
-		server.EnableSecurity("Aes128_Sha256_RsaOaep", ua.MessageSecurityModeSignAndEncrypt),
-		server.EnableSecurity("Aes256_Sha256_RsaPss", ua.MessageSecurityModeSign),
-		server.EnableSecurity("Aes256_Sha256_RsaPss", ua.MessageSecurityModeSignAndEncrypt),
+		server.EnableSecurity(server.SecurityPolicyNone, ua.MessageSecurityModeNone),
+		server.EnableSecurity(server.SecurityPolicyBasic256, ua.MessageSecurityModeSign),
+		server.EnableSecurity(server.SecurityPolicyBasic256, ua.MessageSecurityModeSignAndEncrypt),
+		server.EnableSecurity(server.SecurityPolicyBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt),
+		server.EnableSecurity(server.SecurityPolicyBasic256Sha256, ua.MessageSecurityModeSign),
+		server.EnableSecurity(server.SecurityPolicyAes128Sha256RsaOaep, ua.MessageSecurityModeSign),
+		server.EnableSecurity(server.SecurityPolicyAes128Sha256RsaOaep, ua.MessageSecurityModeSignAndEncrypt),
+		server.EnableSecurity(server.SecurityPolicyAes256Sha256RsaPss, ua.MessageSecurityModeSign),
+		server.EnableSecurity(server.SecurityPolicyAes256Sha256RsaPss, ua.MessageSecurityModeSignAndEncrypt),
 	)
 
 	opts = append(opts,

@@ -14,7 +14,7 @@ type authMode struct {
 }
 
 type security struct {
-	secPolicy string
+	secPolicy SecurityPolicy
 	secMode   ua.MessageSecurityMode
 }
 

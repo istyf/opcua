@@ -81,7 +81,7 @@ func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 			name: "none security does not require certificate or key",
 			cfg: &serverConfig{
 				enabledSec: []security{{
-					secPolicy: ua.SecurityPolicyURINone,
+					secPolicy: SecurityPolicyNone,
 					secMode:   ua.MessageSecurityModeNone,
 				}},
 			},
@@ -90,7 +90,7 @@ func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 			name: "none security with sign mode is rejected",
 			cfg: &serverConfig{
 				enabledSec: []security{{
-					secPolicy: ua.SecurityPolicyURINone,
+					secPolicy: SecurityPolicyNone,
 					secMode:   ua.MessageSecurityModeSign,
 				}},
 			},
@@ -102,7 +102,7 @@ func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 				certificate: []byte("cert"),
 				privateKey:  key,
 				enabledSec: []security{{
-					secPolicy: ua.SecurityPolicyURIBasic256Sha256,
+					secPolicy: SecurityPolicyBasic256Sha256,
 					secMode:   ua.MessageSecurityModeNone,
 				}},
 			},
@@ -113,7 +113,7 @@ func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 			cfg: &serverConfig{
 				privateKey: key,
 				enabledSec: []security{{
-					secPolicy: ua.SecurityPolicyURIBasic256Sha256,
+					secPolicy: SecurityPolicyBasic256Sha256,
 					secMode:   ua.MessageSecurityModeSignAndEncrypt,
 				}},
 			},
@@ -124,7 +124,7 @@ func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 			cfg: &serverConfig{
 				certificate: []byte("cert"),
 				enabledSec: []security{{
-					secPolicy: ua.SecurityPolicyURIBasic256Sha256,
+					secPolicy: SecurityPolicyBasic256Sha256,
 					secMode:   ua.MessageSecurityModeSignAndEncrypt,
 				}},
 			},
@@ -136,7 +136,7 @@ func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 				certificate: []byte("cert"),
 				privateKey:  key,
 				enabledSec: []security{{
-					secPolicy: ua.SecurityPolicyURIBasic256Sha256,
+					secPolicy: SecurityPolicyBasic256Sha256,
 					secMode:   ua.MessageSecurityModeSignAndEncrypt,
 				}},
 			},
@@ -168,20 +168,20 @@ func TestValidateEnabledSecureChannelPolicy(t *testing.T) {
 	t.Parallel()
 
 	validate := validateEnabledSecureChannelPolicy([]security{
-		{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
-		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+		{secPolicy: SecurityPolicyNone, secMode: ua.MessageSecurityModeNone},
+		{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
 	})
 
-	if err := validate(ua.SecurityPolicyURINone); err != nil {
+	if err := validate(SecurityPolicyNone.URI()); err != nil {
 		t.Fatalf("expected none policy to be accepted, got %v", err)
 	}
-	if err := validate(ua.SecurityPolicyURIBasic256Sha256); err != nil {
+	if err := validate(SecurityPolicyBasic256Sha256.URI()); err != nil {
 		t.Fatalf("expected Basic256Sha256 policy to be accepted, got %v", err)
 	}
-	if err := validate(ua.SecurityPolicyURIBasic256); err != ua.StatusBadSecurityPolicyRejected {
+	if err := validate(SecurityPolicyBasic256.URI()); err != ua.StatusBadSecurityPolicyRejected {
 		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityPolicyRejected, err)
 	}
-	if err := validate(ua.SecurityPolicyURIAes256Sha256RsaPss); err != ua.StatusBadSecurityPolicyRejected {
+	if err := validate(SecurityPolicyAes256Sha256RsaPss.URI()); err != ua.StatusBadSecurityPolicyRejected {
 		t.Fatalf("expected globally supported but disabled policy to return %v, got %v", ua.StatusBadSecurityPolicyRejected, err)
 	}
 }
@@ -190,24 +190,32 @@ func TestValidateEnabledSecureChannelMode(t *testing.T) {
 	t.Parallel()
 
 	validate := validateEnabledSecureChannelMode([]security{
-		{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
-		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+		{secPolicy: SecurityPolicyNone, secMode: ua.MessageSecurityModeNone},
+		{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
 	})
 
-	if err := validate(ua.SecurityPolicyURINone, ua.MessageSecurityModeNone); err != nil {
+	if err := validate(SecurityPolicyNone.URI(), ua.MessageSecurityModeNone); err != nil {
 		t.Fatalf("expected none mode to be accepted, got %v", err)
 	}
-	if err := validate(ua.SecurityPolicyURIBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt); err != nil {
+	if err := validate(SecurityPolicyBasic256Sha256.URI(), ua.MessageSecurityModeSignAndEncrypt); err != nil {
 		t.Fatalf("expected configured secure mode to be accepted, got %v", err)
 	}
-	if err := validate(ua.SecurityPolicyURIBasic256Sha256, ua.MessageSecurityModeSign); err != ua.StatusBadSecurityModeRejected {
+	if err := validate(SecurityPolicyBasic256Sha256.URI(), ua.MessageSecurityModeSign); err != ua.StatusBadSecurityModeRejected {
 		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
 	}
-	if err := validate(ua.SecurityPolicyURIBasic256, ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
+	if err := validate(SecurityPolicyBasic256.URI(), ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
 		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
 	}
-	if err := validate(ua.SecurityPolicyURIAes256Sha256RsaPss, ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
+	if err := validate(SecurityPolicyAes256Sha256RsaPss.URI(), ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
 		t.Fatalf("expected globally supported but disabled mode to return %v, got %v", ua.StatusBadSecurityModeRejected, err)
+	}
+}
+
+func TestSecurityPolicyURI(t *testing.T) {
+	t.Parallel()
+
+	if got := SecurityPolicyBasic256Sha256.URI(); got != ua.SecurityPolicyURIBasic256Sha256 {
+		t.Fatalf("expected policy URI %q, got %q", ua.SecurityPolicyURIBasic256Sha256, got)
 	}
 }
 
@@ -215,19 +223,19 @@ func TestEnableSecuritySkipsDuplicates(t *testing.T) {
 	t.Parallel()
 
 	cfg := &serverConfig{}
-	ctx := context.Background()
+	ctx := t.Context()
 
-	EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
-	EnableSecurity("Basic256Sha256", ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
-	EnableSecurity(ua.SecurityPolicyURIBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
+	EnableSecurity(SecurityPolicyBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
+	EnableSecurity(SecurityPolicyBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
+	EnableSecurity(SecurityPolicyBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
 
 	if len(cfg.enabledSec) != 1 {
 		t.Fatalf("expected 1 enabled security entry after duplicate registrations, got %d", len(cfg.enabledSec))
 	}
 
 	entry := cfg.enabledSec[0]
-	if entry.secPolicy != ua.SecurityPolicyURIBasic256Sha256 {
-		t.Fatalf("expected policy %q, got %q", ua.SecurityPolicyURIBasic256Sha256, entry.secPolicy)
+	if entry.secPolicy != SecurityPolicyBasic256Sha256 {
+		t.Fatalf("expected policy %q, got %q", SecurityPolicyBasic256Sha256.URI(), entry.secPolicy.URI())
 	}
 	if entry.secMode != ua.MessageSecurityModeSignAndEncrypt {
 		t.Fatalf("expected mode %v, got %v", ua.MessageSecurityModeSignAndEncrypt, entry.secMode)
@@ -240,7 +248,7 @@ func TestEnableSecurityRejectsUnsupportedServerPolicy(t *testing.T) {
 	cfg := &serverConfig{}
 	ctx := t.Context()
 
-	EnableSecurity("Basic128Rsa15", ua.MessageSecurityModeSign)(ctx, cfg)
+	EnableSecurity(SecurityPolicyBasic128Rsa15, ua.MessageSecurityModeSign)(ctx, cfg)
 
 	if len(cfg.enabledSec) != 0 {
 		t.Fatalf("expected deprecated server policy registration to be ignored, got %d entries", len(cfg.enabledSec))
@@ -315,8 +323,8 @@ func TestInitEndpointsAdvertisesConfiguredAuthModes(t *testing.T) {
 			certificate:     []byte("cert"),
 			endpoints:       []string{"opc.tcp://localhost:4840"},
 			enabledSec: []security{
-				{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
-				{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+				{secPolicy: SecurityPolicyNone, secMode: ua.MessageSecurityModeNone},
+				{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
 			},
 			enabledAuth: []authMode{
 				{tokenType: ua.UserTokenTypeAnonymous},
@@ -374,7 +382,7 @@ func TestInitEndpointsOmitsUserNameWithoutSecurePolicy(t *testing.T) {
 			applicationName: "Test Server",
 			endpoints:       []string{"opc.tcp://localhost:4840"},
 			enabledSec: []security{
-				{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
+				{secPolicy: SecurityPolicyNone, secMode: ua.MessageSecurityModeNone},
 			},
 			enabledAuth: []authMode{
 				{tokenType: ua.UserTokenTypeAnonymous},

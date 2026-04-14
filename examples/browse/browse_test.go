@@ -20,7 +20,7 @@ func TestBrowse(t *testing.T) {
 	s := server.New(
 		ctx,
 		server.EndPoint("localhost", 4840),
-		server.EnableSecurity("None", ua.MessageSecurityModeNone),
+		server.EnableSecurity(server.SecurityPolicyNone, ua.MessageSecurityModeNone),
 		server.EnableAuthMode(ua.UserTokenTypeAnonymous),
 	)
 

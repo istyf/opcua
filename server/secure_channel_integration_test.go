@@ -79,8 +79,8 @@ func TestSecureChannelConnectRejectsDisabledPolicyOrMode(t *testing.T) {
 	defer cancel()
 
 	srv := newSecureChannelIntegrationServer(t, ctx, []security{
-		{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
-		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+		{secPolicy: SecurityPolicyNone, secMode: ua.MessageSecurityModeNone},
+		{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
 	})
 	defer srv.close(t.Context())
 
@@ -143,10 +143,10 @@ func TestGetEndpointsAdvertisesOnlyConfiguredServeableSecurityCombinations(t *te
 	defer cancel()
 
 	enabled := []security{
-		{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
-		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSign},
-		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
-		{secPolicy: ua.SecurityPolicyURIAes128Sha256RsaOaep, secMode: ua.MessageSecurityModeSignAndEncrypt},
+		{secPolicy: SecurityPolicyNone, secMode: ua.MessageSecurityModeNone},
+		{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSign},
+		{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+		{secPolicy: SecurityPolicyAes128Sha256RsaOaep, secMode: ua.MessageSecurityModeSignAndEncrypt},
 	}
 	srv := newSecureChannelIntegrationServer(t, ctx, enabled)
 	defer srv.close(t.Context())
@@ -238,15 +238,15 @@ func mustGetEndpoints(t *testing.T, ctx context.Context, endpoint string) []*ua.
 
 func allSecureChannelMatrixEntries() []security {
 	return []security{
-		{secPolicy: ua.SecurityPolicyURINone, secMode: ua.MessageSecurityModeNone},
-		{secPolicy: ua.SecurityPolicyURIBasic256, secMode: ua.MessageSecurityModeSign},
-		{secPolicy: ua.SecurityPolicyURIBasic256, secMode: ua.MessageSecurityModeSignAndEncrypt},
-		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSign},
-		{secPolicy: ua.SecurityPolicyURIBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
-		{secPolicy: ua.SecurityPolicyURIAes128Sha256RsaOaep, secMode: ua.MessageSecurityModeSign},
-		{secPolicy: ua.SecurityPolicyURIAes128Sha256RsaOaep, secMode: ua.MessageSecurityModeSignAndEncrypt},
-		{secPolicy: ua.SecurityPolicyURIAes256Sha256RsaPss, secMode: ua.MessageSecurityModeSign},
-		{secPolicy: ua.SecurityPolicyURIAes256Sha256RsaPss, secMode: ua.MessageSecurityModeSignAndEncrypt},
+		{secPolicy: SecurityPolicyNone, secMode: ua.MessageSecurityModeNone},
+		{secPolicy: SecurityPolicyBasic256, secMode: ua.MessageSecurityModeSign},
+		{secPolicy: SecurityPolicyBasic256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+		{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSign},
+		{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
+		{secPolicy: SecurityPolicyAes128Sha256RsaOaep, secMode: ua.MessageSecurityModeSign},
+		{secPolicy: SecurityPolicyAes128Sha256RsaOaep, secMode: ua.MessageSecurityModeSignAndEncrypt},
+		{secPolicy: SecurityPolicyAes256Sha256RsaPss, secMode: ua.MessageSecurityModeSign},
+		{secPolicy: SecurityPolicyAes256Sha256RsaPss, secMode: ua.MessageSecurityModeSignAndEncrypt},
 	}
 }
 

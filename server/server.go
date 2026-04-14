@@ -261,22 +261,22 @@ func (s *serverImpl) closeOnStartContextDone(ctx context.Context) {
 func validateConfiguredSecureEndpoints(cfg *serverConfig) error {
 	for _, sec := range cfg.enabledSec {
 		switch {
-		case sec.secPolicy == ua.SecurityPolicyURINone && sec.secMode != ua.MessageSecurityModeNone:
+		case sec.secPolicy == SecurityPolicyNone && sec.secMode != ua.MessageSecurityModeNone:
 			return fmt.Errorf(
 				"cannot start server: invalid secure endpoint config: security policy %q cannot be used with %q",
-				sec.secPolicy,
+				sec.secPolicy.URI(),
 				sec.secMode,
 			)
-		case sec.secPolicy != ua.SecurityPolicyURINone &&
+		case sec.secPolicy != SecurityPolicyNone &&
 			sec.secMode != ua.MessageSecurityModeSign &&
 			sec.secMode != ua.MessageSecurityModeSignAndEncrypt:
 			return fmt.Errorf(
 				"cannot start server: invalid secure endpoint config: security policy %q can only be used with %q or %q",
-				sec.secPolicy,
+				sec.secPolicy.URI(),
 				ua.MessageSecurityModeSign,
 				ua.MessageSecurityModeSignAndEncrypt,
 			)
-		case sec.secPolicy == ua.SecurityPolicyURINone:
+		case sec.secPolicy == SecurityPolicyNone:
 			continue
 		case len(cfg.certificate) == 0:
 			return errors.New("cannot start server: secure endpoints require a certificate")
@@ -403,7 +403,7 @@ func (s *serverImpl) initEndpoints() {
 	var endpoints []*ua.EndpointDescription
 	for _, sec := range s.cfg.enabledSec {
 		for _, url := range s.cfg.endpoints {
-			secLevel := uapolicy.SecurityLevel(sec.secPolicy, sec.secMode)
+			secLevel := uapolicy.SecurityLevel(sec.secPolicy.URI(), sec.secMode)
 
 			ep := &ua.EndpointDescription{
 				EndpointURL:   url, // todo: be able to listen on multiple adapters
@@ -419,24 +419,24 @@ func (s *serverImpl) initEndpoints() {
 				},
 				ServerCertificate:   s.cfg.certificate,
 				SecurityMode:        sec.secMode,
-				SecurityPolicyURI:   sec.secPolicy,
+				SecurityPolicyURI:   sec.secPolicy.URI(),
 				TransportProfileURI: "http://opcfoundation.org/UA-Profile/Transport/uatcp-uasc-uabinary",
 			}
 
 			for _, auth := range s.cfg.enabledAuth {
 				for _, authSec := range s.cfg.enabledSec {
 					if auth.tokenType == ua.UserTokenTypeAnonymous {
-						authSec.secPolicy = "http://opcfoundation.org/UA/SecurityPolicy#None"
+						authSec.secPolicy = SecurityPolicyNone
 					}
 
-					if auth.tokenType != ua.UserTokenTypeAnonymous && authSec.secPolicy == "http://opcfoundation.org/UA/SecurityPolicy#None" {
+					if auth.tokenType != ua.UserTokenTypeAnonymous && authSec.secPolicy == SecurityPolicyNone {
 						continue
 					}
 
 					policyID := strings.ToLower(
 						strings.TrimPrefix(auth.tokenType.String(), "UserTokenType") +
 							"_" +
-							strings.TrimPrefix(authSec.secPolicy, "http://opcfoundation.org/UA/SecurityPolicy#"),
+							strings.TrimPrefix(authSec.secPolicy.URI(), "http://opcfoundation.org/UA/SecurityPolicy#"),
 					)
 
 					var dup bool
@@ -456,7 +456,7 @@ func (s *serverImpl) initEndpoints() {
 						TokenType:         auth.tokenType,
 						IssuedTokenType:   "",
 						IssuerEndpointURL: "",
-						SecurityPolicyURI: authSec.secPolicy,
+						SecurityPolicyURI: authSec.secPolicy.URI(),
 					}
 
 					ep.UserIdentityTokens = append(ep.UserIdentityTokens, tok)

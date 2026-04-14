@@ -57,7 +57,7 @@ func newChannelBroker() *channelBroker {
 func validateEnabledSecureChannelPolicy(enabled []security) func(string) error {
 	return func(policy string) error {
 		for _, sec := range enabled {
-			if sec.secPolicy == policy {
+			if sec.secPolicy.URI() == policy {
 				return nil
 			}
 		}
@@ -68,7 +68,7 @@ func validateEnabledSecureChannelPolicy(enabled []security) func(string) error {
 func validateEnabledSecureChannelMode(enabled []security) func(string, ua.MessageSecurityMode) error {
 	return func(policy string, mode ua.MessageSecurityMode) error {
 		for _, sec := range enabled {
-			if sec.secPolicy == policy && sec.secMode == mode {
+			if sec.secPolicy.URI() == policy && sec.secMode == mode {
 				return nil
 			}
 		}

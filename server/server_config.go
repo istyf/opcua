@@ -10,7 +10,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/gopcua/opcua/server/auth"
@@ -22,12 +21,12 @@ import (
 	"github.com/gopcua/opcua/uasc"
 )
 
-var supportedServerSecurityPolicies = []string{
-	ua.SecurityPolicyURINone,
-	ua.SecurityPolicyURIBasic256,
-	ua.SecurityPolicyURIBasic256Sha256,
-	ua.SecurityPolicyURIAes128Sha256RsaOaep,
-	ua.SecurityPolicyURIAes256Sha256RsaPss,
+var supportedServerSecurityPolicies = []SecurityPolicy{
+	SecurityPolicyNone,
+	SecurityPolicyBasic256,
+	SecurityPolicyBasic256Sha256,
+	SecurityPolicyAes128Sha256RsaOaep,
+	SecurityPolicyAes256Sha256RsaPss,
 }
 
 // Option is an option function type to modify the configuration.
@@ -70,25 +69,24 @@ func Certificate(cert []byte) Option {
 
 // EnableSecurity registers a new endpoint security mode to the server.
 // This will also register the security policy against each enabled auth mode
-func EnableSecurity(secPolicy string, secMode ua.MessageSecurityMode) Option {
+// Use the typed SecurityPolicy constants from this package.
+func EnableSecurity(secPolicy SecurityPolicy, secMode ua.MessageSecurityMode) Option {
 	return func(ctx context.Context, s *serverConfig) {
-		if !strings.HasPrefix(secPolicy, "http://opcfoundation.org/UA/SecurityPolicy#") {
-			secPolicy = "http://opcfoundation.org/UA/SecurityPolicy#" + secPolicy
-		}
+		secPolicyURI := secPolicy.URI()
 
 		ss := uapolicy.SupportedPolicies()
-		ok := slices.Contains(ss, secPolicy)
+		ok := slices.Contains(ss, secPolicyURI)
 		if !ok {
 			ualog.Error(ctx, "unable to add endpoint security mode to config",
 				ualog.String(ualog.ErrorKey, "unsupported policy"),
-				ualog.String("policy", secPolicy),
+				ualog.String("policy", secPolicyURI),
 			)
 			return
 		}
 		if !slices.Contains(supportedServerSecurityPolicies, secPolicy) {
 			ualog.Error(ctx, "unable to add endpoint security mode to config",
 				ualog.String(ualog.ErrorKey, "unsupported server policy"),
-				ualog.String("policy", secPolicy),
+				ualog.String("policy", secPolicyURI),
 			)
 			return
 		}

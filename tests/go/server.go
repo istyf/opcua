@@ -21,7 +21,7 @@ func startServer(ctx context.Context) types.Server {
 	port := 4840
 
 	opts = append(opts,
-		server.EnableSecurity("None", ua.MessageSecurityModeNone),
+		server.EnableSecurity(server.SecurityPolicyNone, ua.MessageSecurityModeNone),
 	)
 
 	opts = append(opts,
