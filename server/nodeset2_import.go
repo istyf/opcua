@@ -21,6 +21,40 @@ import (
 
 type nsIDLookup map[uint16]uint16
 
+func visitNodeSetNodes(nodes *schema.UANodeSet, visit func(*schema.UANode)) {
+	for i := range nodes.UAReferenceType {
+		visit(nodes.UAReferenceType[i].UANode)
+	}
+	for i := range nodes.UADataType {
+		visit(nodes.UADataType[i].UANode)
+	}
+	for i := range nodes.UAObjectType {
+		visit(nodes.UAObjectType[i].UANode)
+	}
+	for i := range nodes.UAVariableType {
+		visit(nodes.UAVariableType[i].UANode)
+	}
+	for i := range nodes.UAVariable {
+		visit(nodes.UAVariable[i].UANode)
+	}
+	for i := range nodes.UAMethod {
+		visit(nodes.UAMethod[i].UANode)
+	}
+	for i := range nodes.UAObject {
+		visit(nodes.UAObject[i].UANode)
+	}
+}
+
+func (s *serverImpl) shouldImportNodeSetNode(n *schema.UANode) bool {
+	if n == nil {
+		return false
+	}
+	if s.importDeprecatedNodeSetNodes {
+		return true
+	}
+	return !strings.EqualFold(n.ReleaseStatusAttr, "Deprecated")
+}
+
 // ImportNodeSet imports nodes, attributes, and references from a NodeSet2
 // document into the server.
 //
@@ -31,7 +65,8 @@ type nsIDLookup map[uint16]uint16
 // without aborting the full import.
 //
 // The importer intentionally does not populate the legacy Definition property;
-// the supported metadata surface is the DataTypeDefinition attribute.
+// the supported metadata surface is the DataTypeDefinition attribute. By
+// default, NodeSet nodes marked ReleaseStatus="Deprecated" are skipped.
 func (s *serverImpl) ImportNodeSet(ctx context.Context, nodes *schema.UANodeSet) error {
 	idLookup, err := s.namespacesImportNodeSet(nodes)
 	if err != nil {
@@ -237,6 +272,9 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 	// set up the reference types.
 	for i := range nodes.UAReferenceType {
 		rt := nodes.UAReferenceType[i]
+		if !s.shouldImportNodeSetNode(rt.UANode) {
+			continue
+		}
 		reftypes[rt.BrowseNameAttr] = rt // sometimes they use browse name
 		reftypes[rt.NodeIdAttr] = rt     // sometimes they use node id
 
@@ -274,6 +312,9 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 	// set up the data types.
 	for i := range nodes.UADataType {
 		dt := nodes.UADataType[i]
+		if !s.shouldImportNodeSetNode(dt.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(dt.NodeIdAttr)
 
 		ns, err := s.Namespace(int(nid.Namespace()))
@@ -318,6 +359,9 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 	// set up the object types
 	for i := range nodes.UAObjectType {
 		ot := nodes.UAObjectType[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 
 		ns, err := s.Namespace(int(nid.Namespace()))
@@ -345,6 +389,9 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 	// set up the variable Types
 	for i := range nodes.UAVariableType {
 		ot := nodes.UAVariableType[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 
 		ns, err := s.Namespace(int(nid.Namespace()))
@@ -383,6 +430,9 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 	// set up the variables
 	for i := range nodes.UAVariable {
 		ot := nodes.UAVariable[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 
 		ns, err := s.Namespace(int(nid.Namespace()))
@@ -515,6 +565,9 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 	// set up the methods
 	for i := range nodes.UAMethod {
 		ot := nodes.UAMethod[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 
@@ -543,6 +596,9 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 	// set up the objects
 	for i := range nodes.UAObject {
 		ot := nodes.UAObject[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 
 		ns, err := s.Namespace(int(nid.Namespace()))
@@ -624,6 +680,23 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		}
 	}
 
+	skippedNodes := make(map[string]struct{})
+	visitNodeSetNodes(nodes, func(n *schema.UANode) {
+		if s.shouldImportNodeSetNode(n) {
+			return
+		}
+		nid := mustParseAndConvertNodeID(n.NodeIdAttr)
+		skippedNodes[nid.String()] = struct{}{}
+	})
+
+	isSkippedNodeID := func(nid *ua.NodeID) bool {
+		if nid == nil {
+			return false
+		}
+		_, ok := skippedNodes[nid.String()]
+		return ok
+	}
+
 	// any of the aliases could be reference types, so we have to check them all and add them to the reftypes map
 	// if they are.
 	for alias := range aliases {
@@ -678,6 +751,9 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 	// set up the reference types.
 	for i := range nodes.UAReferenceType {
 		rt := nodes.UAReferenceType[i]
+		if !s.shouldImportNodeSetNode(rt.UANode) {
+			continue
+		}
 
 		nodeid := mustParseAndConvertNodeID(rt.NodeIdAttr)
 		node := s.Node(nodeid)
@@ -688,6 +764,9 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		for rid := range rt.References.Reference {
 			ref := rt.References.Reference[rid]
 			refnodeid := mustParseAndConvertNodeID(ref.Value)
+			if isSkippedNodeID(refnodeid) {
+				continue
+			}
 			n := s.Node(refnodeid)
 			if n == nil {
 				ualog.Error(ctx, "unable to find node",
@@ -719,6 +798,9 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 	// set up the data types.
 	for i := range nodes.UADataType {
 		dt := nodes.UADataType[i]
+		if !s.shouldImportNodeSetNode(dt.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(dt.NodeIdAttr)
 		node := s.Node(nid)
 
@@ -730,6 +812,9 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			for rid := range dt.References.Reference {
 				ref := dt.References.Reference[rid]
 				refnodeid := mustParseAndConvertNodeID(ref.Value)
+				if isSkippedNodeID(refnodeid) {
+					continue
+				}
 				n := s.Node(refnodeid)
 				if n == nil {
 					ualog.Error(ctx, "unable to find node",
@@ -763,12 +848,18 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 	// set up the object types
 	for i := range nodes.UAObjectType {
 		ot := nodes.UAObjectType[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 		node := s.Node(nid)
 
 		for rid := range ot.References.Reference {
 			ref := ot.References.Reference[rid]
 			refnodeid := mustParseAndConvertNodeID(ref.Value)
+			if isSkippedNodeID(refnodeid) {
+				continue
+			}
 			n := s.Node(refnodeid)
 			if n == nil {
 				ualog.Error(ctx, "unable to find node",
@@ -799,12 +890,18 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 	// set up the variable Types
 	for i := range nodes.UAVariableType {
 		ot := nodes.UAVariableType[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 		node := s.Node(nid)
 
 		for rid := range ot.References.Reference {
 			ref := ot.References.Reference[rid]
 			refnodeid := mustParseAndConvertNodeID(ref.Value)
+			if isSkippedNodeID(refnodeid) {
+				continue
+			}
 			n := s.Node(refnodeid)
 			if n == nil {
 				ualog.Error(ctx, "unable to find node",
@@ -834,12 +931,18 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 	// set up the variables
 	for i := range nodes.UAVariable {
 		ot := nodes.UAVariable[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 		node := s.Node(nid)
 
 		for rid := range ot.References.Reference {
 			ref := ot.References.Reference[rid]
 			refnodeid := mustParseAndConvertNodeID(ref.Value)
+			if isSkippedNodeID(refnodeid) {
+				continue
+			}
 			n := s.Node(refnodeid)
 			if n == nil {
 				ualog.Error(ctx, "unable to find node",
@@ -869,12 +972,18 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 	// set up the methods
 	for i := range nodes.UAMethod {
 		ot := nodes.UAMethod[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 		node := s.Node(nid)
 
 		for rid := range ot.References.Reference {
 			ref := ot.References.Reference[rid]
 			refnodeid := mustParseAndConvertNodeID(ref.Value)
+			if isSkippedNodeID(refnodeid) {
+				continue
+			}
 			n := s.Node(refnodeid)
 			if n == nil {
 				ualog.Error(ctx, "unable to find node",
@@ -904,6 +1013,9 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 	// set up the objects
 	for i := range nodes.UAObject {
 		ot := nodes.UAObject[i]
+		if !s.shouldImportNodeSetNode(ot.UANode) {
+			continue
+		}
 		nid := mustParseAndConvertNodeID(ot.NodeIdAttr)
 		node := s.Node(nid)
 		if nid.IntID() == id.RootFolder {
@@ -913,6 +1025,9 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		for rid := range ot.References.Reference {
 			ref := ot.References.Reference[rid]
 			refnodeid := mustParseAndConvertNodeID(ref.Value)
+			if isSkippedNodeID(refnodeid) {
+				continue
+			}
 			n := s.Node(refnodeid)
 			if n == nil {
 				ualog.Error(ctx, "unable to find node",

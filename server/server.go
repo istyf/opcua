@@ -35,6 +35,8 @@ type serverImpl struct {
 
 	cfg *serverConfig
 
+	importDeprecatedNodeSetNodes bool
+
 	mu         sync.Mutex
 	status     *ua.ServerStatusDataType
 	endpoints  []*ua.EndpointDescription

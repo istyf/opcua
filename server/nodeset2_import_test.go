@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gopcua/opcua/schema"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 )
 
@@ -75,6 +76,73 @@ func TestImportNodeSetLoadsDataTypeDefinitionAttribute(t *testing.T) {
 	}
 	if structure.Fields[0].DataType == nil || !structure.Fields[0].DataType.Equal(ua.NewNumericNodeID(0, 6)) {
 		t.Fatalf("expected field datatype i=6, got %#v", structure.Fields[0].DataType)
+	}
+}
+
+func TestImportNodeSetSkipsDeprecatedNodesByDefault(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:deprecated"},
+		},
+		Aliases: &schema.AliasTable{
+			Alias: []*schema.NodeIdAlias{
+				{AliasAttr: "Organizes", Value: "i=35"},
+			},
+		},
+		UAObject: []*schema.UAObject{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=3100",
+						BrowseNameAttr: "1:CurrentNode",
+						DisplayName:    []*schema.LocalizedText{{Value: "CurrentNode"}},
+						References: &schema.ListOfReferences{
+							Reference: []*schema.Reference{
+								{
+									ReferenceTypeAttr: "Organizes",
+									Value:             "ns=1;i=3101",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:        "ns=1;i=3101",
+						BrowseNameAttr:    "1:DeprecatedNode",
+						DisplayName:       []*schema.LocalizedText{{Value: "DeprecatedNode"}},
+						ReleaseStatusAttr: "Deprecated",
+					},
+				},
+			},
+		},
+	}
+
+	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
+		t.Fatalf("import nodeset with deprecated node: %v", err)
+	}
+
+	current := srv.Node(ua.NewNumericNodeID(1, 3100))
+	if current == nil {
+		t.Fatal("expected non-deprecated node to be imported")
+	}
+
+	deprecated := srv.Node(ua.NewNumericNodeID(1, 3101))
+	if deprecated != nil {
+		t.Fatal("expected deprecated node to be skipped by default")
+	}
+
+	if current.References().Contains(func(ref types.ReferenceWrapper) bool {
+		target := ref.TargetNodeID()
+		return target != nil && target.NodeID != nil && target.NodeID.Equal(ua.NewNumericNodeID(1, 3101))
+	}) {
+		t.Fatal("expected no reference targeting skipped deprecated node")
 	}
 }
 
