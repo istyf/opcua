@@ -15,10 +15,10 @@ import (
 func TestNamespace(t *testing.T) {
 	ctx := context.Background()
 
-	srv := startServer()
-	defer srv.Close()
+	srv := startServer(t, ctx)
+	defer srv.Close(ctx)
 
-	c, err := opcua.NewClient("opc.tcp://localhost:4840", opcua.SecurityMode(ua.MessageSecurityModeNone))
+	c, err := opcua.NewClient(srv.endpoint, opcua.SecurityMode(ua.MessageSecurityModeNone))
 	require.NoError(t, err, "NewClient failed")
 
 	err = c.Connect(ctx)

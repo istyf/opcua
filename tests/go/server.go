@@ -6,7 +6,10 @@ package uatest2
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net"
+	"testing"
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server"
@@ -16,9 +19,16 @@ import (
 	"github.com/gopcua/opcua/ua"
 )
 
-func startServer(ctx context.Context) types.Server {
+type startedServer struct {
+	types.Server
+	endpoint string
+}
+
+func startServer(t testing.TB, ctx context.Context) *startedServer {
+	t.Helper()
+
 	var opts []server.Option
-	port := 4840
+	port := reserveTestPort(t)
 
 	opts = append(opts,
 		server.EnableSecurity(server.SecurityPolicyNone, ua.MessageSecurityModeNone),
@@ -184,5 +194,25 @@ func startServer(ctx context.Context) types.Server {
 		log.Fatalf("Error starting server, exiting: %s", err)
 	}
 
-	return s
+	return &startedServer{
+		Server:   s,
+		endpoint: fmt.Sprintf("opc.tcp://localhost:%d", port),
+	}
+}
+
+func reserveTestPort(t testing.TB) int {
+	t.Helper()
+
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("failed to reserve test port: %v", err)
+	}
+	defer l.Close()
+
+	tcpAddr, ok := l.Addr().(*net.TCPAddr)
+	if !ok {
+		t.Fatalf("unexpected listener address type %T", l.Addr())
+	}
+
+	return tcpAddr.Port
 }

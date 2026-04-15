@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"net"
+	"strconv"
 	"testing"
 
 	"github.com/gopcua/opcua"
@@ -15,11 +17,13 @@ import (
 
 func TestBrowse(t *testing.T) {
 	ctx := t.Context()
+	port := reserveTestPort(t)
+	endpoint := "opc.tcp://localhost:" + strconv.Itoa(port)
 
 	// start the server
 	s := server.New(
 		ctx,
-		server.EndPoint("localhost", 4840),
+		server.EndPoint("localhost", port),
 		server.EnableSecurity(server.SecurityPolicyNone, ua.MessageSecurityModeNone),
 		server.EnableAuthMode(ua.UserTokenTypeAnonymous),
 	)
@@ -32,7 +36,7 @@ func TestBrowse(t *testing.T) {
 	defer s.Close(ctx)
 
 	// prepare the client
-	c, err := opcua.NewClient("opc.tcp://localhost:4840")
+	c, err := opcua.NewClient(endpoint)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,6 +67,23 @@ func TestBrowse(t *testing.T) {
 	if !found {
 		t.Errorf("TestObj1 not found in nodeList: %v", nodeList)
 	}
+}
+
+func reserveTestPort(t *testing.T) int {
+	t.Helper()
+
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("failed to reserve test port: %v", err)
+	}
+	defer l.Close()
+
+	tcpAddr, ok := l.Addr().(*net.TCPAddr)
+	if !ok {
+		t.Fatalf("unexpected listener address type %T", l.Addr())
+	}
+
+	return tcpAddr.Port
 }
 
 func populateServer(s types.Server) {
