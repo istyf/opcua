@@ -24,9 +24,10 @@ func TestStartContextCancellationClosesServer(t *testing.T) {
 	}
 
 	done := make(chan struct{})
+	runCtx := t.Context()
 	go func() {
 		defer close(done)
-		srv.closeOnStartContextDone(ctx)
+		srv.closeOnStartContextDone(ctx, runCtx)
 	}()
 
 	cancel()
@@ -39,6 +40,41 @@ func TestStartContextCancellationClosesServer(t *testing.T) {
 
 	if got := srv.Status().State; got != ua.ServerStateShutdown {
 		t.Fatalf("expected server state %v after start-context cancellation, got %v", ua.ServerStateShutdown, got)
+	}
+}
+
+func TestCloseUnblocksStartContextShutdownWatcher(t *testing.T) {
+	t.Parallel()
+
+	startCtx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+
+	runCtx, runCancel := context.WithCancel(context.Background())
+	defer runCancel()
+
+	srv := &serverImpl{
+		cb: newChannelBroker(),
+		status: &ua.ServerStatusDataType{
+			State: ua.ServerStateRunning,
+		},
+	}
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		srv.closeOnStartContextDone(startCtx, runCtx)
+	}()
+
+	runCancel()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for shutdown watcher to exit after server stop")
+	}
+
+	if got := srv.Status().State; got != ua.ServerStateRunning {
+		t.Fatalf("expected server state %v after manual watcher stop, got %v", ua.ServerStateRunning, got)
 	}
 }
 

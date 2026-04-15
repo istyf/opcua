@@ -42,6 +42,8 @@ type serverImpl struct {
 	endpoints  []*ua.EndpointDescription
 	namespaces []types.NameSpace
 	closeOnce  sync.Once
+	runCancel  context.CancelFunc
+	runWG      sync.WaitGroup
 
 	l  *uacp.Listener
 	cb *channelBroker
@@ -246,16 +248,34 @@ func (s *serverImpl) Start(ctx context.Context) error {
 		s.cb = newChannelBroker()
 	}
 
-	go s.acceptAndRegister(ctx, s.l)
-	go s.monitorConnections(ctx)
-	go s.closeOnStartContextDone(ctx)
+	runCtx, runCancel := context.WithCancel(context.WithoutCancel(ctx))
+	s.mu.Lock()
+	s.runCancel = runCancel
+	s.mu.Unlock()
+
+	s.runWG.Add(3)
+	go func() {
+		defer s.runWG.Done()
+		s.acceptAndRegister(runCtx, s.l)
+	}()
+	go func() {
+		defer s.runWG.Done()
+		s.monitorConnections(runCtx)
+	}()
+	go func() {
+		defer s.runWG.Done()
+		s.closeOnStartContextDone(ctx, runCtx)
+	}()
 
 	return nil
 }
 
-func (s *serverImpl) closeOnStartContextDone(ctx context.Context) {
-	<-ctx.Done()
-	_ = s.Close(context.WithoutCancel(ctx))
+func (s *serverImpl) closeOnStartContextDone(startCtx, runCtx context.Context) {
+	select {
+	case <-startCtx.Done():
+		_ = s.Close(context.WithoutCancel(startCtx))
+	case <-runCtx.Done():
+	}
 }
 
 func validateConfiguredSecureEndpoints(cfg *serverConfig) error {
@@ -300,14 +320,36 @@ func (s *serverImpl) Close(ctx context.Context) error {
 	s.closeOnce.Do(func() {
 		s.setServerState(ua.ServerStateShutdown)
 
+		s.mu.Lock()
+		runCancel := s.runCancel
+		s.runCancel = nil
+		s.mu.Unlock()
+		if runCancel != nil {
+			runCancel()
+		}
+
 		// Close the listener, preventing new sessions from starting
 		if s.l != nil {
-			s.l.Close()
+			_ = s.l.Close()
 		}
 
 		// Shut down all secure channels and UACP connections
 		if s.cb != nil {
 			err = s.cb.Close(ctx)
+		}
+
+		done := make(chan struct{})
+		go func() {
+			defer close(done)
+			s.runWG.Wait()
+		}()
+
+		select {
+		case <-done:
+		case <-ctx.Done():
+			if err == nil {
+				err = ctx.Err()
+			}
 		}
 	})
 
@@ -330,10 +372,12 @@ func (s *serverImpl) acceptAndRegister(ctx context.Context, l *uacp.Listener) {
 		default:
 			c, err := l.Accept(ctx)
 			if err != nil {
+				if ctx.Err() != nil || errors.Is(err, net.ErrClosed) {
+					return
+				}
 				switch x := err.(type) {
 				case *net.OpError:
-					// socket closed. Cannot recover from this.
-					ualog.Error(ctx, "socket closed", ualog.Err(err))
+					ualog.Warn(ctx, "listener stopped accepting", ualog.Err(err))
 					return
 				case temporary:
 					if x.Temporary() {

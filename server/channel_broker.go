@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"io"
 	mrand "math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -13,6 +14,20 @@ import (
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
 )
+
+func isExpectedChannelShutdownError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	if err == io.EOF || err == context.Canceled || err == context.DeadlineExceeded {
+		return true
+	}
+
+	msg := err.Error()
+	return strings.Contains(msg, "use of closed network connection") ||
+		strings.Contains(msg, "closed network connection")
+}
 
 func sendSecureChannelError(conn *uacp.Conn, err error) {
 	status, ok := err.(ua.StatusCode)
@@ -122,16 +137,17 @@ outer:
 	for {
 		select {
 		case <-ctx.Done():
-			// todo(fs): return error?
-			ualog.Warn(ctx, "context done, closing secure channel")
 			break outer
 
 		default:
 			msg := sc.Receive(ctx)
 			if msg.Err == io.EOF {
-				ualog.Warn(ctx, "secure channel closed")
 				break outer
 			} else if msg.Err != nil {
+				if isExpectedChannelShutdownError(msg.Err) {
+					_ = conn.Close()
+					break outer
+				}
 				sendSecureChannelError(conn, msg.Err)
 				_ = conn.Close()
 				ualog.Error(ctx, "secure channel error", ualog.Err(msg.Err))
