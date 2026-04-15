@@ -100,7 +100,7 @@ func (sb *sessionBroker) Session(ctx context.Context, authToken *ua.NodeID) type
 	defer sb.mu.Unlock()
 
 	s := sb.s[authToken.String()]
-	if s == nil {
+	if s == nil && authToken != nil {
 		ualog.Warn(ctx, "unable to lookup session", ualog.Any("token", authToken))
 	}
 
