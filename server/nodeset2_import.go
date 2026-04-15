@@ -707,6 +707,20 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 
 	// any of the aliases could be reference types, so we have to check them all and add them to the reftypes map
 	// if they are.
+	referenceTypeTargetMatches := func(existing *schema.UAReferenceType, target string) bool {
+		if existing == nil {
+			return false
+		}
+
+		existingID := mustParseAndConvertNodeID(existing.NodeIdAttr)
+		targetID := mustParseAndConvertNodeID(target)
+		if existingID == nil || targetID == nil {
+			return existing.NodeIdAttr == target
+		}
+
+		return existingID.Equal(targetID)
+	}
+
 	for alias := range aliases {
 		aliasID := mustParseAndConvertNodeID(aliases[alias])
 		refnode := s.Node(aliasID)
@@ -727,16 +741,24 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		_, ok := reftypes[alias]
 		if !ok {
 			reftypes[alias] = rt // sometimes they use browse name
-		} else {
-			ualog.Error(ctx, "duplicate reference type", ualog.String("alias", alias))
+		} else if !referenceTypeTargetMatches(reftypes[alias], aliases[alias]) {
+			ualog.Warn(ctx, "duplicate reference type alias points to different target",
+				ualog.String("alias", alias),
+				ualog.String("existing", reftypes[alias].NodeIdAttr),
+				ualog.String("incoming", aliases[alias]),
+			)
 			continue
 		}
 
 		_, ok = reftypes[aliases[alias]]
 		if !ok {
 			reftypes[aliases[alias]] = rt // sometimes they use node id
-		} else {
-			ualog.Error(ctx, "duplicate reference type", ualog.String("alias", aliases[alias]))
+		} else if !referenceTypeTargetMatches(reftypes[aliases[alias]], aliases[alias]) {
+			ualog.Warn(ctx, "duplicate reference type alias points to different target",
+				ualog.String("alias", aliases[alias]),
+				ualog.String("existing", reftypes[aliases[alias]].NodeIdAttr),
+				ualog.String("incoming", aliases[alias]),
+			)
 			continue
 		}
 	}

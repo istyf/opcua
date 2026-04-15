@@ -1,12 +1,17 @@
 package server
 
 import (
+	"bytes"
+	"context"
+	"log/slog"
+	"strings"
 	"testing"
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
+	"github.com/gopcua/opcua/ualog"
 )
 
 func TestImportNodeSetLoadsDataTypeDefinitionAttribute(t *testing.T) {
@@ -361,6 +366,85 @@ func TestImportNodeSetVariableWithoutExplicitDataTypeFallsBackToBaseDataType(t *
 	}
 	if !got.Equal(ua.NewNumericNodeID(0, id.BaseDataType)) {
 		t.Fatalf("expected fallback datatype i=%d, got %s", id.BaseDataType, got.String())
+	}
+}
+
+func TestRefsImportNodeSetDuplicateReferenceTypeAliasLogging(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	testCtx := func(t *testing.T) (context.Context, *bytes.Buffer) {
+		t.Helper()
+
+		var out bytes.Buffer
+		handler := slog.NewTextHandler(&out, &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+			ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
+				if a.Key == slog.TimeKey {
+					return slog.Attr{}
+				}
+				return a
+			},
+		})
+
+		return ualog.New(t.Context(), ualog.WithHandler(handler)), &out
+	}
+
+	sameTarget := &schema.UANodeSet{
+		Aliases: &schema.AliasTable{
+			Alias: []*schema.NodeIdAlias{
+				{AliasAttr: "HasComponent", Value: "i=47"},
+			},
+		},
+		UAReferenceType: []*schema.UAReferenceType{
+			{
+				UAType: &schema.UAType{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "i=47",
+						BrowseNameAttr: "HasComponent",
+						DisplayName:    []*schema.LocalizedText{{Value: "HasComponent"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+			},
+		},
+	}
+
+	ctx, out := testCtx(t)
+	if err := srv.refsImportNodeSet(ctx, sameTarget, &nsIDLookup{}); err != nil {
+		t.Fatalf("import same-target aliases: %v", err)
+	}
+	if strings.Contains(out.String(), "duplicate reference type alias points to different target") {
+		t.Fatalf("did not expect same-target alias collision to warn, got log output %q", out.String())
+	}
+
+	differentTarget := &schema.UANodeSet{
+		Aliases: &schema.AliasTable{
+			Alias: []*schema.NodeIdAlias{
+				{AliasAttr: "HasComponent", Value: "i=35"},
+			},
+		},
+		UAReferenceType: []*schema.UAReferenceType{
+			{
+				UAType: &schema.UAType{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "i=47",
+						BrowseNameAttr: "HasComponent",
+						DisplayName:    []*schema.LocalizedText{{Value: "HasComponent"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+			},
+		},
+	}
+
+	ctx, out = testCtx(t)
+	if err := srv.refsImportNodeSet(ctx, differentTarget, &nsIDLookup{}); err != nil {
+		t.Fatalf("import different-target aliases: %v", err)
+	}
+	if !strings.Contains(out.String(), "duplicate reference type alias points to different target") {
+		t.Fatalf("expected different-target alias collision to warn, got log output %q", out.String())
 	}
 }
 
