@@ -162,6 +162,48 @@ func TestCreateSubscriptionRevisesLifetimeCount(t *testing.T) {
 	}
 }
 
+func TestSubscriptionServiceShutdownStopsRunningSubscriptions(t *testing.T) {
+	t.Parallel()
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session, subscriptionTestConfigOptions{})
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	resp, err := service.CreateSubscription(t.Context(), sc, newCreateSubscriptionRequest(session, 1), 1)
+	if err != nil {
+		t.Fatalf("create subscription: %v", err)
+	}
+
+	createResp, ok := resp.(*ua.CreateSubscriptionResponse)
+	if !ok {
+		t.Fatalf("expected CreateSubscriptionResponse, got %T", resp)
+	}
+
+	subID := types.SubscriptionID(createResp.SubscriptionID)
+	sub, ok := service.Get(subID)
+	if !ok || sub == nil {
+		t.Fatalf("expected subscription %d to exist", subID)
+	}
+
+	if err := service.Shutdown(t.Context()); err != nil {
+		t.Fatalf("shutdown subscriptions: %v", err)
+	}
+
+	select {
+	case <-sub.done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("timed out waiting for subscription goroutine to stop")
+	}
+
+	sub.Mu.Lock()
+	running := sub.running
+	sub.Mu.Unlock()
+	if running {
+		t.Fatal("expected subscription to be marked stopped")
+	}
+}
+
 func TestModifySubscriptionRevisesParametersAndUpdatesRuntimeState(t *testing.T) {
 	t.Parallel()
 

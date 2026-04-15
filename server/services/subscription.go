@@ -205,6 +205,26 @@ func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id types.S
 	s.srv.DeleteSubscription(id)
 }
 
+func (s *SubscriptionService) Shutdown(ctx context.Context) error {
+	s.mu.Lock()
+	subs := make([]*Subscription, 0, len(s.subs))
+	for _, sub := range s.subs {
+		if sub != nil {
+			subs = append(subs, sub)
+		}
+	}
+	s.mu.Unlock()
+
+	var err error
+	for _, sub := range subs {
+		if stopErr := sub.Stop(ctx); stopErr != nil && err == nil {
+			err = stopErr
+		}
+	}
+
+	return err
+}
+
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.14.2
 func (s *SubscriptionService) CreateSubscription(ctx context.Context, sc *uasc.SecureChannel, r ua.Request, reqID uint32) (ua.Response, error) {
 	ctx = ualog.WithAttrs(ctx, newSubscriptionServiceLogAttribute("create"))
@@ -546,6 +566,7 @@ type Subscription struct {
 	Mu       sync.Mutex
 	running  bool
 	shutdown chan struct{}
+	done     chan struct{}
 }
 
 type subscriptionModify struct {
@@ -566,6 +587,32 @@ func NewSubscription() *Subscription {
 		SetPublishingModeChannel: make(chan subscriptionPublishingMode, 2),
 		publishQueue:             make(map[uint32]*ua.MonitoredItemNotification),
 		shutdown:                 make(chan struct{}),
+		done:                     make(chan struct{}),
+	}
+}
+
+func (s *Subscription) Stop(ctx context.Context) error {
+	if s == nil {
+		return nil
+	}
+
+	s.Mu.Lock()
+	if s.running {
+		s.running = false
+		close(s.shutdown)
+	}
+	done := s.done
+	s.Mu.Unlock()
+
+	if done == nil {
+		return nil
+	}
+
+	select {
+	case <-done:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }
 
@@ -678,6 +725,7 @@ func (s *Subscription) nextPublishBatch(publishQueue map[uint32]*ua.MonitoredIte
 func (s *Subscription) run(ctx context.Context) {
 	// if this go routine dies, we need to delete ourselves.
 	defer func() {
+		close(s.done)
 		ualog.Info(ctx, "subscription shutting down")
 		s.srv.DeleteSubscription(ctx, s.ID)
 	}()

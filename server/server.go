@@ -333,9 +333,17 @@ func (s *serverImpl) Close(ctx context.Context) error {
 			_ = s.l.Close()
 		}
 
+		if s.SubscriptionService != nil {
+			if stopErr := s.SubscriptionService.Shutdown(ctx); stopErr != nil && err == nil {
+				err = stopErr
+			}
+		}
+
 		// Shut down all secure channels and UACP connections
 		if s.cb != nil {
-			err = s.cb.Close(ctx)
+			if closeErr := s.cb.Close(ctx); closeErr != nil && err == nil {
+				err = closeErr
+			}
 		}
 
 		done := make(chan struct{})
