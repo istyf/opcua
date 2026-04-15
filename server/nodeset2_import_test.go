@@ -3,6 +3,7 @@ package server
 import (
 	"testing"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
@@ -193,6 +194,173 @@ func TestImportNodeSetSkipsMalformedDataTypeDefinition(t *testing.T) {
 
 	if _, err := imported.Attribute(t.Context(), ua.AttributeIDDataTypeDefinition); err == nil {
 		t.Fatal("expected malformed datatype definition to leave attribute unset")
+	}
+}
+
+func TestImportNodeSetVariableWithoutExplicitDataTypeInheritsVariableTypeDataType(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:variables"},
+		},
+		UADataType: []*schema.UADataType{
+			{
+				UAType: &schema.UAType{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4100",
+						BrowseNameAttr: "1:CustomDataType",
+						DisplayName:    []*schema.LocalizedText{{Value: "CustomDataType"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+			},
+		},
+		UAVariableType: []*schema.UAVariableType{
+			{
+				UAType: &schema.UAType{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4200",
+						BrowseNameAttr: "1:CustomVariableType",
+						DisplayName:    []*schema.LocalizedText{{Value: "CustomVariableType"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+				DataTypeAttr: "ns=1;i=4100",
+			},
+		},
+		UAObject: []*schema.UAObject{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4300",
+						BrowseNameAttr: "1:Parent",
+						DisplayName:    []*schema.LocalizedText{{Value: "Parent"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+			},
+		},
+		UAVariable: []*schema.UAVariable{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4301",
+						BrowseNameAttr: "1:Child",
+						DisplayName:    []*schema.LocalizedText{{Value: "Child"}},
+						References: &schema.ListOfReferences{
+							Reference: []*schema.Reference{
+								{
+									ReferenceTypeAttr: "i=40",
+									Value:             "ns=1;i=4200",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
+		t.Fatalf("import nodeset: %v", err)
+	}
+
+	imported := srv.Node(ua.NewNumericNodeID(1, 4301))
+	if imported == nil {
+		t.Fatal("expected imported variable node, got nil")
+	}
+
+	attr, err := imported.Attribute(t.Context(), ua.AttributeIDDataType)
+	if err != nil {
+		t.Fatalf("read datatype attribute: %v", err)
+	}
+
+	got, ok := attr.Value.Value.Value().(*ua.NodeID)
+	if !ok {
+		t.Fatalf("expected datatype as *ua.NodeID, got %T", attr.Value.Value.Value())
+	}
+	if !got.Equal(ua.NewNumericNodeID(1, 4100)) {
+		t.Fatalf("expected inherited datatype ns=1;i=4100, got %s", got.String())
+	}
+}
+
+func TestImportNodeSetVariableWithoutExplicitDataTypeFallsBackToBaseDataType(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:variables"},
+		},
+		UAVariableType: []*schema.UAVariableType{
+			{
+				UAType: &schema.UAType{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4400",
+						BrowseNameAttr: "1:CustomVariableType",
+						DisplayName:    []*schema.LocalizedText{{Value: "CustomVariableType"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+			},
+		},
+		UAObject: []*schema.UAObject{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4500",
+						BrowseNameAttr: "1:Parent",
+						DisplayName:    []*schema.LocalizedText{{Value: "Parent"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+			},
+		},
+		UAVariable: []*schema.UAVariable{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4501",
+						BrowseNameAttr: "1:Child",
+						DisplayName:    []*schema.LocalizedText{{Value: "Child"}},
+						References: &schema.ListOfReferences{
+							Reference: []*schema.Reference{
+								{
+									ReferenceTypeAttr: "i=40",
+									Value:             "ns=1;i=4400",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
+		t.Fatalf("import nodeset: %v", err)
+	}
+
+	imported := srv.Node(ua.NewNumericNodeID(1, 4501))
+	if imported == nil {
+		t.Fatal("expected imported variable node, got nil")
+	}
+
+	attr, err := imported.Attribute(t.Context(), ua.AttributeIDDataType)
+	if err != nil {
+		t.Fatalf("read datatype attribute: %v", err)
+	}
+
+	got, ok := attr.Value.Value.Value().(*ua.NodeID)
+	if !ok {
+		t.Fatalf("expected datatype as *ua.NodeID, got %T", attr.Value.Value.Value())
+	}
+	if !got.Equal(ua.NewNumericNodeID(0, id.BaseDataType)) {
+		t.Fatalf("expected fallback datatype i=%d, got %s", id.BaseDataType, got.String())
 	}
 }
 

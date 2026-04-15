@@ -465,37 +465,45 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			return nil
 		}()
 
-		dtidx := slices.IndexFunc(nodes.UADataType, func(dt *schema.UADataType) bool {
-			if strings.Compare(dt.BrowseNameAttr, ot.DataTypeAttr) == 0 {
-				return true
-			}
+		dataTypeNodeId := func() *ua.NodeID {
+			if ot.DataTypeAttr != "" {
+				dtidx := slices.IndexFunc(nodes.UADataType, func(dt *schema.UADataType) bool {
+					if strings.Compare(dt.BrowseNameAttr, ot.DataTypeAttr) == 0 {
+						return true
+					}
 
-			return strings.Compare(dt.NodeIdAttr, ot.DataTypeAttr) == 0
-		})
+					return strings.Compare(dt.NodeIdAttr, ot.DataTypeAttr) == 0
+				})
+				if dtidx >= 0 {
+					dt := nodes.UADataType[dtidx]
+					return mustParseAndConvertNodeID(dt.NodeIdAttr)
+				}
 
-		var dataTypeNodeId *ua.NodeID
+				if nodes.Aliases != nil {
+					aliasidx := slices.IndexFunc(nodes.Aliases.Alias, func(a *schema.NodeIdAlias) bool {
+						return strings.Compare(a.AliasAttr, ot.DataTypeAttr) == 0
+					})
+					if aliasidx >= 0 {
+						dt := nodes.Aliases.Alias[aliasidx]
+						return mustParseAndConvertNodeID(dt.Value)
+					}
+				}
 
-		if dtidx >= 0 {
-			dt := nodes.UADataType[dtidx]
-			dataTypeNodeId = mustParseAndConvertNodeID(dt.NodeIdAttr)
-		} else {
-			aliasidx := slices.IndexFunc(nodes.Aliases.Alias, func(a *schema.NodeIdAlias) bool {
-				return strings.Compare(a.AliasAttr, ot.DataTypeAttr) == 0
-			})
-			if aliasidx >= 0 {
-				dt := nodes.Aliases.Alias[aliasidx]
-				dataTypeNodeId = mustParseAndConvertNodeID(dt.Value)
-			}
-		}
+				if n := s.Node(mustParseAndConvertNodeID(ot.DataTypeAttr)); n != nil {
+					return n.ID()
+				}
 
-		if dataTypeNodeId == nil {
-			if n := s.Node(mustParseAndConvertNodeID(ot.DataTypeAttr)); n != nil {
-				dataTypeNodeId = n.ID()
-			} else {
 				fmt.Printf("failed to decode variable data type node id: %s (%s)\n", nid.String(), ot.DataTypeAttr)
-				dataTypeNodeId = ua.NewNumericNodeID(0, id.BaseDataType)
 			}
-		}
+
+			if vartype != nil {
+				if expanded := vartype.DataType(); expanded != nil && expanded.NodeID != nil && !expanded.NodeID.Equal(ua.NewTwoByteNodeID(0)) {
+					return expanded.NodeID
+				}
+			}
+
+			return ua.NewNumericNodeID(0, id.BaseDataType)
+		}()
 
 		v := valueFromSchema(ot.Value)
 
