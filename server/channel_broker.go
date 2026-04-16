@@ -167,7 +167,6 @@ outer:
 }
 
 // Close gracefully closes all secure channels
-// todo(fs): use ctx
 func (c *channelBroker) Close(ctx context.Context) error {
 	var err error
 	c.mu.Lock()
