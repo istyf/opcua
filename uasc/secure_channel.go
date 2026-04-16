@@ -430,7 +430,7 @@ func (s *SecureChannel) Receive(ctx context.Context) *MessageBody {
 
 			// todo(fs): not sure this is correct
 			if req, ok := msg.Request().(*ua.OpenSecureChannelRequest); ok {
-				err := s.handleOpenSecureChannelRequest(reqID, req)
+				err := s.handleOpenSecureChannelRequest(ctx, reqID, req)
 				if err != nil {
 					debug.Printf("uasc %d/%d: handling %T failed: %v", s.c.ID(), reqID, req, err)
 					return &MessageBody{Err: err}
@@ -751,7 +751,7 @@ func (s *SecureChannel) handleOpenSecureChannelResponse(resp *ua.OpenSecureChann
 	return
 }
 
-func (s *SecureChannel) handleOpenSecureChannelRequest(reqID uint32, svc ua.Request) error {
+func (s *SecureChannel) handleOpenSecureChannelRequest(ctx context.Context, reqID uint32, svc ua.Request) error {
 	debug.Printf("handleOpenSecureChannelRequest: Got OPN Request\n")
 
 	var err error
@@ -844,7 +844,6 @@ func (s *SecureChannel) handleOpenSecureChannelRequest(reqID uint32, svc ua.Requ
 		ServerNonce: nonce,
 	}
 
-	ctx := context.Background() // todo(fs): fixme
 	if err := s.sendResponseWithContext(ctx, instance, reqID, resp); err != nil {
 		return err
 	}
@@ -887,10 +886,10 @@ func (s *SecureChannel) scheduleRenewal(instance *channelInstance) {
 	}
 
 	// TODO: where should this error go?
-	_ = s.renew(instance)
+	_ = s.renew(s.closeContext(), instance)
 }
 
-func (s *SecureChannel) renew(instance *channelInstance) error {
+func (s *SecureChannel) renew(ctx context.Context, instance *channelInstance) error {
 	// lock ensure no one else renews this at the same time
 	s.reqLocker.lock()
 	defer s.reqLocker.unlock()
@@ -898,7 +897,7 @@ func (s *SecureChannel) renew(instance *channelInstance) error {
 	instance.Lock()
 	defer instance.Unlock()
 
-	return s.open(context.Background(), instance, ua.SecurityTokenRequestTypeRenew)
+	return s.open(ctx, instance, ua.SecurityTokenRequestTypeRenew)
 }
 
 func (s *SecureChannel) scheduleExpiration(instance *channelInstance) {
@@ -1004,7 +1003,7 @@ func (s *SecureChannel) Renew(ctx context.Context) error {
 		return err
 	}
 
-	return s.renew(instance)
+	return s.renew(ctx, instance)
 }
 
 func (s *SecureChannel) SendRequest(ctx context.Context, req ua.Request, authToken *ua.NodeID, h ResponseHandler) error {
@@ -1166,11 +1165,17 @@ func (s *SecureChannel) Close() (err error) {
 	// https://github.com/gopcua/opcua/pull/470
 	// guard against double close until we found the root cause
 	err = io.EOF
-	s.closeOnce.Do(func() { err = s.close() })
+	s.closeOnce.Do(func() { err = s.close(context.Background()) })
 	return
 }
 
-func (s *SecureChannel) close() error {
+func (s *SecureChannel) CloseWithContext(ctx context.Context) (err error) {
+	err = io.EOF
+	s.closeOnce.Do(func() { err = s.close(ctx) })
+	return
+}
+
+func (s *SecureChannel) close(ctx context.Context) error {
 	debug.Printf("uasc %d: Close()", s.c.ID())
 
 	defer func() {
@@ -1186,12 +1191,24 @@ func (s *SecureChannel) close() error {
 	default:
 	}
 
-	err := s.SendRequest(context.Background(), &ua.CloseSecureChannelRequest{}, nil, nil)
+	err := s.SendRequest(ctx, &ua.CloseSecureChannelRequest{}, nil, nil)
 	if err != nil {
 		return err
 	}
 
 	return io.EOF
+}
+
+func (s *SecureChannel) closeContext() context.Context {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		defer cancel()
+		select {
+		case <-s.closing:
+		case <-s.disconnected:
+		}
+	}()
+	return ctx
 }
 
 func (s *SecureChannel) timeNow() time.Time {

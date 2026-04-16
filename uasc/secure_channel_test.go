@@ -323,7 +323,7 @@ func TestHandleOpenSecureChannelRequestRejectsDisabledModeBeforeActivation(t *te
 		SecurityMode:          ua.MessageSecurityModeSign,
 	}
 
-	err := serverChannel.handleOpenSecureChannelRequest(1, req)
+	err := serverChannel.handleOpenSecureChannelRequest(t.Context(), 1, req)
 	if err != ua.StatusBadSecurityModeRejected {
 		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
 	}

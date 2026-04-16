@@ -650,7 +650,7 @@ func (s *Subscription) Start(ctx context.Context) {
 	go s.run(ctx)
 }
 
-func (s *Subscription) keepalive(pubreq types.PubReq) error {
+func (s *Subscription) keepalive(ctx context.Context, pubreq types.PubReq) error {
 	eo := make([]*ua.ExtensionObject, 0)
 
 	msg := ua.NotificationMessage{
@@ -675,7 +675,7 @@ func (s *Subscription) keepalive(pubreq types.PubReq) error {
 		Results:                  []ua.StatusCode{},
 		DiagnosticInfos:          []*ua.DiagnosticInfo{},
 	}
-	err := s.Channel.SendResponseWithContext(context.Background(), pubreq.ID, response)
+	err := s.Channel.SendResponseWithContext(ctx, pubreq.ID, response)
 	if err != nil {
 		return err
 	}
@@ -763,7 +763,7 @@ func (s *Subscription) run(ctx context.Context) {
 						s.keepaliveCounter = 0
 						select {
 						case pubreq := <-s.session.PublishRequestChannel():
-							err := s.keepalive(pubreq)
+							err := s.keepalive(ctx, pubreq)
 							if err != nil {
 								ualog.Warn(ctx, "problem sending keepalive to subscription", ualog.Err(err))
 								return
@@ -868,7 +868,7 @@ func (s *Subscription) run(ctx context.Context) {
 			Results:                  []ua.StatusCode{},
 			DiagnosticInfos:          []*ua.DiagnosticInfo{},
 		}
-		err := s.Channel.SendResponseWithContext(context.Background(), pubreq.ID, response)
+		err := s.Channel.SendResponseWithContext(ctx, pubreq.ID, response)
 		if err != nil {
 			ualog.Error(ctx, "problem sending channel response", ualog.Err(err))
 			ualog.Error(ctx, "killing subscription")

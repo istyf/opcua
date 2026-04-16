@@ -172,7 +172,7 @@ func (c *channelBroker) Close(ctx context.Context) error {
 	var err error
 	c.mu.Lock()
 	for _, s := range c.s {
-		s.Close()
+		_ = s.CloseWithContext(ctx)
 	}
 	c.mu.Unlock()
 
