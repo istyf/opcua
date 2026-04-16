@@ -251,7 +251,7 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 	n.baseNode.attr[ua.AttributeIDAccessLevel] = values.DataValueFromValue(uint8(cfg.accessLevel))
 	n.baseNode.attr[ua.AttributeIDAccessLevelEx] = values.DataValueFromValue(uint32(cfg.accessLevelEx))
 
-	n.AddRef(refs.NewHasTypeDefinitionRefDesc(cfg.variableTypeNode))
+	n.AddRef(refs.NewHasTypeDefinitionReferenceDescription(cfg.variableTypeNode))
 
 	return n
 }

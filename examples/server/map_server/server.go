@@ -203,8 +203,8 @@ func main() {
 	// the object node of the map namespace is a virtual node that contains all the "nodes" for each
 	// map key
 	rootObjectsFolder := rootNS.Node(ua.NewNumericNodeID(0, id.ObjectsFolder))
-	refs.AddOrganizesRefDescs(rootObjectsFolder, myMapNamespace1.Objects())
-	refs.AddHasComponentRefDescs(rootObjectsFolder, myMapNamespace2.Objects())
+	refs.LinkWithOrganizesReferenceDescriptions(rootObjectsFolder, myMapNamespace1.Objects())
+	refs.LinkWithHasComponentReferenceDescriptions(rootObjectsFolder, myMapNamespace2.Objects())
 
 	// Start the server
 	// Note that you can add namespaces before or after starting the server.

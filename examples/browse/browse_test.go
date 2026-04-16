@@ -105,7 +105,7 @@ func populateServer(s types.Server) {
 
 	// Add forward and backward organizes references between the existing root
 	// ObjectsFolder and a test object that we create here
-	refs.AddOrganizesRefDescs(
+	refs.LinkWithOrganizesReferenceDescriptions(
 		rootNS.Node(ua.NewNumericNodeID(0, id.ObjectsFolder)),
 		nodeNS.AddNode(
 			node.NewObjectNode(

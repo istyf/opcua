@@ -68,7 +68,7 @@ func TestNodeNamespaceBrowseHonorsSharedFiltersAndKeepsTypeDefinitionFirst(t *te
 		node.WithType(objectType),
 	)
 
-	refs.AddHasComponentRefDescs(parent, child)
+	refs.LinkWithHasComponentReferenceDescriptions(parent, child)
 	ns.AddNode(parent)
 	ns.AddNode(child)
 

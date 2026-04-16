@@ -92,7 +92,7 @@ func NewMapNamespace(srv types.Server, name string) *MapNamespace {
 		node.WithType(folderType),
 	)
 
-	refs.AddOrganizesRefDescs(
+	refs.LinkWithOrganizesReferenceDescriptions(
 		srv.Node(ua.NewNumericNodeID(0, id.ObjectsFolder)),
 		mrw.objectsFolder,
 	)

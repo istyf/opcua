@@ -90,16 +90,16 @@ func NewReferenceDescription(targetNode types.Node, refTypeNodeID *ua.NodeID, is
 	return d
 }
 
-func AddHasComponentRefDescs(fromNode, toNode types.Node) {
+func LinkWithHasComponentReferenceDescriptions(fromNode, toNode types.Node) {
 	fromNode.AddRef(NewReferenceDescription(toNode, HasComponentRefTypeID, true))
 	toNode.AddRef(NewReferenceDescription(fromNode, HasComponentRefTypeID, false))
 }
 
-func NewHasTypeDefinitionRefDesc(typeNode types.TypeNode) types.ReferenceWrapper {
+func NewHasTypeDefinitionReferenceDescription(typeNode types.TypeNode) types.ReferenceWrapper {
 	return NewReferenceDescription(typeNode, HasTypeDefinitionRefTypeID, true)
 }
 
-func AddOrganizesRefDescs(organizer, organizedItem types.Node) {
+func LinkWithOrganizesReferenceDescriptions(organizer, organizedItem types.Node) {
 	organizer.AddRef(NewReferenceDescription(organizedItem, OrganizesRefTypeID, true))
 	organizedItem.AddRef(NewReferenceDescription(organizer, OrganizesRefTypeID, false))
 }

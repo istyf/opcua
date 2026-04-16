@@ -68,7 +68,7 @@ func NewObjectNode(base func(ua.NodeClass) *baseConfig, opts ...objectOption) ty
 
 	n.baseNode.attr[ua.AttributeIDEventNotifier] = values.DataValueFromValue(uint8(cfg.eventNotifier))
 
-	n.AddRef(refs.NewHasTypeDefinitionRefDesc(cfg.objectTypeNode))
+	n.AddRef(refs.NewHasTypeDefinitionReferenceDescription(cfg.objectTypeNode))
 
 	return n
 }

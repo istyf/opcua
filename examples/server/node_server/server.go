@@ -177,7 +177,7 @@ func main() {
 		),
 	)
 
-	refs.AddOrganizesRefDescs(
+	refs.LinkWithOrganizesReferenceDescriptions(
 		rootNamespace.Node(ua.NewNumericNodeID(0, id.ObjectsFolder)),
 		nodeNSObjectsFolder,
 	)

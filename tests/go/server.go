@@ -66,7 +66,7 @@ func startServer(t testing.TB, ctx context.Context) *startedServer {
 	)
 
 	// add the reference for this namespace's root object folder to the server's root object folder
-	refs.AddOrganizesRefDescs(
+	refs.LinkWithOrganizesReferenceDescriptions(
 		rootNS.Node(ua.NewNumericNodeID(0, id.ObjectsFolder)),
 		nodeNSObjectsFolder,
 	)
@@ -183,7 +183,7 @@ func startServer(t testing.TB, ctx context.Context) *startedServer {
 		),
 	)
 
-	refs.AddOrganizesRefDescs(
+	refs.LinkWithOrganizesReferenceDescriptions(
 		rootNS.Node(ua.NewNumericNodeID(0, id.ObjectsFolder)),
 		gopcuaNSObjectsFolder,
 	)
