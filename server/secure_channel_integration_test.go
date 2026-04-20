@@ -17,6 +17,8 @@ import (
 	"github.com/gopcua/opcua"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSecureChannelConnectMatrix(t *testing.T) {
@@ -48,9 +50,7 @@ func TestSecureChannelConnectMatrix(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ep, err := opcua.SelectEndpoint(endpoints, tt.policy, tt.mode)
-			if err != nil {
-				t.Fatalf("failed to select endpoint for %s/%s: %v", tt.policy, tt.mode, err)
-			}
+			require.NoError(t, err)
 
 			c, err := opcua.NewClient(ep.EndpointURL,
 				opcua.SecurityFromEndpoint(ep, ua.UserTokenTypeAnonymous),
@@ -58,16 +58,10 @@ func TestSecureChannelConnectMatrix(t *testing.T) {
 				opcua.PrivateKey(srv.clientKey),
 				opcua.AutoReconnect(false),
 			)
-			if err != nil {
-				t.Fatalf("failed to create client: %v", err)
-			}
+			require.NoError(t, err)
 
-			if err := c.Connect(ctx); err != nil {
-				t.Fatalf("failed to connect with %s/%s: %v", tt.policy, tt.mode, err)
-			}
-			if err := c.Close(ctx); err != nil {
-				t.Fatalf("failed to close client for %s/%s: %v", tt.policy, tt.mode, err)
-			}
+			require.NoError(t, c.Connect(ctx))
+			require.NoError(t, c.Close(ctx))
 		})
 	}
 }
@@ -121,17 +115,13 @@ func TestSecureChannelConnectRejectsDisabledPolicyOrMode(t *testing.T) {
 				opcua.PrivateKey(srv.clientKey),
 				opcua.AutoReconnect(false),
 			)
-			if err != nil {
-				t.Fatalf("failed to create client: %v", err)
-			}
+			require.NoError(t, err)
 			err = c.Connect(ctx)
 			if err == nil {
 				_ = c.Close(ctx)
-				t.Fatalf("expected connect to fail for %s/%s", tt.policy, tt.mode)
+				require.FailNowf(t, "expected connect to fail", "%s/%s", tt.policy, tt.mode)
 			}
-			if strings.Contains(err.Error(), "StatusBadTimeout") {
-				t.Fatalf("expected prompt rejection for %s/%s, got timeout: %v", tt.policy, tt.mode, err)
-			}
+			assert.False(t, strings.Contains(err.Error(), "StatusBadTimeout"), "expected prompt rejection for %s/%s, got timeout: %v", tt.policy, tt.mode, err)
 		})
 	}
 }
@@ -160,9 +150,7 @@ func TestGetEndpointsAdvertisesOnlyConfiguredServeableSecurityCombinations(t *te
 		if ep.SecurityPolicyURI == ua.SecurityPolicyURINone {
 			continue
 		}
-		if len(ep.ServerCertificate) == 0 {
-			t.Fatalf("expected secure endpoint %s/%s to advertise a certificate", ep.SecurityPolicyURI, ep.SecurityMode)
-		}
+		assert.NotEmpty(t, ep.ServerCertificate, "expected secure endpoint %s/%s to advertise a certificate", ep.SecurityPolicyURI, ep.SecurityMode)
 	}
 
 	want := map[string]bool{
@@ -172,13 +160,9 @@ func TestGetEndpointsAdvertisesOnlyConfiguredServeableSecurityCombinations(t *te
 		fmt.Sprintf("%s|%s", ua.SecurityPolicyURIAes128Sha256RsaOaep, ua.MessageSecurityModeSignAndEncrypt): true,
 	}
 
-	if len(got) != len(want) {
-		t.Fatalf("expected %d endpoints, got %d: %#v", len(want), len(got), got)
-	}
+	require.Len(t, got, len(want), "%#v", got)
 	for key := range want {
-		if !got[key] {
-			t.Fatalf("missing expected endpoint %s", key)
-		}
+		assert.True(t, got[key], "missing expected endpoint %s", key)
 	}
 }
 
@@ -209,9 +193,7 @@ func newSecureChannelIntegrationServer(t *testing.T, ctx context.Context, enable
 	}
 
 	s := New(ctx, opts...)
-	if err := s.Start(ctx); err != nil {
-		t.Fatalf("failed to start test server: %v", err)
-	}
+	require.NoError(t, s.Start(ctx))
 
 	return &secureChannelIntegrationServer{
 		clientCert: clientCert,
@@ -230,9 +212,7 @@ func mustGetEndpoints(t *testing.T, ctx context.Context, endpoint string) []*ua.
 	t.Helper()
 
 	endpoints, err := opcua.GetEndpoints(ctx, endpoint, opcua.AutoReconnect(false))
-	if err != nil {
-		t.Fatalf("failed to get endpoints from %s: %v", endpoint, err)
-	}
+	require.NoError(t, err)
 	return endpoints
 }
 
@@ -254,15 +234,11 @@ func reserveTestPort(t *testing.T) int {
 	t.Helper()
 
 	l, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("failed to reserve test port: %v", err)
-	}
+	require.NoError(t, err)
 	defer l.Close()
 
 	addr, ok := l.Addr().(*net.TCPAddr)
-	if !ok {
-		t.Fatalf("unexpected listener address type %T", l.Addr())
-	}
+	require.True(t, ok, "unexpected listener address type %T", l.Addr())
 	return addr.Port
 }
 
@@ -270,17 +246,13 @@ func mustGenerateTestCertificate(t *testing.T, hosts string, rsaBits int) ([]byt
 	t.Helper()
 
 	priv, err := rsa.GenerateKey(rand.Reader, rsaBits)
-	if err != nil {
-		t.Fatalf("failed to generate private key: %v", err)
-	}
+	require.NoError(t, err)
 
 	notBefore := time.Now().Add(-time.Minute)
 	notAfter := notBefore.Add(24 * time.Hour)
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
-	if err != nil {
-		t.Fatalf("failed to generate serial number: %v", err)
-	}
+	require.NoError(t, err)
 
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
@@ -306,8 +278,6 @@ func mustGenerateTestCertificate(t *testing.T, hosts string, rsaBits int) ([]byt
 	}
 
 	der, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
-	if err != nil {
-		t.Fatalf("failed to create certificate: %v", err)
-	}
+	require.NoError(t, err)
 	return der, priv
 }
