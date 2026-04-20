@@ -104,6 +104,15 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			continue
 		}
 
+		if !methodNode.IsExecutable(ctx) {
+			ualog.Error(ctx, "method is not executable",
+				ualog.String("method", methodNode.BrowseName().String()),
+				ualog.String("object", objectNode.BrowseName().String()),
+			)
+			appendResult(ua.StatusBadNotExecutable)
+			continue
+		}
+
 		outputs, code := s.middleware(methodNode.CallMethod)(
 			srvctx.WithMethodCall(ctx,
 				objectNode.ID().String(), objectNode.BrowseName().String(),
