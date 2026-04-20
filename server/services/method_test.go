@@ -185,8 +185,72 @@ func TestCallPreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
 	callResp, ok := resp.(*ua.CallResponse)
 	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
 	require.Len(t, callResp.Results, 2)
+	require.NotNil(t, callResp.ResponseHeader)
+	assert.Equal(t, ua.StatusOK, callResp.ResponseHeader.ServiceResult)
 	assert.Equal(t, ua.StatusBadNodeIDUnknown, callResp.Results[0].StatusCode)
 	assert.Equal(t, ua.StatusOK, callResp.Results[1].StatusCode)
+}
+
+func TestCallReturnsResultsWhenMethodExecutionFails(t *testing.T) {
+	t.Parallel()
+
+	objectType := node.NewObjectTypeNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(0, 5003)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ObjectType"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("ObjectType")}),
+		),
+	)
+	objectNode := node.NewObjectNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 1201)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Object"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Object")}),
+		),
+		node.WithType(objectType),
+	)
+	methodNode := node.NewMethodNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 2201)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Method"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Method")}),
+		),
+		node.Executable(true),
+		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+			return nil, ua.StatusBadInternalError
+		}),
+	)
+	objectNode.AddComponent(methodNode)
+
+	backend := &methodTestBackend{
+		namespaces: map[int]types.NameSpace{
+			1: &methodTestNamespace{
+				nodes: map[string]types.Node{
+					objectNode.ID().String(): objectNode,
+					methodNode.ID().String(): methodNode,
+				},
+			},
+		},
+	}
+	service := NewMethodService(backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 5},
+		MethodsToCall: []*ua.CallMethodRequest{
+			{
+				ObjectID: objectNode.ID(),
+				MethodID: methodNode.ID(),
+			},
+		},
+	}, 5)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.NotNil(t, callResp.ResponseHeader)
+	assert.Equal(t, ua.StatusOK, callResp.ResponseHeader.ServiceResult)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusBadInternalError, callResp.Results[0].StatusCode)
 }
 
 type methodTestBackend struct {

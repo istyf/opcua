@@ -48,15 +48,11 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 
 	results := make([]*ua.CallMethodResult, 0, len(req.MethodsToCall))
-	status := ua.StatusOK
 	appendResult := func(code ua.StatusCode, outputs ...*ua.Variant) {
 		results = append(results, &ua.CallMethodResult{
 			StatusCode:      code,
 			OutputArguments: outputs,
 		})
-		if code != ua.StatusOK && status == ua.StatusOK {
-			status = code
-		}
 	}
 
 	// Check if the method has a non forward reference to this object
@@ -130,11 +126,11 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 
 	response := &ua.CallResponse{
-		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, status),
+		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
 		// TODO: Support result data ...
 	}
 
-	if status == ua.StatusOK || len(results) != 0 {
+	if len(results) != 0 {
 		response.Results = results
 	}
 
