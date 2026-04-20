@@ -58,6 +58,13 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 
 	for _, method := range req.MethodsToCall {
+		if method.ObjectID == nil || method.MethodID == nil {
+			results = append(results, &ua.CallMethodResult{
+				StatusCode: ua.StatusBadNodeIDInvalid,
+			})
+			continue
+		}
+
 		ns, err := s.backend.Namespace(int(method.ObjectID.Namespace()))
 		if err != nil {
 			return &ua.CallResponse{
@@ -114,7 +121,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		// TODO: Support result data ...
 	}
 
-	if status == ua.StatusOK {
+	if status == ua.StatusOK || len(results) != 0 {
 		response.Results = results
 	}
 
