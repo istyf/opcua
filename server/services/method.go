@@ -25,6 +25,12 @@ type MethodService struct {
 }
 
 func NewMethodService(b MethodServiceBackend, middleware types.MethodMiddleware) *MethodService {
+	if middleware == nil {
+		middleware = func(fn types.MethodFunc) types.MethodFunc {
+			return fn
+		}
+	}
+
 	ms := &MethodService{
 		backend:    b,
 		middleware: middleware,

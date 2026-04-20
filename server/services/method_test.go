@@ -59,56 +59,17 @@ func TestCallReturnsPerMethodStatusForMissingMethodID(t *testing.T) {
 func TestCallResolvesMethodFromMethodNamespace(t *testing.T) {
 	t.Parallel()
 
-	objectType := node.NewObjectTypeNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, 5001)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ObjectType"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("ObjectType")}),
-		),
-	)
-	objectNode := node.NewObjectNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(1, 1001)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Object"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Object")}),
-		),
-		node.WithType(objectType),
-	)
-	methodNode := node.NewMethodNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(2, 2001)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "Method"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Method")}),
-		),
-		node.Executable(true),
-		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-			return nil, ua.StatusOK
-		}),
-	)
-	objectNode.AddComponent(methodNode)
-
-	backend := &methodTestBackend{
-		namespaces: map[int]types.NameSpace{
-			1: &methodTestNamespace{
-				nodes: map[string]types.Node{
-					objectNode.ID().String(): objectNode,
-				},
-			},
-			2: &methodTestNamespace{
-				nodes: map[string]types.Node{
-					methodNode.ID().String(): methodNode,
-				},
-			},
-		},
-	}
-	service := NewMethodService(backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
+	fixture := newMethodCallFixture(1, 2, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		return nil, ua.StatusOK
+	})
+	service := NewMethodService(fixture.backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
 
 	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
 		RequestHeader: &ua.RequestHeader{RequestHandle: 3},
 		MethodsToCall: []*ua.CallMethodRequest{
 			{
-				ObjectID: objectNode.ID(),
-				MethodID: methodNode.ID(),
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
 			},
 		},
 	}, 3)
@@ -123,60 +84,21 @@ func TestCallResolvesMethodFromMethodNamespace(t *testing.T) {
 func TestCallPreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
 	t.Parallel()
 
-	objectType := node.NewObjectTypeNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, 5002)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ObjectType"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("ObjectType")}),
-		),
-	)
-	objectNode := node.NewObjectNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(1, 1101)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Object"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Object")}),
-		),
-		node.WithType(objectType),
-	)
-	methodNode := node.NewMethodNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(2, 2101)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "Method"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Method")}),
-		),
-		node.Executable(true),
-		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-			return nil, ua.StatusOK
-		}),
-	)
-	objectNode.AddComponent(methodNode)
-
-	backend := &methodTestBackend{
-		namespaces: map[int]types.NameSpace{
-			1: &methodTestNamespace{
-				nodes: map[string]types.Node{
-					objectNode.ID().String(): objectNode,
-				},
-			},
-			2: &methodTestNamespace{
-				nodes: map[string]types.Node{
-					methodNode.ID().String(): methodNode,
-				},
-			},
-		},
-	}
-	service := NewMethodService(backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
+	fixture := newMethodCallFixture(1, 2, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		return nil, ua.StatusOK
+	})
+	service := NewMethodService(fixture.backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
 
 	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
 		RequestHeader: &ua.RequestHeader{RequestHandle: 4},
 		MethodsToCall: []*ua.CallMethodRequest{
 			{
 				ObjectID: ua.NewNumericNodeID(1, 9999),
-				MethodID: methodNode.ID(),
+				MethodID: fixture.methodNode.ID(),
 			},
 			{
-				ObjectID: objectNode.ID(),
-				MethodID: methodNode.ID(),
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
 			},
 		},
 	}, 4)
@@ -194,52 +116,17 @@ func TestCallPreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
 func TestCallReturnsResultsWhenMethodExecutionFails(t *testing.T) {
 	t.Parallel()
 
-	objectType := node.NewObjectTypeNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, 5003)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ObjectType"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("ObjectType")}),
-		),
-	)
-	objectNode := node.NewObjectNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(1, 1201)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Object"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Object")}),
-		),
-		node.WithType(objectType),
-	)
-	methodNode := node.NewMethodNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(1, 2201)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Method"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Method")}),
-		),
-		node.Executable(true),
-		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-			return nil, ua.StatusBadInternalError
-		}),
-	)
-	objectNode.AddComponent(methodNode)
-
-	backend := &methodTestBackend{
-		namespaces: map[int]types.NameSpace{
-			1: &methodTestNamespace{
-				nodes: map[string]types.Node{
-					objectNode.ID().String(): objectNode,
-					methodNode.ID().String(): methodNode,
-				},
-			},
-		},
-	}
-	service := NewMethodService(backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		return nil, ua.StatusBadInternalError
+	})
+	service := NewMethodService(fixture.backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
 
 	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
 		RequestHeader: &ua.RequestHeader{RequestHandle: 5},
 		MethodsToCall: []*ua.CallMethodRequest{
 			{
-				ObjectID: objectNode.ID(),
-				MethodID: methodNode.ID(),
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
 			},
 		},
 	}, 5)
@@ -256,54 +143,19 @@ func TestCallReturnsResultsWhenMethodExecutionFails(t *testing.T) {
 func TestCallReturnsBadNotExecutableForNonExecutableMethod(t *testing.T) {
 	t.Parallel()
 
-	objectType := node.NewObjectTypeNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(0, 5004)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ObjectType"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("ObjectType")}),
-		),
-	)
-	objectNode := node.NewObjectNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(1, 1301)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Object"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Object")}),
-		),
-		node.WithType(objectType),
-	)
 	called := false
-	methodNode := node.NewMethodNode(
-		node.WithBase(
-			node.WithID(ua.NewNumericNodeID(1, 2301)),
-			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Method"}),
-			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Method")}),
-		),
-		node.Executable(false),
-		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-			called = true
-			return nil, ua.StatusOK
-		}),
-	)
-	objectNode.AddComponent(methodNode)
-
-	backend := &methodTestBackend{
-		namespaces: map[int]types.NameSpace{
-			1: &methodTestNamespace{
-				nodes: map[string]types.Node{
-					objectNode.ID().String(): objectNode,
-					methodNode.ID().String(): methodNode,
-				},
-			},
-		},
-	}
-	service := NewMethodService(backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
+	fixture := newMethodCallFixture(1, 1, false, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		called = true
+		return nil, ua.StatusOK
+	})
+	service := NewMethodService(fixture.backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
 
 	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
 		RequestHeader: &ua.RequestHeader{RequestHandle: 6},
 		MethodsToCall: []*ua.CallMethodRequest{
 			{
-				ObjectID: objectNode.ID(),
-				MethodID: methodNode.ID(),
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
 			},
 		},
 	}, 6)
@@ -316,6 +168,92 @@ func TestCallReturnsBadNotExecutableForNonExecutableMethod(t *testing.T) {
 	require.Len(t, callResp.Results, 1)
 	assert.Equal(t, ua.StatusBadNotExecutable, callResp.Results[0].StatusCode)
 	assert.False(t, called)
+}
+
+func TestCallUsesIdentityMiddlewareWhenNilMiddlewareProvided(t *testing.T) {
+	t.Parallel()
+
+	var called bool
+	fixture := newMethodCallFixture(1, 1, true, func(_ context.Context, _ ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		called = true
+		return nil, ua.StatusOK
+	})
+	service := NewMethodService(fixture.backend, nil)
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 7},
+		MethodsToCall: []*ua.CallMethodRequest{
+			{
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
+			},
+		},
+	}, 7)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.NotNil(t, callResp.ResponseHeader)
+	assert.Equal(t, ua.StatusOK, callResp.ResponseHeader.ServiceResult)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusOK, callResp.Results[0].StatusCode)
+	assert.True(t, called)
+}
+
+type methodCallFixture struct {
+	backend    *methodTestBackend
+	objectNode types.Node
+	methodNode types.MethodNode
+}
+
+func newMethodCallFixture(objectNamespace, methodNamespace uint16, executable bool, handler types.MethodFunc) *methodCallFixture {
+	objectType := node.NewObjectTypeNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(0, 5000)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ObjectType"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("ObjectType")}),
+		),
+	)
+	objectNode := node.NewObjectNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(objectNamespace, 1001)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: objectNamespace, Name: "Object"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Object")}),
+		),
+		node.WithType(objectType),
+	)
+	methodNode := node.NewMethodNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(methodNamespace, 2001)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: methodNamespace, Name: "Method"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Method")}),
+		),
+		node.Executable(executable),
+		node.WithHandler(handler),
+	)
+	objectNode.AddComponent(methodNode)
+
+	objectNamespaceNode := &methodTestNamespace{
+		nodes: map[string]types.Node{
+			objectNode.ID().String(): objectNode,
+		},
+	}
+	methodNamespaceNode := objectNamespaceNode
+	if objectNamespace != methodNamespace {
+		methodNamespaceNode = &methodTestNamespace{nodes: map[string]types.Node{}}
+	}
+	methodNamespaceNode.nodes[methodNode.ID().String()] = methodNode
+
+	return &methodCallFixture{
+		backend: &methodTestBackend{
+			namespaces: map[int]types.NameSpace{
+				int(objectNamespace): objectNamespaceNode,
+				int(methodNamespace): methodNamespaceNode,
+			},
+		},
+		objectNode: objectNode,
+		methodNode: methodNode,
+	}
 }
 
 type methodTestBackend struct {
