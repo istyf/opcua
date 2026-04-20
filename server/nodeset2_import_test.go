@@ -369,6 +369,107 @@ func TestImportNodeSetVariableWithoutExplicitDataTypeFallsBackToBaseDataType(t *
 	}
 }
 
+func TestImportNodeSetRemapsBrowseNameNamespaceIndexIndependentlyOfNodeID(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+	NewNodeNameSpace(srv, "urn:test:existing")
+
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:imported"},
+		},
+		UAObject: []*schema.UAObject{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4600",
+						BrowseNameAttr: "0:ImportedObject",
+						DisplayName:    []*schema.LocalizedText{{Value: "ImportedObject"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+			},
+		},
+	}
+
+	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
+		t.Fatalf("import nodeset: %v", err)
+	}
+
+	imported := srv.Node(ua.NewNumericNodeID(2, 4600))
+	if imported == nil {
+		t.Fatal("expected imported object node, got nil")
+	}
+
+	browseName := imported.BrowseName()
+	if browseName == nil {
+		t.Fatal("expected browse name, got nil")
+	}
+	if browseName.NamespaceIndex != 0 {
+		t.Fatalf("expected browse name namespace 0, got %d", browseName.NamespaceIndex)
+	}
+	if browseName.Name != "ImportedObject" {
+		t.Fatalf("expected browse name ImportedObject, got %q", browseName.Name)
+	}
+}
+
+func TestImportNodeSetRemapsQualifiedNameValues(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+	NewNodeNameSpace(srv, "urn:test:existing")
+
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:value"},
+		},
+		UAVariable: []*schema.UAVariable{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4700",
+						BrowseNameAttr: "1:QualifiedNameValue",
+						DisplayName:    []*schema.LocalizedText{{Value: "QualifiedNameValue"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+				Value: &schema.Value{
+					QualifiedNameAttr: &schema.ValueQualifiedName{
+						NamespaceIndex: 1,
+						Name:           "ImportedName",
+					},
+				},
+			},
+		},
+	}
+
+	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
+		t.Fatalf("import nodeset: %v", err)
+	}
+
+	imported := srv.Node(ua.NewNumericNodeID(2, 4700))
+	if imported == nil {
+		t.Fatal("expected imported variable node, got nil")
+	}
+
+	attr, err := imported.Attribute(t.Context(), ua.AttributeIDValue)
+	if err != nil {
+		t.Fatalf("read value attribute: %v", err)
+	}
+
+	got, ok := attr.Value.Value.Value().(*ua.QualifiedName)
+	if !ok {
+		t.Fatalf("expected value as *ua.QualifiedName, got %T", attr.Value.Value.Value())
+	}
+	if got.NamespaceIndex != 2 {
+		t.Fatalf("expected qualified name namespace 2, got %d", got.NamespaceIndex)
+	}
+	if got.Name != "ImportedName" {
+		t.Fatalf("expected qualified name ImportedName, got %q", got.Name)
+	}
+}
+
 func TestRefsImportNodeSetDuplicateReferenceTypeAliasLogging(t *testing.T) {
 	t.Parallel()
 

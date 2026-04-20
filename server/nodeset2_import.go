@@ -7,6 +7,7 @@ import (
 	"math"
 	"reflect"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/gopcua/opcua/id"
@@ -153,6 +154,38 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 		}
 		return nid
 	}
+	convertNamespaceIndex := func(ns uint16) uint16 {
+		if correctNS, ok := (*nsID)[ns]; ok {
+			return correctNS
+		}
+		return ns
+	}
+	parseAndConvertQualifiedName := func(name string) *ua.QualifiedName {
+		nsPart, localName, hasNamespace := strings.Cut(name, ":")
+		if !hasNamespace {
+			return &ua.QualifiedName{Name: name}
+		}
+
+		nsIndex, err := strconv.ParseUint(nsPart, 10, 16)
+		if err != nil {
+			return &ua.QualifiedName{Name: name}
+		}
+
+		return &ua.QualifiedName{
+			NamespaceIndex: convertNamespaceIndex(uint16(nsIndex)),
+			Name:           localName,
+		}
+	}
+	convertQualifiedNameValue := func(name *schema.ValueQualifiedName) *ua.QualifiedName {
+		if name == nil {
+			return nil
+		}
+
+		return &ua.QualifiedName{
+			NamespaceIndex: convertNamespaceIndex(uint16(name.NamespaceIndex)),
+			Name:           name.Name,
+		}
+	}
 	resolveImportedNodeID := newImportedNodeIDResolver(aliases, nsID)
 
 	valueFromSchema := func(v *schema.Value) any {
@@ -257,10 +290,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 				return data
 			}
 		} else if v.QualifiedNameAttr != nil {
-			return &ua.QualifiedName{
-				NamespaceIndex: uint16(v.QualifiedNameAttr.NamespaceIndex),
-				Name:           v.QualifiedNameAttr.Name,
-			}
+			return convertQualifiedNameValue(v.QualifiedNameAttr)
 		}
 
 		return nil
@@ -286,7 +316,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			return err
 		}
 
-		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: rt.BrowseNameAttr}
+		browseName := parseAndConvertQualifiedName(rt.BrowseNameAttr)
 		displayNames := localizedTextsFromSchema(rt.DisplayName, browseName.Name)
 		descriptions := localizedTextsFromSchema(rt.Description, "")
 
@@ -324,7 +354,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			return err
 		}
 
-		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: dt.BrowseNameAttr}
+		browseName := parseAndConvertQualifiedName(dt.BrowseNameAttr)
 		displayNames := localizedTextsFromSchema(dt.DisplayName, browseName.Name)
 		descriptions := localizedTextsFromSchema(dt.Description, "")
 
@@ -370,7 +400,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			return err
 		}
 
-		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		browseName := parseAndConvertQualifiedName(ot.BrowseNameAttr)
 		displayNames := localizedTextsFromSchema(ot.DisplayName, browseName.Name)
 		descriptions := localizedTextsFromSchema(ot.Description, "")
 
@@ -400,7 +430,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			return err
 		}
 
-		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		browseName := parseAndConvertQualifiedName(ot.BrowseNameAttr)
 		displayNames := localizedTextsFromSchema(ot.DisplayName, browseName.Name)
 		descriptions := localizedTextsFromSchema(ot.Description, "")
 
@@ -441,7 +471,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			return err
 		}
 
-		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		browseName := parseAndConvertQualifiedName(ot.BrowseNameAttr)
 		displayNames := localizedTextsFromSchema(ot.DisplayName, browseName.Name)
 		descriptions := localizedTextsFromSchema(ot.Description, "")
 
@@ -585,7 +615,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			return err
 		}
 
-		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		browseName := parseAndConvertQualifiedName(ot.BrowseNameAttr)
 		displayNames := localizedTextsFromSchema(ot.DisplayName, ot.BrowseNameAttr)
 		descriptions := localizedTextsFromSchema(ot.Description, "")
 
@@ -615,7 +645,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			return err
 		}
 
-		browseName := &ua.QualifiedName{NamespaceIndex: nid.Namespace(), Name: ot.BrowseNameAttr}
+		browseName := parseAndConvertQualifiedName(ot.BrowseNameAttr)
 		displayNames := localizedTextsFromSchema(ot.DisplayName, ot.BrowseNameAttr)
 		descriptions := localizedTextsFromSchema(ot.Description, "")
 
