@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"log/slog"
-	"strings"
 	"testing"
 
 	"github.com/gopcua/opcua/id"
@@ -12,6 +11,8 @@ import (
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestImportNodeSetLoadsDataTypeDefinitionAttribute(t *testing.T) {
@@ -52,37 +53,23 @@ func TestImportNodeSetLoadsDataTypeDefinitionAttribute(t *testing.T) {
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	imported := srv.Node(ua.NewNumericNodeID(1, 3001))
-	if imported == nil {
-		t.Fatal("expected imported datatype node, got nil")
-	}
+	require.NotNil(t, imported)
 
 	attr, err := imported.Attribute(t.Context(), ua.AttributeIDDataTypeDefinition)
-	if err != nil {
-		t.Fatalf("read datatype definition attribute: %v", err)
-	}
+	require.NoError(t, err)
 
 	extObj, ok := attr.Value.Value.Value().(*ua.ExtensionObject)
-	if !ok {
-		t.Fatalf("expected datatype definition as *ua.ExtensionObject, got %T", attr.Value.Value.Value())
-	}
+	require.True(t, ok, "expected datatype definition as *ua.ExtensionObject, got %T", attr.Value.Value.Value())
 	structure, ok := extObj.Value.(*ua.StructureDefinition)
-	if !ok {
-		t.Fatalf("expected datatype definition payload *ua.StructureDefinition, got %T", extObj.Value)
-	}
-	if structure.BaseDataType == nil || !structure.BaseDataType.Equal(ua.NewNumericNodeID(0, 22)) {
-		t.Fatalf("expected base datatype i=22, got %#v", structure.BaseDataType)
-	}
-	if len(structure.Fields) != 1 {
-		t.Fatalf("expected 1 structure field, got %d", len(structure.Fields))
-	}
-	if structure.Fields[0].DataType == nil || !structure.Fields[0].DataType.Equal(ua.NewNumericNodeID(0, 6)) {
-		t.Fatalf("expected field datatype i=6, got %#v", structure.Fields[0].DataType)
-	}
+	require.True(t, ok, "expected datatype definition payload *ua.StructureDefinition, got %T", extObj.Value)
+	require.NotNil(t, structure.BaseDataType)
+	assert.True(t, structure.BaseDataType.Equal(ua.NewNumericNodeID(0, 22)))
+	require.Len(t, structure.Fields, 1)
+	require.NotNil(t, structure.Fields[0].DataType)
+	assert.True(t, structure.Fields[0].DataType.Equal(ua.NewNumericNodeID(0, 6)))
 }
 
 func TestImportNodeSetSkipsDeprecatedNodesByDefault(t *testing.T) {
@@ -130,26 +117,18 @@ func TestImportNodeSetSkipsDeprecatedNodesByDefault(t *testing.T) {
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset with deprecated node: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	current := srv.Node(ua.NewNumericNodeID(1, 3100))
-	if current == nil {
-		t.Fatal("expected non-deprecated node to be imported")
-	}
+	require.NotNil(t, current)
 
 	deprecated := srv.Node(ua.NewNumericNodeID(1, 3101))
-	if deprecated != nil {
-		t.Fatal("expected deprecated node to be skipped by default")
-	}
+	assert.Nil(t, deprecated)
 
-	if current.References().Contains(func(ref types.ReferenceWrapper) bool {
+	assert.False(t, current.References().Contains(func(ref types.ReferenceWrapper) bool {
 		target := ref.TargetNodeID()
 		return target != nil && target.NodeID != nil && target.NodeID.Equal(ua.NewNumericNodeID(1, 3101))
-	}) {
-		t.Fatal("expected no reference targeting skipped deprecated node")
-	}
+	}))
 }
 
 func TestImportNodeSetSkipsMalformedDataTypeDefinition(t *testing.T) {
@@ -188,18 +167,13 @@ func TestImportNodeSetSkipsMalformedDataTypeDefinition(t *testing.T) {
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset with malformed datatype definition: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	imported := srv.Node(ua.NewNumericNodeID(1, 3002))
-	if imported == nil {
-		t.Fatal("expected imported datatype node, got nil")
-	}
+	require.NotNil(t, imported)
 
-	if _, err := imported.Attribute(t.Context(), ua.AttributeIDDataTypeDefinition); err == nil {
-		t.Fatal("expected malformed datatype definition to leave attribute unset")
-	}
+	_, err := imported.Attribute(t.Context(), ua.AttributeIDDataTypeDefinition)
+	assert.Error(t, err)
 }
 
 func TestImportNodeSetVariableWithoutExplicitDataTypeInheritsVariableTypeDataType(t *testing.T) {
@@ -269,27 +243,17 @@ func TestImportNodeSetVariableWithoutExplicitDataTypeInheritsVariableTypeDataTyp
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	imported := srv.Node(ua.NewNumericNodeID(1, 4301))
-	if imported == nil {
-		t.Fatal("expected imported variable node, got nil")
-	}
+	require.NotNil(t, imported)
 
 	attr, err := imported.Attribute(t.Context(), ua.AttributeIDDataType)
-	if err != nil {
-		t.Fatalf("read datatype attribute: %v", err)
-	}
+	require.NoError(t, err)
 
 	got, ok := attr.Value.Value.Value().(*ua.NodeID)
-	if !ok {
-		t.Fatalf("expected datatype as *ua.NodeID, got %T", attr.Value.Value.Value())
-	}
-	if !got.Equal(ua.NewNumericNodeID(1, 4100)) {
-		t.Fatalf("expected inherited datatype ns=1;i=4100, got %s", got.String())
-	}
+	require.True(t, ok, "expected datatype as *ua.NodeID, got %T", attr.Value.Value.Value())
+	assert.True(t, got.Equal(ua.NewNumericNodeID(1, 4100)))
 }
 
 func TestImportNodeSetVariableWithoutExplicitDataTypeFallsBackToBaseDataType(t *testing.T) {
@@ -346,27 +310,17 @@ func TestImportNodeSetVariableWithoutExplicitDataTypeFallsBackToBaseDataType(t *
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	imported := srv.Node(ua.NewNumericNodeID(1, 4501))
-	if imported == nil {
-		t.Fatal("expected imported variable node, got nil")
-	}
+	require.NotNil(t, imported)
 
 	attr, err := imported.Attribute(t.Context(), ua.AttributeIDDataType)
-	if err != nil {
-		t.Fatalf("read datatype attribute: %v", err)
-	}
+	require.NoError(t, err)
 
 	got, ok := attr.Value.Value.Value().(*ua.NodeID)
-	if !ok {
-		t.Fatalf("expected datatype as *ua.NodeID, got %T", attr.Value.Value.Value())
-	}
-	if !got.Equal(ua.NewNumericNodeID(0, id.BaseDataType)) {
-		t.Fatalf("expected fallback datatype i=%d, got %s", id.BaseDataType, got.String())
-	}
+	require.True(t, ok, "expected datatype as *ua.NodeID, got %T", attr.Value.Value.Value())
+	assert.True(t, got.Equal(ua.NewNumericNodeID(0, id.BaseDataType)))
 }
 
 func TestImportNodeSetRemapsBrowseNameNamespaceIndexIndependentlyOfNodeID(t *testing.T) {
@@ -393,25 +347,15 @@ func TestImportNodeSetRemapsBrowseNameNamespaceIndexIndependentlyOfNodeID(t *tes
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	imported := srv.Node(ua.NewNumericNodeID(2, 4600))
-	if imported == nil {
-		t.Fatal("expected imported object node, got nil")
-	}
+	require.NotNil(t, imported)
 
 	browseName := imported.BrowseName()
-	if browseName == nil {
-		t.Fatal("expected browse name, got nil")
-	}
-	if browseName.NamespaceIndex != 0 {
-		t.Fatalf("expected browse name namespace 0, got %d", browseName.NamespaceIndex)
-	}
-	if browseName.Name != "ImportedObject" {
-		t.Fatalf("expected browse name ImportedObject, got %q", browseName.Name)
-	}
+	require.NotNil(t, browseName)
+	assert.Equal(t, uint16(0), browseName.NamespaceIndex)
+	assert.Equal(t, "ImportedObject", browseName.Name)
 }
 
 func TestImportNodeSetRemapsQualifiedNameValues(t *testing.T) {
@@ -444,30 +388,18 @@ func TestImportNodeSetRemapsQualifiedNameValues(t *testing.T) {
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	imported := srv.Node(ua.NewNumericNodeID(2, 4700))
-	if imported == nil {
-		t.Fatal("expected imported variable node, got nil")
-	}
+	require.NotNil(t, imported)
 
 	attr, err := imported.Attribute(t.Context(), ua.AttributeIDValue)
-	if err != nil {
-		t.Fatalf("read value attribute: %v", err)
-	}
+	require.NoError(t, err)
 
 	got, ok := attr.Value.Value.Value().(*ua.QualifiedName)
-	if !ok {
-		t.Fatalf("expected value as *ua.QualifiedName, got %T", attr.Value.Value.Value())
-	}
-	if got.NamespaceIndex != 2 {
-		t.Fatalf("expected qualified name namespace 2, got %d", got.NamespaceIndex)
-	}
-	if got.Name != "ImportedName" {
-		t.Fatalf("expected qualified name ImportedName, got %q", got.Name)
-	}
+	require.True(t, ok, "expected value as *ua.QualifiedName, got %T", attr.Value.Value.Value())
+	assert.Equal(t, uint16(2), got.NamespaceIndex)
+	assert.Equal(t, "ImportedName", got.Name)
 }
 
 func TestRefsImportNodeSetDuplicateReferenceTypeAliasLogging(t *testing.T) {
@@ -513,12 +445,8 @@ func TestRefsImportNodeSetDuplicateReferenceTypeAliasLogging(t *testing.T) {
 	}
 
 	ctx, out := testCtx(t)
-	if err := srv.refsImportNodeSet(ctx, sameTarget, &nsIDLookup{}); err != nil {
-		t.Fatalf("import same-target aliases: %v", err)
-	}
-	if strings.Contains(out.String(), "duplicate reference type alias points to different target") {
-		t.Fatalf("did not expect same-target alias collision to warn, got log output %q", out.String())
-	}
+	require.NoError(t, srv.refsImportNodeSet(ctx, sameTarget, &nsIDLookup{}))
+	assert.NotContains(t, out.String(), "duplicate reference type alias points to different target")
 
 	differentTarget := &schema.UANodeSet{
 		Aliases: &schema.AliasTable{
@@ -541,12 +469,8 @@ func TestRefsImportNodeSetDuplicateReferenceTypeAliasLogging(t *testing.T) {
 	}
 
 	ctx, out = testCtx(t)
-	if err := srv.refsImportNodeSet(ctx, differentTarget, &nsIDLookup{}); err != nil {
-		t.Fatalf("import different-target aliases: %v", err)
-	}
-	if !strings.Contains(out.String(), "duplicate reference type alias points to different target") {
-		t.Fatalf("expected different-target alias collision to warn, got log output %q", out.String())
-	}
+	require.NoError(t, srv.refsImportNodeSet(ctx, differentTarget, &nsIDLookup{}))
+	assert.Contains(t, out.String(), "duplicate reference type alias points to different target")
 }
 
 func TestImportNodeSetLoadsEnumDataTypeDefinitionAttribute(t *testing.T) {
@@ -602,37 +526,23 @@ func TestImportNodeSetLoadsEnumDataTypeDefinitionAttribute(t *testing.T) {
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	imported := srv.Node(ua.NewNumericNodeID(1, 3010))
-	if imported == nil {
-		t.Fatal("expected imported enum datatype node, got nil")
-	}
+	require.NotNil(t, imported)
 
 	attr, err := imported.Attribute(t.Context(), ua.AttributeIDDataTypeDefinition)
-	if err != nil {
-		t.Fatalf("read datatype definition attribute: %v", err)
-	}
+	require.NoError(t, err)
 
 	extObj, ok := attr.Value.Value.Value().(*ua.ExtensionObject)
-	if !ok {
-		t.Fatalf("expected datatype definition as *ua.ExtensionObject, got %T", attr.Value.Value.Value())
-	}
+	require.True(t, ok, "expected datatype definition as *ua.ExtensionObject, got %T", attr.Value.Value.Value())
 	enumDefinition, ok := extObj.Value.(*ua.EnumDefinition)
-	if !ok {
-		t.Fatalf("expected datatype definition payload *ua.EnumDefinition, got %T", extObj.Value)
-	}
-	if len(enumDefinition.Fields) != 2 {
-		t.Fatalf("expected 2 enum fields, got %d", len(enumDefinition.Fields))
-	}
-	if enumDefinition.Fields[0].Value != 0 || enumDefinition.Fields[1].Value != 1 {
-		t.Fatalf("expected enum values [0 1], got [%d %d]", enumDefinition.Fields[0].Value, enumDefinition.Fields[1].Value)
-	}
-	if enumDefinition.Fields[1].DisplayName == nil || enumDefinition.Fields[1].DisplayName.Text != "Running" {
-		t.Fatalf("expected second enum display name Running, got %#v", enumDefinition.Fields[1].DisplayName)
-	}
+	require.True(t, ok, "expected datatype definition payload *ua.EnumDefinition, got %T", extObj.Value)
+	require.Len(t, enumDefinition.Fields, 2)
+	assert.Equal(t, int64(0), enumDefinition.Fields[0].Value)
+	assert.Equal(t, int64(1), enumDefinition.Fields[1].Value)
+	require.NotNil(t, enumDefinition.Fields[1].DisplayName)
+	assert.Equal(t, "Running", enumDefinition.Fields[1].DisplayName.Text)
 }
 
 func TestImportNodeSetLoadsOptionSetDataTypeDefinitionAttribute(t *testing.T) {
@@ -673,32 +583,19 @@ func TestImportNodeSetLoadsOptionSetDataTypeDefinitionAttribute(t *testing.T) {
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	imported := srv.Node(ua.NewNumericNodeID(1, 3011))
-	if imported == nil {
-		t.Fatal("expected imported option-set datatype node, got nil")
-	}
+	require.NotNil(t, imported)
 
 	attr, err := imported.Attribute(t.Context(), ua.AttributeIDDataTypeDefinition)
-	if err != nil {
-		t.Fatalf("read datatype definition attribute: %v", err)
-	}
+	require.NoError(t, err)
 
 	extObj, ok := attr.Value.Value.Value().(*ua.ExtensionObject)
-	if !ok {
-		t.Fatalf("expected datatype definition as *ua.ExtensionObject, got %T", attr.Value.Value.Value())
-	}
+	require.True(t, ok, "expected datatype definition as *ua.ExtensionObject, got %T", attr.Value.Value.Value())
 	enumDefinition, ok := extObj.Value.(*ua.EnumDefinition)
-	if !ok {
-		t.Fatalf("expected datatype definition payload *ua.EnumDefinition, got %T", extObj.Value)
-	}
-	if len(enumDefinition.Fields) != 2 {
-		t.Fatalf("expected 2 option-set fields, got %d", len(enumDefinition.Fields))
-	}
-	if enumDefinition.Fields[0].Value != 1 || enumDefinition.Fields[1].Value != 4 {
-		t.Fatalf("expected option-set bit values [1 4], got [%d %d]", enumDefinition.Fields[0].Value, enumDefinition.Fields[1].Value)
-	}
+	require.True(t, ok, "expected datatype definition payload *ua.EnumDefinition, got %T", extObj.Value)
+	require.Len(t, enumDefinition.Fields, 2)
+	assert.Equal(t, int64(1), enumDefinition.Fields[0].Value)
+	assert.Equal(t, int64(4), enumDefinition.Fields[1].Value)
 }

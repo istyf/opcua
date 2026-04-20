@@ -5,6 +5,8 @@ import (
 
 	"github.com/gopcua/opcua/schema"
 	"github.com/gopcua/opcua/ua"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConvertSchemaDataTypeDefinitionStructure(t *testing.T) {
@@ -34,51 +36,27 @@ func TestConvertSchemaDataTypeDefinitionStructure(t *testing.T) {
 		kind:          importedDataTypeDefinitionStructure,
 		structureType: ua.StructureTypeStructureWithOptionalFields,
 	}, func(fieldType string) (*ua.NodeID, error) {
-		if fieldType != "ns=1;i=3001" {
-			t.Fatalf("expected resolver input %q, got %q", "ns=1;i=3001", fieldType)
-		}
+		assert.Equal(t, "ns=1;i=3001", fieldType)
 		return resolvedNodeID, nil
 	})
-	if err != nil {
-		t.Fatalf("convert schema structure definition: %v", err)
-	}
+	require.NoError(t, err)
 
 	structure, ok := got.(*ua.StructureDefinition)
-	if !ok {
-		t.Fatalf("expected *ua.StructureDefinition, got %T", got)
-	}
-	if structure.BaseDataType != nil {
-		t.Fatalf("expected structure base datatype to be unset in direct conversion helper, got %#v", structure.BaseDataType)
-	}
-	if structure.StructureType != ua.StructureTypeStructureWithOptionalFields {
-		t.Fatalf("expected structure type %v, got %v", ua.StructureTypeStructureWithOptionalFields, structure.StructureType)
-	}
-	if len(structure.Fields) != 1 {
-		t.Fatalf("expected 1 structure field, got %d", len(structure.Fields))
-	}
+	require.True(t, ok, "expected *ua.StructureDefinition, got %T", got)
+	assert.Nil(t, structure.BaseDataType)
+	assert.Equal(t, ua.StructureTypeStructureWithOptionalFields, structure.StructureType)
+	require.Len(t, structure.Fields, 1)
 
 	field := structure.Fields[0]
-	if field.Name != "Temperature" {
-		t.Fatalf("expected field name %q, got %q", "Temperature", field.Name)
-	}
-	if field.DataType == nil || !field.DataType.Equal(resolvedNodeID) {
-		t.Fatalf("expected field datatype %#v, got %#v", resolvedNodeID, field.DataType)
-	}
-	if field.ValueRank != -1 {
-		t.Fatalf("expected value rank -1, got %d", field.ValueRank)
-	}
-	if len(field.ArrayDimensions) != 2 || field.ArrayDimensions[0] != 2 || field.ArrayDimensions[1] != 4 {
-		t.Fatalf("expected array dimensions [2 4], got %#v", field.ArrayDimensions)
-	}
-	if field.MaxStringLength != 64 {
-		t.Fatalf("expected max string length 64, got %d", field.MaxStringLength)
-	}
-	if !field.IsOptional {
-		t.Fatal("expected field to be optional")
-	}
-	if field.Description == nil || field.Description.Text != "Temperature field" {
-		t.Fatalf("expected description %q, got %#v", "Temperature field", field.Description)
-	}
+	assert.Equal(t, "Temperature", field.Name)
+	require.NotNil(t, field.DataType)
+	assert.True(t, field.DataType.Equal(resolvedNodeID))
+	assert.Equal(t, int32(-1), field.ValueRank)
+	assert.Equal(t, []uint32{2, 4}, field.ArrayDimensions)
+	assert.Equal(t, uint32(64), field.MaxStringLength)
+	assert.True(t, field.IsOptional)
+	require.NotNil(t, field.Description)
+	assert.Equal(t, "Temperature field", field.Description.Text)
 }
 
 func TestConvertSchemaStructureFieldUsesDisplayNameAsDescriptionFallback(t *testing.T) {
@@ -94,13 +72,10 @@ func TestConvertSchemaStructureFieldUsesDisplayNameAsDescriptionFallback(t *test
 	}, func(string) (*ua.NodeID, error) {
 		return ua.NewNumericNodeID(1, 3002), nil
 	})
-	if err != nil {
-		t.Fatalf("convert schema structure field: %v", err)
-	}
+	require.NoError(t, err)
 
-	if field.Description == nil || field.Description.Text != "Status field" {
-		t.Fatalf("expected display name fallback %q, got %#v", "Status field", field.Description)
-	}
+	require.NotNil(t, field.Description)
+	assert.Equal(t, "Status field", field.Description.Text)
 }
 
 func TestConvertSchemaDataTypeDefinitionEnum(t *testing.T) {
@@ -123,31 +98,19 @@ func TestConvertSchemaDataTypeDefinitionEnum(t *testing.T) {
 	}
 
 	got, err := convertSchemaDataTypeDefinition(definition, importedDataTypeClassification{kind: importedDataTypeDefinitionEnum}, nil)
-	if err != nil {
-		t.Fatalf("convert schema enum definition: %v", err)
-	}
+	require.NoError(t, err)
 
 	enumDefinition, ok := got.(*ua.EnumDefinition)
-	if !ok {
-		t.Fatalf("expected *ua.EnumDefinition, got %T", got)
-	}
-	if len(enumDefinition.Fields) != 1 {
-		t.Fatalf("expected 1 enum field, got %d", len(enumDefinition.Fields))
-	}
+	require.True(t, ok, "expected *ua.EnumDefinition, got %T", got)
+	require.Len(t, enumDefinition.Fields, 1)
 
 	field := enumDefinition.Fields[0]
-	if field.Name != "Idle" {
-		t.Fatalf("expected field name %q, got %q", "Idle", field.Name)
-	}
-	if field.Value != 1 {
-		t.Fatalf("expected field value 1, got %d", field.Value)
-	}
-	if field.DisplayName == nil || field.DisplayName.Text != "Idle" {
-		t.Fatalf("expected display name %q, got %#v", "Idle", field.DisplayName)
-	}
-	if field.Description == nil || field.Description.Text != "Idle state" {
-		t.Fatalf("expected description %q, got %#v", "Idle state", field.Description)
-	}
+	assert.Equal(t, "Idle", field.Name)
+	assert.Equal(t, int64(1), field.Value)
+	require.NotNil(t, field.DisplayName)
+	assert.Equal(t, "Idle", field.DisplayName.Text)
+	require.NotNil(t, field.Description)
+	assert.Equal(t, "Idle state", field.Description.Text)
 }
 
 func TestConvertSchemaDataTypeDefinitionOptionSet(t *testing.T) {
@@ -176,39 +139,27 @@ func TestConvertSchemaDataTypeDefinitionOptionSet(t *testing.T) {
 	}
 
 	got, err := convertSchemaDataTypeDefinition(definition, importedDataTypeClassification{kind: importedDataTypeDefinitionEnum}, nil)
-	if err != nil {
-		t.Fatalf("convert schema option set definition: %v", err)
-	}
+	require.NoError(t, err)
 
 	enumDefinition, ok := got.(*ua.EnumDefinition)
-	if !ok {
-		t.Fatalf("expected *ua.EnumDefinition, got %T", got)
-	}
-	if len(enumDefinition.Fields) != 2 {
-		t.Fatalf("expected 2 enum fields, got %d", len(enumDefinition.Fields))
-	}
+	require.True(t, ok, "expected *ua.EnumDefinition, got %T", got)
+	require.Len(t, enumDefinition.Fields, 2)
 
-	if enumDefinition.Fields[0].Name != "HighHigh" || enumDefinition.Fields[0].Value != 1 {
-		t.Fatalf("expected first option set field to preserve name/value, got %#v", enumDefinition.Fields[0])
-	}
-	if enumDefinition.Fields[0].DisplayName == nil || enumDefinition.Fields[0].DisplayName.Text != "HighHigh" {
-		t.Fatalf("expected first option set display name %q, got %#v", "HighHigh", enumDefinition.Fields[0].DisplayName)
-	}
-	if enumDefinition.Fields[1].Name != "LowLow" || enumDefinition.Fields[1].Value != 8 {
-		t.Fatalf("expected second option set field to preserve bit value 8, got %#v", enumDefinition.Fields[1])
-	}
-	if enumDefinition.Fields[1].Description == nil || enumDefinition.Fields[1].Description.Text != "Low low alarm bit" {
-		t.Fatalf("expected second option set description %q, got %#v", "Low low alarm bit", enumDefinition.Fields[1].Description)
-	}
+	assert.Equal(t, "HighHigh", enumDefinition.Fields[0].Name)
+	assert.Equal(t, int64(1), enumDefinition.Fields[0].Value)
+	require.NotNil(t, enumDefinition.Fields[0].DisplayName)
+	assert.Equal(t, "HighHigh", enumDefinition.Fields[0].DisplayName.Text)
+	assert.Equal(t, "LowLow", enumDefinition.Fields[1].Name)
+	assert.Equal(t, int64(8), enumDefinition.Fields[1].Value)
+	require.NotNil(t, enumDefinition.Fields[1].Description)
+	assert.Equal(t, "Low low alarm bit", enumDefinition.Fields[1].Description.Text)
 }
 
 func TestConvertSchemaDataTypeDefinitionRejectsInvalidKind(t *testing.T) {
 	t.Parallel()
 
 	_, err := convertSchemaDataTypeDefinition(&schema.DataTypeDefinition{}, importedDataTypeClassification{}, nil)
-	if err == nil {
-		t.Fatal("expected unsupported kind to return an error")
-	}
+	assert.Error(t, err)
 }
 
 func TestResolveSchemaStructureBaseDataType(t *testing.T) {
@@ -284,23 +235,16 @@ func TestResolveSchemaStructureBaseDataType(t *testing.T) {
 
 			got, err := resolveSchemaStructureBaseDataType(tt.dataType, resolver)
 			if tt.wantErr {
-				if err == nil {
-					t.Fatal("expected error, got nil")
-				}
+				assert.Error(t, err)
 				return
 			}
-			if err != nil {
-				t.Fatalf("resolve schema structure base datatype: %v", err)
-			}
+			require.NoError(t, err)
 			if tt.wantID == nil {
-				if got != nil {
-					t.Fatalf("expected nil base datatype, got %#v", got)
-				}
+				assert.Nil(t, got)
 				return
 			}
-			if got == nil || !got.Equal(tt.wantID) {
-				t.Fatalf("expected base datatype %#v, got %#v", tt.wantID, got)
-			}
+			require.NotNil(t, got)
+			assert.True(t, got.Equal(tt.wantID))
 		})
 	}
 }
@@ -319,9 +263,7 @@ func TestConvertSchemaStructureDefinitionRejectsInvalidArrayDimensions(t *testin
 	}, importedDataTypeClassification{kind: importedDataTypeDefinitionStructure}, func(string) (*ua.NodeID, error) {
 		return ua.NewNumericNodeID(1, 3001), nil
 	})
-	if err == nil {
-		t.Fatal("expected invalid array dimensions to return an error")
-	}
+	assert.Error(t, err)
 }
 
 func TestClassifySchemaDataTypeDefinition(t *testing.T) {
@@ -412,17 +354,11 @@ func TestClassifySchemaDataTypeDefinition(t *testing.T) {
 
 			got, err := classifySchemaDataTypeDefinition(tt.dataType)
 			if tt.wantErr {
-				if err == nil {
-					t.Fatal("expected error, got nil")
-				}
+				assert.Error(t, err)
 				return
 			}
-			if err != nil {
-				t.Fatalf("classify schema datatype definition: %v", err)
-			}
-			if got != tt.want {
-				t.Fatalf("expected classification %#v, got %#v", tt.want, got)
-			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -436,18 +372,10 @@ func TestNewImportedNodeIDResolver(t *testing.T) {
 	}, &nsMap)
 
 	got, err := resolver("TemperatureType")
-	if err != nil {
-		t.Fatalf("resolve aliased node id: %v", err)
-	}
-	if got == nil {
-		t.Fatal("expected resolved node id, got nil")
-	}
-	if got.Namespace() != 7 {
-		t.Fatalf("expected remapped namespace 7, got %d", got.Namespace())
-	}
-	if got.IntID() != 3001 {
-		t.Fatalf("expected numeric id 3001, got %d", got.IntID())
-	}
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, uint16(7), got.Namespace())
+	assert.Equal(t, uint32(3001), got.IntID())
 }
 
 func TestNewImportedNodeIDResolverWithoutAlias(t *testing.T) {
@@ -457,18 +385,10 @@ func TestNewImportedNodeIDResolverWithoutAlias(t *testing.T) {
 	resolver := newImportedNodeIDResolver(nil, &nsMap)
 
 	got, err := resolver("ns=1;i=42")
-	if err != nil {
-		t.Fatalf("resolve direct node id: %v", err)
-	}
-	if got == nil {
-		t.Fatal("expected resolved node id, got nil")
-	}
-	if got.Namespace() != 5 {
-		t.Fatalf("expected remapped namespace 5, got %d", got.Namespace())
-	}
-	if got.IntID() != 42 {
-		t.Fatalf("expected numeric id 42, got %d", got.IntID())
-	}
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.Equal(t, uint16(5), got.Namespace())
+	assert.Equal(t, uint32(42), got.IntID())
 }
 
 func TestNewImportedNodeIDResolverRejectsInvalidNodeID(t *testing.T) {
@@ -476,7 +396,6 @@ func TestNewImportedNodeIDResolverRejectsInvalidNodeID(t *testing.T) {
 
 	resolver := newImportedNodeIDResolver(nil, nil)
 
-	if _, err := resolver("abc=0;i=2"); err == nil {
-		t.Fatal("expected invalid node id to return an error")
-	}
+	_, err := resolver("abc=0;i=2")
+	assert.Error(t, err)
 }

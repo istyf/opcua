@@ -9,6 +9,8 @@ import (
 	"github.com/gopcua/opcua/server/services"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReadReturnsImportedDataTypeDefinitionAttribute(t *testing.T) {
@@ -49,9 +51,7 @@ func TestReadReturnsImportedDataTypeDefinitionAttribute(t *testing.T) {
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	svc := services.NewAttributeService(&attributeTestBackend{srv: srv})
 	resp, err := svc.Read(t.Context(), nil, &ua.ReadRequest{
@@ -65,40 +65,25 @@ func TestReadReturnsImportedDataTypeDefinitionAttribute(t *testing.T) {
 			},
 		},
 	}, 7)
-	if err != nil {
-		t.Fatalf("read datatype definition attribute: %v", err)
-	}
+	require.NoError(t, err)
 
 	readResp, ok := resp.(*ua.ReadResponse)
-	if !ok {
-		t.Fatalf("expected *ua.ReadResponse, got %T", resp)
-	}
-	if len(readResp.Results) != 1 {
-		t.Fatalf("expected 1 read result, got %d", len(readResp.Results))
-	}
+	require.True(t, ok, "expected *ua.ReadResponse, got %T", resp)
+	require.Len(t, readResp.Results, 1)
 
 	got := readResp.Results[0]
-	if got == nil || got.Value == nil {
-		t.Fatalf("expected datatype definition value, got %#v", got)
-	}
+	require.NotNil(t, got)
+	require.NotNil(t, got.Value)
 
 	extObj, ok := got.Value.Value().(*ua.ExtensionObject)
-	if !ok {
-		t.Fatalf("expected datatype definition as *ua.ExtensionObject, got %T", got.Value.Value())
-	}
+	require.True(t, ok, "expected datatype definition as *ua.ExtensionObject, got %T", got.Value.Value())
 	structure, ok := extObj.Value.(*ua.StructureDefinition)
-	if !ok {
-		t.Fatalf("expected datatype definition payload *ua.StructureDefinition, got %T", extObj.Value)
-	}
-	if structure.BaseDataType == nil || !structure.BaseDataType.Equal(ua.NewNumericNodeID(0, 22)) {
-		t.Fatalf("expected base datatype i=22, got %#v", structure.BaseDataType)
-	}
-	if len(structure.Fields) != 1 {
-		t.Fatalf("expected 1 structure field, got %d", len(structure.Fields))
-	}
-	if structure.Fields[0].DataType == nil || !structure.Fields[0].DataType.Equal(ua.NewNumericNodeID(0, 6)) {
-		t.Fatalf("expected field datatype i=6, got %#v", structure.Fields[0].DataType)
-	}
+	require.True(t, ok, "expected datatype definition payload *ua.StructureDefinition, got %T", extObj.Value)
+	require.NotNil(t, structure.BaseDataType)
+	assert.True(t, structure.BaseDataType.Equal(ua.NewNumericNodeID(0, 22)))
+	require.Len(t, structure.Fields, 1)
+	require.NotNil(t, structure.Fields[0].DataType)
+	assert.True(t, structure.Fields[0].DataType.Equal(ua.NewNumericNodeID(0, 6)))
 }
 
 func TestBrowseAndReadImportedDataTypeDefinition(t *testing.T) {
@@ -147,9 +132,7 @@ func TestBrowseAndReadImportedDataTypeDefinition(t *testing.T) {
 		},
 	}
 
-	if err := srv.ImportNodeSet(t.Context(), nodes); err != nil {
-		t.Fatalf("import nodeset: %v", err)
-	}
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
 
 	backend := &attributeTestBackend{srv: srv}
 	viewSvc := services.NewViewService(backend)
@@ -170,31 +153,22 @@ func TestBrowseAndReadImportedDataTypeDefinition(t *testing.T) {
 			},
 		},
 	}, 11)
-	if err != nil {
-		t.Fatalf("browse structure subtypes: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp, ok := browseRespRaw.(*ua.BrowseResponse)
-	if !ok {
-		t.Fatalf("expected *ua.BrowseResponse, got %T", browseRespRaw)
-	}
-	if len(browseResp.Results) != 1 {
-		t.Fatalf("expected 1 browse result, got %d", len(browseResp.Results))
-	}
+	require.True(t, ok, "expected *ua.BrowseResponse, got %T", browseRespRaw)
+	require.Len(t, browseResp.Results, 1)
 
 	var importedRef *ua.ReferenceDescription
 	for _, ref := range browseResp.Results[0].References {
-		if ref != nil && ref.BrowseName != nil && ref.BrowseName.Name == "1:CustomStruct" {
+		if ref != nil && ref.BrowseName != nil && ref.BrowseName.Name == "CustomStruct" {
 			importedRef = ref
 			break
 		}
 	}
-	if importedRef == nil {
-		t.Fatalf("expected browse to return imported custom datatype, got %#v", browseResp.Results[0].References)
-	}
-	if importedRef.NodeID == nil || importedRef.NodeID.NodeID == nil {
-		t.Fatalf("expected imported browse result to include a local node id, got %#v", importedRef.NodeID)
-	}
+	require.NotNil(t, importedRef, "expected browse to return imported custom datatype, got %#v", browseResp.Results[0].References)
+	require.NotNil(t, importedRef.NodeID)
+	require.NotNil(t, importedRef.NodeID.NodeID)
 
 	attrSvc := services.NewAttributeService(backend)
 	readRespRaw, err := attrSvc.Read(t.Context(), nil, &ua.ReadRequest{
@@ -208,37 +182,22 @@ func TestBrowseAndReadImportedDataTypeDefinition(t *testing.T) {
 			},
 		},
 	}, 12)
-	if err != nil {
-		t.Fatalf("read datatype definition attribute: %v", err)
-	}
+	require.NoError(t, err)
 
 	readResp, ok := readRespRaw.(*ua.ReadResponse)
-	if !ok {
-		t.Fatalf("expected *ua.ReadResponse, got %T", readRespRaw)
-	}
-	if len(readResp.Results) != 1 {
-		t.Fatalf("expected 1 read result, got %d", len(readResp.Results))
-	}
+	require.True(t, ok, "expected *ua.ReadResponse, got %T", readRespRaw)
+	require.Len(t, readResp.Results, 1)
 
 	got := readResp.Results[0]
-	if got == nil || got.Value == nil {
-		t.Fatalf("expected datatype definition value, got %#v", got)
-	}
+	require.NotNil(t, got)
+	require.NotNil(t, got.Value)
 
 	extObj, ok := got.Value.Value().(*ua.ExtensionObject)
-	if !ok {
-		t.Fatalf("expected datatype definition as *ua.ExtensionObject, got %T", got.Value.Value())
-	}
+	require.True(t, ok, "expected datatype definition as *ua.ExtensionObject, got %T", got.Value.Value())
 	structure, ok := extObj.Value.(*ua.StructureDefinition)
-	if !ok {
-		t.Fatalf("expected datatype definition payload *ua.StructureDefinition, got %T", extObj.Value)
-	}
-	if len(structure.Fields) != 1 {
-		t.Fatalf("expected 1 structure field, got %d", len(structure.Fields))
-	}
-	if structure.Fields[0].Name != "Temperature" {
-		t.Fatalf("expected field name Temperature, got %q", structure.Fields[0].Name)
-	}
+	require.True(t, ok, "expected datatype definition payload *ua.StructureDefinition, got %T", extObj.Value)
+	require.Len(t, structure.Fields, 1)
+	assert.Equal(t, "Temperature", structure.Fields[0].Name)
 }
 
 type attributeTestBackend struct {
