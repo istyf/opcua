@@ -11,6 +11,7 @@ import (
 var (
 	OrganizesRefTypeID         *ua.NodeID = ua.NewNumericNodeID(0, id.Organizes)
 	HasComponentRefTypeID      *ua.NodeID = ua.NewNumericNodeID(0, id.HasComponent)
+	HasPropertyRefTypeID       *ua.NodeID = ua.NewNumericNodeID(0, id.HasProperty)
 	HasSubtypeRefTypeID        *ua.NodeID = ua.NewNumericNodeID(0, id.HasSubtype)
 	HasTypeDefinitionRefTypeID *ua.NodeID = ua.NewNumericNodeID(0, id.HasTypeDefinition)
 )
@@ -108,6 +109,8 @@ func TypeID(typeID uint32) *ua.NodeID {
 	switch typeID {
 	case id.HasComponent:
 		return HasComponentRefTypeID
+	case id.HasProperty:
+		return HasPropertyRefTypeID
 	case id.HasSubtype:
 		return HasSubtypeRefTypeID
 	case id.HasTypeDefinition:
