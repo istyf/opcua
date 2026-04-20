@@ -9,6 +9,8 @@ import (
 	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNodeNamespaceBrowseHandlesNodesWithoutReferences(t *testing.T) {
@@ -30,12 +32,8 @@ func TestNodeNamespaceBrowseHandlesNodesWithoutReferences(t *testing.T) {
 		ReferenceTypeID: ua.NewNumericNodeID(0, 0),
 	})
 
-	if result.StatusCode != ua.StatusGood {
-		t.Fatalf("expected %s, got %s", ua.StatusGood, result.StatusCode)
-	}
-	if len(result.References) != 0 {
-		t.Fatalf("expected 0 references, got %d", len(result.References))
-	}
+	assert.Equal(t, ua.StatusGood, result.StatusCode)
+	assert.Empty(t, result.References)
 }
 
 func TestNodeNamespaceBrowseHonorsSharedFiltersAndKeepsTypeDefinitionFirst(t *testing.T) {
@@ -79,18 +77,12 @@ func TestNodeNamespaceBrowseHonorsSharedFiltersAndKeepsTypeDefinitionFirst(t *te
 		ResultMask:      uint32(ua.BrowseResultMaskReferenceTypeID | ua.BrowseResultMaskBrowseName),
 	})
 
-	if result.StatusCode != ua.StatusGood {
-		t.Fatalf("expected %s, got %s", ua.StatusGood, result.StatusCode)
-	}
-	if len(result.References) < 2 {
-		t.Fatalf("expected at least 2 references, got %d", len(result.References))
-	}
-	if result.References[0].ReferenceTypeID == nil || result.References[0].ReferenceTypeID.IntID() != id.HasTypeDefinition {
-		t.Fatalf("expected HasTypeDefinition reference first, got %#v", result.References[0].ReferenceTypeID)
-	}
-	if result.References[1].ReferenceTypeID == nil || result.References[1].ReferenceTypeID.IntID() != id.HasComponent {
-		t.Fatalf("expected HasComponent reference after type definition, got %#v", result.References[1].ReferenceTypeID)
-	}
+	require.Equal(t, ua.StatusGood, result.StatusCode)
+	require.GreaterOrEqual(t, len(result.References), 2)
+	require.NotNil(t, result.References[0].ReferenceTypeID)
+	require.NotNil(t, result.References[1].ReferenceTypeID)
+	assert.Equal(t, uint32(id.HasTypeDefinition), result.References[0].ReferenceTypeID.IntID())
+	assert.Equal(t, uint32(id.HasComponent), result.References[1].ReferenceTypeID.IntID())
 }
 
 type nodeNamespaceTestNode struct {

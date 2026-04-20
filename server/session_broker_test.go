@@ -5,6 +5,7 @@ import (
 
 	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/ua"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSessionIsSameAs(t *testing.T) {
@@ -14,15 +15,9 @@ func TestSessionIsSameAs(t *testing.T) {
 	same := &session{authTokenID: ua.NewNumericNodeID(1, 1)}
 	different := &session{authTokenID: ua.NewNumericNodeID(1, 2)}
 
-	if !first.IsSameAs(same) {
-		t.Fatal("expected sessions with the same auth token to match")
-	}
-	if first.IsSameAs(different) {
-		t.Fatal("expected sessions with different auth tokens not to match")
-	}
-	if first.IsSameAs(nil) {
-		t.Fatal("expected nil session not to match")
-	}
+	assert.True(t, first.IsSameAs(same))
+	assert.False(t, first.IsSameAs(different))
+	assert.False(t, first.IsSameAs(nil))
 }
 
 func TestSessionAuthenticatedUserZeroValue(t *testing.T) {
@@ -30,12 +25,8 @@ func TestSessionAuthenticatedUserZeroValue(t *testing.T) {
 
 	sess := &session{}
 
-	if sess.Activated() {
-		t.Fatal("expected new session to start inactive")
-	}
-	if sess.AuthenticatedUser() != nil {
-		t.Fatalf("expected unauthenticated session to expose nil authenticated user, got %#v", sess.AuthenticatedUser())
-	}
+	assert.False(t, sess.Activated())
+	assert.Nil(t, sess.AuthenticatedUser())
 }
 
 func TestSessionSetActivated(t *testing.T) {
@@ -44,14 +35,10 @@ func TestSessionSetActivated(t *testing.T) {
 	sess := &session{}
 
 	sess.SetActivated(true)
-	if !sess.Activated() {
-		t.Fatal("expected session to be active after SetActivated(true)")
-	}
+	assert.True(t, sess.Activated())
 
 	sess.SetActivated(false)
-	if sess.Activated() {
-		t.Fatal("expected session to be inactive after SetActivated(false)")
-	}
+	assert.False(t, sess.Activated())
 }
 
 func TestSessionSetAuthenticatedUser(t *testing.T) {
@@ -68,17 +55,11 @@ func TestSessionSetAuthenticatedUser(t *testing.T) {
 	}
 
 	sess.SetAuthenticatedUser(first)
-	if sess.AuthenticatedUser() != first {
-		t.Fatalf("expected authenticated user %#v, got %#v", first, sess.AuthenticatedUser())
-	}
+	assert.Same(t, first, sess.AuthenticatedUser())
 
 	sess.SetAuthenticatedUser(second)
-	if sess.AuthenticatedUser() != second {
-		t.Fatalf("expected replacement authenticated user %#v, got %#v", second, sess.AuthenticatedUser())
-	}
+	assert.Same(t, second, sess.AuthenticatedUser())
 
 	sess.SetAuthenticatedUser(nil)
-	if sess.AuthenticatedUser() != nil {
-		t.Fatalf("expected clearing authenticated user to restore nil, got %#v", sess.AuthenticatedUser())
-	}
+	assert.Nil(t, sess.AuthenticatedUser())
 }

@@ -6,6 +6,8 @@ import (
 
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateMonitoredItemsChecksSessionOwnership(t *testing.T) {
@@ -48,23 +50,15 @@ func TestCreateMonitoredItemsChecksSessionOwnership(t *testing.T) {
 	}
 
 	resp, err := service.CreateMonitoredItems(t.Context(), nil, req, 1)
-	if err != nil {
-		t.Fatalf("expected no error for owner session, got %v", err)
-	}
-	if _, ok := resp.(*ua.CreateMonitoredItemsResponse); !ok {
-		t.Fatalf("expected CreateMonitoredItemsResponse, got %T", resp)
-	}
+	require.NoError(t, err)
+	require.IsType(t, &ua.CreateMonitoredItemsResponse{}, resp)
 
 	backend.session = otherSession
 	req.RequestHeader.AuthenticationToken = otherSession.AuthTokenID()
 
 	resp, err = service.CreateMonitoredItems(t.Context(), nil, req, 2)
-	if err == nil {
-		t.Fatal("expected an error for a different session")
-	}
-	if resp != nil {
-		t.Fatalf("expected nil response on session mismatch, got %T", resp)
-	}
+	require.Error(t, err)
+	assert.Nil(t, resp)
 }
 
 func TestCreateMonitoredItemsRejectsMissingSession(t *testing.T) {
@@ -104,12 +98,8 @@ func TestCreateMonitoredItemsRejectsMissingSession(t *testing.T) {
 	}
 
 	resp, err := service.CreateMonitoredItems(t.Context(), nil, req, 1)
-	if resp != nil {
-		t.Fatalf("expected nil response, got %T", resp)
-	}
-	if err != ua.StatusBadSessionIDInvalid {
-		t.Fatalf("expected %v, got %v", ua.StatusBadSessionIDInvalid, err)
-	}
+	assert.Nil(t, resp)
+	assert.Equal(t, ua.StatusBadSessionIDInvalid, err)
 }
 
 type monitoredItemTestBackend struct {

@@ -12,6 +12,8 @@ import (
 	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMapNamespaceBrowseFiltersReferencesAndDoesNotReturnNilEntries(t *testing.T) {
@@ -30,25 +32,14 @@ func TestMapNamespaceBrowseFiltersReferencesAndDoesNotReturnNilEntries(t *testin
 		NodeClassMask:   uint32(ua.NodeClassVariable),
 	})
 
-	if result.StatusCode != ua.StatusOK {
-		t.Fatalf("expected %s, got %s", ua.StatusOK, result.StatusCode)
-	}
-	if len(result.References) != 2 {
-		t.Fatalf("expected 2 references, got %d", len(result.References))
-	}
+	require.Equal(t, ua.StatusOK, result.StatusCode)
+	require.Len(t, result.References, 2)
 	for i, ref := range result.References {
-		if ref == nil {
-			t.Fatalf("expected reference %d to be non-nil", i)
-		}
-		if ref.ReferenceTypeID == nil || ref.ReferenceTypeID.IntID() != id.HasComponent {
-			t.Fatalf("expected reference %d to use HasComponent, got %#v", i, ref.ReferenceTypeID)
-		}
-		if !ref.IsForward {
-			t.Fatalf("expected reference %d to be forward", i)
-		}
-		if ref.NodeClass != ua.NodeClassVariable {
-			t.Fatalf("expected reference %d to target a variable, got %s", i, ref.NodeClass)
-		}
+		require.NotNil(t, ref, "reference %d", i)
+		require.NotNil(t, ref.ReferenceTypeID, "reference %d", i)
+		assert.Equal(t, uint32(id.HasComponent), ref.ReferenceTypeID.IntID(), "reference %d", i)
+		assert.True(t, ref.IsForward, "reference %d", i)
+		assert.Equal(t, ua.NodeClassVariable, ref.NodeClass, "reference %d", i)
 	}
 }
 
@@ -65,9 +56,7 @@ func TestMapNamespaceBrowseHonorsDirectionAndReferenceTypeFilters(t *testing.T) 
 		ReferenceTypeID: ua.NewNumericNodeID(0, id.HasComponent),
 		IncludeSubtypes: false,
 	})
-	if len(inverse.References) != 0 {
-		t.Fatalf("expected inverse browse to return 0 references, got %d", len(inverse.References))
-	}
+	assert.Empty(t, inverse.References)
 
 	wrongType := ns.Browse(t.Context(), &ua.BrowseDescription{
 		NodeID:          ns.objectsFolder.ID(),
@@ -75,9 +64,7 @@ func TestMapNamespaceBrowseHonorsDirectionAndReferenceTypeFilters(t *testing.T) 
 		ReferenceTypeID: ua.NewNumericNodeID(0, id.Organizes),
 		IncludeSubtypes: false,
 	})
-	if len(wrongType.References) != 0 {
-		t.Fatalf("expected wrong reference type browse to return 0 references, got %d", len(wrongType.References))
-	}
+	assert.Empty(t, wrongType.References)
 }
 
 type mapNamespaceTestServer struct {
