@@ -65,22 +65,29 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			continue
 		}
 
-		ns, err := s.backend.Namespace(int(method.ObjectID.Namespace()))
+		objectNS, err := s.backend.Namespace(int(method.ObjectID.Namespace()))
 		if err != nil {
 			return &ua.CallResponse{
 				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
 			}, nil
 		}
 
-		objectNode := ns.Node(method.ObjectID)
+		objectNode := objectNS.Node(method.ObjectID)
 		if objectNode == nil {
 			return &ua.CallResponse{
 				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadNodeIDUnknown),
 			}, nil
 		}
 
+		methodNS, err := s.backend.Namespace(int(method.MethodID.Namespace()))
+		if err != nil {
+			return &ua.CallResponse{
+				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
+			}, nil
+		}
+
 		var methodNode types.MethodNode
-		if n := ns.Node(method.MethodID); n != nil {
+		if n := methodNS.Node(method.MethodID); n != nil {
 			methodNode, _ = n.(types.MethodNode)
 		}
 
