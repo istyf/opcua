@@ -49,6 +49,15 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 
 	results := make([]*ua.CallMethodResult, 0, len(req.MethodsToCall))
 	status := ua.StatusOK
+	appendResult := func(code ua.StatusCode, outputs ...*ua.Variant) {
+		results = append(results, &ua.CallMethodResult{
+			StatusCode:      code,
+			OutputArguments: outputs,
+		})
+		if code != ua.StatusOK && status == ua.StatusOK {
+			status = code
+		}
+	}
 
 	// Check if the method has a non forward reference to this object
 	methodBelongsToObject := func(method types.MethodNode, object types.Node) bool {
@@ -59,31 +68,26 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 
 	for _, method := range req.MethodsToCall {
 		if method.ObjectID == nil || method.MethodID == nil {
-			results = append(results, &ua.CallMethodResult{
-				StatusCode: ua.StatusBadNodeIDInvalid,
-			})
+			appendResult(ua.StatusBadNodeIDInvalid)
 			continue
 		}
 
 		objectNS, err := s.backend.Namespace(int(method.ObjectID.Namespace()))
 		if err != nil {
-			return &ua.CallResponse{
-				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
-			}, nil
+			appendResult(ua.StatusBadNodeIDUnknown)
+			continue
 		}
 
 		objectNode := objectNS.Node(method.ObjectID)
 		if objectNode == nil {
-			return &ua.CallResponse{
-				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadNodeIDUnknown),
-			}, nil
+			appendResult(ua.StatusBadNodeIDUnknown)
+			continue
 		}
 
 		methodNS, err := s.backend.Namespace(int(method.MethodID.Namespace()))
 		if err != nil {
-			return &ua.CallResponse{
-				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
-			}, nil
+			appendResult(ua.StatusBadMethodInvalid)
+			continue
 		}
 
 		var methodNode types.MethodNode
@@ -92,23 +96,29 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		}
 
 		if methodNode == nil || !methodBelongsToObject(methodNode, objectNode) {
+			methodName := method.MethodID.String()
+			if methodNode != nil {
+				methodName = methodNode.BrowseName().String()
+			}
 			ualog.Error(ctx, "method does not exist or does not belong to object",
-				ualog.String("method", methodNode.BrowseName().String()),
+				ualog.String("method", methodName),
 				ualog.String("object", objectNode.BrowseName().String()),
 			)
-			return &ua.CallResponse{
-				ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusBadMethodInvalid),
-			}, nil
+			appendResult(ua.StatusBadMethodInvalid)
+			continue
 		}
 
-		res := &ua.CallMethodResult{}
-		res.OutputArguments, res.StatusCode = s.middleware(methodNode.CallMethod)(
+		outputs, code := s.middleware(methodNode.CallMethod)(
 			srvctx.WithMethodCall(ctx,
 				objectNode.ID().String(), objectNode.BrowseName().String(),
 				methodNode.ID().String(), methodNode.BrowseName().String(),
 			),
 			method.InputArguments...,
 		)
+		res := &ua.CallMethodResult{
+			OutputArguments: outputs,
+			StatusCode:      code,
+		}
 
 		ualog.Info(ctx, "called method",
 			ualog.String("method", methodNode.BrowseName().String()),
@@ -116,11 +126,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			ualog.Any("status", res.StatusCode),
 		)
 
-		if res.StatusCode != ua.StatusOK && status == ua.StatusOK {
-			status = res.StatusCode
-		}
-
-		results = append(results, res)
+		appendResult(res.StatusCode, res.OutputArguments...)
 	}
 
 	response := &ua.CallResponse{

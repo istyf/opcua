@@ -120,6 +120,75 @@ func TestCallResolvesMethodFromMethodNamespace(t *testing.T) {
 	assert.Equal(t, ua.StatusOK, callResp.Results[0].StatusCode)
 }
 
+func TestCallPreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
+	t.Parallel()
+
+	objectType := node.NewObjectTypeNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(0, 5002)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "ObjectType"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("ObjectType")}),
+		),
+	)
+	objectNode := node.NewObjectNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 1101)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Object"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Object")}),
+		),
+		node.WithType(objectType),
+	)
+	methodNode := node.NewMethodNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(2, 2101)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "Method"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Method")}),
+		),
+		node.Executable(true),
+		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+			return nil, ua.StatusOK
+		}),
+	)
+	objectNode.AddComponent(methodNode)
+
+	backend := &methodTestBackend{
+		namespaces: map[int]types.NameSpace{
+			1: &methodTestNamespace{
+				nodes: map[string]types.Node{
+					objectNode.ID().String(): objectNode,
+				},
+			},
+			2: &methodTestNamespace{
+				nodes: map[string]types.Node{
+					methodNode.ID().String(): methodNode,
+				},
+			},
+		},
+	}
+	service := NewMethodService(backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 4},
+		MethodsToCall: []*ua.CallMethodRequest{
+			{
+				ObjectID: ua.NewNumericNodeID(1, 9999),
+				MethodID: methodNode.ID(),
+			},
+			{
+				ObjectID: objectNode.ID(),
+				MethodID: methodNode.ID(),
+			},
+		},
+	}, 4)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.Len(t, callResp.Results, 2)
+	assert.Equal(t, ua.StatusBadNodeIDUnknown, callResp.Results[0].StatusCode)
+	assert.Equal(t, ua.StatusOK, callResp.Results[1].StatusCode)
+}
+
 type methodTestBackend struct {
 	namespaces map[int]types.NameSpace
 }
