@@ -12,6 +12,8 @@ import (
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uapolicy"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDecodeUserIdentityToken(t *testing.T) {
@@ -83,33 +85,23 @@ func TestDecodeUserIdentityToken(t *testing.T) {
 
 			got, err := decodeUserIdentityToken(tt.token)
 			if tt.wantErr != nil {
-				if err != tt.wantErr {
-					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
-				}
+				assert.Equal(t, tt.wantErr, err)
 				return
 			}
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
+			require.NoError(t, err)
 			switch want := tt.want.(type) {
 			case *ua.AnonymousIdentityToken:
 				gotToken, ok := got.(*ua.AnonymousIdentityToken)
-				if !ok {
-					t.Fatalf("expected anonymous token, got %T", got)
-				}
-				if *gotToken != *want {
-					t.Fatalf("expected token %#v, got %#v", want, gotToken)
-				}
+				require.True(t, ok, "expected anonymous token, got %T", got)
+				assert.Equal(t, *want, *gotToken)
 			case *ua.UserNameIdentityToken:
 				gotToken, ok := got.(*ua.UserNameIdentityToken)
-				if !ok {
-					t.Fatalf("expected username token, got %T", got)
-				}
-				if gotToken.PolicyID != want.PolicyID || gotToken.UserName != want.UserName || string(gotToken.Password) != string(want.Password) {
-					t.Fatalf("expected token %#v, got %#v", want, gotToken)
-				}
+				require.True(t, ok, "expected username token, got %T", got)
+				assert.Equal(t, want.PolicyID, gotToken.PolicyID)
+				assert.Equal(t, want.UserName, gotToken.UserName)
+				assert.Equal(t, string(want.Password), string(gotToken.Password))
 			default:
-				t.Fatalf("unsupported test expectation type %T", tt.want)
+				require.Failf(t, "unsupported test expectation type", "%T", tt.want)
 			}
 		})
 	}
@@ -203,20 +195,12 @@ func TestResolveUserTokenPolicy(t *testing.T) {
 
 			got, err := resolveUserTokenPolicy(tt.token, endpoints)
 			if tt.wantErr != nil {
-				if err != tt.wantErr {
-					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
-				}
+				assert.Equal(t, tt.wantErr, err)
 				return
 			}
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
-			if got == nil {
-				t.Fatal("expected matching user token policy, got nil")
-			}
-			if got.PolicyID != tt.wantID {
-				t.Fatalf("expected policy %q, got %q", tt.wantID, got.PolicyID)
-			}
+			require.NoError(t, err)
+			require.NotNil(t, got)
+			assert.Equal(t, tt.wantID, got.PolicyID)
 		})
 	}
 }
@@ -225,9 +209,7 @@ func TestDecodeUserNamePassword(t *testing.T) {
 	t.Parallel()
 
 	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatalf("failed to generate test key: %v", err)
-	}
+	require.NoError(t, err)
 
 	serverNonce := []byte("12345678901234567890123456789012")
 
@@ -235,9 +217,7 @@ func TestDecodeUserNamePassword(t *testing.T) {
 		t.Helper()
 
 		algo, err := uapolicy.Asymmetric(policyURI, nil, &serverKey.PublicKey)
-		if err != nil {
-			t.Fatalf("failed to build encrypt-only algorithm: %v", err)
-		}
+		require.NoError(t, err)
 
 		secret := make([]byte, 4)
 		binary.LittleEndian.PutUint32(secret, uint32(len(password)+len(nonce)))
@@ -245,9 +225,7 @@ func TestDecodeUserNamePassword(t *testing.T) {
 		secret = append(secret, nonce...)
 
 		encrypted, err := algo.Encrypt(secret)
-		if err != nil {
-			t.Fatalf("failed to encrypt test password: %v", err)
-		}
+		require.NoError(t, err)
 
 		return encrypted
 	}
@@ -333,17 +311,11 @@ func TestDecodeUserNamePassword(t *testing.T) {
 
 			got, err := decodeUserNamePassword(tt.token, tt.policyURI, tt.privateKey, tt.serverNonce)
 			if tt.wantErr != nil {
-				if err != tt.wantErr {
-					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
-				}
+				assert.Equal(t, tt.wantErr, err)
 				return
 			}
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
-			if got != tt.want {
-				t.Fatalf("expected password %q, got %q", tt.want, got)
-			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -418,17 +390,11 @@ func TestResolveUserTokenSecurityPolicyURI(t *testing.T) {
 
 			got, err := resolveUserTokenSecurityPolicyURI(tt.policy, tt.secureChannelURI)
 			if tt.wantErr != nil {
-				if err != tt.wantErr {
-					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
-				}
+				assert.Equal(t, tt.wantErr, err)
 				return
 			}
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
-			if got != tt.want {
-				t.Fatalf("expected policy uri %q, got %q", tt.want, got)
-			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -437,14 +403,10 @@ func TestValidateUserNameEncryptionAlgorithm(t *testing.T) {
 	t.Parallel()
 
 	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatalf("failed to generate test key: %v", err)
-	}
+	require.NoError(t, err)
 
 	basic256sha256, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, serverKey, nil)
-	if err != nil {
-		t.Fatalf("failed to build decrypt-only algorithm: %v", err)
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		name       string
@@ -501,14 +463,10 @@ func TestValidateUserNameEncryptionAlgorithm(t *testing.T) {
 
 			err := validateUserNameEncryptionAlgorithm(tt.token, tt.policyURI, tt.privateKey)
 			if tt.wantErr != nil {
-				if err != tt.wantErr {
-					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
-				}
+				assert.Equal(t, tt.wantErr, err)
 				return
 			}
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
+			assert.NoError(t, err)
 		})
 	}
 }
@@ -517,9 +475,7 @@ func TestValidateUserNameIdentityToken(t *testing.T) {
 	t.Parallel()
 
 	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatalf("failed to generate test key: %v", err)
-	}
+	require.NoError(t, err)
 
 	serverNonce := []byte("12345678901234567890123456789012")
 	endpoints := []*ua.EndpointDescription{
@@ -538,9 +494,7 @@ func TestValidateUserNameIdentityToken(t *testing.T) {
 		t.Helper()
 
 		algo, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, nil, &serverKey.PublicKey)
-		if err != nil {
-			t.Fatalf("failed to build encrypt-only algorithm: %v", err)
-		}
+		require.NoError(t, err)
 
 		secret := make([]byte, 4)
 		binary.LittleEndian.PutUint32(secret, uint32(len(password)+len(nonce)))
@@ -548,17 +502,13 @@ func TestValidateUserNameIdentityToken(t *testing.T) {
 		secret = append(secret, nonce...)
 
 		encrypted, err := algo.Encrypt(secret)
-		if err != nil {
-			t.Fatalf("failed to encrypt test password: %v", err)
-		}
+		require.NoError(t, err)
 
 		return encrypted
 	}
 
 	decryptOnly, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, serverKey, nil)
-	if err != nil {
-		t.Fatalf("failed to build decrypt-only algorithm: %v", err)
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		name                   string
@@ -629,17 +579,11 @@ func TestValidateUserNameIdentityToken(t *testing.T) {
 
 			got, err := validateUserNameIdentityToken(tt.token, endpoints, tt.secureChannelPolicyURI, tt.privateKey, tt.serverNonce)
 			if tt.wantErr != nil {
-				if err != tt.wantErr {
-					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
-				}
+				assert.Equal(t, tt.wantErr, err)
 				return
 			}
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
-			if got != tt.want {
-				t.Fatalf("expected password %q, got %q", tt.want, got)
-			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -648,9 +592,7 @@ func TestAuthenticateUserIdentity(t *testing.T) {
 	t.Parallel()
 
 	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatalf("failed to generate test key: %v", err)
-	}
+	require.NoError(t, err)
 
 	serverNonce := []byte("12345678901234567890123456789012")
 	endpoints := []*ua.EndpointDescription{
@@ -674,9 +616,7 @@ func TestAuthenticateUserIdentity(t *testing.T) {
 		t.Helper()
 
 		algo, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, nil, &serverKey.PublicKey)
-		if err != nil {
-			t.Fatalf("failed to build encrypt-only algorithm: %v", err)
-		}
+		require.NoError(t, err)
 
 		secret := make([]byte, 4)
 		binary.LittleEndian.PutUint32(secret, uint32(len(password)+len(nonce)))
@@ -684,17 +624,13 @@ func TestAuthenticateUserIdentity(t *testing.T) {
 		secret = append(secret, nonce...)
 
 		encrypted, err := algo.Encrypt(secret)
-		if err != nil {
-			t.Fatalf("failed to encrypt test password: %v", err)
-		}
+		require.NoError(t, err)
 
 		return encrypted
 	}
 
 	decryptOnly, err := uapolicy.Asymmetric(ua.SecurityPolicyURIBasic256Sha256, serverKey, nil)
-	if err != nil {
-		t.Fatalf("failed to build decrypt-only algorithm: %v", err)
-	}
+	require.NoError(t, err)
 
 	session := new(sessionAuthTestSession)
 	expectedUser := &auth.AuthenticatedUser{
@@ -724,18 +660,12 @@ func TestAuthenticateUserIdentity(t *testing.T) {
 				EncryptionAlgorithm: decryptOnly.EncryptionURI(),
 			},
 			authenticator: func(_ context.Context, req *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
-				if req.SessionID == nil || req.SessionID.String() != session.ID().String() {
-					t.Fatalf("expected session id %q, got %#v", session.ID(), req.SessionID)
-				}
-				if req.AuthenticationToken == nil || req.AuthenticationToken.String() != session.AuthTokenID().String() {
-					t.Fatalf("expected auth token %q, got %#v", session.AuthTokenID(), req.AuthenticationToken)
-				}
-				if req.UserName != "alice" {
-					t.Fatalf("expected username %q, got %q", "alice", req.UserName)
-				}
-				if req.Password != "secret" {
-					t.Fatalf("expected password %q, got %q", "secret", req.Password)
-				}
+				require.NotNil(t, req.SessionID)
+				require.NotNil(t, req.AuthenticationToken)
+				assert.Equal(t, session.ID().String(), req.SessionID.String())
+				assert.Equal(t, session.AuthTokenID().String(), req.AuthenticationToken.String())
+				assert.Equal(t, "alice", req.UserName)
+				assert.Equal(t, "secret", req.Password)
 				return expectedUser, nil
 			},
 			want: expectedUser,
@@ -806,17 +736,11 @@ func TestAuthenticateUserIdentity(t *testing.T) {
 				tt.authenticator,
 			)
 			if tt.wantErr != nil {
-				if err != tt.wantErr {
-					t.Fatalf("expected error %v, got %v", tt.wantErr, err)
-				}
+				assert.Equal(t, tt.wantErr, err)
 				return
 			}
-			if err != nil {
-				t.Fatalf("expected no error, got %v", err)
-			}
-			if got != tt.want {
-				t.Fatalf("expected authenticated user %#v, got %#v", tt.want, got)
-			}
+			require.NoError(t, err)
+			assert.Same(t, tt.want, got)
 		})
 	}
 }
@@ -841,9 +765,7 @@ func TestStatusCodeForUserNameAuthenticatorError(t *testing.T) {
 			t.Parallel()
 
 			got := statusCodeForUserNameAuthenticatorError(tt.err)
-			if got != tt.wantErr {
-				t.Fatalf("expected error %v, got %v", tt.wantErr, got)
-			}
+			assert.Equal(t, tt.wantErr, got)
 		})
 	}
 }

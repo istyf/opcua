@@ -18,15 +18,15 @@ import (
 	"github.com/gopcua/opcua/uacp"
 	"github.com/gopcua/opcua/uapolicy"
 	"github.com/gopcua/opcua/uasc"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestActivateSessionStoresAuthenticatedUser(t *testing.T) {
 	t.Parallel()
 
 	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatalf("failed to generate test key: %v", err)
-	}
+	require.NoError(t, err)
 
 	authenticated := &auth.AuthenticatedUser{
 		UserName: "alice",
@@ -45,18 +45,12 @@ func TestActivateSessionStoresAuthenticatedUser(t *testing.T) {
 		cfg: sessionServiceTestConfig{
 			privateKey: serverKey,
 			authenticator: func(_ context.Context, req *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
-				if req.SessionID == nil || req.SessionID.String() != session.ID().String() {
-					t.Fatalf("expected session id %q, got %#v", session.ID(), req.SessionID)
-				}
-				if req.AuthenticationToken == nil || req.AuthenticationToken.String() != session.AuthTokenID().String() {
-					t.Fatalf("expected auth token %q, got %#v", session.AuthTokenID(), req.AuthenticationToken)
-				}
-				if req.UserName != "alice" {
-					t.Fatalf("expected username %q, got %q", "alice", req.UserName)
-				}
-				if req.Password != "secret" {
-					t.Fatalf("expected password %q, got %q", "secret", req.Password)
-				}
+				require.NotNil(t, req.SessionID)
+				require.NotNil(t, req.AuthenticationToken)
+				assert.Equal(t, session.ID().String(), req.SessionID.String())
+				assert.Equal(t, session.AuthTokenID().String(), req.AuthenticationToken.String())
+				assert.Equal(t, "alice", req.UserName)
+				assert.Equal(t, "secret", req.Password)
 				return authenticated, nil
 			},
 		},
@@ -81,29 +75,16 @@ func TestActivateSessionStoresAuthenticatedUser(t *testing.T) {
 	}
 
 	resp, err := service.ActivateSession(t.Context(), sc, req, 0)
-	if err != nil {
-		t.Fatalf("activate session: %v", err)
-	}
+	require.NoError(t, err)
 
 	activateResp, ok := resp.(*ua.ActivateSessionResponse)
-	if !ok {
-		t.Fatalf("expected *ua.ActivateSessionResponse, got %T", resp)
-	}
-	if activateResp.ResponseHeader.ServiceResult != ua.StatusOK {
-		t.Fatalf("expected service result %v, got %v", ua.StatusOK, activateResp.ResponseHeader.ServiceResult)
-	}
-	if !session.Activated() {
-		t.Fatal("expected session to be marked activated")
-	}
-	if session.AuthenticatedUser() != authenticated {
-		t.Fatalf("expected authenticated user %#v, got %#v", authenticated, session.AuthenticatedUser())
-	}
-	if len(session.Locales()) == 0 || session.Locales()[0] != "sv-SE" {
-		t.Fatalf("expected locales to be updated, got %#v", session.Locales())
-	}
-	if string(session.ServerNonce()) == string([]byte("12345678901234567890123456789012")) {
-		t.Fatal("expected server nonce to rotate on activation")
-	}
+	require.True(t, ok, "expected *ua.ActivateSessionResponse, got %T", resp)
+	assert.Equal(t, ua.StatusOK, activateResp.ResponseHeader.ServiceResult)
+	assert.True(t, session.Activated())
+	assert.Same(t, authenticated, session.AuthenticatedUser())
+	require.NotEmpty(t, session.Locales())
+	assert.Equal(t, "sv-SE", session.Locales()[0])
+	assert.NotEqual(t, string([]byte("12345678901234567890123456789012")), string(session.ServerNonce()))
 }
 
 func TestActivateSessionAnonymousClearsAuthenticatedUser(t *testing.T) {
@@ -142,19 +123,11 @@ func TestActivateSessionAnonymousClearsAuthenticatedUser(t *testing.T) {
 	}
 
 	resp, err := service.ActivateSession(t.Context(), sc, req, 0)
-	if err != nil {
-		t.Fatalf("activate session: %v", err)
-	}
+	require.NoError(t, err)
 
-	if _, ok := resp.(*ua.ActivateSessionResponse); !ok {
-		t.Fatalf("expected *ua.ActivateSessionResponse, got %T", resp)
-	}
-	if session.AuthenticatedUser() != nil {
-		t.Fatalf("expected anonymous activation to clear authenticated user, got %#v", session.AuthenticatedUser())
-	}
-	if !session.Activated() {
-		t.Fatal("expected session to remain activated after anonymous activation")
-	}
+	require.IsType(t, &ua.ActivateSessionResponse{}, resp)
+	assert.Nil(t, session.AuthenticatedUser())
+	assert.True(t, session.Activated())
 }
 
 func TestActivateSessionAnonymousSucceedsAlongsideUserNamePolicy(t *testing.T) {
@@ -179,7 +152,7 @@ func TestActivateSessionAnonymousSucceedsAlongsideUserNamePolicy(t *testing.T) {
 		}},
 		cfg: sessionServiceTestConfig{
 			authenticator: func(context.Context, *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
-				t.Fatal("did not expect anonymous activation to call the username authenticator")
+				assert.Fail(t, "did not expect anonymous activation to call the username authenticator")
 				return nil, nil
 			},
 		},
@@ -200,32 +173,20 @@ func TestActivateSessionAnonymousSucceedsAlongsideUserNamePolicy(t *testing.T) {
 	}
 
 	resp, err := service.ActivateSession(t.Context(), sc, req, 0)
-	if err != nil {
-		t.Fatalf("activate session: %v", err)
-	}
+	require.NoError(t, err)
 
 	activateResp, ok := resp.(*ua.ActivateSessionResponse)
-	if !ok {
-		t.Fatalf("expected *ua.ActivateSessionResponse, got %T", resp)
-	}
-	if activateResp.ResponseHeader.ServiceResult != ua.StatusOK {
-		t.Fatalf("expected service result %v, got %v", ua.StatusOK, activateResp.ResponseHeader.ServiceResult)
-	}
-	if !session.Activated() {
-		t.Fatal("expected session to be marked activated")
-	}
-	if session.AuthenticatedUser() != nil {
-		t.Fatalf("expected anonymous activation to leave authenticated user unset, got %#v", session.AuthenticatedUser())
-	}
+	require.True(t, ok, "expected *ua.ActivateSessionResponse, got %T", resp)
+	assert.Equal(t, ua.StatusOK, activateResp.ResponseHeader.ServiceResult)
+	assert.True(t, session.Activated())
+	assert.Nil(t, session.AuthenticatedUser())
 }
 
 func TestActivateSessionReactivationReplacesAuthenticatedUser(t *testing.T) {
 	t.Parallel()
 
 	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatalf("failed to generate test key: %v", err)
-	}
+	require.NoError(t, err)
 
 	users := map[string]*auth.AuthenticatedUser{
 		"alice": {UserName: "alice", Subject: "user:alice"},
@@ -271,29 +232,22 @@ func TestActivateSessionReactivationReplacesAuthenticatedUser(t *testing.T) {
 			}),
 		}
 
-		if _, err := service.ActivateSession(t.Context(), sc, req, 0); err != nil {
-			t.Fatalf("activate session as %s: %v", userName, err)
-		}
+		_, err := service.ActivateSession(t.Context(), sc, req, 0)
+		require.NoError(t, err)
 	}
 
 	activate(t, "alice", "first-secret")
-	if session.AuthenticatedUser() != users["alice"] {
-		t.Fatalf("expected first activation to store %#v, got %#v", users["alice"], session.AuthenticatedUser())
-	}
+	assert.Same(t, users["alice"], session.AuthenticatedUser())
 
 	activate(t, "bob", "second-secret")
-	if session.AuthenticatedUser() != users["bob"] {
-		t.Fatalf("expected reactivation to replace authenticated user with %#v, got %#v", users["bob"], session.AuthenticatedUser())
-	}
+	assert.Same(t, users["bob"], session.AuthenticatedUser())
 }
 
 func TestActivateSessionRejectsFailurePaths(t *testing.T) {
 	t.Parallel()
 
 	serverKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatalf("failed to generate test key: %v", err)
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		name    string
@@ -455,7 +409,7 @@ func TestActivateSessionRejectsFailurePaths(t *testing.T) {
 				cfg: sessionServiceTestConfig{
 					privateKey: serverKey,
 					authenticator: func(context.Context, *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
-						t.Fatal("did not expect malformed encrypted password to call authenticator")
+						assert.Fail(t, "did not expect malformed encrypted password to call authenticator")
 						return nil, nil
 					},
 				},
@@ -485,9 +439,7 @@ func TestActivateSessionRejectsFailurePaths(t *testing.T) {
 			sc := newSessionServiceTestSecureChannel(t)
 
 			_, err := service.ActivateSession(t.Context(), sc, tt.req, 0)
-			if err != tt.wantErr {
-				t.Fatalf("expected error %v, got %v", tt.wantErr, err)
-			}
+			assert.Equal(t, tt.wantErr, err)
 		})
 	}
 }
@@ -532,9 +484,7 @@ func TestActivateSessionRejectsBadClientSignature(t *testing.T) {
 	}
 
 	_, err := service.ActivateSession(t.Context(), sc, req, 0)
-	if err != ua.StatusBadSecurityChecksFailed {
-		t.Fatalf("expected error %v, got %v", ua.StatusBadSecurityChecksFailed, err)
-	}
+	assert.Equal(t, ua.StatusBadSecurityChecksFailed, err)
 }
 
 type sessionServiceTestBackend struct {
@@ -642,9 +592,7 @@ func newSessionServiceTestSecureChannelWithConfig(t *testing.T, cfg *uasc.Config
 		cfg,
 		make(chan error, 1),
 	)
-	if err != nil {
-		t.Fatalf("new secure channel: %v", err)
-	}
+	require.NoError(t, err)
 	return sc
 }
 
@@ -652,9 +600,7 @@ func mustSessionServiceDecryptOnlyAlgorithm(t *testing.T, privateKey *rsa.Privat
 	t.Helper()
 
 	algo, err := uapolicy.Asymmetric(policyURI, privateKey, nil)
-	if err != nil {
-		t.Fatalf("build decrypt-only algorithm: %v", err)
-	}
+	require.NoError(t, err)
 	return algo
 }
 
@@ -662,9 +608,7 @@ func encryptSessionServiceTestPassword(t *testing.T, privateKey *rsa.PrivateKey,
 	t.Helper()
 
 	algo, err := uapolicy.Asymmetric(policyURI, nil, &privateKey.PublicKey)
-	if err != nil {
-		t.Fatalf("build encrypt-only algorithm: %v", err)
-	}
+	require.NoError(t, err)
 
 	secret := make([]byte, 4)
 	binary.LittleEndian.PutUint32(secret, uint32(len(password)+len(nonce)))
@@ -672,9 +616,7 @@ func encryptSessionServiceTestPassword(t *testing.T, privateKey *rsa.PrivateKey,
 	secret = append(secret, nonce...)
 
 	encrypted, err := algo.Encrypt(secret)
-	if err != nil {
-		t.Fatalf("encrypt password: %v", err)
-	}
+	require.NoError(t, err)
 
 	return encrypted
 }
@@ -683,9 +625,7 @@ func mustSessionServiceTestCertificate(t *testing.T, uri string) ([]byte, *rsa.P
 	t.Helper()
 
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatalf("generate rsa key: %v", err)
-	}
+	require.NoError(t, err)
 
 	template := x509.Certificate{
 		SerialNumber: big.NewInt(time.Now().UnixNano()),
@@ -700,9 +640,7 @@ func mustSessionServiceTestCertificate(t *testing.T, uri string) ([]byte, *rsa.P
 	}
 
 	der, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
-	if err != nil {
-		t.Fatalf("create certificate: %v", err)
-	}
+	require.NoError(t, err)
 
 	return der, priv
 }

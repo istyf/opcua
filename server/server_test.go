@@ -9,6 +9,8 @@ import (
 
 	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/ua"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCloseIsIdempotent(t *testing.T) {
@@ -21,25 +23,16 @@ func TestCloseIsIdempotent(t *testing.T) {
 		},
 	}
 
-	if err := srv.Close(t.Context()); err != nil {
-		t.Fatalf("first close returned error: %v", err)
-	}
-	if err := srv.Close(t.Context()); err != nil {
-		t.Fatalf("second close returned error: %v", err)
-	}
-
-	if got := srv.Status().State; got != ua.ServerStateShutdown {
-		t.Fatalf("expected server state %v after repeated close, got %v", ua.ServerStateShutdown, got)
-	}
+	require.NoError(t, srv.Close(t.Context()))
+	require.NoError(t, srv.Close(t.Context()))
+	assert.Equal(t, ua.ServerStateShutdown, srv.Status().State)
 }
 
 func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 	t.Parallel()
 
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		t.Fatalf("failed to generate test key: %v", err)
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		name    string
@@ -118,17 +111,11 @@ func TestValidateConfiguredSecureEndpoints(t *testing.T) {
 
 			err := validateConfiguredSecureEndpoints(tt.cfg)
 			if tt.wantErr == "" {
-				if err != nil {
-					t.Fatalf("expected no error, got %v", err)
-				}
+				assert.NoError(t, err)
 				return
 			}
-			if err == nil {
-				t.Fatalf("expected error %q, got nil", tt.wantErr)
-			}
-			if err.Error() != tt.wantErr {
-				t.Fatalf("expected error %q, got %q", tt.wantErr, err.Error())
-			}
+			require.Error(t, err)
+			assert.Equal(t, tt.wantErr, err.Error())
 		})
 	}
 }
@@ -141,18 +128,10 @@ func TestValidateEnabledSecureChannelPolicy(t *testing.T) {
 		{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
 	})
 
-	if err := validate(SecurityPolicyNone.URI()); err != nil {
-		t.Fatalf("expected none policy to be accepted, got %v", err)
-	}
-	if err := validate(SecurityPolicyBasic256Sha256.URI()); err != nil {
-		t.Fatalf("expected Basic256Sha256 policy to be accepted, got %v", err)
-	}
-	if err := validate(SecurityPolicyBasic256.URI()); err != ua.StatusBadSecurityPolicyRejected {
-		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityPolicyRejected, err)
-	}
-	if err := validate(SecurityPolicyAes256Sha256RsaPss.URI()); err != ua.StatusBadSecurityPolicyRejected {
-		t.Fatalf("expected globally supported but disabled policy to return %v, got %v", ua.StatusBadSecurityPolicyRejected, err)
-	}
+	assert.NoError(t, validate(SecurityPolicyNone.URI()))
+	assert.NoError(t, validate(SecurityPolicyBasic256Sha256.URI()))
+	assert.Equal(t, ua.StatusBadSecurityPolicyRejected, validate(SecurityPolicyBasic256.URI()))
+	assert.Equal(t, ua.StatusBadSecurityPolicyRejected, validate(SecurityPolicyAes256Sha256RsaPss.URI()))
 }
 
 func TestValidateEnabledSecureChannelMode(t *testing.T) {
@@ -163,29 +142,17 @@ func TestValidateEnabledSecureChannelMode(t *testing.T) {
 		{secPolicy: SecurityPolicyBasic256Sha256, secMode: ua.MessageSecurityModeSignAndEncrypt},
 	})
 
-	if err := validate(SecurityPolicyNone.URI(), ua.MessageSecurityModeNone); err != nil {
-		t.Fatalf("expected none mode to be accepted, got %v", err)
-	}
-	if err := validate(SecurityPolicyBasic256Sha256.URI(), ua.MessageSecurityModeSignAndEncrypt); err != nil {
-		t.Fatalf("expected configured secure mode to be accepted, got %v", err)
-	}
-	if err := validate(SecurityPolicyBasic256Sha256.URI(), ua.MessageSecurityModeSign); err != ua.StatusBadSecurityModeRejected {
-		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
-	}
-	if err := validate(SecurityPolicyBasic256.URI(), ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
-		t.Fatalf("expected %v, got %v", ua.StatusBadSecurityModeRejected, err)
-	}
-	if err := validate(SecurityPolicyAes256Sha256RsaPss.URI(), ua.MessageSecurityModeSignAndEncrypt); err != ua.StatusBadSecurityModeRejected {
-		t.Fatalf("expected globally supported but disabled mode to return %v, got %v", ua.StatusBadSecurityModeRejected, err)
-	}
+	assert.NoError(t, validate(SecurityPolicyNone.URI(), ua.MessageSecurityModeNone))
+	assert.NoError(t, validate(SecurityPolicyBasic256Sha256.URI(), ua.MessageSecurityModeSignAndEncrypt))
+	assert.Equal(t, ua.StatusBadSecurityModeRejected, validate(SecurityPolicyBasic256Sha256.URI(), ua.MessageSecurityModeSign))
+	assert.Equal(t, ua.StatusBadSecurityModeRejected, validate(SecurityPolicyBasic256.URI(), ua.MessageSecurityModeSignAndEncrypt))
+	assert.Equal(t, ua.StatusBadSecurityModeRejected, validate(SecurityPolicyAes256Sha256RsaPss.URI(), ua.MessageSecurityModeSignAndEncrypt))
 }
 
 func TestSecurityPolicyURI(t *testing.T) {
 	t.Parallel()
 
-	if got := SecurityPolicyBasic256Sha256.URI(); got != ua.SecurityPolicyURIBasic256Sha256 {
-		t.Fatalf("expected policy URI %q, got %q", ua.SecurityPolicyURIBasic256Sha256, got)
-	}
+	assert.Equal(t, ua.SecurityPolicyURIBasic256Sha256, SecurityPolicyBasic256Sha256.URI())
 }
 
 func TestEnableSecuritySkipsDuplicates(t *testing.T) {
@@ -198,17 +165,11 @@ func TestEnableSecuritySkipsDuplicates(t *testing.T) {
 	EnableSecurity(SecurityPolicyBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
 	EnableSecurity(SecurityPolicyBasic256Sha256, ua.MessageSecurityModeSignAndEncrypt)(ctx, cfg)
 
-	if len(cfg.enabledSec) != 1 {
-		t.Fatalf("expected 1 enabled security entry after duplicate registrations, got %d", len(cfg.enabledSec))
-	}
+	require.Len(t, cfg.enabledSec, 1)
 
 	entry := cfg.enabledSec[0]
-	if entry.secPolicy != SecurityPolicyBasic256Sha256 {
-		t.Fatalf("expected policy %q, got %q", SecurityPolicyBasic256Sha256.URI(), entry.secPolicy.URI())
-	}
-	if entry.secMode != ua.MessageSecurityModeSignAndEncrypt {
-		t.Fatalf("expected mode %v, got %v", ua.MessageSecurityModeSignAndEncrypt, entry.secMode)
-	}
+	assert.Equal(t, SecurityPolicyBasic256Sha256, entry.secPolicy)
+	assert.Equal(t, ua.MessageSecurityModeSignAndEncrypt, entry.secMode)
 }
 
 func TestEnableSecurityRejectsUnsupportedServerPolicy(t *testing.T) {
@@ -219,9 +180,7 @@ func TestEnableSecurityRejectsUnsupportedServerPolicy(t *testing.T) {
 
 	EnableSecurity(SecurityPolicyBasic128Rsa15, ua.MessageSecurityModeSign)(ctx, cfg)
 
-	if len(cfg.enabledSec) != 0 {
-		t.Fatalf("expected deprecated server policy registration to be ignored, got %d entries", len(cfg.enabledSec))
-	}
+	assert.Empty(t, cfg.enabledSec)
 }
 
 func TestEnableAuthModeSkipsDuplicates(t *testing.T) {
@@ -234,15 +193,9 @@ func TestEnableAuthModeSkipsDuplicates(t *testing.T) {
 	EnableAuthMode(ua.UserTokenTypeUserName)(t.Context(), cfg)
 	EnableAuthMode(ua.UserTokenTypeUserName)(t.Context(), cfg)
 
-	if len(cfg.enabledAuth) != 2 {
-		t.Fatalf("expected 2 enabled auth modes after duplicate registrations, got %d", len(cfg.enabledAuth))
-	}
-	if cfg.enabledAuth[0].tokenType != ua.UserTokenTypeAnonymous {
-		t.Fatalf("expected first auth mode %v, got %v", ua.UserTokenTypeAnonymous, cfg.enabledAuth[0].tokenType)
-	}
-	if cfg.enabledAuth[1].tokenType != ua.UserTokenTypeUserName {
-		t.Fatalf("expected second auth mode %v, got %v", ua.UserTokenTypeUserName, cfg.enabledAuth[1].tokenType)
-	}
+	require.Len(t, cfg.enabledAuth, 2)
+	assert.Equal(t, ua.UserTokenTypeAnonymous, cfg.enabledAuth[0].tokenType)
+	assert.Equal(t, ua.UserTokenTypeUserName, cfg.enabledAuth[1].tokenType)
 }
 
 func TestWithUserNameAuthenticator(t *testing.T) {
@@ -258,28 +211,20 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 		},
 	}
 	authenticator := func(_ context.Context, req *auth.UserNameAuthenticationRequest) (*auth.AuthenticatedUser, error) {
-		if req == nil {
-			t.Fatal("expected request to be forwarded to authenticator")
-		}
+		require.NotNil(t, req)
 		return expected, authErr
 	}
 
 	WithUserNameAuthenticator(authenticator)(t.Context(), cfg)
 
-	if cfg.userNameAuthenticator == nil {
-		t.Fatal("expected username authenticator to be stored on config")
-	}
+	require.NotNil(t, cfg.userNameAuthenticator)
 
 	result, err := cfg.userNameAuthenticator(t.Context(), &auth.UserNameAuthenticationRequest{
 		UserName: "alice",
 		Password: "secret",
 	})
-	if !errors.Is(err, authErr) {
-		t.Fatalf("expected authenticator error %v, got %v", authErr, err)
-	}
-	if result != expected {
-		t.Fatalf("expected authenticator result %#v, got %#v", expected, result)
-	}
+	assert.ErrorIs(t, err, authErr)
+	assert.Same(t, expected, result)
 }
 
 func TestInitEndpointsAdvertisesConfiguredAuthModes(t *testing.T) {
@@ -305,9 +250,7 @@ func TestInitEndpointsAdvertisesConfiguredAuthModes(t *testing.T) {
 	srv.initEndpoints()
 
 	endpoints := srv.Endpoints()
-	if len(endpoints) != 2 {
-		t.Fatalf("expected 2 endpoints, got %d", len(endpoints))
-	}
+	require.Len(t, endpoints, 2)
 
 	for _, ep := range endpoints {
 		policies := make(map[string]*ua.UserTokenPolicy, len(ep.UserIdentityTokens))
@@ -316,29 +259,16 @@ func TestInitEndpointsAdvertisesConfiguredAuthModes(t *testing.T) {
 		}
 
 		anonymous, ok := policies["anonymous_none"]
-		if !ok {
-			t.Fatalf("expected endpoint %s/%s to advertise anonymous_none", ep.SecurityPolicyURI, ep.SecurityMode)
-		}
-		if anonymous.TokenType != ua.UserTokenTypeAnonymous {
-			t.Fatalf("expected anonymous policy token type %v, got %v", ua.UserTokenTypeAnonymous, anonymous.TokenType)
-		}
-		if anonymous.SecurityPolicyURI != ua.SecurityPolicyURINone {
-			t.Fatalf("expected anonymous policy URI %q, got %q", ua.SecurityPolicyURINone, anonymous.SecurityPolicyURI)
-		}
+		require.True(t, ok, "expected endpoint %s/%s to advertise anonymous_none", ep.SecurityPolicyURI, ep.SecurityMode)
+		assert.Equal(t, ua.UserTokenTypeAnonymous, anonymous.TokenType)
+		assert.Equal(t, ua.SecurityPolicyURINone, anonymous.SecurityPolicyURI)
 
 		userName, ok := policies["username_basic256sha256"]
-		if !ok {
-			t.Fatalf("expected endpoint %s/%s to advertise username_basic256sha256", ep.SecurityPolicyURI, ep.SecurityMode)
-		}
-		if userName.TokenType != ua.UserTokenTypeUserName {
-			t.Fatalf("expected username policy token type %v, got %v", ua.UserTokenTypeUserName, userName.TokenType)
-		}
-		if userName.SecurityPolicyURI != ua.SecurityPolicyURIBasic256Sha256 {
-			t.Fatalf("expected username policy URI %q, got %q", ua.SecurityPolicyURIBasic256Sha256, userName.SecurityPolicyURI)
-		}
-		if _, exists := policies["username_none"]; exists {
-			t.Fatalf("did not expect endpoint %s/%s to advertise username_none", ep.SecurityPolicyURI, ep.SecurityMode)
-		}
+		require.True(t, ok, "expected endpoint %s/%s to advertise username_basic256sha256", ep.SecurityPolicyURI, ep.SecurityMode)
+		assert.Equal(t, ua.UserTokenTypeUserName, userName.TokenType)
+		assert.Equal(t, ua.SecurityPolicyURIBasic256Sha256, userName.SecurityPolicyURI)
+		_, exists := policies["username_none"]
+		assert.False(t, exists)
 	}
 }
 
@@ -363,13 +293,7 @@ func TestInitEndpointsOmitsUserNameWithoutSecurePolicy(t *testing.T) {
 	srv.initEndpoints()
 
 	endpoints := srv.Endpoints()
-	if len(endpoints) != 1 {
-		t.Fatalf("expected 1 endpoint, got %d", len(endpoints))
-	}
-	if len(endpoints[0].UserIdentityTokens) != 1 {
-		t.Fatalf("expected only anonymous auth to be advertised, got %d user token policies", len(endpoints[0].UserIdentityTokens))
-	}
-	if endpoints[0].UserIdentityTokens[0].PolicyID != "anonymous_none" {
-		t.Fatalf("expected only anonymous_none policy, got %q", endpoints[0].UserIdentityTokens[0].PolicyID)
-	}
+	require.Len(t, endpoints, 1)
+	require.Len(t, endpoints[0].UserIdentityTokens, 1)
+	assert.Equal(t, "anonymous_none", endpoints[0].UserIdentityTokens[0].PolicyID)
 }
