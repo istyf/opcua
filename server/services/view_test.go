@@ -14,6 +14,8 @@ import (
 	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBrowseReturnsResultsInRequestOrder(t *testing.T) {
@@ -59,26 +61,14 @@ func TestBrowseReturnsResultsInRequestOrder(t *testing.T) {
 			{NodeID: secondNodeID, ResultMask: uint32(ua.BrowseResultMaskBrowseName)},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp, ok := resp.(*ua.BrowseResponse)
-	if !ok {
-		t.Fatalf("expected BrowseResponse, got %T", resp)
-	}
-	if len(browseResp.Results) != 2 {
-		t.Fatalf("expected 2 results, got %d", len(browseResp.Results))
-	}
-	if len(browseResp.DiagnosticInfos) != 0 {
-		t.Fatalf("expected empty diagnostic infos, got %d entries", len(browseResp.DiagnosticInfos))
-	}
-	if got := browseResp.Results[0].References[0].BrowseName.Name; got != "first" {
-		t.Fatalf("expected first result to stay first, got %q", got)
-	}
-	if got := browseResp.Results[1].References[0].BrowseName.Name; got != "second" {
-		t.Fatalf("expected second result to stay second, got %q", got)
-	}
+	require.True(t, ok, "expected BrowseResponse, got %T", resp)
+	require.Len(t, browseResp.Results, 2)
+	assert.Empty(t, browseResp.DiagnosticInfos)
+	assert.Equal(t, "first", browseResp.Results[0].References[0].BrowseName.Name)
+	assert.Equal(t, "second", browseResp.Results[1].References[0].BrowseName.Name)
 }
 
 func TestBrowsePreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
@@ -121,35 +111,17 @@ func TestBrowsePreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
 			},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp, ok := resp.(*ua.BrowseResponse)
-	if !ok {
-		t.Fatalf("expected BrowseResponse, got %T", resp)
-	}
-	if len(browseResp.Results) != 4 {
-		t.Fatalf("expected 4 results, got %d", len(browseResp.Results))
-	}
-	if len(browseResp.DiagnosticInfos) != 0 {
-		t.Fatalf("expected empty diagnostics, got %d entries", len(browseResp.DiagnosticInfos))
-	}
-	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadNodeIDInvalid {
-		t.Fatalf("expected first result to be %s, got %s", ua.StatusBadNodeIDInvalid, got)
-	}
-	if got := browseResp.Results[1].StatusCode; got != ua.StatusBadNodeIDUnknown {
-		t.Fatalf("expected second result to be %s, got %s", ua.StatusBadNodeIDUnknown, got)
-	}
-	if got := browseResp.Results[2].StatusCode; got != ua.StatusOK {
-		t.Fatalf("expected third result to be %s, got %s", ua.StatusOK, got)
-	}
-	if got := browseResp.Results[2].References[0].BrowseName.Name; got != "valid" {
-		t.Fatalf("expected third result browse name to be valid, got %q", got)
-	}
-	if got := browseResp.Results[3].StatusCode; got != ua.StatusBadBrowseDirectionInvalid {
-		t.Fatalf("expected fourth result to be %s, got %s", ua.StatusBadBrowseDirectionInvalid, got)
-	}
+	require.True(t, ok, "expected BrowseResponse, got %T", resp)
+	require.Len(t, browseResp.Results, 4)
+	assert.Empty(t, browseResp.DiagnosticInfos)
+	assert.Equal(t, ua.StatusBadNodeIDInvalid, browseResp.Results[0].StatusCode)
+	assert.Equal(t, ua.StatusBadNodeIDUnknown, browseResp.Results[1].StatusCode)
+	assert.Equal(t, ua.StatusOK, browseResp.Results[2].StatusCode)
+	assert.Equal(t, "valid", browseResp.Results[2].References[0].BrowseName.Name)
+	assert.Equal(t, ua.StatusBadBrowseDirectionInvalid, browseResp.Results[3].StatusCode)
 }
 
 func TestBrowseRequestedMaxReferencesPerNodeZeroReturnsAllReferences(t *testing.T) {
@@ -184,17 +156,11 @@ func TestBrowseRequestedMaxReferencesPerNodeZeroReturnsAllReferences(t *testing.
 			{NodeID: nodeID},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
-	if len(browseResp.Results[0].References) != 3 {
-		t.Fatalf("expected 3 references, got %d", len(browseResp.Results[0].References))
-	}
-	if len(browseResp.Results[0].ContinuationPoint) != 0 {
-		t.Fatal("expected no continuation point when max references is zero")
-	}
+	assert.Len(t, browseResp.Results[0].References, 3)
+	assert.Empty(t, browseResp.Results[0].ContinuationPoint)
 }
 
 func TestBrowseTruncatesResultsAndReturnsContinuationPoint(t *testing.T) {
@@ -229,20 +195,12 @@ func TestBrowseTruncatesResultsAndReturnsContinuationPoint(t *testing.T) {
 			{NodeID: nodeID, ResultMask: uint32(ua.BrowseResultMaskBrowseName)},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
-	if len(browseResp.Results[0].References) != 2 {
-		t.Fatalf("expected 2 references, got %d", len(browseResp.Results[0].References))
-	}
-	if got := browseResp.Results[0].References[0].BrowseName.Name; got != "one" {
-		t.Fatalf("expected first returned reference to be one, got %q", got)
-	}
-	if len(browseResp.Results[0].ContinuationPoint) == 0 {
-		t.Fatal("expected continuation point for truncated browse result")
-	}
+	assert.Len(t, browseResp.Results[0].References, 2)
+	assert.Equal(t, "one", browseResp.Results[0].References[0].BrowseName.Name)
+	assert.NotEmpty(t, browseResp.Results[0].ContinuationPoint)
 }
 
 func TestBrowseNextReturnsNextReferenceBatch(t *testing.T) {
@@ -277,9 +235,7 @@ func TestBrowseNextReturnsNextReferenceBatch(t *testing.T) {
 			{NodeID: nodeID, ResultMask: uint32(ua.BrowseResultMaskBrowseName)},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	firstBatch := browseResp.(*ua.BrowseResponse).Results[0]
 	resp, err := service.BrowseNext(t.Context(), nil, &ua.BrowseNextRequest{
@@ -287,23 +243,13 @@ func TestBrowseNextReturnsNextReferenceBatch(t *testing.T) {
 		ContinuationPoints:        [][]byte{firstBatch.ContinuationPoint},
 		ReleaseContinuationPoints: false,
 	}, 2)
-	if err != nil {
-		t.Fatalf("browse next: %v", err)
-	}
+	require.NoError(t, err)
 
 	nextResp := resp.(*ua.BrowseNextResponse)
-	if len(nextResp.Results) != 1 {
-		t.Fatalf("expected 1 result, got %d", len(nextResp.Results))
-	}
-	if len(nextResp.Results[0].References) != 1 {
-		t.Fatalf("expected 1 remaining reference, got %d", len(nextResp.Results[0].References))
-	}
-	if got := nextResp.Results[0].References[0].BrowseName.Name; got != "three" {
-		t.Fatalf("expected remaining reference to be three, got %q", got)
-	}
-	if len(nextResp.Results[0].ContinuationPoint) != 0 {
-		t.Fatal("expected continuation point to be exhausted after final batch")
-	}
+	assert.Len(t, nextResp.Results, 1)
+	assert.Len(t, nextResp.Results[0].References, 1)
+	assert.Equal(t, "three", nextResp.Results[0].References[0].BrowseName.Name)
+	assert.Empty(t, nextResp.Results[0].ContinuationPoint)
 }
 
 func TestBrowseNextReleaseContinuationPointsReturnsEmptyResults(t *testing.T) {
@@ -337,9 +283,7 @@ func TestBrowseNextReleaseContinuationPointsReturnsEmptyResults(t *testing.T) {
 			{NodeID: nodeID},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	firstBatch := browseResp.(*ua.BrowseResponse).Results[0]
 	resp, err := service.BrowseNext(t.Context(), nil, &ua.BrowseNextRequest{
@@ -347,17 +291,11 @@ func TestBrowseNextReleaseContinuationPointsReturnsEmptyResults(t *testing.T) {
 		ContinuationPoints:        [][]byte{firstBatch.ContinuationPoint},
 		ReleaseContinuationPoints: true,
 	}, 2)
-	if err != nil {
-		t.Fatalf("browse next release: %v", err)
-	}
+	require.NoError(t, err)
 
 	nextResp := resp.(*ua.BrowseNextResponse)
-	if len(nextResp.Results) != 0 {
-		t.Fatalf("expected empty results when releasing continuation points, got %d", len(nextResp.Results))
-	}
-	if len(nextResp.DiagnosticInfos) != 0 {
-		t.Fatalf("expected empty diagnostics when releasing continuation points, got %d", len(nextResp.DiagnosticInfos))
-	}
+	assert.Empty(t, nextResp.Results)
+	assert.Empty(t, nextResp.DiagnosticInfos)
 }
 
 func TestBrowseNextReturnsBadContinuationPointInvalid(t *testing.T) {
@@ -371,14 +309,10 @@ func TestBrowseNextReturnsBadContinuationPointInvalid(t *testing.T) {
 		ContinuationPoints:        [][]byte{[]byte("missing")},
 		ReleaseContinuationPoints: false,
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse next: %v", err)
-	}
+	require.NoError(t, err)
 
 	nextResp := resp.(*ua.BrowseNextResponse)
-	if got := nextResp.Results[0].StatusCode; got != ua.StatusBadContinuationPointInvalid {
-		t.Fatalf("expected %s, got %s", ua.StatusBadContinuationPointInvalid, got)
-	}
+	assert.Equal(t, ua.StatusBadContinuationPointInvalid, nextResp.Results[0].StatusCode)
 }
 
 func TestBrowseReturnsBadNoContinuationPointsWhenCapacityIsExhausted(t *testing.T) {
@@ -418,20 +352,12 @@ func TestBrowseReturnsBadNoContinuationPointsWhenCapacityIsExhausted(t *testing.
 			{NodeID: secondNodeID},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
-	if got := browseResp.Results[0].StatusCode; got != ua.StatusOK {
-		t.Fatalf("expected first result to succeed, got %s", got)
-	}
-	if len(browseResp.Results[0].ContinuationPoint) == 0 {
-		t.Fatal("expected first result to allocate continuation point")
-	}
-	if got := browseResp.Results[1].StatusCode; got != ua.StatusBadNoContinuationPoints {
-		t.Fatalf("expected %s, got %s", ua.StatusBadNoContinuationPoints, got)
-	}
+	assert.Equal(t, ua.StatusOK, browseResp.Results[0].StatusCode)
+	assert.NotEmpty(t, browseResp.Results[0].ContinuationPoint)
+	assert.Equal(t, ua.StatusBadNoContinuationPoints, browseResp.Results[1].StatusCode)
 }
 
 func TestBrowseReturnsBadNodeIDInvalidForNilNodeID(t *testing.T) {
@@ -446,14 +372,10 @@ func TestBrowseReturnsBadNodeIDInvalidForNilNodeID(t *testing.T) {
 			{NodeID: nil},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
-	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadNodeIDInvalid {
-		t.Fatalf("expected %s, got %s", ua.StatusBadNodeIDInvalid, got)
-	}
+	assert.Equal(t, ua.StatusBadNodeIDInvalid, browseResp.Results[0].StatusCode)
 }
 
 func TestBrowseReturnsBadNodeIDUnknownForMissingNamespace(t *testing.T) {
@@ -468,14 +390,10 @@ func TestBrowseReturnsBadNodeIDUnknownForMissingNamespace(t *testing.T) {
 			{NodeID: ua.NewNumericNodeID(9, 9009)},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
-	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadNodeIDUnknown {
-		t.Fatalf("expected %s, got %s", ua.StatusBadNodeIDUnknown, got)
-	}
+	assert.Equal(t, ua.StatusBadNodeIDUnknown, browseResp.Results[0].StatusCode)
 }
 
 func TestBrowseReturnsBadInternalErrorWhenNamespaceBrowseReturnsNil(t *testing.T) {
@@ -498,14 +416,10 @@ func TestBrowseReturnsBadInternalErrorWhenNamespaceBrowseReturnsNil(t *testing.T
 			{NodeID: ua.NewNumericNodeID(1, 1001)},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
-	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadInternalError {
-		t.Fatalf("expected %s, got %s", ua.StatusBadInternalError, got)
-	}
+	assert.Equal(t, ua.StatusBadInternalError, browseResp.Results[0].StatusCode)
 }
 
 func TestBrowseRejectsEmptyNodesToBrowse(t *testing.T) {
@@ -518,9 +432,7 @@ func TestBrowseRejectsEmptyNodesToBrowse(t *testing.T) {
 		RequestHeader: &ua.RequestHeader{RequestHandle: 45},
 		NodesToBrowse: nil,
 	}, 1)
-	if err != ua.StatusBadNothingToDo {
-		t.Fatalf("expected %s, got %v", ua.StatusBadNothingToDo, err)
-	}
+	assert.Equal(t, ua.StatusBadNothingToDo, err)
 }
 
 func TestBrowseRejectsTooManyOperations(t *testing.T) {
@@ -538,9 +450,7 @@ func TestBrowseRejectsTooManyOperations(t *testing.T) {
 			{NodeID: ua.NewNumericNodeID(1, 1002)},
 		},
 	}, 1)
-	if err != ua.StatusBadTooManyOperations {
-		t.Fatalf("expected %s, got %v", ua.StatusBadTooManyOperations, err)
-	}
+	assert.Equal(t, ua.StatusBadTooManyOperations, err)
 }
 
 func TestBrowseAcceptsEmptyViewDescription(t *testing.T) {
@@ -567,9 +477,7 @@ func TestBrowseAcceptsEmptyViewDescription(t *testing.T) {
 			{NodeID: ua.NewNumericNodeID(1, 1001)},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	assert.NoError(t, err)
 }
 
 func TestBrowseAcceptsNilViewDescription(t *testing.T) {
@@ -596,9 +504,7 @@ func TestBrowseAcceptsNilViewDescription(t *testing.T) {
 			{NodeID: ua.NewNumericNodeID(1, 1001)},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	assert.NoError(t, err)
 }
 
 func TestBrowseRejectsUnsupportedViewID(t *testing.T) {
@@ -616,9 +522,7 @@ func TestBrowseRejectsUnsupportedViewID(t *testing.T) {
 			{NodeID: ua.NewNumericNodeID(1, 1001)},
 		},
 	}, 1)
-	if err != ua.StatusBadViewIDUnknown {
-		t.Fatalf("expected %s, got %v", ua.StatusBadViewIDUnknown, err)
-	}
+	assert.Equal(t, ua.StatusBadViewIDUnknown, err)
 }
 
 func TestBrowseRejectsViewParameterMismatch(t *testing.T) {
@@ -636,9 +540,7 @@ func TestBrowseRejectsViewParameterMismatch(t *testing.T) {
 			{NodeID: ua.NewNumericNodeID(1, 1001)},
 		},
 	}, 1)
-	if err != ua.StatusBadViewParameterMismatch {
-		t.Fatalf("expected %s, got %v", ua.StatusBadViewParameterMismatch, err)
-	}
+	assert.Equal(t, ua.StatusBadViewParameterMismatch, err)
 }
 
 func TestBrowseRejectsUnsupportedViewTimestamp(t *testing.T) {
@@ -657,9 +559,7 @@ func TestBrowseRejectsUnsupportedViewTimestamp(t *testing.T) {
 			{NodeID: ua.NewNumericNodeID(1, 1001)},
 		},
 	}, 1)
-	if err != ua.StatusBadViewTimestampInvalid {
-		t.Fatalf("expected %s, got %v", ua.StatusBadViewTimestampInvalid, err)
-	}
+	assert.Equal(t, ua.StatusBadViewTimestampInvalid, err)
 }
 
 func TestBrowseRejectsUnsupportedViewVersion(t *testing.T) {
@@ -678,9 +578,7 @@ func TestBrowseRejectsUnsupportedViewVersion(t *testing.T) {
 			{NodeID: ua.NewNumericNodeID(1, 1001)},
 		},
 	}, 1)
-	if err != ua.StatusBadViewVersionInvalid {
-		t.Fatalf("expected %s, got %v", ua.StatusBadViewVersionInvalid, err)
-	}
+	assert.Equal(t, ua.StatusBadViewVersionInvalid, err)
 }
 
 func TestBrowseReturnsBadNodeIDUnknownForMissingNodeInKnownNamespace(t *testing.T) {
@@ -698,14 +596,10 @@ func TestBrowseReturnsBadNodeIDUnknownForMissingNodeInKnownNamespace(t *testing.
 			{NodeID: ua.NewNumericNodeID(1, 1234)},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
-	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadNodeIDUnknown {
-		t.Fatalf("expected %s, got %s", ua.StatusBadNodeIDUnknown, got)
-	}
+	assert.Equal(t, ua.StatusBadNodeIDUnknown, browseResp.Results[0].StatusCode)
 }
 
 func TestBrowseReturnsBadBrowseDirectionInvalid(t *testing.T) {
@@ -723,14 +617,10 @@ func TestBrowseReturnsBadBrowseDirectionInvalid(t *testing.T) {
 			},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
-	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadBrowseDirectionInvalid {
-		t.Fatalf("expected %s, got %s", ua.StatusBadBrowseDirectionInvalid, got)
-	}
+	assert.Equal(t, ua.StatusBadBrowseDirectionInvalid, browseResp.Results[0].StatusCode)
 }
 
 func TestBrowseReturnsBadReferenceTypeIDInvalid(t *testing.T) {
@@ -753,14 +643,10 @@ func TestBrowseReturnsBadReferenceTypeIDInvalid(t *testing.T) {
 			},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
-	if got := browseResp.Results[0].StatusCode; got != ua.StatusBadReferenceTypeIDInvalid {
-		t.Fatalf("expected %s, got %s", ua.StatusBadReferenceTypeIDInvalid, got)
-	}
+	assert.Equal(t, ua.StatusBadReferenceTypeIDInvalid, browseResp.Results[0].StatusCode)
 }
 
 func TestSuitableDirection(t *testing.T) {
@@ -786,9 +672,7 @@ func TestSuitableDirection(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			if got := suitableDirection(tt.direction, tt.isForward, tt.isSymmetric); got != tt.want {
-				t.Fatalf("expected %t, got %t", tt.want, got)
-			}
+			assert.Equal(t, tt.want, suitableDirection(tt.direction, tt.isForward, tt.isSymmetric))
 		})
 	}
 }
@@ -844,18 +728,10 @@ func TestSuitableRefType(t *testing.T) {
 		},
 	}
 
-	if !suitableRefType(srv, hierarchical, hierarchical, false) {
-		t.Fatal("expected exact reference type match to succeed")
-	}
-	if suitableRefType(srv, hierarchical, organizes, false) {
-		t.Fatal("expected subtype to fail when includeSubtypes is false")
-	}
-	if !suitableRefType(srv, hierarchical, organizes, true) {
-		t.Fatal("expected subtype to match when includeSubtypes is true")
-	}
-	if suitableRefType(srv, hierarchical, ua.NewNumericNodeID(0, id.HasTypeDefinition), true) {
-		t.Fatal("expected unrelated reference type not to match")
-	}
+	assert.True(t, suitableRefType(srv, hierarchical, hierarchical, false))
+	assert.False(t, suitableRefType(srv, hierarchical, organizes, false))
+	assert.True(t, suitableRefType(srv, hierarchical, organizes, true))
+	assert.False(t, suitableRefType(srv, hierarchical, ua.NewNumericNodeID(0, id.HasTypeDefinition), true))
 }
 
 func TestTrimReferenceDescriptionByResultMask(t *testing.T) {
@@ -873,21 +749,14 @@ func TestTrimReferenceDescriptionByResultMask(t *testing.T) {
 
 	trimmed := trimReferenceDescriptionByResultMask(ref, uint32(ua.BrowseResultMaskBrowseName|ua.BrowseResultMaskTypeDefinition))
 
-	if trimmed.ReferenceTypeID != nil {
-		t.Fatal("expected reference type to be omitted")
-	}
-	if trimmed.BrowseName == nil || trimmed.BrowseName.Name != "target" {
-		t.Fatal("expected browse name to be preserved")
-	}
-	if trimmed.TypeDefinition == nil || !trimmed.TypeDefinition.NodeID.Equal(ua.NewNumericNodeID(0, id.BaseObjectType)) {
-		t.Fatal("expected type definition to be preserved")
-	}
-	if trimmed.DisplayName != nil {
-		t.Fatal("expected display name to be omitted")
-	}
-	if trimmed.NodeID == nil || !trimmed.NodeID.NodeID.Equal(ua.NewNumericNodeID(1, 2001)) {
-		t.Fatal("expected target node id to always be preserved")
-	}
+	assert.Nil(t, trimmed.ReferenceTypeID)
+	require.NotNil(t, trimmed.BrowseName)
+	assert.Equal(t, "target", trimmed.BrowseName.Name)
+	require.NotNil(t, trimmed.TypeDefinition)
+	assert.True(t, trimmed.TypeDefinition.NodeID.Equal(ua.NewNumericNodeID(0, id.BaseObjectType)))
+	assert.Nil(t, trimmed.DisplayName)
+	require.NotNil(t, trimmed.NodeID)
+	assert.True(t, trimmed.NodeID.NodeID.Equal(ua.NewNumericNodeID(1, 2001)))
 }
 
 func TestBrowseAppliesResultMask(t *testing.T) {
@@ -931,30 +800,18 @@ func TestBrowseAppliesResultMask(t *testing.T) {
 			},
 		},
 	}, 1)
-	if err != nil {
-		t.Fatalf("browse: %v", err)
-	}
+	require.NoError(t, err)
 
 	browseResp := resp.(*ua.BrowseResponse)
 	ref := browseResp.Results[0].References[0]
-	if ref.BrowseName == nil || ref.BrowseName.Name != "target" {
-		t.Fatal("expected browse name to be present")
-	}
-	if ref.NodeClass != ua.NodeClassObject {
-		t.Fatalf("expected node class %s, got %s", ua.NodeClassObject, ref.NodeClass)
-	}
-	if ref.ReferenceTypeID != nil {
-		t.Fatal("expected reference type id to be omitted by result mask")
-	}
-	if ref.DisplayName != nil {
-		t.Fatal("expected display name to be omitted by result mask")
-	}
-	if ref.NodeID == nil || !ref.NodeID.NodeID.Equal(ua.NewNumericNodeID(1, 2001)) {
-		t.Fatal("expected target node id to be preserved by result mask")
-	}
-	if ref.TypeDefinition != nil {
-		t.Fatal("expected type definition to be omitted by result mask")
-	}
+	require.NotNil(t, ref.BrowseName)
+	assert.Equal(t, "target", ref.BrowseName.Name)
+	assert.Equal(t, ua.NodeClassObject, ref.NodeClass)
+	assert.Nil(t, ref.ReferenceTypeID)
+	assert.Nil(t, ref.DisplayName)
+	require.NotNil(t, ref.NodeID)
+	assert.True(t, ref.NodeID.NodeID.Equal(ua.NewNumericNodeID(1, 2001)))
+	assert.Nil(t, ref.TypeDefinition)
 }
 
 func TestSuitableReferenceNodeClassMask(t *testing.T) {
@@ -1003,9 +860,7 @@ func TestSuitableReferenceNodeClassMask(t *testing.T) {
 				IncludeSubtypes: true,
 				NodeClassMask:   tt.mask,
 			}
-			if got := SuitableReference(t.Context(), srv, desc, ref); got != tt.want {
-				t.Fatalf("expected %t, got %t", tt.want, got)
-			}
+			assert.Equal(t, tt.want, SuitableReference(t.Context(), srv, desc, ref))
 		})
 	}
 }
