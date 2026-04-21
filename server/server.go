@@ -408,11 +408,17 @@ func (s *serverImpl) monitorConnections(ctx context.Context) {
 				ualog.String("func", "monitorConnections"),
 				ualog.Err(msg.Err),
 			)
-			continue // todo(fs): close SC???
+			if msg.SecureChannelID != 0 {
+				s.cb.CloseSecureChannel(ctx, msg.SecureChannelID)
+			}
+			continue
 		}
 		if resp := msg.Response(); resp != nil {
 			ualog.Error(ctx, "server received response", ualog.Any("response", resp))
-			continue // todo(fs): close SC???
+			if msg.SecureChannelID != 0 {
+				s.cb.CloseSecureChannel(ctx, msg.SecureChannelID)
+			}
+			continue
 		}
 
 		ualog.Debug(ctx, "received message",

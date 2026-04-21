@@ -29,3 +29,10 @@ func TestChannelBrokerEnqueueMessageReturnsWhenContextCanceled(t *testing.T) {
 		require.FailNow(t, "timed out waiting for enqueueMessage to return")
 	}
 }
+
+func TestChannelBrokerCloseSecureChannelReturnsFalseWhenChannelMissing(t *testing.T) {
+	t.Parallel()
+
+	broker := newChannelBroker()
+	assert.False(t, broker.CloseSecureChannel(t.Context(), 1))
+}

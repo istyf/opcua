@@ -78,6 +78,18 @@ func (c *channelBroker) enqueueMessage(ctx context.Context, msg *uasc.MessageBod
 	}
 }
 
+func (c *channelBroker) CloseSecureChannel(ctx context.Context, id uint32) bool {
+	c.mu.RLock()
+	sc, ok := c.s[id]
+	c.mu.RUnlock()
+	if !ok || sc == nil {
+		return false
+	}
+
+	_ = sc.CloseWithContext(ctx)
+	return true
+}
+
 func validateEnabledSecureChannelPolicy(enabled []security) func(string) error {
 	return func(policy string) error {
 		for _, sec := range enabled {
