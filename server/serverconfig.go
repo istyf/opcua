@@ -41,6 +41,7 @@ type serverConfig struct {
 	maxSubscriptions                  uint32
 	maxSubscriptionsPerSession        uint32
 	maxSubscriptionOperationsPerCall  uint32
+	channelBrokerCloseTimeout         time.Duration
 	minSubscriptionPublishingInterval time.Duration
 	minSubscriptionMaxKeepAliveCount  uint32
 	minSubscriptionLifetimeCount      uint32

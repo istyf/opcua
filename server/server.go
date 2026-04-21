@@ -70,12 +70,13 @@ type serverImpl struct {
 // Call Start() afterwards to begin listening and serving connections
 func New(ctx context.Context, opts ...Option) types.Server {
 	cfg := &serverConfig{
-		cap:                  capabilities,
-		applicationName:      "GOPCUA",               // override with the ServerName option
-		manufacturerName:     "The gopcua Team",      // override with the ManufacturerName option
-		productName:          "gopcua OPC/UA Server", // override with the ProductName option
-		softwareVersion:      "0.0.0-dev",            // override with the SoftwareVersion option
-		methodCallMiddleware: func(fn types.MethodFunc) types.MethodFunc { return fn },
+		cap:                       capabilities,
+		applicationName:           "GOPCUA",               // override with the ServerName option
+		manufacturerName:          "The gopcua Team",      // override with the ManufacturerName option
+		productName:               "gopcua OPC/UA Server", // override with the ProductName option
+		softwareVersion:           "0.0.0-dev",            // override with the SoftwareVersion option
+		channelBrokerCloseTimeout: defaultChannelBrokerCloseTimeout,
+		methodCallMiddleware:      func(fn types.MethodFunc) types.MethodFunc { return fn },
 	}
 
 	for _, opt := range opts {
@@ -301,6 +302,13 @@ func (s *serverImpl) setServerState(state ua.ServerState) {
 	s.mu.Unlock()
 }
 
+func (s *serverImpl) channelBrokerCloseTimeout() time.Duration {
+	if s.cfg == nil || s.cfg.channelBrokerCloseTimeout <= 0 {
+		return defaultChannelBrokerCloseTimeout
+	}
+	return s.cfg.channelBrokerCloseTimeout
+}
+
 // Close gracefully shuts the server down by closing all open connections,
 // and stops listening on all endpoints
 func (s *serverImpl) Close(ctx context.Context) error {
@@ -329,7 +337,7 @@ func (s *serverImpl) Close(ctx context.Context) error {
 
 		// Shut down all secure channels and UACP connections
 		if s.cb != nil {
-			if closeErr := s.cb.Close(ctx); closeErr != nil && err == nil {
+			if closeErr := s.cb.Close(ctx, s.channelBrokerCloseTimeout()); closeErr != nil && err == nil {
 				err = closeErr
 			}
 		}

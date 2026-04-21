@@ -15,6 +15,8 @@ import (
 	"github.com/gopcua/opcua/uasc"
 )
 
+const defaultChannelBrokerCloseTimeout = 10 * time.Second
+
 func isExpectedChannelShutdownError(err error) bool {
 	if err == nil {
 		return false
@@ -188,8 +190,8 @@ outer:
 	return nil
 }
 
-// Close gracefully closes all secure channels
-func (c *channelBroker) Close(ctx context.Context) error {
+// Close gracefully closes all secure channels.
+func (c *channelBroker) Close(ctx context.Context, timeout time.Duration) error {
 	var err error
 	c.mu.Lock()
 	for _, s := range c.s {
@@ -204,13 +206,15 @@ func (c *channelBroker) Close(ctx context.Context) error {
 		c.wg.Wait()
 	}()
 
-	channelExitTimeout := time.Duration(10 * time.Second) // todo(fs): magic number
+	if timeout <= 0 {
+		timeout = defaultChannelBrokerCloseTimeout
+	}
 
 	select {
 	case <-done:
-	case <-time.After(channelExitTimeout):
+	case <-time.After(timeout):
 		ualog.Error(ctx, "timed out waiting for channels to exit",
-			ualog.Duration("timeout", channelExitTimeout),
+			ualog.Duration("timeout", timeout),
 		)
 	}
 

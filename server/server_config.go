@@ -225,6 +225,19 @@ func MaxSubscriptionOperationsPerCall(count uint32) Option {
 	}
 }
 
+// ChannelBrokerCloseTimeout controls how long server shutdown waits for secure
+// channel goroutines to exit after close has been requested. Values less than
+// or equal to 0 restore the default timeout.
+func ChannelBrokerCloseTimeout(timeout time.Duration) Option {
+	return func(_ context.Context, s *serverConfig) {
+		if timeout <= 0 {
+			s.channelBrokerCloseTimeout = defaultChannelBrokerCloseTimeout
+			return
+		}
+		s.channelBrokerCloseTimeout = timeout
+	}
+}
+
 // MinSubscriptionPublishingInterval sets the smallest supported publishing
 // interval for subscriptions. Values less than or equal to 0 restore the
 // default minimum.

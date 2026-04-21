@@ -7,6 +7,7 @@ import (
 	"errors"
 	"math"
 	"testing"
+	"time"
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/auth"
@@ -310,6 +311,18 @@ func TestWireupServerCapabilityNodeValueAdvertisesUnlimitedLimitsAsTypeMax(t *te
 	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_MaxBrowseContinuationPoints, uint16(math.MaxUint16))
 	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_MaxSubscriptions, uint32(math.MaxUint32))
 	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_MaxSubscriptionsPerSession, uint32(math.MaxUint32))
+}
+
+func TestChannelBrokerCloseTimeoutOption(t *testing.T) {
+	t.Parallel()
+
+	cfg := &serverConfig{}
+
+	ChannelBrokerCloseTimeout(3*time.Second)(t.Context(), cfg)
+	assert.Equal(t, 3*time.Second, cfg.channelBrokerCloseTimeout)
+
+	ChannelBrokerCloseTimeout(0)(t.Context(), cfg)
+	assert.Equal(t, defaultChannelBrokerCloseTimeout, cfg.channelBrokerCloseTimeout)
 }
 
 func assertServerCapabilityValue(t *testing.T, ns types.NameSpace, nodeID uint32, want any) {
