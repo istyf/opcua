@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/gopcua/opcua/id"
@@ -39,12 +40,57 @@ func WireupNamespacesArrayNodeValue(s types.Server, ns types.NameSpace) {
 }
 
 func WireupServerCapabilityNodeValue(s types.Server, ns types.NameSpace) {
-	nodeID := ua.NewNumericNodeID(0, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerRead)
-	theNode := mustHaveServerNode[types.VariableNode](nodeID, ns)
+	advertiseUint32Limit := func(limit uint32) uint32 {
+		if limit == 0 {
+			return math.MaxUint32
+		}
+		return limit
+	}
+	advertiseUint16Limit := func(limit uint32) uint16 {
+		if limit == 0 || limit >= math.MaxUint16 {
+			return math.MaxUint16
+		}
+		return uint16(limit)
+	}
 
-	theNode.SetValue(values.DataValueFromValue(
-		s.Config().MaxNodesPerRead(),
-	))
+	type nodeconf struct {
+		nodeID uint32
+		value  any
+	}
+
+	cfg := s.Config()
+	nodeconfigs := []nodeconf{
+		{
+			nodeID: id.Server_ServerCapabilities_OperationLimits_MaxNodesPerRead,
+			value:  advertiseUint32Limit(cfg.MaxNodesPerRead()),
+		},
+		{
+			nodeID: id.Server_ServerCapabilities_OperationLimits_MaxNodesPerMethodCall,
+			value:  advertiseUint32Limit(cfg.MaxMethodOperationsPerCall()),
+		},
+		{
+			nodeID: id.Server_ServerCapabilities_OperationLimits_MaxNodesPerBrowse,
+			value:  advertiseUint32Limit(cfg.MaxBrowseOperationsPerCall()),
+		},
+		{
+			nodeID: id.Server_ServerCapabilities_MaxBrowseContinuationPoints,
+			value:  advertiseUint16Limit(cfg.MaxBrowseContinuationPoints()),
+		},
+		{
+			nodeID: id.Server_ServerCapabilities_MaxSubscriptions,
+			value:  advertiseUint32Limit(cfg.MaxSubscriptions()),
+		},
+		{
+			nodeID: id.Server_ServerCapabilities_MaxSubscriptionsPerSession,
+			value:  advertiseUint32Limit(cfg.MaxSubscriptionsPerSession()),
+		},
+	}
+
+	for _, cfg := range nodeconfigs {
+		nodeID := ua.NewNumericNodeID(0, cfg.nodeID)
+		theNode := mustHaveServerNode[types.VariableNode](nodeID, ns)
+		theNode.SetValue(values.DataValueFromValue(cfg.value))
+	}
 }
 
 func WireupServerStatusNodesValues(s types.Server, serverNode types.Node, ns types.NameSpace) {

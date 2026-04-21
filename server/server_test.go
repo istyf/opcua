@@ -5,9 +5,12 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"errors"
+	"math"
 	"testing"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/auth"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -270,6 +273,58 @@ func TestInitEndpointsAdvertisesConfiguredAuthModes(t *testing.T) {
 		_, exists := policies["username_none"]
 		assert.False(t, exists)
 	}
+}
+
+func TestWireupServerCapabilityNodeValueAdvertisesConfiguredLimits(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context(),
+		MaxBrowseOperationsPerCall(12),
+		MaxMethodOperationsPerCall(13),
+		MaxBrowseContinuationPoints(14),
+		MaxSubscriptions(15),
+		MaxSubscriptionsPerSession(16),
+	).(*serverImpl)
+
+	ns, err := srv.Namespace(0)
+	require.NoError(t, err)
+
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerRead, uint32(32))
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerBrowse, uint32(12))
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerMethodCall, uint32(13))
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_MaxBrowseContinuationPoints, uint16(14))
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_MaxSubscriptions, uint32(15))
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_MaxSubscriptionsPerSession, uint32(16))
+}
+
+func TestWireupServerCapabilityNodeValueAdvertisesUnlimitedLimitsAsTypeMax(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	ns, err := srv.Namespace(0)
+	require.NoError(t, err)
+
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerMethodCall, uint32(math.MaxUint32))
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_OperationLimits_MaxNodesPerBrowse, uint32(math.MaxUint32))
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_MaxBrowseContinuationPoints, uint16(math.MaxUint16))
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_MaxSubscriptions, uint32(math.MaxUint32))
+	assertServerCapabilityValue(t, ns, id.Server_ServerCapabilities_MaxSubscriptionsPerSession, uint32(math.MaxUint32))
+}
+
+func assertServerCapabilityValue(t *testing.T, ns types.NameSpace, nodeID uint32, want any) {
+	t.Helper()
+
+	n := ns.Node(ua.NewNumericNodeID(0, nodeID))
+	require.NotNil(t, n)
+
+	v, ok := n.(types.VariableNode)
+	require.True(t, ok, "expected variable node for i=%d", nodeID)
+
+	dv := v.Value()
+	require.NotNil(t, dv)
+	require.NotNil(t, dv.Value)
+	assert.Equal(t, want, dv.Value.Value())
 }
 
 func TestInitEndpointsOmitsUserNameWithoutSecurePolicy(t *testing.T) {
