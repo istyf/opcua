@@ -63,10 +63,18 @@ func (as *NodeNameSpace) AddNode(n types.Node) types.Node {
 	as.mu.Lock()
 	defer as.mu.Unlock()
 
-	// todo(fs): this is wrong since this leaves the old node in the list.
-	as.nodes = append(as.nodes, n)
 	k := n.ID().String()
+	if existing, ok := as.m[k]; ok {
+		for i := range as.nodes {
+			if as.nodes[i] == existing {
+				as.nodes[i] = n
+				as.m[k] = n
+				return n
+			}
+		}
+	}
 
+	as.nodes = append(as.nodes, n)
 	as.m[k] = n
 	return n
 }

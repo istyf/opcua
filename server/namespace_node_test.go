@@ -85,6 +85,40 @@ func TestNodeNamespaceBrowseHonorsSharedFiltersAndKeepsTypeDefinitionFirst(t *te
 	assert.Equal(t, uint32(id.HasComponent), result.References[1].ReferenceTypeID.IntID())
 }
 
+func TestNodeNamespaceAddNodeReplacesExistingNodeByID(t *testing.T) {
+	t.Parallel()
+
+	srv := newMapNamespaceTestServer()
+	ns := NewNodeNameSpace(srv, "node")
+	nodeID := ua.NewNumericNodeID(ns.ID(), 1004)
+
+	original := nodeNamespaceTestNode{
+		id:          nodeID,
+		browseName:  ns.NewQualifiedName("Original"),
+		displayName: ua.NewLocalizedText("Original"),
+		nodeClass:   ua.NodeClassObject,
+	}
+	replacement := nodeNamespaceTestNode{
+		id:          nodeID,
+		browseName:  ns.NewQualifiedName("Replacement"),
+		displayName: ua.NewLocalizedText("Replacement"),
+		nodeClass:   ua.NodeClassObject,
+	}
+
+	ns.AddNode(original)
+	ns.AddNode(replacement)
+
+	got := ns.Node(nodeID)
+	require.NotNil(t, got)
+	assert.Equal(t, "Replacement", got.BrowseName().Name)
+
+	ns.mu.RLock()
+	defer ns.mu.RUnlock()
+
+	require.Len(t, ns.nodes, 1)
+	assert.Equal(t, "Replacement", ns.nodes[0].BrowseName().Name)
+}
+
 type nodeNamespaceTestNode struct {
 	id          *ua.NodeID
 	browseName  *ua.QualifiedName
