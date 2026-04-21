@@ -69,6 +69,15 @@ func newChannelBroker() *channelBroker {
 	}
 }
 
+func (c *channelBroker) enqueueMessage(ctx context.Context, msg *uasc.MessageBody) bool {
+	select {
+	case <-ctx.Done():
+		return false
+	case c.msgChan <- msg:
+		return true
+	}
+}
+
 func validateEnabledSecureChannelPolicy(enabled []security) func(string) error {
 	return func(policy string) error {
 		for _, sec := range enabled {
@@ -153,8 +162,9 @@ outer:
 				ualog.Error(ctx, "secure channel error", ualog.Err(msg.Err))
 				break outer
 			}
-			// todo(fs): honor ctx
-			c.msgChan <- msg
+			if !c.enqueueMessage(ctx, msg) {
+				break outer
+			}
 		}
 	}
 
