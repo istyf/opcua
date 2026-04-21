@@ -79,6 +79,7 @@ func TestCallResolvesMethodFromMethodNamespace(t *testing.T) {
 	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
 	require.Len(t, callResp.Results, 1)
 	assert.Equal(t, ua.StatusOK, callResp.Results[0].StatusCode)
+	assert.Nil(t, callResp.Results[0].InputArgumentResults)
 }
 
 func TestCallPreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
@@ -138,6 +139,7 @@ func TestCallReturnsResultsWhenMethodExecutionFails(t *testing.T) {
 	assert.Equal(t, ua.StatusOK, callResp.ResponseHeader.ServiceResult)
 	require.Len(t, callResp.Results, 1)
 	assert.Equal(t, ua.StatusBadInternalError, callResp.Results[0].StatusCode)
+	assert.Nil(t, callResp.Results[0].InputArgumentResults)
 }
 
 func TestCallReturnsBadNotExecutableForNonExecutableMethod(t *testing.T) {
