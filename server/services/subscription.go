@@ -206,9 +206,6 @@ func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id types.S
 }
 
 func (s *SubscriptionService) Shutdown(ctx context.Context) error {
-	ualog.Debug(ctx, "subscription service shutting down")
-	defer ualog.Debug(ctx, "subscription service shut down")
-
 	s.mu.Lock()
 	subs := make([]*Subscription, 0, len(s.subs))
 	for _, sub := range s.subs {
