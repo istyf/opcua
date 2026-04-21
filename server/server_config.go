@@ -184,6 +184,14 @@ func MaxBrowseOperationsPerCall(count uint32) Option {
 	}
 }
 
+// MaxMethodOperationsPerCall limits the number of methods a Call request may
+// include. A value of 0 disables the limit.
+func MaxMethodOperationsPerCall(count uint32) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.maxMethodOperationsPerCall = count
+	}
+}
+
 // MaxBrowseContinuationPoints limits the number of browse continuation points
 // that may be held by the server at one time. A value of 0 disables the limit.
 func MaxBrowseContinuationPoints(count uint32) Option {

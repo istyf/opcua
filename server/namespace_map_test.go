@@ -175,6 +175,8 @@ func (mapNamespaceTestConfig) SoftwareVersion() string { return "" }
 
 func (mapNamespaceTestConfig) MaxNodesPerRead() uint32 { return 0 }
 
+func (mapNamespaceTestConfig) MaxMethodOperationsPerCall() uint32 { return 0 }
+
 func (mapNamespaceTestConfig) MaxBrowseOperationsPerCall() uint32 { return 0 }
 
 func (mapNamespaceTestConfig) MaxBrowseContinuationPoints() uint32 { return 0 }

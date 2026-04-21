@@ -564,6 +564,7 @@ func (cfg sessionServiceTestConfig) ManufacturerName() string                   
 func (cfg sessionServiceTestConfig) ProductName() string                              { return "" }
 func (cfg sessionServiceTestConfig) SoftwareVersion() string                          { return "" }
 func (cfg sessionServiceTestConfig) MaxNodesPerRead() uint32                          { return 0 }
+func (cfg sessionServiceTestConfig) MaxMethodOperationsPerCall() uint32               { return 0 }
 func (cfg sessionServiceTestConfig) MaxBrowseOperationsPerCall() uint32               { return 0 }
 func (cfg sessionServiceTestConfig) MaxBrowseContinuationPoints() uint32              { return 0 }
 func (cfg sessionServiceTestConfig) MaxSubscriptions() uint32                         { return 0 }

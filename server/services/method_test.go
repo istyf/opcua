@@ -2,9 +2,12 @@ package services
 
 import (
 	"context"
+	"crypto/rsa"
 	"errors"
 	"testing"
+	"time"
 
+	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
@@ -231,6 +234,27 @@ func TestCallReturnsBadMethodInvalidWhenMethodNodeIsMissing(t *testing.T) {
 	assert.Equal(t, ua.StatusBadMethodInvalid, callResp.Results[0].StatusCode)
 }
 
+func TestCallRejectsTooManyOperations(t *testing.T) {
+	t.Parallel()
+
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		return nil, ua.StatusOK
+	})
+	fixture.backend.cfg = methodTestConfig{maxMethodOperationsPerCall: 1}
+
+	service := NewMethodService(fixture.backend, nil)
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 9},
+		MethodsToCall: []*ua.CallMethodRequest{
+			{ObjectID: fixture.objectNode.ID(), MethodID: fixture.methodNode.ID()},
+			{ObjectID: fixture.objectNode.ID(), MethodID: fixture.methodNode.ID()},
+		},
+	}, 9)
+	require.ErrorIs(t, err, ua.StatusBadTooManyOperations)
+	assert.Nil(t, resp)
+}
+
 type methodCallFixture struct {
 	backend    *methodTestBackend
 	objectNode types.Node
@@ -289,9 +313,17 @@ func newMethodCallFixture(objectNamespace, methodNamespace uint16, executable bo
 
 type methodTestBackend struct {
 	namespaces map[int]types.NameSpace
+	cfg        types.ServerConfig
 }
 
 func (*methodTestBackend) RegisterHandler(int, Handler) {}
+
+func (b *methodTestBackend) Config() types.ServerConfig {
+	if b.cfg == nil {
+		return methodTestConfig{}
+	}
+	return b.cfg
+}
 
 func (b *methodTestBackend) Namespace(id int) (types.NameSpace, error) {
 	if b.namespaces == nil {
@@ -340,3 +372,47 @@ func (*methodTestNamespace) NewQualifiedName(name string) *ua.QualifiedName {
 }
 
 func (*methodTestNamespace) NextAvailableID() *ua.NodeID { return ua.NewNumericNodeID(0, 0) }
+
+type methodTestConfig struct {
+	maxMethodOperationsPerCall uint32
+}
+
+func (cfg methodTestConfig) Certificate() []byte { return nil }
+
+func (cfg methodTestConfig) Endpoints() []string { return nil }
+
+func (cfg methodTestConfig) PrivateKey() *rsa.PrivateKey { return nil }
+
+func (cfg methodTestConfig) UserNameAuthenticator() auth.UserNameAuthenticator { return nil }
+
+func (cfg methodTestConfig) ApplicationURI() string { return "" }
+
+func (cfg methodTestConfig) ManufacturerName() string { return "" }
+
+func (cfg methodTestConfig) ProductName() string { return "" }
+
+func (cfg methodTestConfig) SoftwareVersion() string { return "" }
+
+func (cfg methodTestConfig) MaxNodesPerRead() uint32 { return 0 }
+
+func (cfg methodTestConfig) MaxMethodOperationsPerCall() uint32 {
+	return cfg.maxMethodOperationsPerCall
+}
+
+func (cfg methodTestConfig) MaxBrowseOperationsPerCall() uint32 { return 0 }
+
+func (cfg methodTestConfig) MaxBrowseContinuationPoints() uint32 { return 0 }
+
+func (cfg methodTestConfig) MaxSubscriptions() uint32 { return 0 }
+
+func (cfg methodTestConfig) MaxSubscriptionsPerSession() uint32 { return 0 }
+
+func (cfg methodTestConfig) MaxSubscriptionOperationsPerCall() uint32 { return 0 }
+
+func (cfg methodTestConfig) MinSubscriptionPublishingInterval() time.Duration { return 0 }
+
+func (cfg methodTestConfig) MinSubscriptionMaxKeepAliveCount() uint32 { return 0 }
+
+func (cfg methodTestConfig) MinSubscriptionLifetimeCount() uint32 { return 0 }
+
+func (cfg methodTestConfig) MethodCallMiddleware() types.MethodMiddleware { return nil }

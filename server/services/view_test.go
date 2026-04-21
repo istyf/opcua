@@ -1130,6 +1130,8 @@ func (cfg viewTestConfig) SoftwareVersion() string { return "" }
 
 func (cfg viewTestConfig) MaxNodesPerRead() uint32 { return 0 }
 
+func (cfg viewTestConfig) MaxMethodOperationsPerCall() uint32 { return 0 }
+
 func (cfg viewTestConfig) MaxBrowseOperationsPerCall() uint32 {
 	return cfg.maxBrowseOperationsPerCall
 }

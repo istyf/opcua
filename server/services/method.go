@@ -14,14 +14,16 @@ import (
 type MethodServiceBackend interface {
 	HandlerRegistrator
 	NamespaceProvider
+	Config() types.ServerConfig
 }
 
 // MethodService implements the Method Service Set.
 //
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.12
 type MethodService struct {
-	backend    MethodServiceBackend
-	middleware types.MethodMiddleware
+	backend             MethodServiceBackend
+	middleware          types.MethodMiddleware
+	maxMethodOperations uint32
 }
 
 func NewMethodService(b MethodServiceBackend, middleware types.MethodMiddleware) *MethodService {
@@ -32,8 +34,9 @@ func NewMethodService(b MethodServiceBackend, middleware types.MethodMiddleware)
 	}
 
 	ms := &MethodService{
-		backend:    b,
-		middleware: middleware,
+		backend:             b,
+		middleware:          middleware,
+		maxMethodOperations: b.Config().MaxMethodOperationsPerCall(),
 	}
 
 	b.RegisterHandler(id.CallRequest_Encoding_DefaultBinary, ms.Call)
@@ -51,6 +54,12 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	req, err := safeReq[*ua.CallRequest](r)
 	if err != nil {
 		return nil, err
+	}
+	if len(req.MethodsToCall) == 0 {
+		return nil, ua.StatusBadNothingToDo
+	}
+	if s.maxMethodOperations > 0 && uint32(len(req.MethodsToCall)) > s.maxMethodOperations {
+		return nil, ua.StatusBadTooManyOperations
 	}
 
 	results := make([]*ua.CallMethodResult, 0, len(req.MethodsToCall))
