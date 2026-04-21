@@ -253,7 +253,7 @@ func (s *serverImpl) Start(ctx context.Context) error {
 	s.runCancel = runCancel
 	s.mu.Unlock()
 
-	s.runWG.Add(3)
+	s.runWG.Add(2)
 	go func() {
 		defer s.runWG.Done()
 		s.acceptAndRegister(runCtx, s.l)
@@ -262,20 +262,8 @@ func (s *serverImpl) Start(ctx context.Context) error {
 		defer s.runWG.Done()
 		s.monitorConnections(runCtx)
 	}()
-	go func() {
-		defer s.runWG.Done()
-		s.closeOnStartContextDone(ctx, runCtx)
-	}()
 
 	return nil
-}
-
-func (s *serverImpl) closeOnStartContextDone(startCtx, runCtx context.Context) {
-	select {
-	case <-startCtx.Done():
-		_ = s.Close(context.WithoutCancel(startCtx))
-	case <-runCtx.Done():
-	}
 }
 
 func validateConfiguredSecureEndpoints(cfg *serverConfig) error {
