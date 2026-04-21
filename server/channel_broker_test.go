@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gopcua/opcua/uacp"
 	"github.com/gopcua/opcua/uasc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -35,4 +36,18 @@ func TestChannelBrokerCloseSecureChannelReturnsFalseWhenChannelMissing(t *testin
 
 	broker := newChannelBroker()
 	assert.False(t, broker.CloseSecureChannel(t.Context(), 1))
+}
+
+func TestServerSecureChannelKeepsConfiguredEndpoint(t *testing.T) {
+	t.Parallel()
+
+	endpoint := "opc.tcp://localhost:4840/UA/Server"
+
+	sc, err := uasc.NewServerSecureChannel(endpoint, &uacp.Conn{}, &uasc.Config{
+		SecurityPolicyURI: "http://opcfoundation.org/UA/SecurityPolicy#None",
+		SecurityMode:      1,
+	}, make(chan error, 1), 1, 1, 1)
+	require.NoError(t, err)
+
+	assert.Equal(t, endpoint, sc.LocalEndpoint())
 }

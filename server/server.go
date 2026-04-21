@@ -385,7 +385,7 @@ func (s *serverImpl) acceptAndRegister(ctx context.Context, l *uacp.Listener) {
 				}
 			}
 
-			go s.cb.RegisterConn(ctx, c, s.Config().Certificate(), s.Config().PrivateKey(), slices.Clone(s.cfg.enabledSec))
+			go s.cb.RegisterConn(ctx, l.Endpoint(), c, s.Config().Certificate(), s.Config().PrivateKey(), slices.Clone(s.cfg.enabledSec))
 
 			ualog.Info(ctx, "registered connection",
 				ualog.String("remote", c.RemoteAddr().String()),
