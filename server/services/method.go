@@ -60,6 +60,32 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			OutputArguments: outputs,
 		})
 	}
+	nodeLogName := func(node types.Node) string {
+		if node == nil {
+			return ""
+		}
+		if browseName := node.BrowseName(); browseName != nil && browseName.Name != "" {
+			return browseName.String()
+		}
+		if id := node.ID(); id != nil {
+			return id.String()
+		}
+		return ""
+	}
+	requestedMethodLogName := func(methodID *ua.NodeID, methodNode types.MethodNode) string {
+		if methodNode != nil {
+			if browseName := methodNode.BrowseName(); browseName != nil && browseName.Name != "" {
+				return browseName.String()
+			}
+			if id := methodNode.ID(); id != nil {
+				return id.String()
+			}
+		}
+		if methodID != nil {
+			return methodID.String()
+		}
+		return ""
+	}
 
 	// Check if the method has a non forward reference to this object
 	methodBelongsToObject := func(method types.MethodNode, object types.Node) bool {
@@ -98,13 +124,9 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		}
 
 		if methodNode == nil || !methodBelongsToObject(methodNode, objectNode) {
-			methodName := method.MethodID.String()
-			if methodNode != nil {
-				methodName = methodNode.BrowseName().String()
-			}
 			ualog.Error(ctx, "method does not exist or does not belong to object",
-				ualog.String("method", methodName),
-				ualog.String("object", objectNode.BrowseName().String()),
+				ualog.String("method", requestedMethodLogName(method.MethodID, methodNode)),
+				ualog.String("object", nodeLogName(objectNode)),
 			)
 			appendResult(ua.StatusBadMethodInvalid)
 			continue
@@ -112,8 +134,8 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 
 		if !methodNode.IsExecutable(ctx) {
 			ualog.Error(ctx, "method is not executable",
-				ualog.String("method", methodNode.BrowseName().String()),
-				ualog.String("object", objectNode.BrowseName().String()),
+				ualog.String("method", nodeLogName(methodNode)),
+				ualog.String("object", nodeLogName(objectNode)),
 			)
 			appendResult(ua.StatusBadNotExecutable)
 			continue
@@ -132,8 +154,8 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		}
 
 		ualog.Info(ctx, "called method",
-			ualog.String("method", methodNode.BrowseName().String()),
-			ualog.String("object", objectNode.BrowseName().String()),
+			ualog.String("method", nodeLogName(methodNode)),
+			ualog.String("object", nodeLogName(objectNode)),
 			ualog.Any("status", res.StatusCode),
 		)
 

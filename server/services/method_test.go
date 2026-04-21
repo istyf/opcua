@@ -200,6 +200,35 @@ func TestCallUsesIdentityMiddlewareWhenNilMiddlewareProvided(t *testing.T) {
 	assert.True(t, called)
 }
 
+func TestCallReturnsBadMethodInvalidWhenMethodNodeIsMissing(t *testing.T) {
+	t.Parallel()
+
+	fixture := newMethodCallFixture(1, 2, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		return nil, ua.StatusOK
+	})
+	delete(fixture.backend.namespaces[2].(*methodTestNamespace).nodes, fixture.methodNode.ID().String())
+
+	service := NewMethodService(fixture.backend, nil)
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 8},
+		MethodsToCall: []*ua.CallMethodRequest{
+			{
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
+			},
+		},
+	}, 8)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.NotNil(t, callResp.ResponseHeader)
+	assert.Equal(t, ua.StatusOK, callResp.ResponseHeader.ServiceResult)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusBadMethodInvalid, callResp.Results[0].StatusCode)
+}
+
 type methodCallFixture struct {
 	backend    *methodTestBackend
 	objectNode types.Node
