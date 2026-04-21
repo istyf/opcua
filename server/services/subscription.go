@@ -206,6 +206,9 @@ func (s *SubscriptionService) DeleteSubscription(ctx context.Context, id types.S
 }
 
 func (s *SubscriptionService) Shutdown(ctx context.Context) error {
+	ualog.Debug(ctx, "subscription service shutting down")
+	defer ualog.Debug(ctx, "subscription service shut down")
+
 	s.mu.Lock()
 	subs := make([]*Subscription, 0, len(s.subs))
 	for _, sub := range s.subs {
@@ -563,10 +566,11 @@ type Subscription struct {
 	// the running flag and shutdown channel are used to signal the background task that it should stop.
 	// multiple places can kill the subscription so make sure you check the running flag using the mutex
 	// before closing the shutdown channel.
-	Mu       sync.Mutex
-	running  bool
-	shutdown chan struct{}
-	done     chan struct{}
+	Mu        sync.Mutex
+	running   bool
+	runCancel context.CancelFunc
+	shutdown  chan struct{}
+	done      chan struct{}
 }
 
 type subscriptionModify struct {
@@ -592,13 +596,13 @@ func NewSubscription() *Subscription {
 }
 
 func (s *Subscription) Stop(ctx context.Context) error {
-	if s == nil {
-		return nil
-	}
-
 	s.Mu.Lock()
 	if s.running {
 		s.running = false
+		if s.runCancel != nil {
+			s.runCancel()
+			s.runCancel = nil
+		}
 		close(s.shutdown)
 	}
 	done := s.done
@@ -646,8 +650,14 @@ func (s *Subscription) applySetPublishingMode(enabled bool) {
 }
 
 func (s *Subscription) Start(ctx context.Context) {
-	ctx = ualog.WithAttrs(ctx, ualog.Uint32("sub", uint32(s.ID)))
-	go s.run(ctx)
+	runCtx, runCancel := context.WithCancel(context.WithoutCancel(ctx))
+	runCtx = ualog.WithAttrs(runCtx, ualog.Uint32("sub", uint32(s.ID)))
+
+	s.Mu.Lock()
+	s.runCancel = runCancel
+	s.Mu.Unlock()
+
+	go s.run(runCtx)
 }
 
 func (s *Subscription) keepalive(ctx context.Context, pubreq types.PubReq) error {
@@ -725,6 +735,9 @@ func (s *Subscription) nextPublishBatch(publishQueue map[uint32]*ua.MonitoredIte
 func (s *Subscription) run(ctx context.Context) {
 	// if this go routine dies, we need to delete ourselves.
 	defer func() {
+		s.Mu.Lock()
+		s.runCancel = nil
+		s.Mu.Unlock()
 		close(s.done)
 		ualog.Info(ctx, "subscription shutting down")
 		s.srv.DeleteSubscription(ctx, s.ID)

@@ -179,6 +179,45 @@ func TestSubscriptionServiceShutdownStopsRunningSubscriptions(t *testing.T) {
 	assert.False(t, running)
 }
 
+func TestCreateSubscriptionIgnoresCreateRequestContextCancellation(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(t.Context())
+
+	session := newSubscriptionTestSession()
+	backend := newSubscriptionTestBackend(session, subscriptionTestConfigOptions{})
+	service := NewSubscriptionService(backend)
+	sc := newTestSecureChannel(t)
+
+	resp, err := service.CreateSubscription(ctx, sc, newCreateSubscriptionRequest(session, 2), 1)
+	require.NoError(t, err)
+
+	createResp, ok := resp.(*ua.CreateSubscriptionResponse)
+	require.True(t, ok, "expected CreateSubscriptionResponse, got %T", resp)
+
+	subID := types.SubscriptionID(createResp.SubscriptionID)
+	sub, ok := service.Get(subID)
+	require.True(t, ok, "expected subscription %d to exist", subID)
+	require.NotNil(t, sub)
+
+	cancel()
+
+	time.Sleep(50 * time.Millisecond)
+
+	sub.Mu.Lock()
+	running := sub.running
+	sub.Mu.Unlock()
+	assert.True(t, running)
+
+	service.DeleteSubscription(t.Context(), subID)
+
+	select {
+	case <-sub.done:
+	case <-time.After(2 * time.Second):
+		require.FailNow(t, "timed out waiting for subscription goroutine to stop")
+	}
+}
+
 func TestModifySubscriptionRevisesParametersAndUpdatesRuntimeState(t *testing.T) {
 	t.Parallel()
 
