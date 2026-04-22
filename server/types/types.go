@@ -103,6 +103,7 @@ type MethodNode interface {
 	IsExecutable(context.Context) bool
 	SetExecutable(bool)
 	UserExecutable(context.Context) bool
+	SetUserExecutable(bool)
 	SetUserExecutableHandler(MethodUserExecutableHandler)
 }
 

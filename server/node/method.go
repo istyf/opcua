@@ -12,12 +12,14 @@ type methodNode struct {
 	baseNode
 
 	executable            bool
+	userExecutable        bool
 	userExecutableHandler types.MethodUserExecutableHandler
 	call                  types.MethodFunc
 }
 
 type methodConfig struct {
 	executable            bool
+	userExecutable        *bool
 	userExecutableHandler types.MethodUserExecutableHandler
 	handler               types.MethodFunc
 }
@@ -27,6 +29,13 @@ type methodOption func(*methodConfig)
 func Executable(executable bool) methodOption {
 	return func(cfg *methodConfig) {
 		cfg.executable = executable
+	}
+}
+
+func UserExecutable(executable bool) methodOption {
+	return func(cfg *methodConfig) {
+		cfg.userExecutable = new(bool)
+		*cfg.userExecutable = executable
 	}
 }
 
@@ -48,17 +57,21 @@ func NewMethodNode(base func(ua.NodeClass) *baseConfig, opts ...methodOption) ty
 	for _, applyOption := range opts {
 		applyOption(cfg)
 	}
+	userExecutable := cfg.executable
+	if cfg.userExecutable != nil {
+		userExecutable = *cfg.userExecutable
+	}
 
 	n := &methodNode{
 		baseNode:              *newBaseNode(base(ua.NodeClassMethod)),
 		call:                  cfg.handler,
 		executable:            cfg.executable,
+		userExecutable:        userExecutable,
 		userExecutableHandler: cfg.userExecutableHandler,
 	}
 
-	dv := values.DataValueFromValue(n.executable)
-	n.baseNode.attr[ua.AttributeIDExecutable] = dv
-	n.baseNode.attr[ua.AttributeIDUserExecutable] = dv
+	n.baseNode.attr[ua.AttributeIDExecutable] = values.DataValueFromValue(n.executable)
+	n.baseNode.attr[ua.AttributeIDUserExecutable] = values.DataValueFromValue(n.userExecutable)
 
 	return n
 }
@@ -79,6 +92,9 @@ func (n *methodNode) UserExecutable(ctx context.Context) bool {
 	if !n.executable {
 		return false
 	}
+	if !n.userExecutable {
+		return false
+	}
 	if n.userExecutableHandler == nil {
 		return true
 	}
@@ -89,9 +105,14 @@ func (n *methodNode) SetExecutable(executable bool) {
 	if n.executable != executable {
 		n.executable = executable
 
-		dv := values.DataValueFromValue(executable)
-		n.baseNode.attr[ua.AttributeIDExecutable] = dv
-		n.baseNode.attr[ua.AttributeIDUserExecutable] = dv
+		n.baseNode.attr[ua.AttributeIDExecutable] = values.DataValueFromValue(executable)
+	}
+}
+
+func (n *methodNode) SetUserExecutable(executable bool) {
+	if n.userExecutable != executable {
+		n.userExecutable = executable
+		n.baseNode.attr[ua.AttributeIDUserExecutable] = values.DataValueFromValue(executable)
 	}
 }
 
