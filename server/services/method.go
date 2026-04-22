@@ -266,13 +266,5 @@ func (s *MethodService) decorateCallContext(
 	}
 
 	session := s.backend.Session(ctx, reqHeader)
-	if session == nil {
-		return callCtx
-	}
-
-	decoratedCtx := decorator(callCtx, session.AuthenticatedUser())
-	if decoratedCtx == nil {
-		panic("server authorization context decorator returned nil context")
-	}
-	return decoratedCtx
+	return decorateAuthorizationContext(callCtx, s.backend.Config(), session)
 }

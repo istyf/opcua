@@ -84,6 +84,14 @@ func (n *methodNode) CallMethod(ctx context.Context, args ...*ua.Variant) ([]*ua
 	return n.call(ctx, args...)
 }
 
+func (n *methodNode) Attribute(ctx context.Context, id ua.AttributeID) (*types.AttrValue, error) {
+	if id == ua.AttributeIDUserExecutable {
+		return NewAttrValue(values.DataValueFromValue(n.UserExecutable(ctx))), nil
+	}
+
+	return n.baseNode.Attribute(ctx, id)
+}
+
 func (n *methodNode) IsExecutable(context.Context) bool {
 	return n.executable
 }

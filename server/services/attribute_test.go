@@ -1,17 +1,84 @@
 package services_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/schema"
 	"github.com/gopcua/opcua/server"
+	"github.com/gopcua/opcua/server/auth"
+	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/services"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestReadReturnsDynamicUserExecutableAttribute(t *testing.T) {
+	t.Parallel()
+
+	type contextKey string
+
+	const executableKey contextKey = "method-user-executable"
+
+	srv := server.New(t.Context(), server.WithAuthorizationContextDecorator(
+		func(ctx context.Context, user *auth.AuthenticatedUser) context.Context {
+			require.NotNil(t, user)
+			return context.WithValue(ctx, executableKey, true)
+		},
+	))
+	ns := server.NewNodeNameSpace(srv, "urn:test:methods")
+	methodID := ua.NewNumericNodeID(ns.ID(), 4101)
+	method := node.NewMethodNode(
+		node.WithBase(
+			node.WithID(methodID),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: ns.ID(), Name: "Method"}),
+		),
+		node.Executable(true),
+		node.WithUserExecutableHandler(func(ctx context.Context) bool {
+			allowed, _ := ctx.Value(executableKey).(bool)
+			return allowed
+		}),
+	)
+	ns.AddNode(method)
+
+	backend := &attributeTestBackend{
+		srv: srv,
+		session: &attributeTestSession{
+			user: &auth.AuthenticatedUser{
+				UserName: "alice",
+				Subject:  "user:alice",
+				Roles: []*ua.NodeID{
+					ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser),
+				},
+			},
+		},
+	}
+	svc := services.NewAttributeService(backend)
+
+	resp, err := svc.Read(t.Context(), nil, &ua.ReadRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       21,
+			AuthenticationToken: ua.NewNumericNodeID(1, 9001),
+		},
+		NodesToRead: []*ua.ReadValueID{
+			{
+				NodeID:      methodID,
+				AttributeID: ua.AttributeIDUserExecutable,
+			},
+		},
+	}, 21)
+	require.NoError(t, err)
+
+	readResp, ok := resp.(*ua.ReadResponse)
+	require.True(t, ok, "expected *ua.ReadResponse, got %T", resp)
+	require.Len(t, readResp.Results, 1)
+	require.NotNil(t, readResp.Results[0])
+	require.NotNil(t, readResp.Results[0].Value)
+	assert.Equal(t, true, readResp.Results[0].Value.Value())
+}
 
 func TestReadReturnsImportedDataTypeDefinitionAttribute(t *testing.T) {
 	t.Parallel()
@@ -201,7 +268,8 @@ func TestBrowseAndReadImportedDataTypeDefinition(t *testing.T) {
 }
 
 type attributeTestBackend struct {
-	srv types.Server
+	srv     types.Server
+	session types.Session
 }
 
 func (*attributeTestBackend) RegisterHandler(int, services.Handler) {}
@@ -217,3 +285,40 @@ func (b *attributeTestBackend) Node(id *ua.NodeID) types.Node {
 func (b *attributeTestBackend) Config() types.ServerConfig {
 	return b.srv.Config()
 }
+
+func (b *attributeTestBackend) Session(context.Context, *ua.RequestHeader) types.Session {
+	if b.session != nil {
+		return b.session
+	}
+	return nil
+}
+
+type attributeTestSession struct {
+	user *auth.AuthenticatedUser
+}
+
+func (*attributeTestSession) AuthTokenID() *ua.NodeID { return nil }
+
+func (*attributeTestSession) ID() *ua.NodeID { return nil }
+
+func (*attributeTestSession) Locales() []string { return nil }
+
+func (*attributeTestSession) SetLocales([]string) {}
+
+func (*attributeTestSession) RemoteCertificate() []byte { return nil }
+
+func (*attributeTestSession) ServerNonce() []byte { return nil }
+
+func (*attributeTestSession) SetServerNonce([]byte) {}
+
+func (*attributeTestSession) TimeOutInMillis() float64 { return 0 }
+
+func (*attributeTestSession) Activated() bool { return true }
+
+func (*attributeTestSession) SetActivated(bool) {}
+
+func (*attributeTestSession) IsSameAs(types.Session) bool { return false }
+
+func (s *attributeTestSession) AuthenticatedUser() *auth.AuthenticatedUser { return s.user }
+
+func (*attributeTestSession) PublishRequestChannel() chan types.PubReq { return nil }

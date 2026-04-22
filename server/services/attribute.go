@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gopcua/opcua/id"
+	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
 	"github.com/gopcua/opcua/uasc"
@@ -17,6 +18,8 @@ type HandlerRegistrator interface {
 type AttributeServiceBackend interface {
 	HandlerRegistrator
 	NamespaceProvider
+	SessionProvider
+	Config() types.ServerConfig
 }
 
 // AttributeService implements the Attribute Service Set.
@@ -49,6 +52,10 @@ func (s *AttributeService) Read(ctx context.Context, sc *uasc.SecureChannel, r u
 	req, err := safeReq[*ua.ReadRequest](r)
 	if err != nil {
 		return nil, err
+	}
+
+	if req.RequestHeader != nil {
+		ctx = decorateAuthorizationContext(ctx, s.backend.Config(), s.backend.Session(ctx, req.RequestHeader))
 	}
 
 	results := make([]*ua.DataValue, len(req.NodesToRead))
