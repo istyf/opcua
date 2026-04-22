@@ -52,3 +52,12 @@ type UserNameAuthenticationRequest struct {
 // Returning a non-nil error rejects the activation. On success, the callback
 // returns the authenticated user context to store on the session.
 type UserNameAuthenticator func(context.Context, *UserNameAuthenticationRequest) (*AuthenticatedUser, error)
+
+// AuthorizationContextDecorator enriches a request context with application-
+// specific authorization data derived from the authenticated user attached to a
+// session.
+//
+// The server uses this hook to project authenticated identity information into
+// the context seen by application method handlers without exposing internal
+// session types.
+type AuthorizationContextDecorator func(context.Context, *AuthenticatedUser) context.Context

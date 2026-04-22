@@ -581,6 +581,10 @@ func (cfg sessionServiceTestConfig) PrivateKey() *rsa.PrivateKey { return cfg.pr
 func (cfg sessionServiceTestConfig) UserNameAuthenticator() auth.UserNameAuthenticator {
 	return cfg.authenticator
 }
+
+func (cfg sessionServiceTestConfig) AuthorizationContextDecorator() auth.AuthorizationContextDecorator {
+	return nil
+}
 func (cfg sessionServiceTestConfig) ApplicationURI() string                           { return "" }
 func (cfg sessionServiceTestConfig) ManufacturerName() string                         { return "" }
 func (cfg sessionServiceTestConfig) ProductName() string                              { return "" }

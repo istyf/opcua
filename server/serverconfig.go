@@ -48,6 +48,7 @@ type serverConfig struct {
 
 	methodCallMiddleware  types.MethodMiddleware
 	userNameAuthenticator auth.UserNameAuthenticator
+	authContextDecorator  auth.AuthorizationContextDecorator
 }
 
 var capabilities = ServerCapabilities{
@@ -138,4 +139,8 @@ func (cfg *serverConfig) MethodCallMiddleware() types.MethodMiddleware {
 
 func (cfg *serverConfig) UserNameAuthenticator() auth.UserNameAuthenticator {
 	return cfg.userNameAuthenticator
+}
+
+func (cfg *serverConfig) AuthorizationContextDecorator() auth.AuthorizationContextDecorator {
+	return cfg.authContextDecorator
 }

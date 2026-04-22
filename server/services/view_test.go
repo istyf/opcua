@@ -1120,6 +1120,10 @@ func (cfg viewTestConfig) PrivateKey() *rsa.PrivateKey { return nil }
 
 func (cfg viewTestConfig) UserNameAuthenticator() auth.UserNameAuthenticator { return nil }
 
+func (cfg viewTestConfig) AuthorizationContextDecorator() auth.AuthorizationContextDecorator {
+	return nil
+}
+
 func (cfg viewTestConfig) ApplicationURI() string { return "" }
 
 func (cfg viewTestConfig) ManufacturerName() string { return "" }

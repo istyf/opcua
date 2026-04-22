@@ -144,6 +144,19 @@ func WithUserNameAuthenticator(authenticator auth.UserNameAuthenticator) Option 
 	}
 }
 
+// WithAuthorizationContextDecorator registers the callback used to enrich
+// request contexts for application method handlers using the authenticated user
+// stored on the current session.
+//
+// The decorator is optional. When set, it is applied immediately before
+// method dispatch and receives the session's authenticated user, which may be
+// nil for anonymous or unauthenticated sessions.
+func WithAuthorizationContextDecorator(decorator auth.AuthorizationContextDecorator) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.authContextDecorator = decorator
+	}
+}
+
 func defaultChannelConfig() *uasc.Config {
 	return &uasc.Config{
 		SecurityPolicyURI: ua.SecurityPolicyURINone,

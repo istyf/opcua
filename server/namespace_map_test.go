@@ -165,6 +165,10 @@ func (mapNamespaceTestConfig) PrivateKey() *rsa.PrivateKey { return nil }
 
 func (mapNamespaceTestConfig) UserNameAuthenticator() auth.UserNameAuthenticator { return nil }
 
+func (mapNamespaceTestConfig) AuthorizationContextDecorator() auth.AuthorizationContextDecorator {
+	return nil
+}
+
 func (mapNamespaceTestConfig) ApplicationURI() string { return "" }
 
 func (mapNamespaceTestConfig) ManufacturerName() string { return "" }

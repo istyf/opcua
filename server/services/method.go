@@ -14,6 +14,7 @@ import (
 type MethodServiceBackend interface {
 	HandlerRegistrator
 	NamespaceProvider
+	SessionProvider
 	Config() types.ServerConfig
 }
 
@@ -213,10 +214,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		}
 
 		outputs, code := s.middleware(methodNode.CallMethod)(
-			srvctx.WithMethodCall(ctx,
-				objectNode.ID().String(), objectNode.BrowseName().String(),
-				methodNode.ID().String(), methodNode.BrowseName().String(),
-			),
+			s.decorateCallContext(ctx, req.RequestHeader, objectNode, methodNode),
 			method.InputArguments...,
 		)
 		res := &ua.CallMethodResult{
@@ -243,4 +241,31 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 
 	return response, nil
+}
+
+func (s *MethodService) decorateCallContext(
+	ctx context.Context,
+	reqHeader *ua.RequestHeader,
+	objectNode types.Node,
+	methodNode types.MethodNode,
+) context.Context {
+	callCtx := srvctx.WithMethodCall(ctx,
+		objectNode.ID().String(), objectNode.BrowseName().String(),
+		methodNode.ID().String(), methodNode.BrowseName().String(),
+	)
+	decorator := s.backend.Config().AuthorizationContextDecorator()
+	if decorator == nil || reqHeader == nil {
+		return callCtx
+	}
+
+	session := s.backend.Session(ctx, reqHeader)
+	if session == nil {
+		return callCtx
+	}
+
+	decoratedCtx := decorator(callCtx, session.AuthenticatedUser())
+	if decoratedCtx == nil {
+		panic("server authorization context decorator returned nil context")
+	}
+	return decoratedCtx
 }

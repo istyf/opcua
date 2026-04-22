@@ -1280,6 +1280,10 @@ func (cfg subscriptionTestConfig) UserNameAuthenticator() auth.UserNameAuthentic
 	return nil
 }
 
+func (cfg subscriptionTestConfig) AuthorizationContextDecorator() auth.AuthorizationContextDecorator {
+	return nil
+}
+
 func (cfg subscriptionTestConfig) ApplicationURI() string {
 	return ""
 }

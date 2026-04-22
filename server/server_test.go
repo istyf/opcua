@@ -234,6 +234,20 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 	assert.Same(t, expected, result)
 }
 
+func TestWithAuthorizationContextDecorator(t *testing.T) {
+	t.Parallel()
+
+	cfg := &serverConfig{}
+	decorator := func(ctx context.Context, user *auth.AuthenticatedUser) context.Context {
+		return ctx
+	}
+
+	WithAuthorizationContextDecorator(decorator)(t.Context(), cfg)
+
+	require.NotNil(t, cfg.AuthorizationContextDecorator())
+	assert.NotNil(t, cfg.authContextDecorator)
+}
+
 func TestInitEndpointsAdvertisesConfiguredAuthModes(t *testing.T) {
 	t.Parallel()
 

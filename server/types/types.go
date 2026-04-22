@@ -170,6 +170,11 @@ type ServerConfig interface {
 	// advertised.
 	UserNameAuthenticator() auth.UserNameAuthenticator
 
+	// AuthorizationContextDecorator returns the optional hook used to enrich
+	// method handler contexts from the authenticated user stored on the active
+	// session.
+	AuthorizationContextDecorator() auth.AuthorizationContextDecorator
+
 	ApplicationURI() string
 	ManufacturerName() string
 	ProductName() string

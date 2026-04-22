@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/refs"
@@ -204,6 +205,109 @@ func TestCallUsesIdentityMiddlewareWhenNilMiddlewareProvided(t *testing.T) {
 	require.Len(t, callResp.Results, 1)
 	assert.Equal(t, ua.StatusOK, callResp.Results[0].StatusCode)
 	assert.True(t, called)
+}
+
+func TestCallDecoratesHandlerContextFromAuthenticatedUser(t *testing.T) {
+	t.Parallel()
+
+	type contextKey string
+
+	const (
+		userNameKey contextKey = "user-name"
+		roleKey     contextKey = "role-id"
+	)
+
+	expectedUser := &auth.AuthenticatedUser{
+		UserName: "alice",
+		Subject:  "user:alice",
+		Roles: []*ua.NodeID{
+			ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser),
+		},
+		Attributes: map[string]any{
+			"department": "ops",
+		},
+	}
+
+	var gotUserName string
+	var gotRoleID string
+	fixture := newMethodCallFixture(1, 1, true, func(ctx context.Context, _ ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		gotUserName, _ = ctx.Value(userNameKey).(string)
+		gotRoleID, _ = ctx.Value(roleKey).(string)
+		return nil, ua.StatusOK
+	})
+	fixture.backend.session = &methodTestSession{user: expectedUser}
+	fixture.backend.cfg = methodTestConfig{
+		authContextDecorator: func(ctx context.Context, user *auth.AuthenticatedUser) context.Context {
+			require.Same(t, expectedUser, user)
+			ctx = context.WithValue(ctx, userNameKey, user.UserName)
+			return context.WithValue(ctx, roleKey, user.Roles[0].String())
+		},
+	}
+
+	service := NewMethodService(fixture.backend, nil)
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       71,
+			AuthenticationToken: ua.NewNumericNodeID(1, 9001),
+		},
+		MethodsToCall: []*ua.CallMethodRequest{
+			{
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
+			},
+		},
+	}, 71)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusOK, callResp.Results[0].StatusCode)
+	assert.Equal(t, "alice", gotUserName)
+	assert.Equal(t, ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser).String(), gotRoleID)
+}
+
+func TestCallPanicsWhenAuthorizationContextDecoratorReturnsNil(t *testing.T) {
+	t.Parallel()
+
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		return nil, ua.StatusOK
+	})
+	fixture.backend.session = &methodTestSession{
+		user: &auth.AuthenticatedUser{
+			UserName: "alice",
+			Subject:  "user:alice",
+			Roles: []*ua.NodeID{
+				ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser),
+			},
+		},
+	}
+	fixture.backend.cfg = methodTestConfig{
+		authContextDecorator: func(context.Context, *auth.AuthenticatedUser) context.Context {
+			return nil
+		},
+	}
+
+	service := NewMethodService(fixture.backend, nil)
+
+	require.PanicsWithValue(t,
+		"server authorization context decorator returned nil context",
+		func() {
+			_, _ = service.Call(t.Context(), nil, &ua.CallRequest{
+				RequestHeader: &ua.RequestHeader{
+					RequestHandle:       72,
+					AuthenticationToken: ua.NewNumericNodeID(1, 9002),
+				},
+				MethodsToCall: []*ua.CallMethodRequest{
+					{
+						ObjectID: fixture.objectNode.ID(),
+						MethodID: fixture.methodNode.ID(),
+					},
+				},
+			}, 72)
+		},
+	)
 }
 
 func TestCallReturnsBadMethodInvalidWhenMethodNodeIsMissing(t *testing.T) {
@@ -449,6 +553,7 @@ func newMethodCallFixture(objectNamespace, methodNamespace uint16, executable bo
 
 type methodTestBackend struct {
 	namespaces map[int]types.NameSpace
+	session    types.Session
 	cfg        types.ServerConfig
 }
 
@@ -470,6 +575,10 @@ func (b *methodTestBackend) Namespace(id int) (types.NameSpace, error) {
 		return nil, errors.New("namespace not found")
 	}
 	return ns, nil
+}
+
+func (b *methodTestBackend) Session(context.Context, *ua.RequestHeader) types.Session {
+	return b.session
 }
 
 type methodTestNamespace struct {
@@ -511,6 +620,7 @@ func (*methodTestNamespace) NextAvailableID() *ua.NodeID { return ua.NewNumericN
 
 type methodTestConfig struct {
 	maxMethodOperationsPerCall uint32
+	authContextDecorator       auth.AuthorizationContextDecorator
 }
 
 func (cfg methodTestConfig) Certificate() []byte { return nil }
@@ -520,6 +630,10 @@ func (cfg methodTestConfig) Endpoints() []string { return nil }
 func (cfg methodTestConfig) PrivateKey() *rsa.PrivateKey { return nil }
 
 func (cfg methodTestConfig) UserNameAuthenticator() auth.UserNameAuthenticator { return nil }
+
+func (cfg methodTestConfig) AuthorizationContextDecorator() auth.AuthorizationContextDecorator {
+	return cfg.authContextDecorator
+}
 
 func (cfg methodTestConfig) ApplicationURI() string { return "" }
 
@@ -552,3 +666,33 @@ func (cfg methodTestConfig) MinSubscriptionMaxKeepAliveCount() uint32 { return 0
 func (cfg methodTestConfig) MinSubscriptionLifetimeCount() uint32 { return 0 }
 
 func (cfg methodTestConfig) MethodCallMiddleware() types.MethodMiddleware { return nil }
+
+type methodTestSession struct {
+	user *auth.AuthenticatedUser
+}
+
+func (*methodTestSession) AuthTokenID() *ua.NodeID { return nil }
+
+func (*methodTestSession) ID() *ua.NodeID { return nil }
+
+func (*methodTestSession) Locales() []string { return nil }
+
+func (*methodTestSession) SetLocales([]string) {}
+
+func (*methodTestSession) RemoteCertificate() []byte { return nil }
+
+func (*methodTestSession) ServerNonce() []byte { return nil }
+
+func (*methodTestSession) SetServerNonce([]byte) {}
+
+func (*methodTestSession) TimeOutInMillis() float64 { return 0 }
+
+func (*methodTestSession) Activated() bool { return true }
+
+func (*methodTestSession) SetActivated(bool) {}
+
+func (*methodTestSession) IsSameAs(types.Session) bool { return false }
+
+func (s *methodTestSession) AuthenticatedUser() *auth.AuthenticatedUser { return s.user }
+
+func (*methodTestSession) PublishRequestChannel() chan types.PubReq { return nil }
