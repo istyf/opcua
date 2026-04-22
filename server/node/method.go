@@ -208,7 +208,7 @@ func SetMethod3[T, U, V any](n *methodNode, fn func(context.Context, T, U, V) er
 
 		arg0Val, ok0 := decodeInputParameter[T](args[0])
 		arg1Val, ok1 := decodeInputParameter[U](args[1])
-		arg2Val, ok2 := decodeInputParameter[V](args[1])
+		arg2Val, ok2 := decodeInputParameter[V](args[2])
 		if !ok0 || !ok1 || !ok2 {
 			return types.NewMethodResult(ua.StatusBadTypeMismatch)
 		}
