@@ -177,6 +177,40 @@ func TestCallReturnsBadNotExecutableForNonExecutableMethod(t *testing.T) {
 	assert.False(t, called)
 }
 
+func TestCallReturnsBadUserAccessDeniedForUserNonExecutableMethod(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		called = true
+		return nil, ua.StatusOK
+	})
+	fixture.methodNode.SetUserExecutableHandler(func(context.Context) bool {
+		return false
+	})
+
+	service := NewMethodService(fixture.backend, nil)
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 61},
+		MethodsToCall: []*ua.CallMethodRequest{
+			{
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
+			},
+		},
+	}, 61)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.NotNil(t, callResp.ResponseHeader)
+	assert.Equal(t, ua.StatusOK, callResp.ResponseHeader.ServiceResult)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusBadUserAccessDenied, callResp.Results[0].StatusCode)
+	assert.False(t, called)
+}
+
 func TestCallUsesIdentityMiddlewareWhenNilMiddlewareProvided(t *testing.T) {
 	t.Parallel()
 

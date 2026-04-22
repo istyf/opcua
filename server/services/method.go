@@ -213,10 +213,17 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			continue
 		}
 
-		outputs, code := s.middleware(methodNode.CallMethod)(
-			s.decorateCallContext(ctx, req.RequestHeader, objectNode, methodNode),
-			method.InputArguments...,
-		)
+		callCtx := s.decorateCallContext(ctx, req.RequestHeader, objectNode, methodNode)
+		if !methodNode.UserExecutable(callCtx) {
+			ualog.Warn(ctx, "method is not executable for current user",
+				ualog.String("method", nodeLogName(methodNode)),
+				ualog.String("object", nodeLogName(objectNode)),
+			)
+			appendResult(ua.StatusBadUserAccessDenied)
+			continue
+		}
+
+		outputs, code := s.middleware(methodNode.CallMethod)(callCtx, method.InputArguments...)
 		res := &ua.CallMethodResult{
 			OutputArguments: outputs,
 			StatusCode:      code,
