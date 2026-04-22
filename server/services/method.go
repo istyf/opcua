@@ -102,6 +102,68 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			return !e.IsForward() && e.TargetsNode(object)
 		})
 	}
+	resolveTypeDefinitionNode := func(objectNode types.Node) types.Node {
+		if objectNode == nil {
+			return nil
+		}
+		for ref := range objectNode.References().Find(func(r types.ReferenceWrapper) bool {
+			return r.IsReferenceType(id.HasTypeDefinition) && r.IsForward()
+		}) {
+			targetID := ref.TargetNodeID()
+			if targetID == nil || targetID.NodeID == nil {
+				continue
+			}
+			ns, err := s.backend.Namespace(int(targetID.NodeID.Namespace()))
+			if err != nil {
+				continue
+			}
+			if target := ns.Node(targetID.NodeID); target != nil {
+				return target
+			}
+		}
+		return nil
+	}
+	resolveBaseTypeNode := func(typeNode types.Node) types.Node {
+		if typeNode == nil {
+			return nil
+		}
+		for ref := range typeNode.References().Find(func(r types.ReferenceWrapper) bool {
+			return r.IsReferenceType(id.HasSubtype) && !r.IsForward()
+		}) {
+			targetID := ref.TargetNodeID()
+			if targetID == nil || targetID.NodeID == nil {
+				continue
+			}
+			ns, err := s.backend.Namespace(int(targetID.NodeID.Namespace()))
+			if err != nil {
+				continue
+			}
+			if target := ns.Node(targetID.NodeID); target != nil {
+				return target
+			}
+		}
+		return nil
+	}
+	methodBelongsToObjectOrTypeHierarchy := func(method types.MethodNode, object types.Node) bool {
+		if methodBelongsToObject(method, object) {
+			return true
+		}
+
+		visited := make(map[string]struct{})
+		for typeNode := resolveTypeDefinitionNode(object); typeNode != nil; typeNode = resolveBaseTypeNode(typeNode) {
+			key := typeNode.ID().String()
+			if _, ok := visited[key]; ok {
+				break
+			}
+			visited[key] = struct{}{}
+
+			if methodBelongsToObject(method, typeNode) {
+				return true
+			}
+		}
+
+		return false
+	}
 
 	for _, method := range req.MethodsToCall {
 		if method.ObjectID == nil || method.MethodID == nil {
@@ -132,7 +194,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			methodNode, _ = n.(types.MethodNode)
 		}
 
-		if methodNode == nil || !methodBelongsToObject(methodNode, objectNode) {
+		if methodNode == nil || !methodBelongsToObjectOrTypeHierarchy(methodNode, objectNode) {
 			ualog.Error(ctx, "method does not exist or does not belong to object",
 				ualog.String("method", requestedMethodLogName(method.MethodID, methodNode)),
 				ualog.String("object", nodeLogName(objectNode)),

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/node"
+	"github.com/gopcua/opcua/server/refs"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/stretchr/testify/assert"
@@ -253,6 +254,141 @@ func TestCallRejectsTooManyOperations(t *testing.T) {
 	}, 9)
 	require.ErrorIs(t, err, ua.StatusBadTooManyOperations)
 	assert.Nil(t, resp)
+}
+
+func TestCallResolvesMethodDefinedOnObjectType(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	objectType := node.NewObjectTypeNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 5001)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "ObjectType"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("ObjectType")}),
+		),
+	)
+	objectNode := node.NewObjectNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 1001)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Object"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Object")}),
+		),
+		node.WithType(objectType),
+	)
+	methodNode := node.NewMethodNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 2001)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Method"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Method")}),
+		),
+		node.Executable(true),
+		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+			called = true
+			return nil, ua.StatusOK
+		}),
+	)
+	objectType.AddComponent(methodNode)
+
+	backend := &methodTestBackend{
+		namespaces: map[int]types.NameSpace{
+			1: &methodTestNamespace{
+				nodes: map[string]types.Node{
+					objectNode.ID().String(): objectNode,
+					objectType.ID().String(): objectType,
+					methodNode.ID().String(): methodNode,
+				},
+			},
+		},
+	}
+	service := NewMethodService(backend, nil)
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 10},
+		MethodsToCall: []*ua.CallMethodRequest{{
+			ObjectID: objectNode.ID(),
+			MethodID: methodNode.ID(),
+		}},
+	}, 10)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusOK, callResp.Results[0].StatusCode)
+	assert.True(t, called)
+}
+
+func TestCallResolvesMethodInheritedFromBaseObjectType(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	baseType := node.NewObjectTypeNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 5002)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "BaseType"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("BaseType")}),
+		),
+	)
+	derivedType := node.NewObjectTypeNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 5003)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "DerivedType"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("DerivedType")}),
+		),
+	)
+	baseType.AddRef(refs.NewReferenceDescription(derivedType, refs.HasSubtypeRefTypeID, true))
+	derivedType.AddRef(refs.NewReferenceDescription(baseType, refs.HasSubtypeRefTypeID, false))
+
+	objectNode := node.NewObjectNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 1002)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Object"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Object")}),
+		),
+		node.WithType(derivedType),
+	)
+	methodNode := node.NewMethodNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(1, 2002)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "InheritedMethod"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("InheritedMethod")}),
+		),
+		node.Executable(true),
+		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+			called = true
+			return nil, ua.StatusOK
+		}),
+	)
+	baseType.AddComponent(methodNode)
+
+	backend := &methodTestBackend{
+		namespaces: map[int]types.NameSpace{
+			1: &methodTestNamespace{
+				nodes: map[string]types.Node{
+					objectNode.ID().String():  objectNode,
+					baseType.ID().String():    baseType,
+					derivedType.ID().String(): derivedType,
+					methodNode.ID().String():  methodNode,
+				},
+			},
+		},
+	}
+	service := NewMethodService(backend, nil)
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 11},
+		MethodsToCall: []*ua.CallMethodRequest{{
+			ObjectID: objectNode.ID(),
+			MethodID: methodNode.ID(),
+		}},
+	}, 11)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusOK, callResp.Results[0].StatusCode)
+	assert.True(t, called)
 }
 
 type methodCallFixture struct {
