@@ -166,10 +166,16 @@ func (s *serverImpl) Namespaces() []types.NameSpace {
 }
 
 func (s *serverImpl) ChangeNotification(ctx context.Context, n *ua.NodeID) {
+	if s.MonitoredItemService == nil {
+		return
+	}
 	s.MonitoredItemService.ChangeNotification(ctx, n)
 }
 
 func (s *serverImpl) DeleteSubscription(id types.SubscriptionID) {
+	if s.MonitoredItemService == nil {
+		return
+	}
 	s.MonitoredItemService.DeleteSub(id)
 }
 
