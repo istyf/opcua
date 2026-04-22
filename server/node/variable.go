@@ -306,6 +306,10 @@ func (n *variableNode) SetUserAccessLevelHandler(handler types.UserAccessLevelHa
 }
 
 func (n *variableNode) Attribute(ctx context.Context, id ua.AttributeID) (*types.AttrValue, error) {
+	if id == ua.AttributeIDUserAccessLevel {
+		return NewAttrValue(values.DataValueFromValue(uint8(n.UserAccessLevel(ctx)))), nil
+	}
+
 	if id == ua.AttributeIDValue {
 		if !n.Access(ctx, ua.AccessLevelTypeCurrentRead) {
 			return NewAttrValue(&ua.DataValue{

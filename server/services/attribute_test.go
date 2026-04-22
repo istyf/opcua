@@ -80,6 +80,84 @@ func TestReadReturnsDynamicUserExecutableAttribute(t *testing.T) {
 	assert.Equal(t, true, readResp.Results[0].Value.Value())
 }
 
+func TestReadReturnsDynamicUserAccessLevelAttribute(t *testing.T) {
+	t.Parallel()
+
+	type contextKey string
+
+	const writableKey contextKey = "variable-user-writable"
+
+	srv := server.New(t.Context(), server.WithAuthorizationContextDecorator(
+		func(ctx context.Context, user *auth.AuthenticatedUser) context.Context {
+			require.NotNil(t, user)
+			return context.WithValue(ctx, writableKey, user.UserName == "alice")
+		},
+	))
+	ns := server.NewNodeNameSpace(srv, "urn:test:variables")
+	variableID := ua.NewNumericNodeID(ns.ID(), 4201)
+	variable := node.NewVariableNode(
+		node.WithBase(
+			node.WithID(variableID),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: ns.ID(), Name: "Variable"}),
+		),
+		node.WithVariableType(newAttributeTestVariableTypeNode()),
+		node.WithAccessLevel(uint8(ua.AccessLevelTypeCurrentRead)),
+		node.WithUserAccessLevelHandler(func(ctx context.Context, access ua.AccessLevelType) ua.AccessLevelType {
+			if writable, _ := ctx.Value(writableKey).(bool); writable {
+				return access | ua.AccessLevelTypeCurrentWrite
+			}
+			return access
+		}),
+		node.WithValue(int32(42)),
+	)
+	ns.AddNode(variable)
+
+	session := &attributeTestSession{}
+	backend := &attributeTestBackend{
+		srv:     srv,
+		session: session,
+	}
+	svc := services.NewAttributeService(backend)
+
+	readUserAccessLevel := func(t *testing.T, userName string) uint8 {
+		t.Helper()
+
+		session.user = &auth.AuthenticatedUser{
+			UserName: userName,
+			Subject:  "user:" + userName,
+			Roles: []*ua.NodeID{
+				ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser),
+			},
+		}
+
+		resp, err := svc.Read(t.Context(), nil, &ua.ReadRequest{
+			RequestHeader: &ua.RequestHeader{
+				RequestHandle:       22,
+				AuthenticationToken: ua.NewNumericNodeID(1, 9002),
+			},
+			NodesToRead: []*ua.ReadValueID{
+				{
+					NodeID:      variableID,
+					AttributeID: ua.AttributeIDUserAccessLevel,
+				},
+			},
+		}, 22)
+		require.NoError(t, err)
+
+		readResp, ok := resp.(*ua.ReadResponse)
+		require.True(t, ok, "expected *ua.ReadResponse, got %T", resp)
+		require.Len(t, readResp.Results, 1)
+		require.NotNil(t, readResp.Results[0])
+		require.NotNil(t, readResp.Results[0].Value)
+		value, ok := readResp.Results[0].Value.Value().(uint8)
+		require.True(t, ok, "expected uint8 UserAccessLevel value, got %T", readResp.Results[0].Value.Value())
+		return value
+	}
+
+	assert.Equal(t, uint8(ua.AccessLevelTypeCurrentRead|ua.AccessLevelTypeCurrentWrite), readUserAccessLevel(t, "alice"))
+	assert.Equal(t, uint8(ua.AccessLevelTypeCurrentRead), readUserAccessLevel(t, "bob"))
+}
+
 func TestReadReturnsImportedDataTypeDefinitionAttribute(t *testing.T) {
 	t.Parallel()
 
@@ -322,3 +400,13 @@ func (*attributeTestSession) IsSameAs(types.Session) bool { return false }
 func (s *attributeTestSession) AuthenticatedUser() *auth.AuthenticatedUser { return s.user }
 
 func (*attributeTestSession) PublishRequestChannel() chan types.PubReq { return nil }
+
+func newAttributeTestVariableTypeNode() types.VariableTypeNode {
+	return node.NewVariableTypeNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(0, id.BaseDataVariableType)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "BaseDataVariableType"}),
+		),
+		node.WithDefaultValue(ua.NewNumericNodeID(0, id.Int32), -1, int32(0)),
+	)
+}
