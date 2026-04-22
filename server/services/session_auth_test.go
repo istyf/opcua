@@ -8,6 +8,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
@@ -636,6 +637,12 @@ func TestAuthenticateUserIdentity(t *testing.T) {
 	expectedUser := &auth.AuthenticatedUser{
 		UserName: "alice",
 		Subject:  "user:alice",
+		Roles: []*ua.NodeID{
+			ua.NewNumericNodeID(0, id.WellKnownRole_Anonymous),
+		},
+		Attributes: map[string]any{
+			"tenant": "factory-a",
+		},
 	}
 
 	tests := []struct {

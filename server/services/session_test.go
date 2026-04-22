@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
@@ -31,6 +32,12 @@ func TestActivateSessionStoresAuthenticatedUser(t *testing.T) {
 	authenticated := &auth.AuthenticatedUser{
 		UserName: "alice",
 		Subject:  "user:alice",
+		Roles: []*ua.NodeID{
+			ua.NewNumericNodeID(0, id.WellKnownRole_Anonymous),
+		},
+		Attributes: map[string]any{
+			"team": "ops",
+		},
 	}
 	session := newSessionServiceTestSession()
 	backend := &sessionServiceTestBackend{
@@ -94,6 +101,9 @@ func TestActivateSessionAnonymousClearsAuthenticatedUser(t *testing.T) {
 	session.SetAuthenticatedUser(&auth.AuthenticatedUser{
 		UserName: "alice",
 		Subject:  "user:alice",
+		Roles: []*ua.NodeID{
+			ua.NewNumericNodeID(0, id.WellKnownRole_Anonymous),
+		},
 	})
 
 	backend := &sessionServiceTestBackend{
@@ -189,8 +199,20 @@ func TestActivateSessionReactivationReplacesAuthenticatedUser(t *testing.T) {
 	require.NoError(t, err)
 
 	users := map[string]*auth.AuthenticatedUser{
-		"alice": {UserName: "alice", Subject: "user:alice"},
-		"bob":   {UserName: "bob", Subject: "user:bob"},
+		"alice": {
+			UserName: "alice",
+			Subject:  "user:alice",
+			Roles: []*ua.NodeID{
+				ua.NewNumericNodeID(0, id.WellKnownRole_Anonymous),
+			},
+		},
+		"bob": {
+			UserName: "bob",
+			Subject:  "user:bob",
+			Roles: []*ua.NodeID{
+				ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser),
+			},
+		},
 	}
 
 	session := newSessionServiceTestSession()

@@ -210,6 +210,9 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 	expected := &auth.AuthenticatedUser{
 		UserName: "alice",
 		Subject:  "user:alice",
+		Roles: []*ua.NodeID{
+			ua.NewNumericNodeID(0, id.WellKnownRole_Anonymous),
+		},
 		Attributes: map[string]any{
 			"department": "ops",
 		},

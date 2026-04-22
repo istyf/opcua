@@ -3,6 +3,7 @@ package server
 import (
 	"testing"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/auth"
 	"github.com/gopcua/opcua/ua"
 	"github.com/stretchr/testify/assert"
@@ -48,10 +49,16 @@ func TestSessionSetAuthenticatedUser(t *testing.T) {
 	first := &auth.AuthenticatedUser{
 		UserName: "alice",
 		Subject:  "user:alice",
+		Roles: []*ua.NodeID{
+			ua.NewNumericNodeID(0, id.WellKnownRole_Anonymous),
+		},
 	}
 	second := &auth.AuthenticatedUser{
 		UserName: "bob",
 		Subject:  "user:bob",
+		Roles: []*ua.NodeID{
+			ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser),
+		},
 	}
 
 	sess.SetAuthenticatedUser(first)

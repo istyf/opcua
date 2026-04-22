@@ -22,12 +22,13 @@ var (
 // AuthenticatedUser contains the authenticated identity information attached to
 // a session after successful user authentication.
 //
-// This structure is intentionally focused on identity data needed by the
-// server today. Extra backend-specific data can be attached through
-// Attributes. Role assignment will be added later as a follow-on feature.
+// This structure carries authenticated identity data together with any
+// assigned OPC UA roles. Extra backend-specific data can be attached through
+// Attributes.
 type AuthenticatedUser struct {
 	UserName string
 	Subject  string
+	Roles    []*ua.NodeID
 
 	Attributes map[string]any
 }
@@ -49,7 +50,5 @@ type UserNameAuthenticationRequest struct {
 // ActivateSession.
 //
 // Returning a non-nil error rejects the activation. On success, the callback
-// returns the authenticated user context to store on the session. Role
-// assignment is intentionally out of scope for this first pass and will be
-// added in follow-on work.
+// returns the authenticated user context to store on the session.
 type UserNameAuthenticator func(context.Context, *UserNameAuthenticationRequest) (*AuthenticatedUser, error)
