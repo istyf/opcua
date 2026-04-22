@@ -268,29 +268,10 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 	return n
 }
 
-// Access returns true if the node has the access level requested.
-// It checks both the UserAccessLevel and AccessLevel attributes.
-// If neither are present, it assumes global access and returns true.
-//
-// I'm not sure what the best way to implement "user" specific access levels
-// is presently.  Will need functioning user authentication first, and then a way to
-// pass it into the nodes user access attribute so it can be checked properly.
+// Access returns true if the node has the requested effective per-user access
+// level.
 func (n *variableNode) Access(ctx context.Context, flag ua.AccessLevelType) bool {
-
-	access, err := n.Attribute(ctx, ua.AttributeIDAccessLevel)
-	if err == nil { // if we have an access level, we need to check it.
-		val0 := access.Value.Value.Value()
-		val, ok := val0.(uint8)
-		if !ok {
-			return false
-		}
-
-		if val&uint8(flag) == 0 {
-			return false
-		}
-	}
-
-	return true
+	return n.UserAccessLevel(ctx)&flag != 0
 }
 
 func (n *variableNode) UserAccessLevel(ctx context.Context) ua.AccessLevelType {

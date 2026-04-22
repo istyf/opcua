@@ -107,6 +107,10 @@ func (s *AttributeService) Write(ctx context.Context, sc *uasc.SecureChannel, r 
 		return nil, err
 	}
 
+	if req.RequestHeader != nil {
+		ctx = decorateAuthorizationContext(ctx, s.backend.Config(), s.backend.Session(ctx, req.RequestHeader))
+	}
+
 	status := make([]ua.StatusCode, len(req.NodesToWrite))
 
 	for i := range req.NodesToWrite {

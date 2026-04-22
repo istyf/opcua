@@ -214,6 +214,9 @@ func (as *NodeNameSpace) SetAttribute(ctx context.Context, id *ua.NodeID, attr u
 
 	err := n.SetAttribute(ctx, attr, val)
 	if err != nil {
+		if status, ok := err.(ua.StatusCode); ok {
+			return status
+		}
 		return ua.StatusBadAttributeIDInvalid
 	}
 	as.srv.ChangeNotification(ctx, id)
