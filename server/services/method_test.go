@@ -211,6 +211,211 @@ func TestCallReturnsBadUserAccessDeniedForUserNonExecutableMethod(t *testing.T) 
 	assert.False(t, called)
 }
 
+func TestCallAndReadUserExecutableStayConsistentForSameUser(t *testing.T) {
+	t.Parallel()
+
+	type contextKey string
+
+	const executableKey contextKey = "method-user-executable"
+
+	session := &methodTestSession{
+		user: &auth.AuthenticatedUser{
+			UserName: "alice",
+			Subject:  "user:alice",
+			Roles: []*ua.NodeID{
+				ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser),
+			},
+		},
+	}
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		return nil, ua.StatusOK
+	})
+	fixture.backend.session = session
+	fixture.backend.cfg = methodTestConfig{
+		authContextDecorator: func(ctx context.Context, user *auth.AuthenticatedUser) context.Context {
+			require.Same(t, session.user, user)
+			return context.WithValue(ctx, executableKey, false)
+		},
+	}
+	fixture.methodNode.SetUserExecutableHandler(func(ctx context.Context) bool {
+		allowed, _ := ctx.Value(executableKey).(bool)
+		return allowed
+	})
+
+	methodSvc := NewMethodService(fixture.backend, nil)
+	attrSvc := NewAttributeService(fixture.backend)
+
+	callRespRaw, err := methodSvc.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       81,
+			AuthenticationToken: ua.NewNumericNodeID(1, 9001),
+		},
+		MethodsToCall: []*ua.CallMethodRequest{
+			{
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
+			},
+		},
+	}, 81)
+	require.NoError(t, err)
+
+	callResp, ok := callRespRaw.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", callRespRaw)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusBadUserAccessDenied, callResp.Results[0].StatusCode)
+
+	readRespRaw, err := attrSvc.Read(t.Context(), nil, &ua.ReadRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       82,
+			AuthenticationToken: ua.NewNumericNodeID(1, 9001),
+		},
+		NodesToRead: []*ua.ReadValueID{
+			{
+				NodeID:      fixture.methodNode.ID(),
+				AttributeID: ua.AttributeIDUserExecutable,
+			},
+		},
+	}, 82)
+	require.NoError(t, err)
+
+	readResp, ok := readRespRaw.(*ua.ReadResponse)
+	require.True(t, ok, "expected *ua.ReadResponse, got %T", readRespRaw)
+	require.Len(t, readResp.Results, 1)
+	require.NotNil(t, readResp.Results[0])
+	require.NotNil(t, readResp.Results[0].Value)
+	assert.Equal(t, false, readResp.Results[0].Value.Value())
+}
+
+func TestReadUserExecutableCanDifferForDifferentUsers(t *testing.T) {
+	t.Parallel()
+
+	type contextKey string
+
+	const userNameKey contextKey = "user-name"
+
+	session := &methodTestSession{}
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		return nil, ua.StatusOK
+	})
+	fixture.backend.session = session
+	fixture.backend.cfg = methodTestConfig{
+		authContextDecorator: func(ctx context.Context, user *auth.AuthenticatedUser) context.Context {
+			if user == nil {
+				return ctx
+			}
+			return context.WithValue(ctx, userNameKey, user.UserName)
+		},
+	}
+	fixture.methodNode.SetUserExecutableHandler(func(ctx context.Context) bool {
+		userName, _ := ctx.Value(userNameKey).(string)
+		return userName == "alice"
+	})
+
+	attrSvc := NewAttributeService(fixture.backend)
+	readUserExecutable := func(t *testing.T, userName string) bool {
+		t.Helper()
+
+		session.user = &auth.AuthenticatedUser{
+			UserName: userName,
+			Subject:  "user:" + userName,
+			Roles: []*ua.NodeID{
+				ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser),
+			},
+		}
+
+		respRaw, err := attrSvc.Read(t.Context(), nil, &ua.ReadRequest{
+			RequestHeader: &ua.RequestHeader{
+				RequestHandle:       83,
+				AuthenticationToken: ua.NewNumericNodeID(1, 9002),
+			},
+			NodesToRead: []*ua.ReadValueID{
+				{
+					NodeID:      fixture.methodNode.ID(),
+					AttributeID: ua.AttributeIDUserExecutable,
+				},
+			},
+		}, 83)
+		require.NoError(t, err)
+
+		resp, ok := respRaw.(*ua.ReadResponse)
+		require.True(t, ok, "expected *ua.ReadResponse, got %T", respRaw)
+		require.Len(t, resp.Results, 1)
+		require.NotNil(t, resp.Results[0])
+		require.NotNil(t, resp.Results[0].Value)
+		value, ok := resp.Results[0].Value.Value().(bool)
+		require.True(t, ok, "expected bool UserExecutable value, got %T", resp.Results[0].Value.Value())
+		return value
+	}
+
+	assert.True(t, readUserExecutable(t, "alice"))
+	assert.False(t, readUserExecutable(t, "bob"))
+}
+
+func TestReadExecutableStaysStaticWhileUserExecutableIsDynamic(t *testing.T) {
+	t.Parallel()
+
+	type contextKey string
+
+	const executableKey contextKey = "method-user-executable"
+
+	session := &methodTestSession{
+		user: &auth.AuthenticatedUser{
+			UserName: "alice",
+			Subject:  "user:alice",
+			Roles: []*ua.NodeID{
+				ua.NewNumericNodeID(0, id.WellKnownRole_AuthenticatedUser),
+			},
+		},
+	}
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		return nil, ua.StatusOK
+	})
+	fixture.backend.session = session
+	fixture.backend.cfg = methodTestConfig{
+		authContextDecorator: func(ctx context.Context, user *auth.AuthenticatedUser) context.Context {
+			require.Same(t, session.user, user)
+			return context.WithValue(ctx, executableKey, false)
+		},
+	}
+	fixture.methodNode.SetUserExecutable(true)
+	fixture.methodNode.SetUserExecutableHandler(func(ctx context.Context) bool {
+		allowed, _ := ctx.Value(executableKey).(bool)
+		return allowed
+	})
+
+	attrSvc := NewAttributeService(fixture.backend)
+
+	readAttribute := func(t *testing.T, attributeID ua.AttributeID) bool {
+		t.Helper()
+
+		respRaw, err := attrSvc.Read(t.Context(), nil, &ua.ReadRequest{
+			RequestHeader: &ua.RequestHeader{
+				RequestHandle:       84,
+				AuthenticationToken: ua.NewNumericNodeID(1, 9003),
+			},
+			NodesToRead: []*ua.ReadValueID{
+				{
+					NodeID:      fixture.methodNode.ID(),
+					AttributeID: attributeID,
+				},
+			},
+		}, 84)
+		require.NoError(t, err)
+
+		resp, ok := respRaw.(*ua.ReadResponse)
+		require.True(t, ok, "expected *ua.ReadResponse, got %T", respRaw)
+		require.Len(t, resp.Results, 1)
+		require.NotNil(t, resp.Results[0])
+		require.NotNil(t, resp.Results[0].Value)
+		value, ok := resp.Results[0].Value.Value().(bool)
+		require.True(t, ok, "expected bool attribute value, got %T", resp.Results[0].Value.Value())
+		return value
+	}
+
+	assert.True(t, readAttribute(t, ua.AttributeIDExecutable))
+	assert.False(t, readAttribute(t, ua.AttributeIDUserExecutable))
+}
+
 func TestCallUsesIdentityMiddlewareWhenNilMiddlewareProvided(t *testing.T) {
 	t.Parallel()
 
@@ -638,8 +843,21 @@ func (*methodTestNamespace) ID() uint16 { return 0 }
 
 func (*methodTestNamespace) SetID(uint16) {}
 
-func (*methodTestNamespace) Attribute(context.Context, *ua.NodeID, ua.AttributeID) *ua.DataValue {
-	return nil
+func (ns *methodTestNamespace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.AttributeID) *ua.DataValue {
+	node := ns.Node(id)
+	if node == nil {
+		return &ua.DataValue{Status: ua.StatusBadNodeIDUnknown}
+	}
+
+	value, err := node.Attribute(ctx, attr)
+	if err != nil {
+		if status, ok := err.(ua.StatusCode); ok {
+			return &ua.DataValue{Status: status}
+		}
+		return &ua.DataValue{Status: ua.StatusBadAttributeIDInvalid}
+	}
+
+	return value.Value
 }
 
 func (*methodTestNamespace) SetAttribute(context.Context, *ua.NodeID, ua.AttributeID, *ua.DataValue) ua.StatusCode {
