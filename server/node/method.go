@@ -76,9 +76,9 @@ func NewMethodNode(base func(ua.NodeClass) *baseConfig, opts ...methodOption) ty
 	return n
 }
 
-func (n *methodNode) CallMethod(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+func (n *methodNode) CallMethod(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
 	if n.call == nil {
-		return nil, ua.StatusBadNotImplemented
+		return types.NewMethodResult(ua.StatusBadNotImplemented)
 	}
 
 	return n.call(ctx, args...)
@@ -129,91 +129,91 @@ func (n *methodNode) SetUserExecutableHandler(handler types.MethodUserExecutable
 }
 
 func SetMethod(n *methodNode, fn func(context.Context) error) {
-	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
 		if len(args) > 0 {
-			return nil, ua.StatusBadTooManyArguments
+			return types.NewMethodResult(ua.StatusBadTooManyArguments)
 		}
 
-		return nil, mapError(fn(ctx))
+		return types.NewMethodResult(mapError(fn(ctx)))
 	}
 }
 
 func SetMethod1S[T any](n *methodNode, fn func(context.Context, []T) error) {
-	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
 		if len(args) == 0 {
-			return nil, ua.StatusBadArgumentsMissing
+			return types.NewMethodResult(ua.StatusBadArgumentsMissing)
 		}
 
 		if len(args) > 1 {
-			return nil, ua.StatusBadTooManyArguments
+			return types.NewMethodResult(ua.StatusBadTooManyArguments)
 		}
 
 		argVal, ok := decodeInputParameterSlice[T](args[0])
 		if !ok {
-			return nil, ua.StatusBadTypeMismatch
+			return types.NewMethodResult(ua.StatusBadTypeMismatch)
 		}
 
-		return nil, mapError(fn(ctx, argVal))
+		return types.NewMethodResult(mapError(fn(ctx, argVal)))
 	}
 }
 
 func SetMethod1[T any](n *methodNode, fn func(context.Context, T) error) {
-	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
 		if len(args) == 0 {
-			return nil, ua.StatusBadArgumentsMissing
+			return types.NewMethodResult(ua.StatusBadArgumentsMissing)
 		}
 
 		if len(args) > 1 {
-			return nil, ua.StatusBadTooManyArguments
+			return types.NewMethodResult(ua.StatusBadTooManyArguments)
 		}
 
 		argVal, ok := decodeInputParameter[T](args[0])
 		if !ok {
-			return nil, ua.StatusBadTypeMismatch
+			return types.NewMethodResult(ua.StatusBadTypeMismatch)
 		}
 
-		return nil, mapError(fn(ctx, argVal))
+		return types.NewMethodResult(mapError(fn(ctx, argVal)))
 	}
 }
 
 func SetMethod2[T, U any](n *methodNode, fn func(context.Context, T, U) error) {
-	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
 		if len(args) < 2 {
-			return nil, ua.StatusBadArgumentsMissing
+			return types.NewMethodResult(ua.StatusBadArgumentsMissing)
 		}
 
 		if len(args) > 2 {
-			return nil, ua.StatusBadTooManyArguments
+			return types.NewMethodResult(ua.StatusBadTooManyArguments)
 		}
 
 		arg0Val, ok0 := decodeInputParameter[T](args[0])
 		arg1Val, ok1 := decodeInputParameter[U](args[1])
 		if !ok0 || !ok1 {
-			return nil, ua.StatusBadTypeMismatch
+			return types.NewMethodResult(ua.StatusBadTypeMismatch)
 		}
 
-		return nil, mapError(fn(ctx, arg0Val, arg1Val))
+		return types.NewMethodResult(mapError(fn(ctx, arg0Val, arg1Val)))
 	}
 }
 
 func SetMethod3[T, U, V any](n *methodNode, fn func(context.Context, T, U, V) error) {
-	n.call = func(ctx context.Context, args ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
 		if len(args) < 3 {
-			return nil, ua.StatusBadArgumentsMissing
+			return types.NewMethodResult(ua.StatusBadArgumentsMissing)
 		}
 
 		if len(args) > 3 {
-			return nil, ua.StatusBadTooManyArguments
+			return types.NewMethodResult(ua.StatusBadTooManyArguments)
 		}
 
 		arg0Val, ok0 := decodeInputParameter[T](args[0])
 		arg1Val, ok1 := decodeInputParameter[U](args[1])
 		arg2Val, ok2 := decodeInputParameter[V](args[1])
 		if !ok0 || !ok1 || !ok2 {
-			return nil, ua.StatusBadTypeMismatch
+			return types.NewMethodResult(ua.StatusBadTypeMismatch)
 		}
 
-		return nil, mapError(fn(ctx, arg0Val, arg1Val, arg2Val))
+		return types.NewMethodResult(mapError(fn(ctx, arg0Val, arg1Val, arg2Val)))
 	}
 }
 

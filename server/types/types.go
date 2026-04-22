@@ -98,7 +98,7 @@ type DataTypeNode interface {
 type MethodNode interface {
 	Node
 
-	CallMethod(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode)
+	CallMethod(context.Context, ...*ua.Variant) *MethodResult
 
 	IsExecutable(context.Context) bool
 	SetExecutable(bool)
@@ -161,7 +161,22 @@ type Server interface {
 	Start(context.Context) error
 }
 
-type MethodFunc func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode)
+type MethodResult struct {
+	StatusCode                   ua.StatusCode
+	OutputArguments              []*ua.Variant
+	InputArgumentResults         []ua.StatusCode
+	InputArgumentDiagnosticInfos []*ua.DiagnosticInfo
+	DiagnosticInfo               *ua.DiagnosticInfo
+}
+
+func NewMethodResult(code ua.StatusCode, outputs ...*ua.Variant) *MethodResult {
+	return &MethodResult{
+		StatusCode:      code,
+		OutputArguments: outputs,
+	}
+}
+
+type MethodFunc func(context.Context, ...*ua.Variant) *MethodResult
 type MethodMiddleware func(MethodFunc) MethodFunc
 type MethodUserExecutableHandler func(context.Context) bool
 type UserAccessLevelHandler func(context.Context, ua.AccessLevelType) ua.AccessLevelType

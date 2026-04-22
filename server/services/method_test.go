@@ -64,8 +64,8 @@ func TestCallReturnsPerMethodStatusForMissingMethodID(t *testing.T) {
 func TestCallResolvesMethodFromMethodNamespace(t *testing.T) {
 	t.Parallel()
 
-	fixture := newMethodCallFixture(1, 2, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-		return nil, ua.StatusOK
+	fixture := newMethodCallFixture(1, 2, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	service := NewMethodService(fixture.backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
 
@@ -90,8 +90,8 @@ func TestCallResolvesMethodFromMethodNamespace(t *testing.T) {
 func TestCallPreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
 	t.Parallel()
 
-	fixture := newMethodCallFixture(1, 2, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-		return nil, ua.StatusOK
+	fixture := newMethodCallFixture(1, 2, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	service := NewMethodService(fixture.backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
 
@@ -122,8 +122,8 @@ func TestCallPreservesRequestOrderForMixedSuccessAndFailure(t *testing.T) {
 func TestCallReturnsResultsWhenMethodExecutionFails(t *testing.T) {
 	t.Parallel()
 
-	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-		return nil, ua.StatusBadInternalError
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return types.NewMethodResult(ua.StatusBadInternalError)
 	})
 	service := NewMethodService(fixture.backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
 
@@ -147,13 +147,73 @@ func TestCallReturnsResultsWhenMethodExecutionFails(t *testing.T) {
 	assert.Nil(t, callResp.Results[0].InputArgumentResults)
 }
 
+func TestCallReturnsRicherMethodResultData(t *testing.T) {
+	t.Parallel()
+
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return &types.MethodResult{
+			StatusCode:                   ua.StatusBadInvalidArgument,
+			InputArgumentResults:         []ua.StatusCode{ua.StatusOK, ua.StatusBadTypeMismatch},
+			InputArgumentDiagnosticInfos: []*ua.DiagnosticInfo{{AdditionalInfo: "second argument failed type validation"}},
+		}
+	})
+	service := NewMethodService(fixture.backend, nil)
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 51},
+		MethodsToCall: []*ua.CallMethodRequest{
+			{
+				ObjectID: fixture.objectNode.ID(),
+				MethodID: fixture.methodNode.ID(),
+				InputArguments: []*ua.Variant{
+					ua.MustVariant(int32(1)),
+					ua.MustVariant("wrong"),
+				},
+			},
+		},
+	}, 51)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.NotNil(t, callResp.ResponseHeader)
+	assert.Equal(t, ua.StatusOK, callResp.ResponseHeader.ServiceResult)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusBadInvalidArgument, callResp.Results[0].StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusBadTypeMismatch}, callResp.Results[0].InputArgumentResults)
+	require.Len(t, callResp.Results[0].InputArgumentDiagnosticInfos, 1)
+	require.NotNil(t, callResp.Results[0].InputArgumentDiagnosticInfos[0])
+	assert.Equal(t, "second argument failed type validation", callResp.Results[0].InputArgumentDiagnosticInfos[0].AdditionalInfo)
+}
+
+func TestCallPanicsWhenMethodHandlerReturnsNilResult(t *testing.T) {
+	t.Parallel()
+
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return nil
+	})
+	service := NewMethodService(fixture.backend, nil)
+
+	require.PanicsWithValue(t, "method handler returned nil result", func() {
+		_, _ = service.Call(t.Context(), nil, &ua.CallRequest{
+			RequestHeader: &ua.RequestHeader{RequestHandle: 52},
+			MethodsToCall: []*ua.CallMethodRequest{
+				{
+					ObjectID: fixture.objectNode.ID(),
+					MethodID: fixture.methodNode.ID(),
+				},
+			},
+		}, 52)
+	})
+}
+
 func TestCallReturnsBadNotExecutableForNonExecutableMethod(t *testing.T) {
 	t.Parallel()
 
 	called := false
-	fixture := newMethodCallFixture(1, 1, false, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+	fixture := newMethodCallFixture(1, 1, false, func(context.Context, ...*ua.Variant) *types.MethodResult {
 		called = true
-		return nil, ua.StatusOK
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	service := NewMethodService(fixture.backend, func(fn types.MethodFunc) types.MethodFunc { return fn })
 
@@ -181,9 +241,9 @@ func TestCallReturnsBadUserAccessDeniedForUserNonExecutableMethod(t *testing.T) 
 	t.Parallel()
 
 	called := false
-	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
 		called = true
-		return nil, ua.StatusOK
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	fixture.methodNode.SetUserExecutableHandler(func(context.Context) bool {
 		return false
@@ -227,8 +287,8 @@ func TestCallAndReadUserExecutableStayConsistentForSameUser(t *testing.T) {
 			},
 		},
 	}
-	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-		return nil, ua.StatusOK
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	fixture.backend.session = session
 	fixture.backend.cfg = methodTestConfig{
@@ -294,8 +354,8 @@ func TestReadUserExecutableCanDifferForDifferentUsers(t *testing.T) {
 	const userNameKey contextKey = "user-name"
 
 	session := &methodTestSession{}
-	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-		return nil, ua.StatusOK
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	fixture.backend.session = session
 	fixture.backend.cfg = methodTestConfig{
@@ -367,8 +427,8 @@ func TestReadExecutableStaysStaticWhileUserExecutableIsDynamic(t *testing.T) {
 			},
 		},
 	}
-	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-		return nil, ua.StatusOK
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	fixture.backend.session = session
 	fixture.backend.cfg = methodTestConfig{
@@ -420,9 +480,9 @@ func TestCallUsesIdentityMiddlewareWhenNilMiddlewareProvided(t *testing.T) {
 	t.Parallel()
 
 	var called bool
-	fixture := newMethodCallFixture(1, 1, true, func(_ context.Context, _ ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+	fixture := newMethodCallFixture(1, 1, true, func(_ context.Context, _ ...*ua.Variant) *types.MethodResult {
 		called = true
-		return nil, ua.StatusOK
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	service := NewMethodService(fixture.backend, nil)
 
@@ -469,10 +529,10 @@ func TestCallDecoratesHandlerContextFromAuthenticatedUser(t *testing.T) {
 
 	var gotUserName string
 	var gotRoleID string
-	fixture := newMethodCallFixture(1, 1, true, func(ctx context.Context, _ ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+	fixture := newMethodCallFixture(1, 1, true, func(ctx context.Context, _ ...*ua.Variant) *types.MethodResult {
 		gotUserName, _ = ctx.Value(userNameKey).(string)
 		gotRoleID, _ = ctx.Value(roleKey).(string)
-		return nil, ua.StatusOK
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	fixture.backend.session = &methodTestSession{user: expectedUser}
 	fixture.backend.cfg = methodTestConfig{
@@ -510,8 +570,8 @@ func TestCallDecoratesHandlerContextFromAuthenticatedUser(t *testing.T) {
 func TestCallPanicsWhenAuthorizationContextDecoratorReturnsNil(t *testing.T) {
 	t.Parallel()
 
-	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-		return nil, ua.StatusOK
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	fixture.backend.session = &methodTestSession{
 		user: &auth.AuthenticatedUser{
@@ -552,8 +612,8 @@ func TestCallPanicsWhenAuthorizationContextDecoratorReturnsNil(t *testing.T) {
 func TestCallReturnsBadMethodInvalidWhenMethodNodeIsMissing(t *testing.T) {
 	t.Parallel()
 
-	fixture := newMethodCallFixture(1, 2, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-		return nil, ua.StatusOK
+	fixture := newMethodCallFixture(1, 2, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	delete(fixture.backend.namespaces[2].(*methodTestNamespace).nodes, fixture.methodNode.ID().String())
 
@@ -581,8 +641,8 @@ func TestCallReturnsBadMethodInvalidWhenMethodNodeIsMissing(t *testing.T) {
 func TestCallRejectsTooManyOperations(t *testing.T) {
 	t.Parallel()
 
-	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
-		return nil, ua.StatusOK
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		return types.NewMethodResult(ua.StatusOK)
 	})
 	fixture.backend.cfg = methodTestConfig{maxMethodOperationsPerCall: 1}
 
@@ -625,9 +685,9 @@ func TestCallResolvesMethodDefinedOnObjectType(t *testing.T) {
 			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Method")}),
 		),
 		node.Executable(true),
-		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		node.WithHandler(func(context.Context, ...*ua.Variant) *types.MethodResult {
 			called = true
-			return nil, ua.StatusOK
+			return types.NewMethodResult(ua.StatusOK)
 		}),
 	)
 	objectType.AddComponent(methodNode)
@@ -697,9 +757,9 @@ func TestCallResolvesMethodInheritedFromBaseObjectType(t *testing.T) {
 			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("InheritedMethod")}),
 		),
 		node.Executable(true),
-		node.WithHandler(func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode) {
+		node.WithHandler(func(context.Context, ...*ua.Variant) *types.MethodResult {
 			called = true
-			return nil, ua.StatusOK
+			return types.NewMethodResult(ua.StatusOK)
 		}),
 	)
 	baseType.AddComponent(methodNode)

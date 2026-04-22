@@ -64,10 +64,15 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 
 	results := make([]*ua.CallMethodResult, 0, len(req.MethodsToCall))
-	appendResult := func(code ua.StatusCode, outputs ...*ua.Variant) {
+	appendResult := func(result *types.MethodResult) {
+		if result == nil {
+			panic("method handler returned nil result")
+		}
 		results = append(results, &ua.CallMethodResult{
-			StatusCode:      code,
-			OutputArguments: outputs,
+			StatusCode:                   result.StatusCode,
+			OutputArguments:              result.OutputArguments,
+			InputArgumentResults:         result.InputArgumentResults,
+			InputArgumentDiagnosticInfos: result.InputArgumentDiagnosticInfos,
 		})
 	}
 	nodeLogName := func(node types.Node) string {
@@ -168,25 +173,25 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 
 	for _, method := range req.MethodsToCall {
 		if method.ObjectID == nil || method.MethodID == nil {
-			appendResult(ua.StatusBadNodeIDInvalid)
+			appendResult(types.NewMethodResult(ua.StatusBadNodeIDInvalid))
 			continue
 		}
 
 		objectNS, err := s.backend.Namespace(int(method.ObjectID.Namespace()))
 		if err != nil {
-			appendResult(ua.StatusBadNodeIDUnknown)
+			appendResult(types.NewMethodResult(ua.StatusBadNodeIDUnknown))
 			continue
 		}
 
 		objectNode := objectNS.Node(method.ObjectID)
 		if objectNode == nil {
-			appendResult(ua.StatusBadNodeIDUnknown)
+			appendResult(types.NewMethodResult(ua.StatusBadNodeIDUnknown))
 			continue
 		}
 
 		methodNS, err := s.backend.Namespace(int(method.MethodID.Namespace()))
 		if err != nil {
-			appendResult(ua.StatusBadMethodInvalid)
+			appendResult(types.NewMethodResult(ua.StatusBadMethodInvalid))
 			continue
 		}
 
@@ -200,7 +205,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 				ualog.String("method", requestedMethodLogName(method.MethodID, methodNode)),
 				ualog.String("object", nodeLogName(objectNode)),
 			)
-			appendResult(ua.StatusBadMethodInvalid)
+			appendResult(types.NewMethodResult(ua.StatusBadMethodInvalid))
 			continue
 		}
 
@@ -209,7 +214,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 				ualog.String("method", nodeLogName(methodNode)),
 				ualog.String("object", nodeLogName(objectNode)),
 			)
-			appendResult(ua.StatusBadNotExecutable)
+			appendResult(types.NewMethodResult(ua.StatusBadNotExecutable))
 			continue
 		}
 
@@ -219,28 +224,26 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 				ualog.String("method", nodeLogName(methodNode)),
 				ualog.String("object", nodeLogName(objectNode)),
 			)
-			appendResult(ua.StatusBadUserAccessDenied)
+			appendResult(types.NewMethodResult(ua.StatusBadUserAccessDenied))
 			continue
 		}
 
-		outputs, code := s.middleware(methodNode.CallMethod)(callCtx, method.InputArguments...)
-		res := &ua.CallMethodResult{
-			OutputArguments: outputs,
-			StatusCode:      code,
+		result := s.middleware(methodNode.CallMethod)(callCtx, method.InputArguments...)
+		if result == nil {
+			panic("method handler returned nil result")
 		}
 
 		ualog.Info(ctx, "called method",
 			ualog.String("method", nodeLogName(methodNode)),
 			ualog.String("object", nodeLogName(objectNode)),
-			ualog.Any("status", res.StatusCode),
+			ualog.Any("status", result.StatusCode),
 		)
 
-		appendResult(res.StatusCode, res.OutputArguments...)
+		appendResult(result)
 	}
 
 	response := &ua.CallResponse{
 		ResponseHeader: NewResponseHeader(req.RequestHeader.RequestHandle, ua.StatusOK),
-		// TODO: Support result data ...
 	}
 
 	if len(results) != 0 {
