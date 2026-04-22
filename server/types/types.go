@@ -102,6 +102,8 @@ type MethodNode interface {
 
 	IsExecutable(context.Context) bool
 	SetExecutable(bool)
+	UserExecutable(context.Context) bool
+	SetUserExecutableHandler(MethodUserExecutableHandler)
 }
 
 type ObjectNode interface {
@@ -122,6 +124,8 @@ type VariableNode interface {
 	Node
 
 	Access(context.Context, ua.AccessLevelType) bool
+	UserAccessLevel(context.Context) ua.AccessLevelType
+	SetUserAccessLevelHandler(UserAccessLevelHandler)
 	Value() *ua.DataValue
 	SetValue(*ua.DataValue)
 	SetValueFunc(func() *ua.DataValue)
@@ -158,6 +162,8 @@ type Server interface {
 
 type MethodFunc func(context.Context, ...*ua.Variant) ([]*ua.Variant, ua.StatusCode)
 type MethodMiddleware func(MethodFunc) MethodFunc
+type MethodUserExecutableHandler func(context.Context) bool
+type UserAccessLevelHandler func(context.Context, ua.AccessLevelType) ua.AccessLevelType
 
 type ServerConfig interface {
 	Certificate() []byte

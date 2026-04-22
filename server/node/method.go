@@ -11,13 +11,15 @@ import (
 type methodNode struct {
 	baseNode
 
-	executable bool
-	call       types.MethodFunc
+	executable            bool
+	userExecutableHandler types.MethodUserExecutableHandler
+	call                  types.MethodFunc
 }
 
 type methodConfig struct {
-	executable bool
-	handler    types.MethodFunc
+	executable            bool
+	userExecutableHandler types.MethodUserExecutableHandler
+	handler               types.MethodFunc
 }
 
 type methodOption func(*methodConfig)
@@ -34,6 +36,12 @@ func WithHandler(handler types.MethodFunc) methodOption {
 	}
 }
 
+func WithUserExecutableHandler(handler types.MethodUserExecutableHandler) methodOption {
+	return func(cfg *methodConfig) {
+		cfg.userExecutableHandler = handler
+	}
+}
+
 func NewMethodNode(base func(ua.NodeClass) *baseConfig, opts ...methodOption) types.MethodNode {
 
 	cfg := &methodConfig{}
@@ -42,9 +50,10 @@ func NewMethodNode(base func(ua.NodeClass) *baseConfig, opts ...methodOption) ty
 	}
 
 	n := &methodNode{
-		baseNode:   *newBaseNode(base(ua.NodeClassMethod)),
-		call:       cfg.handler,
-		executable: cfg.executable,
+		baseNode:              *newBaseNode(base(ua.NodeClassMethod)),
+		call:                  cfg.handler,
+		executable:            cfg.executable,
+		userExecutableHandler: cfg.userExecutableHandler,
 	}
 
 	dv := values.DataValueFromValue(n.executable)
@@ -63,8 +72,17 @@ func (n *methodNode) CallMethod(ctx context.Context, args ...*ua.Variant) ([]*ua
 }
 
 func (n *methodNode) IsExecutable(context.Context) bool {
-	// TODO: Use authentication context to check "user executable" value
 	return n.executable
+}
+
+func (n *methodNode) UserExecutable(ctx context.Context) bool {
+	if !n.executable {
+		return false
+	}
+	if n.userExecutableHandler == nil {
+		return true
+	}
+	return n.userExecutableHandler(ctx)
 }
 
 func (n *methodNode) SetExecutable(executable bool) {
@@ -75,6 +93,10 @@ func (n *methodNode) SetExecutable(executable bool) {
 		n.baseNode.attr[ua.AttributeIDExecutable] = dv
 		n.baseNode.attr[ua.AttributeIDUserExecutable] = dv
 	}
+}
+
+func (n *methodNode) SetUserExecutableHandler(handler types.MethodUserExecutableHandler) {
+	n.userExecutableHandler = handler
 }
 
 func SetMethod(n *methodNode, fn func(context.Context) error) {

@@ -26,6 +26,8 @@ type variableConfig struct {
 
 	accessLevel   ua.AccessLevelType
 	accessLevelEx ua.AccessLevelExType
+
+	userAccessLevelHandler types.UserAccessLevelHandler
 }
 
 type variableOption func(*variableConfig)
@@ -63,6 +65,12 @@ func WithAccessLevels(levels ...ua.AccessLevelExType) variableOption {
 
 		lowestBits := ua.AccessLevelType(uint32(level) & 255)
 		cfg.accessLevel = lowestBits
+	}
+}
+
+func WithUserAccessLevelHandler(handler types.UserAccessLevelHandler) variableOption {
+	return func(cfg *variableConfig) {
+		cfg.userAccessLevelHandler = handler
 	}
 }
 
@@ -129,7 +137,9 @@ func WithValue(value any) variableOption {
 
 type variableNode struct {
 	baseNode
-	valueFunc func() *ua.DataValue
+	valueFunc              func() *ua.DataValue
+	accessLevel            ua.AccessLevelType
+	userAccessLevelHandler types.UserAccessLevelHandler
 }
 
 var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
@@ -241,8 +251,10 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 	}
 
 	n := &variableNode{
-		baseNode:  *newBaseNode(base(ua.NodeClassVariable)),
-		valueFunc: cfg.valueFunc,
+		baseNode:               *newBaseNode(base(ua.NodeClassVariable)),
+		valueFunc:              cfg.valueFunc,
+		accessLevel:            cfg.accessLevel,
+		userAccessLevelHandler: cfg.userAccessLevelHandler,
 	}
 
 	n.baseNode.attr[ua.AttributeIDValueRank] = values.DataValueFromValue(cfg.rank)
@@ -279,6 +291,19 @@ func (n *variableNode) Access(ctx context.Context, flag ua.AccessLevelType) bool
 	}
 
 	return true
+}
+
+func (n *variableNode) UserAccessLevel(ctx context.Context) ua.AccessLevelType {
+	if n.userAccessLevelHandler == nil {
+		return n.accessLevel
+	}
+
+	level := n.userAccessLevelHandler(ctx, n.accessLevel)
+	return level & n.accessLevel
+}
+
+func (n *variableNode) SetUserAccessLevelHandler(handler types.UserAccessLevelHandler) {
+	n.userAccessLevelHandler = handler
 }
 
 func (n *variableNode) Attribute(ctx context.Context, id ua.AttributeID) (*types.AttrValue, error) {
