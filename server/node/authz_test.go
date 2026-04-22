@@ -111,6 +111,30 @@ func TestVariableNodeUserAccessLevelDefaultsToStaticAccessLevel(t *testing.T) {
 	)
 }
 
+func TestVariableNodeUserAccessLevelCallbackOverridesStaticAccessLevelBaseline(t *testing.T) {
+	t.Parallel()
+
+	variable := NewVariableNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(1, 2003)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Variable"}),
+		),
+		WithVariableType(newAuthzTestVariableTypeNode()),
+		WithAccessLevel(uint8(ua.AccessLevelTypeCurrentRead)),
+		WithValue(int32(42)),
+	)
+
+	assert.Equal(t, ua.AccessLevelTypeCurrentRead, variable.UserAccessLevel(t.Context()))
+
+	variable.SetUserAccessLevelHandler(func(context.Context, ua.AccessLevelType) ua.AccessLevelType {
+		return ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite
+	})
+	assert.Equal(t,
+		ua.AccessLevelTypeCurrentRead|ua.AccessLevelTypeCurrentWrite,
+		variable.UserAccessLevel(t.Context()),
+	)
+}
+
 func TestVariableNodeUserAccessLevelUsesHandlerAndNarrowsStaticAccessLevel(t *testing.T) {
 	t.Parallel()
 
@@ -125,7 +149,7 @@ func TestVariableNodeUserAccessLevelUsesHandlerAndNarrowsStaticAccessLevel(t *te
 	)
 
 	variable.SetUserAccessLevelHandler(func(context.Context, ua.AccessLevelType) ua.AccessLevelType {
-		return ua.AccessLevelTypeCurrentRead | ua.AccessLevelTypeCurrentWrite
+		return ua.AccessLevelTypeCurrentRead
 	})
 
 	assert.Equal(t, ua.AccessLevelTypeCurrentRead, variable.UserAccessLevel(t.Context()))

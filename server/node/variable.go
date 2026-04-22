@@ -298,8 +298,7 @@ func (n *variableNode) UserAccessLevel(ctx context.Context) ua.AccessLevelType {
 		return n.accessLevel
 	}
 
-	level := n.userAccessLevelHandler(ctx, n.accessLevel)
-	return level & n.accessLevel
+	return n.userAccessLevelHandler(ctx, n.accessLevel)
 }
 
 func (n *variableNode) SetUserAccessLevelHandler(handler types.UserAccessLevelHandler) {
