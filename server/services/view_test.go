@@ -1011,6 +1011,8 @@ func (r viewTestReference) IsReferenceType(refType uint32) bool {
 
 func (r viewTestReference) ReferenceType() *ua.NodeID { return r.refType }
 
+func (r viewTestReference) TargetNode() types.Node { return r.targetNode }
+
 func (r viewTestReference) TargetNodeID() *ua.ExpandedNodeID {
 	return &ua.ExpandedNodeID{NodeID: r.targetNode.ID()}
 }

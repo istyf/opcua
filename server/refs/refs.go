@@ -44,6 +44,10 @@ func (d *desc) ReferenceType() *ua.NodeID {
 	return d.refType
 }
 
+func (d *desc) TargetNode() types.Node {
+	return d.target
+}
+
 // TargetNodeID implements [types.ReferenceWrapper].
 func (d *desc) TargetNodeID() *ua.ExpandedNodeID {
 	return &ua.ExpandedNodeID{NodeID: d.target.ID()}

@@ -2,7 +2,10 @@ package node
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -128,10 +131,192 @@ func (n *methodNode) SetUserExecutableHandler(handler types.MethodUserExecutable
 	n.userExecutableHandler = handler
 }
 
+func resultForExactArgumentCount(args []*ua.Variant, expected int) *types.MethodResult {
+	switch {
+	case len(args) < expected:
+		return types.NewMethodResult(ua.StatusBadArgumentsMissing)
+	case len(args) > expected:
+		return types.NewMethodResult(ua.StatusBadTooManyArguments)
+	default:
+		return nil
+	}
+}
+
+func decodeRequiredArgument[T any](args []*ua.Variant, idx int) (T, *types.MethodResult) {
+	val, ok := decodeInputParameter[T](args[idx])
+	if !ok {
+		var zero T
+		return zero, types.NewMethodResult(ua.StatusBadTypeMismatch)
+	}
+	return val, nil
+}
+
+func decodeRequiredArgumentSlice[T any](args []*ua.Variant, idx int) ([]T, *types.MethodResult) {
+	val, ok := decodeInputParameterSlice[T](args[idx])
+	if !ok {
+		return nil, types.NewMethodResult(ua.StatusBadTypeMismatch)
+	}
+	return val, nil
+}
+
+func validateMethodWrapperSignature(n *methodNode, expected []expectedMethodArgument) {
+	args, ok := inputArgumentsFromMethodNode(n)
+	if !ok {
+		return
+	}
+
+	if len(args) != len(expected) {
+		panic(fmt.Sprintf(
+			"method wrapper signature mismatch for %s: metadata declares %d input arguments, wrapper expects %d",
+			n.BrowseName().String(),
+			len(args),
+			len(expected),
+		))
+	}
+
+	for idx, exp := range expected {
+		arg := args[idx]
+		if arg == nil {
+			continue
+		}
+
+		if !valueRankMatches(exp.valueRank, arg.ValueRank) {
+			panic(fmt.Sprintf(
+				"method wrapper signature mismatch for %s argument %d (%s): metadata value rank %d is incompatible with wrapper rank %d",
+				n.BrowseName().String(),
+				idx,
+				arg.Name,
+				arg.ValueRank,
+				exp.valueRank,
+			))
+		}
+
+		if exp.dataType != nil && arg.DataType != nil && !exp.dataType.Equal(arg.DataType) {
+			panic(fmt.Sprintf(
+				"method wrapper signature mismatch for %s argument %d (%s): metadata data type %s is incompatible with wrapper data type %s",
+				n.BrowseName().String(),
+				idx,
+				arg.Name,
+				arg.DataType.String(),
+				exp.dataType.String(),
+			))
+		}
+	}
+}
+
+type expectedMethodArgument struct {
+	dataType  *ua.NodeID
+	valueRank int32
+}
+
+func expectedScalarArgument[T any]() expectedMethodArgument {
+	return expectedMethodArgument{
+		dataType:  expectedArgumentDataType[T](),
+		valueRank: expectedArgumentValueRank[T](),
+	}
+}
+
+func expectedSliceArgument[T any]() expectedMethodArgument {
+	return expectedMethodArgument{
+		dataType:  expectedArgumentDataType[[]T](),
+		valueRank: 1,
+	}
+}
+
+func expectedArgumentDataType[T any]() *ua.NodeID {
+	typ := reflect.TypeFor[T]()
+	var zero any
+	switch typ.Kind() {
+	case reflect.Slice:
+		zero = reflect.Zero(typ).Interface()
+	case reflect.Pointer:
+		zero = reflect.Zero(typ).Interface()
+	default:
+		zero = reflect.Zero(typ).Interface()
+	}
+
+	dataType, _ := LookupTypeNodeIDFromValue(zero)
+	return dataType
+}
+
+func expectedArgumentValueRank[T any]() int32 {
+	typ := reflect.TypeFor[T]()
+	if typ.Kind() == reflect.Slice {
+		return 1
+	}
+	return -1
+}
+
+func valueRankMatches(expected int32, actual int32) bool {
+	// OPC UA uses negative sentinel values for non-fixed ranks here:
+	// -2 means "Any" and -3 means "ScalarOrOneDimension". Both are compatible
+	// with the explicit scalar/slice wrapper signatures we validate here.
+	if actual == -2 || actual == -3 {
+		return true
+	}
+	return expected == actual
+}
+
+func inputArgumentsFromMethodNode(n *methodNode) ([]*ua.Argument, bool) {
+	for ref := range n.References().Find(func(r types.ReferenceWrapper) bool {
+		return r.IsReferenceType(id.HasProperty) && r.IsForward()
+	}) {
+		target := ref.TargetNode()
+		if target == nil {
+			continue
+		}
+
+		browseName := target.BrowseName()
+		if browseName == nil || browseName.Name != "InputArguments" {
+			continue
+		}
+
+		valueNode, ok := target.(types.VariableNode)
+		if !ok {
+			return nil, false
+		}
+
+		value := valueNode.Value()
+		if value == nil || value.Value == nil {
+			return nil, false
+		}
+
+		switch v := value.Value.Value().(type) {
+		case []*ua.Argument:
+			return v, true
+		case []ua.Argument:
+			out := make([]*ua.Argument, 0, len(v))
+			for idx := range v {
+				arg := v[idx]
+				out = append(out, &arg)
+			}
+			return out, true
+		case []*ua.ExtensionObject:
+			out := make([]*ua.Argument, 0, len(v))
+			for _, eo := range v {
+				if eo == nil {
+					return nil, false
+				}
+				arg, ok := eo.Value.(*ua.Argument)
+				if !ok || arg == nil {
+					return nil, false
+				}
+				out = append(out, arg)
+			}
+			return out, true
+		}
+
+		return nil, false
+	}
+
+	return nil, false
+}
+
 func SetMethod(n *methodNode, fn func(context.Context) error) {
+	validateMethodWrapperSignature(n, nil)
 	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
-		if len(args) > 0 {
-			return types.NewMethodResult(ua.StatusBadTooManyArguments)
+		if result := resultForExactArgumentCount(args, 0); result != nil {
+			return result
 		}
 
 		return types.NewMethodResult(mapError(fn(ctx)))
@@ -139,18 +324,15 @@ func SetMethod(n *methodNode, fn func(context.Context) error) {
 }
 
 func SetMethod1S[T any](n *methodNode, fn func(context.Context, []T) error) {
+	validateMethodWrapperSignature(n, []expectedMethodArgument{expectedSliceArgument[T]()})
 	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
-		if len(args) == 0 {
-			return types.NewMethodResult(ua.StatusBadArgumentsMissing)
+		if result := resultForExactArgumentCount(args, 1); result != nil {
+			return result
 		}
 
-		if len(args) > 1 {
-			return types.NewMethodResult(ua.StatusBadTooManyArguments)
-		}
-
-		argVal, ok := decodeInputParameterSlice[T](args[0])
-		if !ok {
-			return types.NewMethodResult(ua.StatusBadTypeMismatch)
+		argVal, result := decodeRequiredArgumentSlice[T](args, 0)
+		if result != nil {
+			return result
 		}
 
 		return types.NewMethodResult(mapError(fn(ctx, argVal)))
@@ -158,18 +340,15 @@ func SetMethod1S[T any](n *methodNode, fn func(context.Context, []T) error) {
 }
 
 func SetMethod1[T any](n *methodNode, fn func(context.Context, T) error) {
+	validateMethodWrapperSignature(n, []expectedMethodArgument{expectedScalarArgument[T]()})
 	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
-		if len(args) == 0 {
-			return types.NewMethodResult(ua.StatusBadArgumentsMissing)
+		if result := resultForExactArgumentCount(args, 1); result != nil {
+			return result
 		}
 
-		if len(args) > 1 {
-			return types.NewMethodResult(ua.StatusBadTooManyArguments)
-		}
-
-		argVal, ok := decodeInputParameter[T](args[0])
-		if !ok {
-			return types.NewMethodResult(ua.StatusBadTypeMismatch)
+		argVal, result := decodeRequiredArgument[T](args, 0)
+		if result != nil {
+			return result
 		}
 
 		return types.NewMethodResult(mapError(fn(ctx, argVal)))
@@ -177,19 +356,23 @@ func SetMethod1[T any](n *methodNode, fn func(context.Context, T) error) {
 }
 
 func SetMethod2[T, U any](n *methodNode, fn func(context.Context, T, U) error) {
+	validateMethodWrapperSignature(n, []expectedMethodArgument{
+		expectedScalarArgument[T](),
+		expectedScalarArgument[U](),
+	})
 	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
-		if len(args) < 2 {
-			return types.NewMethodResult(ua.StatusBadArgumentsMissing)
+		if result := resultForExactArgumentCount(args, 2); result != nil {
+			return result
 		}
 
-		if len(args) > 2 {
-			return types.NewMethodResult(ua.StatusBadTooManyArguments)
+		arg0Val, result := decodeRequiredArgument[T](args, 0)
+		if result != nil {
+			return result
 		}
 
-		arg0Val, ok0 := decodeInputParameter[T](args[0])
-		arg1Val, ok1 := decodeInputParameter[U](args[1])
-		if !ok0 || !ok1 {
-			return types.NewMethodResult(ua.StatusBadTypeMismatch)
+		arg1Val, result := decodeRequiredArgument[U](args, 1)
+		if result != nil {
+			return result
 		}
 
 		return types.NewMethodResult(mapError(fn(ctx, arg0Val, arg1Val)))
@@ -197,20 +380,29 @@ func SetMethod2[T, U any](n *methodNode, fn func(context.Context, T, U) error) {
 }
 
 func SetMethod3[T, U, V any](n *methodNode, fn func(context.Context, T, U, V) error) {
+	validateMethodWrapperSignature(n, []expectedMethodArgument{
+		expectedScalarArgument[T](),
+		expectedScalarArgument[U](),
+		expectedScalarArgument[V](),
+	})
 	n.call = func(ctx context.Context, args ...*ua.Variant) *types.MethodResult {
-		if len(args) < 3 {
-			return types.NewMethodResult(ua.StatusBadArgumentsMissing)
+		if result := resultForExactArgumentCount(args, 3); result != nil {
+			return result
 		}
 
-		if len(args) > 3 {
-			return types.NewMethodResult(ua.StatusBadTooManyArguments)
+		arg0Val, result := decodeRequiredArgument[T](args, 0)
+		if result != nil {
+			return result
 		}
 
-		arg0Val, ok0 := decodeInputParameter[T](args[0])
-		arg1Val, ok1 := decodeInputParameter[U](args[1])
-		arg2Val, ok2 := decodeInputParameter[V](args[2])
-		if !ok0 || !ok1 || !ok2 {
-			return types.NewMethodResult(ua.StatusBadTypeMismatch)
+		arg1Val, result := decodeRequiredArgument[U](args, 1)
+		if result != nil {
+			return result
+		}
+
+		arg2Val, result := decodeRequiredArgument[V](args, 2)
+		if result != nil {
+			return result
 		}
 
 		return types.NewMethodResult(mapError(fn(ctx, arg0Val, arg1Val, arg2Val)))

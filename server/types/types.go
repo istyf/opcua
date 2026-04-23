@@ -24,6 +24,7 @@ type ReferenceWrapper interface {
 	IsReferenceType(refType uint32) bool
 	ReferenceType() *ua.NodeID
 
+	TargetNode() Node
 	TargetNodeID() *ua.ExpandedNodeID
 	TargetsNode(Node) bool
 
