@@ -186,6 +186,85 @@ func TestCallReturnsRicherMethodResultData(t *testing.T) {
 	assert.Equal(t, "second argument failed type validation", callResp.Results[0].InputArgumentDiagnosticInfos[0].AdditionalInfo)
 }
 
+func TestCallPropagatesWrapperInputArgumentResultsForTypeMismatch(t *testing.T) {
+	t.Parallel()
+
+	fixture := newMethodCallFixture(1, 1, true, nil)
+	node.SetMethod2(fixture.methodNode, func(_ context.Context, _ int32, _ string) error {
+		t.Fatal("handler should not be called")
+		return nil
+	})
+	service := NewMethodService(fixture.backend, nil)
+
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 53},
+		MethodsToCall: []*ua.CallMethodRequest{{
+			ObjectID: fixture.objectNode.ID(),
+			MethodID: fixture.methodNode.ID(),
+			InputArguments: []*ua.Variant{
+				ua.MustVariant(int32(1)),
+				ua.MustVariant(true),
+			},
+		}},
+	}, 53)
+	require.NoError(t, err)
+
+	callResp, ok := resp.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", resp)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusBadTypeMismatch, callResp.Results[0].StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusBadTypeMismatch}, callResp.Results[0].InputArgumentResults)
+}
+
+func TestCallPropagatesWrapperInputArgumentResultsForArgumentCountErrors(t *testing.T) {
+	t.Parallel()
+
+	fixture := newMethodCallFixture(1, 1, true, nil)
+	node.SetMethod2(fixture.methodNode, func(_ context.Context, _ int32, _ string) error {
+		t.Fatal("handler should not be called")
+		return nil
+	})
+	service := NewMethodService(fixture.backend, nil)
+
+	missingRespRaw, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 54},
+		MethodsToCall: []*ua.CallMethodRequest{{
+			ObjectID: fixture.objectNode.ID(),
+			MethodID: fixture.methodNode.ID(),
+			InputArguments: []*ua.Variant{
+				ua.MustVariant(int32(1)),
+			},
+		}},
+	}, 54)
+	require.NoError(t, err)
+
+	missingResp, ok := missingRespRaw.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", missingRespRaw)
+	require.Len(t, missingResp.Results, 1)
+	assert.Equal(t, ua.StatusBadArgumentsMissing, missingResp.Results[0].StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusBadArgumentsMissing}, missingResp.Results[0].InputArgumentResults)
+
+	tooManyRespRaw, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 55},
+		MethodsToCall: []*ua.CallMethodRequest{{
+			ObjectID: fixture.objectNode.ID(),
+			MethodID: fixture.methodNode.ID(),
+			InputArguments: []*ua.Variant{
+				ua.MustVariant(int32(1)),
+				ua.MustVariant("two"),
+				ua.MustVariant(true),
+			},
+		}},
+	}, 55)
+	require.NoError(t, err)
+
+	tooManyResp, ok := tooManyRespRaw.(*ua.CallResponse)
+	require.True(t, ok, "expected *ua.CallResponse, got %T", tooManyRespRaw)
+	require.Len(t, tooManyResp.Results, 1)
+	assert.Equal(t, ua.StatusBadTooManyArguments, tooManyResp.Results[0].StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusOK, ua.StatusBadTooManyArguments}, tooManyResp.Results[0].InputArgumentResults)
+}
+
 func TestCallPanicsWhenMethodHandlerReturnsNilResult(t *testing.T) {
 	t.Parallel()
 
@@ -794,6 +873,106 @@ func TestCallResolvesMethodInheritedFromBaseObjectType(t *testing.T) {
 	assert.True(t, called)
 }
 
+func TestCallValidatesInputArgumentsMetadataForMissingArguments(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		called = true
+		return types.NewMethodResult(ua.StatusOK)
+	})
+	addMethodInputArgumentsProperty(t, fixture, &ua.Argument{
+		Name:      "value",
+		DataType:  ua.NewNumericNodeID(0, id.Int32),
+		ValueRank: -1,
+	})
+
+	service := NewMethodService(fixture.backend, nil)
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 12},
+		MethodsToCall: []*ua.CallMethodRequest{{
+			ObjectID: fixture.objectNode.ID(),
+			MethodID: fixture.methodNode.ID(),
+		}},
+	}, 12)
+	require.NoError(t, err)
+
+	callResp := resp.(*ua.CallResponse)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusBadArgumentsMissing, callResp.Results[0].StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusBadArgumentsMissing}, callResp.Results[0].InputArgumentResults)
+	assert.False(t, called)
+}
+
+func TestCallValidatesInputArgumentsMetadataForTypeMismatch(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		called = true
+		return types.NewMethodResult(ua.StatusOK)
+	})
+	addMethodInputArgumentsProperty(t, fixture, &ua.Argument{
+		Name:      "value",
+		DataType:  ua.NewNumericNodeID(0, id.Int32),
+		ValueRank: -1,
+	})
+
+	service := NewMethodService(fixture.backend, nil)
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 13},
+		MethodsToCall: []*ua.CallMethodRequest{{
+			ObjectID: fixture.objectNode.ID(),
+			MethodID: fixture.methodNode.ID(),
+			InputArguments: []*ua.Variant{
+				ua.MustVariant("wrong"),
+			},
+		}},
+	}, 13)
+	require.NoError(t, err)
+
+	callResp := resp.(*ua.CallResponse)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusBadTypeMismatch, callResp.Results[0].StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusBadTypeMismatch}, callResp.Results[0].InputArgumentResults)
+	assert.False(t, called)
+}
+
+func TestCallValidatesInputArgumentsMetadataForTooManyArguments(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		called = true
+		return types.NewMethodResult(ua.StatusOK)
+	})
+	addMethodInputArgumentsProperty(t, fixture, &ua.Argument{
+		Name:      "value",
+		DataType:  ua.NewNumericNodeID(0, id.Int32),
+		ValueRank: -1,
+	})
+
+	service := NewMethodService(fixture.backend, nil)
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 14},
+		MethodsToCall: []*ua.CallMethodRequest{{
+			ObjectID: fixture.objectNode.ID(),
+			MethodID: fixture.methodNode.ID(),
+			InputArguments: []*ua.Variant{
+				ua.MustVariant(int32(1)),
+				ua.MustVariant(true),
+			},
+		}},
+	}, 14)
+	require.NoError(t, err)
+
+	callResp := resp.(*ua.CallResponse)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusBadTooManyArguments, callResp.Results[0].StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusBadTooManyArguments}, callResp.Results[0].InputArgumentResults)
+	assert.False(t, called)
+}
+
 type methodCallFixture struct {
 	backend    *methodTestBackend
 	objectNode types.Node
@@ -848,6 +1027,45 @@ func newMethodCallFixture(objectNamespace, methodNamespace uint16, executable bo
 		objectNode: objectNode,
 		methodNode: methodNode,
 	}
+}
+
+func addMethodInputArgumentsProperty(t *testing.T, fixture *methodCallFixture, args ...*ua.Argument) {
+	t.Helper()
+
+	varType := node.NewVariableTypeNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(0, id.PropertyType)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "PropertyType"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("PropertyType")}),
+		),
+		node.WithDefaultValue(ua.NewNumericNodeID(0, id.Argument), 1, []*ua.ExtensionObject{}),
+	)
+
+	extObjs := make([]*ua.ExtensionObject, 0, len(args))
+	for _, arg := range args {
+		extObjs = append(extObjs, ua.NewExtensionObject(arg))
+	}
+
+	property := node.NewVariableNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(fixture.methodNode.ID().Namespace(), 3000+uint32(len(args)))),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "InputArguments"}),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("InputArguments")}),
+		),
+		node.WithVariableType(varType),
+		node.WithDataType(ua.NewNumericNodeID(0, id.Argument)),
+		node.WithValueRank(1),
+		node.WithValue(extObjs),
+	)
+
+	fixture.methodNode.AddRef(refs.NewReferenceDescription(property, refs.HasPropertyRefTypeID, true))
+	property.AddRef(refs.NewReferenceDescription(fixture.methodNode, refs.HasPropertyRefTypeID, false))
+
+	objectNS, err := fixture.backend.Namespace(int(fixture.objectNode.ID().Namespace()))
+	require.NoError(t, err)
+	ns, ok := objectNS.(*methodTestNamespace)
+	require.True(t, ok)
+	ns.nodes[property.ID().String()] = property
 }
 
 type methodTestBackend struct {

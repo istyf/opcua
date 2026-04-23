@@ -5,6 +5,7 @@ import (
 
 	"github.com/gopcua/opcua/id"
 	srvctx "github.com/gopcua/opcua/server/context"
+	srvnode "github.com/gopcua/opcua/server/node"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/ualog"
@@ -100,6 +101,73 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 			return methodID.String()
 		}
 		return ""
+	}
+	validateMethodInputArguments := func(methodNode types.MethodNode, inputArguments []*ua.Variant) *types.MethodResult {
+		declared, ok := srvnode.MethodInputArguments(methodNode)
+		if !ok {
+			return nil
+		}
+
+		switch {
+		case len(inputArguments) < len(declared):
+			results := make([]ua.StatusCode, len(declared))
+			for idx := range results {
+				if idx < len(inputArguments) {
+					results[idx] = ua.StatusOK
+				} else {
+					results[idx] = ua.StatusBadArgumentsMissing
+				}
+			}
+			return &types.MethodResult{
+				StatusCode:           ua.StatusBadArgumentsMissing,
+				InputArgumentResults: results,
+			}
+		case len(inputArguments) > len(declared):
+			results := make([]ua.StatusCode, len(inputArguments))
+			for idx := range results {
+				if idx < len(declared) {
+					results[idx] = ua.StatusOK
+				} else {
+					results[idx] = ua.StatusBadTooManyArguments
+				}
+			}
+			return &types.MethodResult{
+				StatusCode:           ua.StatusBadTooManyArguments,
+				InputArgumentResults: results,
+			}
+		}
+
+		var (
+			results      []ua.StatusCode
+			overallError ua.StatusCode
+		)
+		for idx, arg := range inputArguments {
+			status := ua.StatusOK
+			if !srvnode.MethodInputArgumentMatches(declared[idx], arg) {
+				status = ua.StatusBadTypeMismatch
+			}
+
+			if status != ua.StatusOK {
+				if results == nil {
+					results = make([]ua.StatusCode, len(inputArguments))
+					for i := range results {
+						results[i] = ua.StatusOK
+					}
+				}
+				results[idx] = status
+				if overallError == ua.StatusOK {
+					overallError = ua.StatusBadTypeMismatch
+				}
+			}
+		}
+
+		if overallError != ua.StatusOK {
+			return &types.MethodResult{
+				StatusCode:           overallError,
+				InputArgumentResults: results,
+			}
+		}
+		return nil
 	}
 
 	// Check if the method has a non forward reference to this object
@@ -225,6 +293,10 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 				ualog.String("object", nodeLogName(objectNode)),
 			)
 			appendResult(types.NewMethodResult(ua.StatusBadUserAccessDenied))
+			continue
+		}
+		if result := validateMethodInputArguments(methodNode, method.InputArguments); result != nil {
+			appendResult(result)
 			continue
 		}
 

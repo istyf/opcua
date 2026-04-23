@@ -44,6 +44,50 @@ func TestSetMethod3UsesThirdArgumentIndex(t *testing.T) {
 	assert.True(t, gotBool)
 }
 
+func TestSetMethodCallsZeroArgumentHandler(t *testing.T) {
+	t.Parallel()
+
+	method := NewMethodNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(1, 3005)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Method"}),
+		),
+	).(*methodNode)
+
+	called := false
+	SetMethod(method, func(_ context.Context) error {
+		called = true
+		return nil
+	})
+
+	result := method.CallMethod(t.Context())
+	require.NotNil(t, result)
+	assert.Equal(t, ua.StatusOK, result.StatusCode)
+	assert.True(t, called)
+}
+
+func TestSetMethod1SDecodesSliceArgument(t *testing.T) {
+	t.Parallel()
+
+	method := NewMethodNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(1, 3006)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Method"}),
+		),
+	).(*methodNode)
+
+	var got []int32
+	SetMethod1S(method, func(_ context.Context, values []int32) error {
+		got = append([]int32(nil), values...)
+		return nil
+	})
+
+	result := method.CallMethod(t.Context(), ua.MustVariant([]int32{1, 2, 3}))
+	require.NotNil(t, result)
+	assert.Equal(t, ua.StatusOK, result.StatusCode)
+	assert.Equal(t, []int32{1, 2, 3}, got)
+}
+
 func TestSetMethod1ReturnsTypeMismatchForWrongArgumentType(t *testing.T) {
 	t.Parallel()
 
@@ -62,6 +106,7 @@ func TestSetMethod1ReturnsTypeMismatchForWrongArgumentType(t *testing.T) {
 	result := method.CallMethod(t.Context(), ua.MustVariant("wrong"))
 	require.NotNil(t, result)
 	assert.Equal(t, ua.StatusBadTypeMismatch, result.StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusBadTypeMismatch}, result.InputArgumentResults)
 }
 
 func TestSetMethod2ReturnsArgumentCountErrors(t *testing.T) {
@@ -82,6 +127,7 @@ func TestSetMethod2ReturnsArgumentCountErrors(t *testing.T) {
 	missing := method.CallMethod(t.Context(), ua.MustVariant(int32(1)))
 	require.NotNil(t, missing)
 	assert.Equal(t, ua.StatusBadArgumentsMissing, missing.StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusBadArgumentsMissing}, missing.InputArgumentResults)
 
 	tooMany := method.CallMethod(
 		t.Context(),
@@ -91,6 +137,28 @@ func TestSetMethod2ReturnsArgumentCountErrors(t *testing.T) {
 	)
 	require.NotNil(t, tooMany)
 	assert.Equal(t, ua.StatusBadTooManyArguments, tooMany.StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusOK, ua.StatusBadTooManyArguments}, tooMany.InputArgumentResults)
+}
+
+func TestSetMethod2ReportsWhichArgumentHasTypeMismatch(t *testing.T) {
+	t.Parallel()
+
+	method := NewMethodNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(1, 3004)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 1, Name: "Method"}),
+		),
+	).(*methodNode)
+
+	SetMethod2(method, func(_ context.Context, _ int32, _ string) error {
+		t.Fatal("handler should not be called")
+		return nil
+	})
+
+	result := method.CallMethod(t.Context(), ua.MustVariant(int32(1)), ua.MustVariant(true))
+	require.NotNil(t, result)
+	assert.Equal(t, ua.StatusBadTypeMismatch, result.StatusCode)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusBadTypeMismatch}, result.InputArgumentResults)
 }
 
 func TestSetMethod2PanicsWhenInputArgumentMetadataDeclaresThreeArguments(t *testing.T) {
