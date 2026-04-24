@@ -136,6 +136,14 @@ func x509Cert(c, k []byte) tls.Certificate {
 	return cert
 }
 
+func mustThumbprint(t *testing.T, cert []byte) []byte {
+	t.Helper()
+
+	thumbprint, err := uapolicy.Thumbprint(cert)
+	require.NoError(t, err)
+	return thumbprint
+}
+
 func TestOptions(t *testing.T) {
 	randomRequestID = func() uint32 { return 125 }
 	defer func() { randomRequestID = nil }()
@@ -492,7 +500,7 @@ func TestOptions(t *testing.T) {
 					c.SecurityPolicyURI = "a"
 					c.SecurityMode = 5
 					c.RemoteCertificate = certDER
-					c.Thumbprint = uapolicy.Thumbprint(certDER)
+					c.Thumbprint = mustThumbprint(t, certDER)
 					return c
 				}(),
 				session: func() *uasc.SessionConfig {
@@ -514,7 +522,7 @@ func TestOptions(t *testing.T) {
 					c.SecurityPolicyURI = "a"
 					c.SecurityMode = 5
 					c.RemoteCertificate = certDER
-					c.Thumbprint = uapolicy.Thumbprint(certDER)
+					c.Thumbprint = mustThumbprint(t, certDER)
 					return c
 				}(),
 				session: func() *uasc.SessionConfig {
@@ -534,7 +542,7 @@ func TestOptions(t *testing.T) {
 					c.SecurityPolicyURI = "a"
 					c.SecurityMode = 5
 					c.RemoteCertificate = certDER
-					c.Thumbprint = uapolicy.Thumbprint(certDER)
+					c.Thumbprint = mustThumbprint(t, certDER)
 					return c
 				}(),
 				session: func() *uasc.SessionConfig {
@@ -554,7 +562,7 @@ func TestOptions(t *testing.T) {
 					c.SecurityPolicyURI = "a"
 					c.SecurityMode = 5
 					c.RemoteCertificate = certDER
-					c.Thumbprint = uapolicy.Thumbprint(certDER)
+					c.Thumbprint = mustThumbprint(t, certDER)
 					return c
 				}(),
 				session: func() *uasc.SessionConfig {
@@ -574,7 +582,7 @@ func TestOptions(t *testing.T) {
 					c.SecurityPolicyURI = "a"
 					c.SecurityMode = 5
 					c.RemoteCertificate = certDER
-					c.Thumbprint = uapolicy.Thumbprint(certDER)
+					c.Thumbprint = mustThumbprint(t, certDER)
 					return c
 				}(),
 				session: func() *uasc.SessionConfig {
@@ -594,7 +602,7 @@ func TestOptions(t *testing.T) {
 					c.SecurityPolicyURI = "c"
 					c.SecurityMode = 5
 					c.RemoteCertificate = certDER
-					c.Thumbprint = uapolicy.Thumbprint(certDER)
+					c.Thumbprint = mustThumbprint(t, certDER)
 					return c
 				}(),
 				session: func() *uasc.SessionConfig {

@@ -118,9 +118,10 @@ func validateEnabledSecureChannelMode(enabled []security) func(string, ua.Messag
 // of connections and starts waiting for data on it.  Data is pushed onto the broker's
 // Response channel
 // Blocks until the context is done, the connection closes, or a critical error
-func (c *channelBroker) RegisterConn(ctx context.Context, endpoint string, conn *uacp.Conn, localCert []byte, localKey *rsa.PrivateKey, enabled []security) error {
+func (c *channelBroker) RegisterConn(ctx context.Context, endpoint string, conn *uacp.Conn, localCert []byte, advertisedCert []byte, localKey *rsa.PrivateKey, enabled []security) error {
 	cfg := defaultChannelConfig()
 	cfg.Certificate = localCert
+	cfg.AdvertisedCertificate = advertisedCert
 	cfg.LocalKey = localKey
 	cfg.ServerSecurityPolicyValidator = validateEnabledSecureChannelPolicy(enabled)
 	cfg.ServerOpenSecureChannelValidator = validateEnabledSecureChannelMode(enabled)

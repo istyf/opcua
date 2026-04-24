@@ -29,6 +29,11 @@ type Config struct {
 	// This field shall be null if the Message is not signed.
 	Certificate []byte
 
+	// AdvertisedCertificate is the X.509 Certificate or certificate chain to send
+	// in protocol fields that carry the sender certificate blob. If nil, Certificate
+	// is used.
+	AdvertisedCertificate []byte
+
 	// LocalKey is a RSA Private Key which will be used to encrypt the OpenSecureChannel
 	// messages.  It is the key associated with Certificate
 	LocalKey *rsa.PrivateKey

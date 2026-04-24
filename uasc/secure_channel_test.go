@@ -20,6 +20,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func mustChannelThumbprint(t *testing.T, cert []byte) []byte {
+	t.Helper()
+
+	thumbprint, err := uapolicy.Thumbprint(cert)
+	require.NoError(t, err)
+	return thumbprint
+}
+
 func TestNewRequestMessage(t *testing.T) {
 	fixedTime := func() time.Time { return time.Date(2019, 1, 1, 12, 13, 14, 0, time.UTC) }
 
@@ -154,6 +162,25 @@ func TestNewRequestMessage(t *testing.T) {
 			require.Equal(t, tt.m, m)
 		})
 	}
+}
+
+func TestNewOpenSecureChannelMessageUsesAdvertisedCertificate(t *testing.T) {
+	t.Parallel()
+
+	leafDER, _, chain := mustCertificateTestChain(t)
+	sc := &SecureChannel{
+		cfg: &Config{
+			Certificate:           leafDER,
+			AdvertisedCertificate: append(chain[0], chain[1]...),
+			Thumbprint:            []byte{1, 2, 3},
+		},
+	}
+
+	instance := newChannelInstance(sc)
+	msg := instance.newMessage(&ua.OpenSecureChannelRequest{}, id.OpenSecureChannelRequest_Encoding_DefaultBinary, 1)
+
+	require.Equal(t, append(chain[0], chain[1]...), msg.AsymmetricSecurityHeader.SenderCertificate)
+	require.Equal(t, []byte{1, 2, 3}, msg.AsymmetricSecurityHeader.ReceiverCertificateThumbprint)
 }
 
 func TestValidateIncomingOpenSecureChannelPolicy(t *testing.T) {
@@ -803,7 +830,7 @@ func TestServerReceivesCreateSessionRequestOverSecureChannel(t *testing.T) {
 				Certificate:       clientCert.Raw,
 				LocalKey:          clientKey,
 				RemoteCertificate: serverCert.Raw,
-				Thumbprint:        uapolicy.Thumbprint(serverCert.Raw),
+				Thumbprint:        mustChannelThumbprint(t, serverCert.Raw),
 				RequestTimeout:    2 * time.Second,
 				Lifetime:          uint32((time.Hour) / time.Millisecond),
 			}
@@ -971,7 +998,7 @@ func TestOpenSecureChannelRequestMessageDecodes(t *testing.T) {
 					SecurityMode:      tt.mode,
 					Certificate:       clientCert.Raw,
 					LocalKey:          clientKey,
-					Thumbprint:        uapolicy.Thumbprint(serverCert.Raw),
+					Thumbprint:        mustChannelThumbprint(t, serverCert.Raw),
 				},
 			}
 			receiver := &SecureChannel{
@@ -1062,7 +1089,7 @@ func TestOpenSecureChannelRequestDecodesBeforeSecurityModeNegotiation(t *testing
 			SecurityMode:      ua.MessageSecurityModeSign,
 			Certificate:       clientCert.Raw,
 			LocalKey:          clientKey,
-			Thumbprint:        uapolicy.Thumbprint(serverCert.Raw),
+			Thumbprint:        mustChannelThumbprint(t, serverCert.Raw),
 		},
 	}
 	receiver := &SecureChannel{
