@@ -1,9 +1,13 @@
 package uasc
 
 import (
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 )
 
 func parseFirstCertificate(cert []byte) (*x509.Certificate, error) {
@@ -40,4 +44,17 @@ func parseFirstCertificate(cert []byte) (*x509.Certificate, error) {
 		return nil, errors.New("failed to parse certificate")
 	}
 	return parsed[0], nil
+}
+
+func certificatePublicKeyType(cert *x509.Certificate) string {
+	switch cert.PublicKey.(type) {
+	case *rsa.PublicKey:
+		return "RSA"
+	case *ecdsa.PublicKey:
+		return "ECDSA"
+	case ed25519.PublicKey:
+		return "Ed25519"
+	default:
+		return fmt.Sprintf("%T", cert.PublicKey)
+	}
 }

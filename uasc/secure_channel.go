@@ -539,6 +539,13 @@ func (s *SecureChannel) prepareOpeningInstanceForOpen(m *MessageChunk) error {
 	}
 	remoteKey, ok := remoteCert.PublicKey.(*rsa.PublicKey)
 	if !ok {
+		log.Printf(
+			"uasc %d: rejecting peer certificate with unsupported public key type %s (subject=%q, serial=%s)",
+			s.c.ID(),
+			certificatePublicKeyType(remoteCert),
+			remoteCert.Subject.String(),
+			remoteCert.SerialNumber.String(),
+		)
 		return ua.StatusBadCertificateInvalid
 	}
 	algo, err := uapolicy.Asymmetric(s.cfg.SecurityPolicyURI, s.openingInstance.sc.cfg.LocalKey, remoteKey)
@@ -644,6 +651,13 @@ func (s *SecureChannel) open(ctx context.Context, instance *channelInstance, req
 		}
 		var ok bool
 		if remoteKey, ok = remoteCert.PublicKey.(*rsa.PublicKey); !ok {
+			log.Printf(
+				"uasc %d: rejecting remote certificate with unsupported public key type %s (subject=%q, serial=%s)",
+				s.c.ID(),
+				certificatePublicKeyType(remoteCert),
+				remoteCert.Subject.String(),
+				remoteCert.SerialNumber.String(),
+			)
 			return ua.StatusBadCertificateInvalid
 		}
 	}
@@ -808,6 +822,13 @@ func (s *SecureChannel) handleOpenSecureChannelRequest(ctx context.Context, reqI
 		}
 		var ok bool
 		if remoteKey, ok = remoteCert.PublicKey.(*rsa.PublicKey); !ok {
+			log.Printf(
+				"uasc %d: rejecting remote certificate with unsupported public key type %s (subject=%q, serial=%s)",
+				s.c.ID(),
+				certificatePublicKeyType(remoteCert),
+				remoteCert.Subject.String(),
+				remoteCert.SerialNumber.String(),
+			)
 			return ua.StatusBadCertificateInvalid
 		}
 	}
