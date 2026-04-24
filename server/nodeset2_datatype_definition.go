@@ -61,7 +61,7 @@ func convertSchemaDataTypeDefinition(
 
 	switch classification.kind {
 	case importedDataTypeDefinitionStructure:
-		return convertSchemaStructureDefinition(def, classification.structureType, nil, resolveFieldType)
+		return convertSchemaStructureDefinition(def, nil, classification.structureType, nil, resolveFieldType)
 	case importedDataTypeDefinitionEnum:
 		return convertSchemaEnumDefinition(def), nil
 	default:
@@ -82,11 +82,15 @@ func importSchemaDataTypeDefinition(dt *schema.UADataType, resolveFieldType data
 	var definition any
 	switch classification.kind {
 	case importedDataTypeDefinitionStructure:
+		defaultEncodingID, err := resolveSchemaStructureDefaultEncodingID(dt, resolveFieldType)
+		if err != nil {
+			return nil, err
+		}
 		baseDataType, err := resolveSchemaStructureBaseDataType(dt, resolveFieldType)
 		if err != nil {
 			return nil, err
 		}
-		definition, err = convertSchemaStructureDefinition(dt.Definition, classification.structureType, baseDataType, resolveFieldType)
+		definition, err = convertSchemaStructureDefinition(dt.Definition, defaultEncodingID, classification.structureType, baseDataType, resolveFieldType)
 		if err != nil {
 			return nil, err
 		}
@@ -198,7 +202,45 @@ func resolveSchemaStructureBaseDataType(dt *schema.UADataType, resolveFieldType 
 	return resolveFieldType(superTypeID.String())
 }
 
-func convertSchemaStructureDefinition(def *schema.DataTypeDefinition, structureType ua.StructureType, baseDataType *ua.NodeID, resolveFieldType dataTypeFieldResolver) (*ua.StructureDefinition, error) {
+func resolveSchemaStructureDefaultEncodingID(dt *schema.UADataType, resolveFieldType dataTypeFieldResolver) (*ua.NodeID, error) {
+	if dt == nil || dt.Definition == nil {
+		return nil, errors.New("missing data type definition")
+	}
+	if resolveFieldType == nil {
+		return nil, errors.New("missing structure field type resolver")
+	}
+	if dt.References == nil {
+		return nil, nil
+	}
+
+	var fallback *ua.NodeID
+	for _, ref := range dt.References.Reference {
+		if ref == nil {
+			continue
+		}
+		if ref.ReferenceTypeAttr != "HasEncoding" && ref.ReferenceTypeAttr != "i=38" {
+			continue
+		}
+		if ref.IsForwardAttr != nil && !*ref.IsForwardAttr {
+			continue
+		}
+
+		encodingID, err := resolveFieldType(ref.Value)
+		if err != nil {
+			return nil, err
+		}
+		if encodingID == nil {
+			continue
+		}
+		if fallback == nil {
+			fallback = encodingID
+		}
+	}
+
+	return fallback, nil
+}
+
+func convertSchemaStructureDefinition(def *schema.DataTypeDefinition, defaultEncodingID *ua.NodeID, structureType ua.StructureType, baseDataType *ua.NodeID, resolveFieldType dataTypeFieldResolver) (*ua.StructureDefinition, error) {
 	fields := make([]*ua.StructureField, 0, len(def.Field))
 	for _, field := range def.Field {
 		converted, err := convertSchemaStructureField(field, resolveFieldType)
@@ -209,9 +251,10 @@ func convertSchemaStructureDefinition(def *schema.DataTypeDefinition, structureT
 	}
 
 	return &ua.StructureDefinition{
-		BaseDataType:  baseDataType,
-		StructureType: structureType,
-		Fields:        fields,
+		DefaultEncodingID: defaultEncodingID,
+		BaseDataType:      baseDataType,
+		StructureType:     structureType,
+		Fields:            fields,
 	}, nil
 }
 
