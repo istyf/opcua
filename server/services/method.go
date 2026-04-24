@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gopcua/opcua/id"
 	srvctx "github.com/gopcua/opcua/server/context"
@@ -145,6 +146,9 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		for idx, arg := range inputArguments {
 			status := ua.StatusOK
 			if !srvnode.MethodInputArgumentMatches(s.backend, declared[idx], arg) {
+				ualog.Warn(ctx, "method input argument type mismatch",
+					methodInputArgumentMismatchLogAttrs(s.backend, methodNode, idx, declared[idx], arg)...,
+				)
 				status = ua.StatusBadTypeMismatch
 			}
 
@@ -324,6 +328,89 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	}
 
 	return response, nil
+}
+
+func methodInputArgumentMismatchLogAttrs(
+	backend MethodServiceBackend, methodNode types.MethodNode, index int, declared *ua.Argument, arg *ua.Variant,
+) []ualog.Attr {
+	attrs := make([]ualog.Attr, 0, 12)
+	if methodNode != nil {
+		if id := methodNode.ID(); id != nil {
+			attrs = append(attrs, ualog.String("method_id", id.String()))
+		}
+		if browseName := methodNode.BrowseName(); browseName != nil {
+			attrs = append(attrs, ualog.String("method_browse_name", browseName.String()))
+		}
+	}
+
+	attrs = append(attrs, ualog.Int("argument_index", index))
+
+	if declared != nil {
+		attrs = append(attrs,
+			ualog.String("declared_argument_name", declared.Name),
+			ualog.Int("declared_value_rank", int(declared.ValueRank)),
+		)
+		if declared.DataType != nil {
+			attrs = append(attrs, ualog.String("declared_data_type", declared.DataType.String()))
+		}
+	}
+
+	if arg == nil {
+		return append(attrs, ualog.String("actual_value", "<nil variant>"))
+	}
+
+	value := arg.Value()
+	actualType, actualRank := srvnode.LookupTypeNodeIDFromValue(value)
+	if actualType != nil {
+		attrs = append(attrs, ualog.String("actual_type_from_value", actualType.String()))
+	}
+	attrs = append(attrs,
+		ualog.Int("actual_value_rank", int(actualRank)),
+		ualog.String("actual_go_type", fmt.Sprintf("%T", value)),
+	)
+
+	if extObj := arg.ExtensionObject(); extObj != nil {
+		attrs = appendExtensionObjectTypeLogAttrs(backend, attrs, extObj.TypeID)
+		return attrs
+	}
+
+	if extObjs, ok := value.([]*ua.ExtensionObject); ok {
+		attrs = append(attrs, ualog.Int("extension_object_count", len(extObjs)))
+		if len(extObjs) > 0 && extObjs[0] != nil {
+			return appendExtensionObjectTypeLogAttrs(backend, attrs, extObjs[0].TypeID)
+		}
+	}
+
+	return attrs
+}
+
+func appendExtensionObjectTypeLogAttrs(
+	backend MethodServiceBackend, attrs []ualog.Attr, typeID *ua.ExpandedNodeID,
+) []ualog.Attr {
+	if typeID == nil || typeID.NodeID == nil {
+		return append(attrs, ualog.String("extension_object_type_id", "<nil>"))
+	}
+
+	attrs = append(attrs, ualog.String("extension_object_type_id", typeID.NodeID.String()))
+	if typeID.NamespaceURI != "" {
+		attrs = append(attrs, ualog.String("extension_object_namespace_uri", typeID.NamespaceURI))
+	}
+
+	resolved := ua.NewNodeIDFromExpandedNodeID(typeID)
+	if resolved == nil {
+		return attrs
+	}
+	if typeID.NamespaceURI != "" {
+		for _, ns := range backend.Namespaces() {
+			if ns.Name() != typeID.NamespaceURI {
+				continue
+			}
+			resolved.SetNamespace(ns.ID())
+			break
+		}
+	}
+
+	return append(attrs, ualog.String("extension_object_resolved_type_id", resolved.String()))
 }
 
 func (s *MethodService) decorateCallContext(
