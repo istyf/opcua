@@ -533,6 +533,12 @@ func (s *SecureChannel) prepareOpeningInstanceForOpen(m *MessageChunk) error {
 	s.cfg.RemoteCertificate = m.AsymmetricSecurityHeader.SenderCertificate
 	debug.Printf("uasc %d: setting securityPolicy to %s", s.c.ID(), m.SecurityPolicyURI)
 
+	thumbprint, err := uapolicy.Thumbprint(s.cfg.RemoteCertificate)
+	if err != nil {
+		return err
+	}
+	s.cfg.Thumbprint = thumbprint
+
 	remoteCert, err := parseFirstCertificate(s.cfg.RemoteCertificate)
 	if err != nil {
 		return err

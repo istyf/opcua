@@ -292,6 +292,47 @@ func TestPrepareOpeningInstanceForOpenPreservesNegotiatedSecurityMode(t *testing
 	err = sc.prepareOpeningInstanceForOpen(chunk)
 	require.NoError(t, err)
 	require.Equal(t, ua.MessageSecurityModeSign, sc.cfg.SecurityMode)
+	require.Equal(t, mustChannelThumbprint(t, remoteCert.Raw), sc.cfg.Thumbprint)
+	require.NotNil(t, sc.openingInstance.algo)
+}
+
+func TestPrepareOpeningInstanceForOpenUsesLeafThumbprintFromCertificateChain(t *testing.T) {
+	t.Parallel()
+
+	_, keyPEM, err := uatest.GenerateCert("localhost", 2048, 24*time.Hour)
+	require.NoError(t, err)
+
+	keyBlock, _ := pem.Decode(keyPEM)
+	localKey, err := x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
+	require.NoError(t, err)
+
+	leafDER, _, chain := mustCertificateTestChain(t)
+
+	sc := &SecureChannel{
+		kind: client,
+		c:    &uacp.Conn{},
+		cfg: &Config{
+			SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+			SecurityMode:      ua.MessageSecurityModeSign,
+			LocalKey:          localKey,
+		},
+		openingInstance: newChannelInstance(nil),
+	}
+	sc.openingInstance.sc = sc
+
+	chunk := &MessageChunk{
+		MessageHeader: &MessageHeader{
+			Header: NewHeader(MessageTypeOpenSecureChannel, ChunkTypeFinal, 1),
+			AsymmetricSecurityHeader: &AsymmetricSecurityHeader{
+				SecurityPolicyURI: ua.SecurityPolicyURIBasic256Sha256,
+				SenderCertificate: append(chain[0], chain[1]...),
+			},
+		},
+	}
+
+	err = sc.prepareOpeningInstanceForOpen(chunk)
+	require.NoError(t, err)
+	require.Equal(t, mustChannelThumbprint(t, leafDER), sc.cfg.Thumbprint)
 	require.NotNil(t, sc.openingInstance.algo)
 }
 
