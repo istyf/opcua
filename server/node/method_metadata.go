@@ -100,28 +100,69 @@ func MethodInputArgumentMatches(resolver namespaceResolver, declared *ua.Argumen
 		return false
 	}
 
-	ns, err := resolver.Namespace(int(actualType.Namespace()))
+	if methodArgumentEncodingMatchesDeclaredDataType(resolver, declared.DataType, actualType) {
+		return true
+	}
+
+	return false
+}
+
+func methodArgumentEncodingMatchesDeclaredDataType(resolver namespaceResolver, declaredType, actualType *ua.NodeID) bool {
+	if resolver == nil || declaredType == nil || actualType == nil {
+		return false
+	}
+
+	actualNS, err := resolver.Namespace(int(actualType.Namespace()))
 	if err != nil {
 		return false
 	}
-
-	actualNode := ns.Node(actualType)
+	actualNode := actualNS.Node(actualType)
 	if actualNode == nil {
-		return false
+		return methodArgumentDeclaredTypeReferencesEncoding(resolver, declaredType, actualType)
 	}
 
-	return actualNode.References().Contains(func(ref types.ReferenceWrapper) bool {
-		if ref.IsForward() || !ref.IsReferenceType(id.HasEncoding) {
+	if actualNode.References().Contains(func(ref types.ReferenceWrapper) bool {
+		if !ref.IsReferenceType(id.HasEncoding) {
 			return false
 		}
 
 		target := ref.TargetNode()
 		if target != nil {
-			return target.ID().Equal(declared.DataType)
+			return target.ID().Equal(declaredType)
 		}
 
 		targetID := ref.TargetNodeID()
-		return targetID != nil && targetID.NodeID != nil && targetID.NodeID.Equal(declared.DataType)
+		return targetID != nil && targetID.NodeID != nil && targetID.NodeID.Equal(declaredType)
+	}) {
+		return true
+	}
+
+	return methodArgumentDeclaredTypeReferencesEncoding(resolver, declaredType, actualType)
+}
+
+func methodArgumentDeclaredTypeReferencesEncoding(resolver namespaceResolver, declaredType, actualType *ua.NodeID) bool {
+	declaredNS, err := resolver.Namespace(int(declaredType.Namespace()))
+	if err != nil {
+		return false
+	}
+
+	declaredNode := declaredNS.Node(declaredType)
+	if declaredNode == nil {
+		return false
+	}
+
+	return declaredNode.References().Contains(func(ref types.ReferenceWrapper) bool {
+		if !ref.IsReferenceType(id.HasEncoding) {
+			return false
+		}
+
+		target := ref.TargetNode()
+		if target != nil {
+			return target.ID().Equal(actualType)
+		}
+
+		targetID := ref.TargetNodeID()
+		return targetID != nil && targetID.NodeID != nil && targetID.NodeID.Equal(actualType)
 	})
 }
 

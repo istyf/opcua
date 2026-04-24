@@ -15,15 +15,31 @@ import (
 func TestMethodInputArgumentMatchesAcceptsExtensionObjectEncodingForDeclaredDataType(t *testing.T) {
 	t.Parallel()
 
-	resolver, declaredType, encodingType := newMethodMetadataResolver(t)
+	resolver, ids := newMethodMetadataResolver(t)
 	value := ua.MustVariant(&ua.ExtensionObject{
-		TypeID:       &ua.ExpandedNodeID{NodeID: encodingType},
+		TypeID:       &ua.ExpandedNodeID{NodeID: ids.binaryEncodingType},
 		EncodingMask: ua.ExtensionObjectBinary,
 		Value:        &ua.Argument{},
 	})
 
 	assert.True(t, MethodInputArgumentMatches(resolver, &ua.Argument{
-		DataType:  declaredType,
+		DataType:  ids.declaredType,
+		ValueRank: -1,
+	}, value))
+}
+
+func TestMethodInputArgumentMatchesAcceptsXMLExtensionObjectEncodingForDeclaredDataType(t *testing.T) {
+	t.Parallel()
+
+	resolver, ids := newMethodMetadataResolver(t)
+	value := ua.MustVariant(&ua.ExtensionObject{
+		TypeID:       &ua.ExpandedNodeID{NodeID: ids.xmlEncodingType},
+		EncodingMask: ua.ExtensionObjectXML,
+		Value:        new(ua.XMLElement),
+	})
+
+	assert.True(t, MethodInputArgumentMatches(resolver, &ua.Argument{
+		DataType:  ids.declaredType,
 		ValueRank: -1,
 	}, value))
 }
@@ -31,16 +47,15 @@ func TestMethodInputArgumentMatchesAcceptsExtensionObjectEncodingForDeclaredData
 func TestMethodInputArgumentMatchesRejectsExtensionObjectEncodingForOtherDataType(t *testing.T) {
 	t.Parallel()
 
-	resolver, _, encodingType := newMethodMetadataResolver(t)
-	otherType := ua.NewNumericNodeID(2, 7003)
+	resolver, ids := newMethodMetadataResolver(t)
 	value := ua.MustVariant(&ua.ExtensionObject{
-		TypeID:       &ua.ExpandedNodeID{NodeID: encodingType},
+		TypeID:       &ua.ExpandedNodeID{NodeID: ids.otherBinaryEncodingType},
 		EncodingMask: ua.ExtensionObjectBinary,
 		Value:        &ua.Argument{},
 	})
 
 	assert.False(t, MethodInputArgumentMatches(resolver, &ua.Argument{
-		DataType:  otherType,
+		DataType:  ids.declaredType,
 		ValueRank: -1,
 	}, value))
 }
@@ -63,7 +78,30 @@ func TestMethodInputArgumentMatchesArrayStillMatches(t *testing.T) {
 	}, ua.MustVariant([]string{"a", "b"})))
 }
 
-func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, *ua.NodeID, *ua.NodeID) {
+func TestMethodInputArgumentMatchesExtensionObjectArrayStillMatches(t *testing.T) {
+	t.Parallel()
+
+	resolver, ids := newMethodMetadataResolver(t)
+	assert.True(t, MethodInputArgumentMatches(resolver, &ua.Argument{
+		DataType:  ids.declaredType,
+		ValueRank: 1,
+	}, ua.MustVariant([]*ua.ExtensionObject{
+		{
+			TypeID:       &ua.ExpandedNodeID{NodeID: ids.binaryEncodingType},
+			EncodingMask: ua.ExtensionObjectBinary,
+			Value:        &ua.Argument{},
+		},
+	})))
+}
+
+type methodMetadataIDs struct {
+	declaredType            *ua.NodeID
+	binaryEncodingType      *ua.NodeID
+	xmlEncodingType         *ua.NodeID
+	otherBinaryEncodingType *ua.NodeID
+}
+
+func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, methodMetadataIDs) {
 	t.Helper()
 
 	objectType := NewObjectTypeNode(
@@ -78,20 +116,50 @@ func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, *ua.N
 			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "StructuredType"}),
 		),
 	)
-	encodingNode := NewObjectNode(
+	binaryEncodingNode := NewObjectNode(
 		WithBase(
 			WithID(ua.NewNumericNodeID(2, 7002)),
 			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "StructuredType_Encoding_DefaultBinary"}),
 		),
 		WithType(objectType),
 	)
-	encodingNode.AddRef(refs.NewReferenceDescription(declaredType, ua.NewNumericNodeID(0, id.HasEncoding), false))
+	binaryEncodingNode.AddRef(refs.NewReferenceDescription(declaredType, ua.NewNumericNodeID(0, id.HasEncoding), false))
+	declaredType.AddRef(refs.NewReferenceDescription(binaryEncodingNode, ua.NewNumericNodeID(0, id.HasEncoding), true))
+
+	xmlEncodingNode := NewObjectNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(2, 7003)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "StructuredType_Encoding_DefaultXML"}),
+		),
+		WithType(objectType),
+	)
+	xmlEncodingNode.AddRef(refs.NewReferenceDescription(declaredType, ua.NewNumericNodeID(0, id.HasEncoding), false))
+	declaredType.AddRef(refs.NewReferenceDescription(xmlEncodingNode, ua.NewNumericNodeID(0, id.HasEncoding), true))
+
+	otherType := NewDataTypeNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(2, 7004)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "OtherStructuredType"}),
+		),
+	)
+	otherBinaryEncodingNode := NewObjectNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(2, 7005)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "OtherStructuredType_Encoding_DefaultBinary"}),
+		),
+		WithType(objectType),
+	)
+	otherBinaryEncodingNode.AddRef(refs.NewReferenceDescription(otherType, ua.NewNumericNodeID(0, id.HasEncoding), false))
+	otherType.AddRef(refs.NewReferenceDescription(otherBinaryEncodingNode, ua.NewNumericNodeID(0, id.HasEncoding), true))
 
 	ns := &methodMetadataTestNamespace{
 		nodes: map[string]types.Node{
-			declaredType.ID().String(): declaredType,
-			encodingNode.ID().String(): encodingNode,
-			objectType.ID().String():   objectType,
+			declaredType.ID().String():            declaredType,
+			binaryEncodingNode.ID().String():      binaryEncodingNode,
+			xmlEncodingNode.ID().String():         xmlEncodingNode,
+			otherType.ID().String():               otherType,
+			otherBinaryEncodingNode.ID().String(): otherBinaryEncodingNode,
+			objectType.ID().String():              objectType,
 		},
 	}
 
@@ -99,7 +167,12 @@ func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, *ua.N
 		namespaces: map[int]types.NameSpace{2: ns},
 	}
 
-	return resolver, declaredType.ID(), encodingNode.ID()
+	return resolver, methodMetadataIDs{
+		declaredType:            declaredType.ID(),
+		binaryEncodingType:      binaryEncodingNode.ID(),
+		xmlEncodingType:         xmlEncodingNode.ID(),
+		otherBinaryEncodingType: otherBinaryEncodingNode.ID(),
+	}
 }
 
 type methodMetadataTestResolver struct {
