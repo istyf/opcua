@@ -143,7 +143,7 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		)
 		for idx, arg := range inputArguments {
 			status := ua.StatusOK
-			if !srvnode.MethodInputArgumentMatches(declared[idx], arg) {
+			if !srvnode.MethodInputArgumentMatches(s.backend, declared[idx], arg) {
 				status = ua.StatusBadTypeMismatch
 			}
 
