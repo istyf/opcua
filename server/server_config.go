@@ -51,20 +51,31 @@ func EndPoint(host string, port int) Option {
 	}
 }
 
+// ApplicationURI sets the application uri to a custom string in cases where the used
+// certificate does not carry URI information on its leaf certificate. Setting this
+// to a non empty value disables the uri extraction from the provided cert.
+func ApplicationURI(uri string) Option {
+	return func(_ context.Context, s *serverConfig) {
+		s.applicationURI = uri
+	}
+}
+
 // Certificate sets the client X509 certificate in the secure channel configuration
 // and also detects and sets the ApplicationURI from the URI within the certificate
 func Certificate(cert []byte) Option {
 	return func(_ context.Context, s *serverConfig) {
 		s.setCertificateChain([][]byte{cert})
 
-		// Extract the application URI from the certificate.
-		var appURI string
-		x509cert, err := x509.ParseCertificate(s.certificate)
-		if err == nil && len(x509cert.URIs) > 0 {
-			appURI = x509cert.URIs[0].String()
-		}
+		if s.applicationURI == "" {
+			// Extract the application URI from the certificate.
+			var appURI string
+			x509cert, err := x509.ParseCertificate(s.certificate)
+			if err == nil && len(x509cert.URIs) > 0 {
+				appURI = x509cert.URIs[0].String()
+			}
 
-		s.applicationURI = appURI
+			s.applicationURI = appURI
+		}
 	}
 }
 
@@ -93,15 +104,17 @@ func TLSCertificate(cert tls.Certificate) Option {
 			}
 		}
 
-		s.applicationURI = ""
-		if len(leaf.URIs) > 0 {
-			s.applicationURI = leaf.URIs[0].String()
+		if s.applicationURI == "" {
+			if len(leaf.URIs) > 0 {
+				s.applicationURI = leaf.URIs[0].String()
+			}
 		}
 
 		if key, ok := cert.PrivateKey.(*rsa.PrivateKey); ok {
 			s.privateKey = key
 			return
 		}
+
 		if cert.PrivateKey != nil {
 			ualog.Warn(ctx, "tls certificate private key is not rsa; keep using configured private key")
 		}
