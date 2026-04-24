@@ -127,10 +127,15 @@ func (c *channelInstance) newMessage(srv any, typeID uint16, requestID uint32) *
 			thumbprint = nil
 		}
 
+		senderCertificate := c.sc.cfg.Certificate
+		if len(c.sc.cfg.AdvertisedCertificate) > 0 {
+			senderCertificate = c.sc.cfg.AdvertisedCertificate
+		}
+
 		return &Message{
 			MessageHeader: &MessageHeader{
 				Header:                   NewHeader(MessageTypeOpenSecureChannel, ChunkTypeFinal, c.secureChannelID),
-				AsymmetricSecurityHeader: NewAsymmetricSecurityHeader(c.securityPolicyURI(), c.sc.cfg.Certificate, thumbprint),
+				AsymmetricSecurityHeader: NewAsymmetricSecurityHeader(c.securityPolicyURI(), senderCertificate, thumbprint),
 				SequenceHeader:           NewSequenceHeader(sequenceNumber, requestID),
 			},
 			TypeID:  ua.NewFourByteExpandedNodeID(0, typeID),
