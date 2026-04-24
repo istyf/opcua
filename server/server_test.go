@@ -4,8 +4,13 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"errors"
 	"math"
+	"math/big"
+	"net/url"
 	"testing"
 	"time"
 
@@ -232,6 +237,91 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 	})
 	assert.ErrorIs(t, err, authErr)
 	assert.Same(t, expected, result)
+}
+
+func TestTLSCertificateSetsLeafPrivateKeyAndAdvertisedChain(t *testing.T) {
+	t.Parallel()
+
+	leafDER, leafKey, chain := mustServerTestCertificateChain(t)
+	cfg := &serverConfig{}
+
+	TLSCertificate(tls.Certificate{
+		Certificate: chain,
+		PrivateKey:  leafKey,
+		Leaf:        mustServerTestParseCertificate(t, leafDER),
+	})(t.Context(), cfg)
+
+	require.Equal(t, leafDER, cfg.Certificate())
+	require.Equal(t, leafKey, cfg.PrivateKey())
+	require.Equal(t, bytesJoin(chain), cfg.AdvertisedCertificate())
+	assert.NotEmpty(t, cfg.ApplicationURI())
+}
+
+func TestCertificateKeepsLeafAsAdvertisedCertificate(t *testing.T) {
+	t.Parallel()
+
+	leafDER, _, _ := mustServerTestCertificateChain(t)
+	cfg := &serverConfig{}
+
+	Certificate(leafDER)(t.Context(), cfg)
+
+	require.Equal(t, leafDER, cfg.Certificate())
+	require.Equal(t, leafDER, cfg.AdvertisedCertificate())
+	assert.NotEmpty(t, cfg.ApplicationURI())
+}
+
+func bytesJoin(chunks [][]byte) []byte {
+	var out []byte
+	for _, chunk := range chunks {
+		out = append(out, chunk...)
+	}
+	return out
+}
+
+func mustServerTestCertificateChain(t *testing.T) ([]byte, *rsa.PrivateKey, [][]byte) {
+	t.Helper()
+
+	rootKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+	leafKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	now := time.Now()
+	rootTmpl := &x509.Certificate{
+		SerialNumber:          big.NewInt(1),
+		Subject:               pkix.Name{CommonName: "root-ca"},
+		NotBefore:             now.Add(-time.Hour),
+		NotAfter:              now.Add(24 * time.Hour),
+		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+	}
+	rootDER, err := x509.CreateCertificate(rand.Reader, rootTmpl, rootTmpl, &rootKey.PublicKey, rootKey)
+	require.NoError(t, err)
+	rootCert := mustServerTestParseCertificate(t, rootDER)
+
+	leafTmpl := &x509.Certificate{
+		SerialNumber: big.NewInt(2),
+		Subject:      pkix.Name{CommonName: "leaf"},
+		URIs:         []*url.URL{{Scheme: "urn", Opaque: "gopcua:test:server"}},
+		DNSNames:     []string{"localhost"},
+		NotBefore:    now.Add(-time.Hour),
+		NotAfter:     now.Add(24 * time.Hour),
+		KeyUsage:     x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+	}
+	leafDER, err := x509.CreateCertificate(rand.Reader, leafTmpl, rootCert, &leafKey.PublicKey, rootKey)
+	require.NoError(t, err)
+
+	return leafDER, leafKey, [][]byte{leafDER, rootDER}
+}
+
+func mustServerTestParseCertificate(t *testing.T, der []byte) *x509.Certificate {
+	t.Helper()
+
+	cert, err := x509.ParseCertificate(der)
+	require.NoError(t, err)
+	return cert
 }
 
 func TestWithAuthorizationContextDecorator(t *testing.T) {

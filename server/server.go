@@ -477,7 +477,7 @@ func (s *serverImpl) initEndpoints() {
 					DiscoveryProfileURI: "",
 					DiscoveryURLs:       s.URLs(),
 				},
-				ServerCertificate:   s.cfg.certificate,
+				ServerCertificate:   s.cfg.AdvertisedCertificate(),
 				SecurityMode:        sec.secMode,
 				SecurityPolicyURI:   sec.secPolicy.URI(),
 				TransportProfileURI: "http://opcfoundation.org/UA-Profile/Transport/uatcp-uasc-uabinary",

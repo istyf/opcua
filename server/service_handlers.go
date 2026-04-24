@@ -27,7 +27,7 @@ func (s *serverImpl) initHandlers() {
 	s.methodService = services.NewMethodService(s, s.Config().MethodCallMiddleware())
 	s.nodeManagementService = services.NewNodeManagementService(s)
 	s.queryService = services.NewQueryService(s)
-	s.sessionService = services.NewSessionService(s, s.cfg.certificate)
+	s.sessionService = services.NewSessionService(s, s.cfg.AdvertisedCertificate())
 	s.viewService = services.NewViewService(s)
 
 	s.SubscriptionService = services.NewSubscriptionService(s)

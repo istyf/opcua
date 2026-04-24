@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"crypto/rsa"
 	"time"
 
@@ -21,6 +22,7 @@ type security struct {
 type serverConfig struct {
 	privateKey     *rsa.PrivateKey
 	certificate    []byte
+	advertisedCert []byte
 	applicationURI string
 
 	endpoints []string
@@ -71,6 +73,10 @@ func (cfg *serverConfig) ApplicationURI() string {
 
 func (cfg *serverConfig) Certificate() []byte {
 	return cfg.certificate
+}
+
+func (cfg *serverConfig) AdvertisedCertificate() []byte {
+	return cfg.advertisedCert
 }
 
 func (cfg *serverConfig) PrivateKey() *rsa.PrivateKey {
@@ -143,4 +149,16 @@ func (cfg *serverConfig) UserNameAuthenticator() auth.UserNameAuthenticator {
 
 func (cfg *serverConfig) AuthorizationContextDecorator() auth.AuthorizationContextDecorator {
 	return cfg.authContextDecorator
+}
+
+func (cfg *serverConfig) setCertificateChain(chain [][]byte) {
+	if len(chain) == 0 {
+		cfg.certificate = nil
+		cfg.advertisedCert = nil
+		cfg.applicationURI = ""
+		return
+	}
+
+	cfg.certificate = chain[0]
+	cfg.advertisedCert = bytes.Join(chain, nil)
 }

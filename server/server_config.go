@@ -7,6 +7,7 @@ package server
 import (
 	"context"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"slices"
@@ -54,16 +55,56 @@ func EndPoint(host string, port int) Option {
 // and also detects and sets the ApplicationURI from the URI within the certificate
 func Certificate(cert []byte) Option {
 	return func(_ context.Context, s *serverConfig) {
-		s.certificate = cert
+		s.setCertificateChain([][]byte{cert})
 
 		// Extract the application URI from the certificate.
 		var appURI string
-		x509cert, err := x509.ParseCertificate(cert)
+		x509cert, err := x509.ParseCertificate(s.certificate)
 		if err == nil && len(x509cert.URIs) > 0 {
 			appURI = x509cert.URIs[0].String()
 		}
 
 		s.applicationURI = appURI
+	}
+}
+
+// TLSCertificate configures the server certificate chain from a tls.Certificate.
+// The first certificate in the chain must be the leaf certificate used for OPC UA
+// application identity and secure-channel cryptography. Any remaining
+// certificates are advertised as part of the server certificate chain.
+func TLSCertificate(cert tls.Certificate) Option {
+	return func(ctx context.Context, s *serverConfig) {
+		if len(cert.Certificate) == 0 {
+			ualog.Warn(ctx, "empty tls certificate, skipping")
+			return
+		}
+
+		s.setCertificateChain(cert.Certificate)
+
+		var leaf *x509.Certificate
+		if cert.Leaf != nil {
+			leaf = cert.Leaf
+		} else {
+			var err error
+			leaf, err = x509.ParseCertificate(cert.Certificate[0])
+			if err != nil {
+				ualog.Error(ctx, "unable to parse leaf certificate from tls certificate", ualog.Err(err))
+				return
+			}
+		}
+
+		s.applicationURI = ""
+		if len(leaf.URIs) > 0 {
+			s.applicationURI = leaf.URIs[0].String()
+		}
+
+		if key, ok := cert.PrivateKey.(*rsa.PrivateKey); ok {
+			s.privateKey = key
+			return
+		}
+		if cert.PrivateKey != nil {
+			ualog.Warn(ctx, "tls certificate private key is not rsa; keep using configured private key")
+		}
 	}
 }
 
