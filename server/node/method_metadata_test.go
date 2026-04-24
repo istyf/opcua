@@ -44,6 +44,22 @@ func TestMethodInputArgumentMatchesAcceptsXMLExtensionObjectEncodingForDeclaredD
 	}, value))
 }
 
+func TestMethodInputArgumentMatchesAcceptsExtensionObjectEncodingWithNamespaceURI(t *testing.T) {
+	t.Parallel()
+
+	resolver, ids := newMethodMetadataResolver(t)
+	value := ua.MustVariant(&ua.ExtensionObject{
+		TypeID:       ua.NewExpandedNodeID(ua.NewNumericNodeID(0, ids.binaryEncodingType.IntID()), "urn:test:method-metadata", 0),
+		EncodingMask: ua.ExtensionObjectBinary,
+		Value:        &ua.Argument{},
+	})
+
+	assert.True(t, MethodInputArgumentMatches(resolver, &ua.Argument{
+		DataType:  ids.declaredType,
+		ValueRank: -1,
+	}, value))
+}
+
 func TestMethodInputArgumentMatchesRejectsExtensionObjectEncodingForOtherDataType(t *testing.T) {
 	t.Parallel()
 
@@ -185,6 +201,14 @@ func (r *methodMetadataTestResolver) Namespace(id int) (types.NameSpace, error) 
 		return nil, fmt.Errorf("namespace %d not found", id)
 	}
 	return ns, nil
+}
+
+func (r *methodMetadataTestResolver) Namespaces() []types.NameSpace {
+	namespaces := make([]types.NameSpace, 0, len(r.namespaces))
+	for _, ns := range r.namespaces {
+		namespaces = append(namespaces, ns)
+	}
+	return namespaces
 }
 
 type methodMetadataTestNamespace struct {

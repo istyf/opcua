@@ -17,6 +17,7 @@ type MethodServiceBackend interface {
 	NamespaceProvider
 	SessionProvider
 	Config() types.ServerConfig
+	Namespaces() []types.NameSpace
 }
 
 // MethodService implements the Method Service Set.

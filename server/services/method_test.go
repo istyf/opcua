@@ -1094,6 +1094,14 @@ func (b *methodTestBackend) Namespace(id int) (types.NameSpace, error) {
 	return ns, nil
 }
 
+func (b *methodTestBackend) Namespaces() []types.NameSpace {
+	namespaces := make([]types.NameSpace, 0, len(b.namespaces))
+	for _, ns := range b.namespaces {
+		namespaces = append(namespaces, ns)
+	}
+	return namespaces
+}
+
 func (b *methodTestBackend) Session(context.Context, *ua.RequestHeader) types.Session {
 	return b.session
 }

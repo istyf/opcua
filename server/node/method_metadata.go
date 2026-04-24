@@ -8,6 +8,7 @@ import (
 
 type namespaceResolver interface {
 	Namespace(int) (types.NameSpace, error)
+	Namespaces() []types.NameSpace
 }
 
 // MethodInputArguments returns the decoded InputArguments property for a method
@@ -100,11 +101,9 @@ func MethodInputArgumentMatches(resolver namespaceResolver, declared *ua.Argumen
 		return false
 	}
 
-	if methodArgumentEncodingMatchesDeclaredDataType(resolver, declared.DataType, actualType) {
-		return true
-	}
+	actualType = extensionObjectTypeNodeID(resolver, value.Value(), actualType)
 
-	return false
+	return methodArgumentEncodingMatchesDeclaredDataType(resolver, declared.DataType, actualType)
 }
 
 func methodArgumentEncodingMatchesDeclaredDataType(resolver namespaceResolver, declaredType, actualType *ua.NodeID) bool {
@@ -173,4 +172,44 @@ func isExtensionObjectValue(value any) bool {
 	default:
 		return false
 	}
+}
+
+func extensionObjectTypeNodeID(resolver namespaceResolver, value any, fallback *ua.NodeID) *ua.NodeID {
+	switch v := value.(type) {
+	case *ua.ExtensionObject:
+		return resolveExpandedNodeID(resolver, v.TypeID, fallback)
+	case []*ua.ExtensionObject:
+		if len(v) == 0 {
+			return fallback
+		}
+		return resolveExpandedNodeID(resolver, v[0].TypeID, fallback)
+	default:
+		return fallback
+	}
+}
+
+func resolveExpandedNodeID(resolver namespaceResolver, id *ua.ExpandedNodeID, fallback *ua.NodeID) *ua.NodeID {
+	if id == nil || id.NodeID == nil {
+		return fallback
+	}
+
+	nodeID := ua.NewNodeIDFromExpandedNodeID(id)
+	if nodeID == nil {
+		return fallback
+	}
+
+	if id.NamespaceURI == "" {
+		return nodeID
+	}
+
+	for _, ns := range resolver.Namespaces() {
+		if ns.Name() != id.NamespaceURI {
+			continue
+		}
+
+		nodeID.SetNamespace(ns.ID())
+		return nodeID
+	}
+
+	return nodeID
 }
