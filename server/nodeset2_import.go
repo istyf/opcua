@@ -799,6 +799,37 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			return rt
 		}
 
+		refTypeID, err := ua.ParseNodeID(refType)
+		if err == nil && refTypeID != nil {
+			if correctNS, ok := (*nsID)[refTypeID.Namespace()]; ok {
+				refTypeID.SetNamespace(uint16(correctNS))
+			}
+
+			refNode := s.Node(refTypeID)
+			if refNode != nil && refNode.NodeClass() == ua.NodeClassReferenceType {
+				rt = new(schema.UAReferenceType)
+				rt.UAType = new(schema.UAType)
+				rt.UAType.UANode = new(schema.UANode)
+				rt.NodeIdAttr = refTypeID.String()
+				if browseName := refNode.BrowseName(); browseName != nil {
+					rt.BrowseNameAttr = browseName.Name
+				}
+				isSymmetricValue, err := refNode.Attribute(ctx, ua.AttributeIDSymmetric)
+				if err == nil && isSymmetricValue != nil && isSymmetricValue.Value != nil && isSymmetricValue.Value.Value != nil {
+					if symmetric, ok := isSymmetricValue.Value.Value.Value().(bool); ok {
+						rt.SymmetricAttr = symmetric
+					}
+				}
+
+				reftypes[refType] = rt
+				reftypes[rt.NodeIdAttr] = rt
+				if rt.BrowseNameAttr != "" {
+					reftypes[rt.BrowseNameAttr] = rt
+				}
+				return rt
+			}
+		}
+
 		ualog.Error(ctx, "unable to find reference type",
 			ualog.String("ref_type", refType),
 			ualog.String("browse_name", browseName),

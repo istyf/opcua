@@ -473,6 +473,130 @@ func TestRefsImportNodeSetDuplicateReferenceTypeAliasLogging(t *testing.T) {
 	assert.Contains(t, out.String(), "duplicate reference type alias points to different target")
 }
 
+func TestRefsImportNodeSetResolvesDirectReferenceTypeNodeIDFromServer(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:refs"},
+		},
+		UAObject: []*schema.UAObject{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=353",
+						BrowseNameAttr: "1:StateMachine",
+						DisplayName:    []*schema.LocalizedText{{Value: "StateMachine"}},
+						References: &schema.ListOfReferences{
+							Reference: []*schema.Reference{
+								{
+									ReferenceTypeAttr: "i=117",
+									Value:             "ns=1;i=354",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=354",
+						BrowseNameAttr: "1:SubStateMachine",
+						DisplayName:    []*schema.LocalizedText{{Value: "SubStateMachine"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+			},
+		},
+	}
+
+	var out bytes.Buffer
+	handler := slog.NewTextHandler(&out, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.TimeKey {
+				return slog.Attr{}
+			}
+			return a
+		},
+	})
+	ctx := ualog.New(t.Context(), ualog.WithHandler(handler))
+
+	require.NoError(t, srv.ImportNodeSet(ctx, nodes))
+	assert.NotContains(t, out.String(), "unable to find reference type")
+
+	stateMachine := srv.Node(ua.NewNumericNodeID(1, 353))
+	require.NotNil(t, stateMachine)
+	subStateMachineID := ua.NewNumericNodeID(1, 354)
+	assert.True(t, stateMachine.References().Contains(func(ref types.ReferenceWrapper) bool {
+		target := ref.TargetNodeID()
+		return ref.IsReferenceType(id.HasSubStateMachine) &&
+			ref.IsForward() &&
+			target != nil &&
+			target.NodeID != nil &&
+			target.NodeID.Equal(subStateMachineID)
+	}))
+}
+
+func TestRefsImportNodeSetRejectsDirectNodeIDThatIsNotReferenceType(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:refs"},
+		},
+		UAObject: []*schema.UAObject{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=400",
+						BrowseNameAttr: "1:Parent",
+						DisplayName:    []*schema.LocalizedText{{Value: "Parent"}},
+						References: &schema.ListOfReferences{
+							Reference: []*schema.Reference{
+								{
+									ReferenceTypeAttr: "i=85",
+									Value:             "ns=1;i=401",
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=401",
+						BrowseNameAttr: "1:Child",
+						DisplayName:    []*schema.LocalizedText{{Value: "Child"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+			},
+		},
+	}
+
+	var out bytes.Buffer
+	handler := slog.NewTextHandler(&out, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
+			if a.Key == slog.TimeKey {
+				return slog.Attr{}
+			}
+			return a
+		},
+	})
+	ctx := ualog.New(t.Context(), ualog.WithHandler(handler))
+
+	require.NoError(t, srv.ImportNodeSet(ctx, nodes))
+	assert.Contains(t, out.String(), "unable to find reference type")
+}
+
 func TestImportNodeSetLoadsEnumDataTypeDefinitionAttribute(t *testing.T) {
 	t.Parallel()
 
