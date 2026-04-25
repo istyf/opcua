@@ -69,7 +69,7 @@ func convertSchemaDataTypeDefinition(
 	}
 }
 
-func importSchemaDataTypeDefinition(dt *schema.UADataType, resolveFieldType dataTypeFieldResolver) (*ua.ExtensionObject, error) {
+func importSchemaDataTypeDefinition(nodes *schema.UANodeSet, dt *schema.UADataType, resolveFieldType dataTypeFieldResolver) (*ua.ExtensionObject, error) {
 	if dt == nil || dt.Definition == nil {
 		return nil, nil
 	}
@@ -82,7 +82,7 @@ func importSchemaDataTypeDefinition(dt *schema.UADataType, resolveFieldType data
 	var definition any
 	switch classification.kind {
 	case importedDataTypeDefinitionStructure:
-		defaultEncodingID, err := resolveSchemaStructureDefaultEncodingID(dt, resolveFieldType)
+		defaultEncodingID, err := resolveSchemaStructureDefaultEncodingID(nodes, dt, resolveFieldType)
 		if err != nil {
 			return nil, err
 		}
@@ -202,42 +202,89 @@ func resolveSchemaStructureBaseDataType(dt *schema.UADataType, resolveFieldType 
 	return resolveFieldType(superTypeID.String())
 }
 
-func resolveSchemaStructureDefaultEncodingID(dt *schema.UADataType, resolveFieldType dataTypeFieldResolver) (*ua.NodeID, error) {
+func resolveSchemaStructureDefaultEncodingID(nodes *schema.UANodeSet, dt *schema.UADataType, resolveFieldType dataTypeFieldResolver) (*ua.NodeID, error) {
 	if dt == nil || dt.Definition == nil {
 		return nil, errors.New("missing data type definition")
 	}
 	if resolveFieldType == nil {
 		return nil, errors.New("missing structure field type resolver")
 	}
-	if dt.References == nil {
+
+	candidates := make([]*ua.NodeID, 0, 3)
+	appendCandidate := func(nodeID string) error {
+		encodingID, err := resolveFieldType(nodeID)
+		if err != nil {
+			return err
+		}
+		if encodingID != nil {
+			candidates = append(candidates, encodingID)
+		}
+		return nil
+	}
+
+	if dt.References != nil {
+		for _, ref := range dt.References.Reference {
+			if ref == nil {
+				continue
+			}
+			if ref.ReferenceTypeAttr != "HasEncoding" && ref.ReferenceTypeAttr != "i=38" {
+				continue
+			}
+			if ref.IsForwardAttr != nil && !*ref.IsForwardAttr {
+				continue
+			}
+			if err := appendCandidate(ref.Value); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if nodes != nil {
+		for _, obj := range nodes.UAObject {
+			if obj == nil || obj.UANode == nil || obj.References == nil {
+				continue
+			}
+			if !isDefaultEncodingObject(obj) {
+				continue
+			}
+			for _, ref := range obj.References.Reference {
+				if ref == nil {
+					continue
+				}
+				if ref.ReferenceTypeAttr != "HasEncoding" && ref.ReferenceTypeAttr != "i=38" {
+					continue
+				}
+				if ref.IsForwardAttr == nil || *ref.IsForwardAttr {
+					continue
+				}
+				if ref.Value != dt.NodeIdAttr {
+					continue
+				}
+				if err := appendCandidate(obj.NodeIdAttr); err != nil {
+					return nil, err
+				}
+				break
+			}
+		}
+	}
+
+	if len(candidates) == 0 {
 		return nil, nil
 	}
+	return candidates[0], nil
+}
 
-	var fallback *ua.NodeID
-	for _, ref := range dt.References.Reference {
-		if ref == nil {
-			continue
-		}
-		if ref.ReferenceTypeAttr != "HasEncoding" && ref.ReferenceTypeAttr != "i=38" {
-			continue
-		}
-		if ref.IsForwardAttr != nil && !*ref.IsForwardAttr {
-			continue
-		}
-
-		encodingID, err := resolveFieldType(ref.Value)
-		if err != nil {
-			return nil, err
-		}
-		if encodingID == nil {
-			continue
-		}
-		if fallback == nil {
-			fallback = encodingID
-		}
+func isDefaultEncodingObject(obj *schema.UAObject) bool {
+	if obj == nil || obj.UANode == nil {
+		return false
 	}
-
-	return fallback, nil
+	if strings.EqualFold(obj.BrowseNameAttr, "Default Binary") || strings.HasSuffix(obj.BrowseNameAttr, ":Default Binary") {
+		return true
+	}
+	if strings.EqualFold(obj.SymbolicNameAttr, "DefaultBinary") {
+		return true
+	}
+	return false
 }
 
 func convertSchemaStructureDefinition(def *schema.DataTypeDefinition, defaultEncodingID *ua.NodeID, structureType ua.StructureType, baseDataType *ua.NodeID, resolveFieldType dataTypeFieldResolver) (*ua.StructureDefinition, error) {

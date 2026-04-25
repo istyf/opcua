@@ -255,7 +255,7 @@ func TestResolveSchemaStructureDefaultEncodingID(t *testing.T) {
 
 	trueValue := true
 
-	got, err := resolveSchemaStructureDefaultEncodingID(&schema.UADataType{
+	got, err := resolveSchemaStructureDefaultEncodingID(nil, &schema.UADataType{
 		Definition: &schema.DataTypeDefinition{},
 		UAType: &schema.UAType{
 			UANode: &schema.UANode{
@@ -281,7 +281,7 @@ func TestResolveSchemaStructureDefaultEncodingID(t *testing.T) {
 func TestResolveSchemaStructureDefaultEncodingIDMissingDefinitionRejected(t *testing.T) {
 	t.Parallel()
 
-	_, err := resolveSchemaStructureDefaultEncodingID(&schema.UADataType{}, func(string) (*ua.NodeID, error) {
+	_, err := resolveSchemaStructureDefaultEncodingID(nil, &schema.UADataType{}, func(string) (*ua.NodeID, error) {
 		return nil, nil
 	})
 	assert.Error(t, err)
@@ -293,7 +293,7 @@ func TestImportSchemaDataTypeDefinitionSetsStructureDefaultEncodingID(t *testing
 	trueValue := true
 	falseValue := false
 
-	got, err := importSchemaDataTypeDefinition(&schema.UADataType{
+	got, err := importSchemaDataTypeDefinition(nil, &schema.UADataType{
 		UAType: &schema.UAType{
 			UANode: &schema.UANode{
 				References: &schema.ListOfReferences{
@@ -332,6 +332,48 @@ func TestImportSchemaDataTypeDefinitionSetsStructureDefaultEncodingID(t *testing
 	require.True(t, ok, "expected *ua.StructureDefinition, got %T", got.Value)
 	require.NotNil(t, definition.DefaultEncodingID)
 	assert.True(t, definition.DefaultEncodingID.Equal(ua.NewNumericNodeID(2, 7002)))
+}
+
+func TestResolveSchemaStructureDefaultEncodingIDFromInverseEncodingReference(t *testing.T) {
+	t.Parallel()
+
+	falseValue := false
+
+	got, err := resolveSchemaStructureDefaultEncodingID(&schema.UANodeSet{
+		UAObject: []*schema.UAObject{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:       "ns=1;i=896",
+						BrowseNameAttr:   "Default Binary",
+						SymbolicNameAttr: "DefaultBinary",
+						References: &schema.ListOfReferences{
+							Reference: []*schema.Reference{
+								{
+									ReferenceTypeAttr: "HasEncoding",
+									IsForwardAttr:     &falseValue,
+									Value:             "ns=1;i=890",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}, &schema.UADataType{
+		UAType: &schema.UAType{
+			UANode: &schema.UANode{
+				NodeIdAttr:     "ns=1;i=890",
+				BrowseNameAttr: "1:StoreJobsRequestType",
+			},
+		},
+		Definition: &schema.DataTypeDefinition{},
+	}, func(nodeID string) (*ua.NodeID, error) {
+		return ua.ParseNodeID(nodeID)
+	})
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	assert.True(t, got.Equal(ua.NewNumericNodeID(1, 896)))
 }
 
 func TestConvertSchemaStructureDefinitionRejectsInvalidArrayDimensions(t *testing.T) {

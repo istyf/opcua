@@ -367,7 +367,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			),
 			node.WithAbstractType(dt.IsAbstractAttr),
 		)
-		if definition, err := importSchemaDataTypeDefinition(dt, resolveImportedNodeID); err != nil {
+		if definition, err := importSchemaDataTypeDefinition(nodes, dt, resolveImportedNodeID); err != nil {
 			ualog.Warn(ctx, "failed to import data type definition",
 				ualog.String("node_id", nid.String()),
 				ualog.String("browse_name", dt.BrowseNameAttr),
