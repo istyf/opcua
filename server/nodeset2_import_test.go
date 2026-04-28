@@ -402,6 +402,146 @@ func TestImportNodeSetRemapsQualifiedNameValues(t *testing.T) {
 	assert.Equal(t, "ImportedName", got.Name)
 }
 
+func TestImportNodeSetDefaultsMissingMethodArgumentValueRankToScalar(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:methods"},
+		},
+		UAVariable: []*schema.UAVariable{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4800",
+						BrowseNameAttr: "1:InputArguments",
+						DisplayName:    []*schema.LocalizedText{{Value: "InputArguments"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+				DataTypeAttr:        "i=296",
+				ValueRankAttr:       new(1),
+				ArrayDimensionsAttr: "0",
+				Value: &schema.Value{
+					ExtObjListAttr: &schema.ValueExtensionObjectList{
+						Data: []schema.ValueExtensionObject{{
+							TypeID: struct {
+								Identifier string `xml:"Identifier"`
+							}{
+								Identifier: "i=297",
+							},
+							Body: schema.ValueExtensionObjectBody{
+								Argument: &schema.ValueExtensionObjectArgument{
+									Name: "Request",
+									DataType: struct {
+										Identifier string `xml:"Identifier"`
+									}{
+										Identifier: "i=24",
+									},
+									Description: struct {
+										Text string `xml:"Text"`
+									}{
+										Text: "Request payload",
+									},
+								},
+							},
+						}},
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
+
+	imported := srv.Node(ua.NewNumericNodeID(1, 4800))
+	require.NotNil(t, imported)
+
+	attr, err := imported.Attribute(t.Context(), ua.AttributeIDValue)
+	require.NoError(t, err)
+
+	value, ok := attr.Value.Value.Value().([]*ua.ExtensionObject)
+	require.True(t, ok, "expected value as []*ua.ExtensionObject, got %T", attr.Value.Value.Value())
+	require.Len(t, value, 1)
+
+	arg, ok := value[0].Value.(*ua.Argument)
+	require.True(t, ok, "expected argument payload *ua.Argument, got %T", value[0].Value)
+	assert.Equal(t, int32(-1), arg.ValueRank)
+}
+
+func TestImportNodeSetPreservesExplicitMethodArgumentValueRank(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	zero := 0
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:methods"},
+		},
+		UAVariable: []*schema.UAVariable{
+			{
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=4801",
+						BrowseNameAttr: "1:InputArguments",
+						DisplayName:    []*schema.LocalizedText{{Value: "InputArguments"}},
+						References:     &schema.ListOfReferences{},
+					},
+				},
+				DataTypeAttr:        "i=296",
+				ValueRankAttr:       new(1),
+				ArrayDimensionsAttr: "0",
+				Value: &schema.Value{
+					ExtObjListAttr: &schema.ValueExtensionObjectList{
+						Data: []schema.ValueExtensionObject{{
+							TypeID: struct {
+								Identifier string `xml:"Identifier"`
+							}{
+								Identifier: "i=297",
+							},
+							Body: schema.ValueExtensionObjectBody{
+								Argument: &schema.ValueExtensionObjectArgument{
+									Name:      "Request",
+									ValueRank: &zero,
+									DataType: struct {
+										Identifier string `xml:"Identifier"`
+									}{
+										Identifier: "i=24",
+									},
+									Description: struct {
+										Text string `xml:"Text"`
+									}{
+										Text: "Request payload",
+									},
+								},
+							},
+						}},
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
+
+	imported := srv.Node(ua.NewNumericNodeID(1, 4801))
+	require.NotNil(t, imported)
+
+	attr, err := imported.Attribute(t.Context(), ua.AttributeIDValue)
+	require.NoError(t, err)
+
+	value, ok := attr.Value.Value.Value().([]*ua.ExtensionObject)
+	require.True(t, ok, "expected value as []*ua.ExtensionObject, got %T", attr.Value.Value.Value())
+	require.Len(t, value, 1)
+
+	arg, ok := value[0].Value.(*ua.Argument)
+	require.True(t, ok, "expected argument payload *ua.Argument, got %T", value[0].Value)
+	assert.Equal(t, int32(0), arg.ValueRank)
+}
+
 func TestRefsImportNodeSetDuplicateReferenceTypeAliasLogging(t *testing.T) {
 	t.Parallel()
 

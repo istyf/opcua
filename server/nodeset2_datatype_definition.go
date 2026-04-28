@@ -328,11 +328,16 @@ func convertSchemaStructureField(field *schema.DataTypeField, resolveFieldType d
 		return nil, err
 	}
 
+	valueRank := int32(-1)
+	if field.ValueRankAttr != nil {
+		valueRank = int32(*field.ValueRankAttr)
+	}
+
 	return &ua.StructureField{
 		Name:            field.NameAttr,
 		Description:     firstNonEmptyLocalizedTextFromSchema(field.Description, field.DisplayName),
 		DataType:        dataType,
-		ValueRank:       int32(field.ValueRankAttr),
+		ValueRank:       valueRank,
 		ArrayDimensions: arrayDimensions,
 		MaxStringLength: field.MaxStringLengthAttr,
 		IsOptional:      field.IsOptionalAttr,

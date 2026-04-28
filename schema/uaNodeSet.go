@@ -254,7 +254,7 @@ type ValueExtensionObjectArgument struct {
 	DataType struct {
 		Identifier string `xml:"Identifier"`
 	} `xml:"DataType"`
-	ValueRank       int `xml:"ValueRank"`
+	ValueRank       *int `xml:"ValueRank"`
 	ArrayDimensions struct {
 		Data []ValueUInt32 `xml:"UInt32,omitempty"`
 	}
@@ -433,7 +433,7 @@ type DataTypeField struct {
 	NameAttr            string           `xml:"Name,attr"`
 	SymbolicNameAttr    string           `xml:"SymbolicName,attr,omitempty"`
 	DataTypeAttr        string           `xml:"DataType,attr,omitempty"`
-	ValueRankAttr       int              `xml:"ValueRank,attr,omitempty"`
+	ValueRankAttr       *int             `xml:"ValueRank,attr,omitempty"`
 	ArrayDimensionsAttr string           `xml:"ArrayDimensions,attr,omitempty"`
 	MaxStringLengthAttr uint32           `xml:"MaxStringLength,attr,omitempty"`
 	ValueAttr           int              `xml:"Value,attr,omitempty"`

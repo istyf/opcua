@@ -19,7 +19,7 @@ func TestConvertSchemaDataTypeDefinitionStructure(t *testing.T) {
 				NameAttr:            "Temperature",
 				SymbolicNameAttr:    "Temp",
 				DataTypeAttr:        "ns=1;i=3001",
-				ValueRankAttr:       -1,
+				ValueRankAttr:       new(-1),
 				ArrayDimensionsAttr: "2, 4",
 				MaxStringLengthAttr: 64,
 				IsOptionalAttr:      true,
@@ -66,7 +66,7 @@ func TestConvertSchemaStructureFieldUsesDisplayNameAsDescriptionFallback(t *test
 	field, err := convertSchemaStructureField(&schema.DataTypeField{
 		NameAttr:      "Status",
 		DataTypeAttr:  "ns=1;i=3002",
-		ValueRankAttr: -1,
+		ValueRankAttr: new(-1),
 		DisplayName: []*schema.LocalizedText{
 			{Value: "Status field", LocaleAttr: "en"},
 		},
@@ -77,6 +77,35 @@ func TestConvertSchemaStructureFieldUsesDisplayNameAsDescriptionFallback(t *test
 
 	require.NotNil(t, field.Description)
 	assert.Equal(t, "Status field", field.Description.Text)
+}
+
+func TestConvertSchemaStructureFieldDefaultsMissingValueRankToScalar(t *testing.T) {
+	t.Parallel()
+
+	field, err := convertSchemaStructureField(&schema.DataTypeField{
+		NameAttr:     "Request",
+		DataTypeAttr: "ns=1;i=3003",
+	}, func(string) (*ua.NodeID, error) {
+		return ua.NewNumericNodeID(1, 3003), nil
+	})
+	require.NoError(t, err)
+
+	assert.Equal(t, int32(-1), field.ValueRank)
+}
+
+func TestConvertSchemaStructureFieldPreservesExplicitZeroValueRank(t *testing.T) {
+	t.Parallel()
+
+	field, err := convertSchemaStructureField(&schema.DataTypeField{
+		NameAttr:      "Jobs",
+		DataTypeAttr:  "ns=1;i=3004",
+		ValueRankAttr: new(0),
+	}, func(string) (*ua.NodeID, error) {
+		return ua.NewNumericNodeID(1, 3004), nil
+	})
+	require.NoError(t, err)
+
+	assert.Equal(t, int32(0), field.ValueRank)
 }
 
 func TestConvertSchemaDataTypeDefinitionEnum(t *testing.T) {
@@ -318,7 +347,7 @@ func TestImportSchemaDataTypeDefinitionSetsStructureDefaultEncodingID(t *testing
 				{
 					NameAttr:      "Value",
 					DataTypeAttr:  "i=11",
-					ValueRankAttr: -1,
+					ValueRankAttr: new(-1),
 				},
 			},
 		},

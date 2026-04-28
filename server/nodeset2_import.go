@@ -187,6 +187,12 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 		}
 	}
 	resolveImportedNodeID := newImportedNodeIDResolver(aliases, nsID)
+	importedArgumentValueRank := func(arg *schema.ValueExtensionObjectArgument) int32 {
+		if arg == nil || arg.ValueRank == nil {
+			return -1
+		}
+		return int32(*arg.ValueRank)
+	}
 
 	valueFromSchema := func(v *schema.Value) any {
 		if v == nil {
@@ -236,7 +242,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 				arg := &ua.Argument{
 					Name:            extObj.Body.Argument.Name,
 					DataType:        mustParseAndConvertNodeID(extObj.Body.Argument.DataType.Identifier),
-					ValueRank:       int32(extObj.Body.Argument.ValueRank),
+					ValueRank:       importedArgumentValueRank(extObj.Body.Argument),
 					ArrayDimensions: make([]uint32, 0, len(extObj.Body.Argument.ArrayDimensions.Data)),
 					Description:     ua.NewLocalizedText(extObj.Body.Argument.Description.Text),
 				}
@@ -269,7 +275,7 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 						arg := &ua.Argument{
 							Name:            extObj.Body.Argument.Name,
 							DataType:        mustParseAndConvertNodeID(extObj.Body.Argument.DataType.Identifier),
-							ValueRank:       int32(extObj.Body.Argument.ValueRank),
+							ValueRank:       importedArgumentValueRank(extObj.Body.Argument),
 							ArrayDimensions: make([]uint32, 0, len(extObj.Body.Argument.ArrayDimensions.Data)),
 							Description:     ua.NewLocalizedText(extObj.Body.Argument.Description.Text),
 						}
