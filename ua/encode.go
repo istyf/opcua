@@ -33,6 +33,16 @@ func isBinaryEncoder(val reflect.Value) bool {
 	return val.Type().Implements(binaryEncoder)
 }
 
+func binaryEncoderFor(val reflect.Value) (BinaryEncoder, bool) {
+	if isBinaryEncoder(val) {
+		return val.Interface().(BinaryEncoder), true
+	}
+	if val.CanAddr() && isBinaryEncoder(val.Addr()) {
+		return val.Addr().Interface().(BinaryEncoder), true
+	}
+	return nil, false
+}
+
 func isNilValue(val reflect.Value) bool {
 	if !val.IsValid() {
 		return true
@@ -63,14 +73,13 @@ func encode(val reflect.Value, name string) ([]byte, error) {
 	}
 
 	buf := NewBuffer(nil)
-	switch {
-	case isBinaryEncoder(val):
-		if isNilValue(val) {
+	if v, ok := binaryEncoderFor(val); ok {
+		if isNilValue(reflect.ValueOf(v)) {
 			return nil, nil
 		}
-		v := val.Interface().(BinaryEncoder)
 		return dump(v.Encode())
-
+	}
+	switch {
 	case isTime(val):
 		buf.WriteTime(val.Convert(timeType).Interface().(time.Time))
 

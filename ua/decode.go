@@ -19,7 +19,20 @@ var (
 )
 
 func isBinaryDecoder(val reflect.Value) bool {
+	if !val.IsValid() {
+		return false
+	}
 	return val.Type().Implements(binaryDecoder)
+}
+
+func binaryDecoderFor(val reflect.Value) (BinaryDecoder, bool) {
+	if isBinaryDecoder(val) {
+		return val.Interface().(BinaryDecoder), true
+	}
+	if val.CanAddr() && isBinaryDecoder(val.Addr()) {
+		return val.Addr().Interface().(BinaryDecoder), true
+	}
+	return nil, false
 }
 
 func isTime(val reflect.Value) bool {
@@ -44,10 +57,10 @@ func decode(b []byte, val reflect.Value, name string) (n int, err error) {
 	}
 
 	buf := NewBuffer(b)
-	switch {
-	case isBinaryDecoder(val):
-		v := val.Interface().(BinaryDecoder)
+	if v, ok := binaryDecoderFor(val); ok {
 		return v.Decode(b)
+	}
+	switch {
 	case isTime(val):
 		val.Set(reflect.ValueOf(buf.ReadTime()).Convert(val.Type()))
 	default:
