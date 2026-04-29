@@ -5,6 +5,8 @@
 package ua
 
 import (
+	"fmt"
+
 	"github.com/gopcua/opcua/debug"
 	"github.com/gopcua/opcua/id"
 )
@@ -53,11 +55,22 @@ func (e *ExtensionObject) Decode(b []byte) (int, error) {
 	buf.ReadStruct(e.TypeID)
 
 	e.EncodingMask = buf.ReadByte()
+	debug.Printf("ua: incoming extension object type_id=%s encoding=%s(%d)",
+		formatExpandedNodeIDForLog(e.TypeID),
+		extensionObjectEncodingName(e.EncodingMask),
+		e.EncodingMask,
+	)
 	if e.EncodingMask == ExtensionObjectEmpty {
 		return buf.Pos(), buf.Error()
 	}
 
 	length := buf.ReadUint32()
+	debug.Printf("ua: incoming extension object type_id=%s encoding=%s(%d) declared_length=%d",
+		formatExpandedNodeIDForLog(e.TypeID),
+		extensionObjectEncodingName(e.EncodingMask),
+		e.EncodingMask,
+		length,
+	)
 	if length == 0 || length == 0xffffffff || buf.Error() != nil {
 		return buf.Pos(), buf.Error()
 	}
@@ -76,12 +89,50 @@ func (e *ExtensionObject) Decode(b []byte) (int, error) {
 	typeID := e.TypeID.NodeID
 	e.Value = eotypes.New(typeID)
 	if e.Value == nil {
-		debug.Printf("ua: unknown extension object %s", typeID)
+		debug.Printf("ua: unknown extension object type_id=%s encoding=%s(%d)",
+			formatExpandedNodeIDForLog(e.TypeID),
+			extensionObjectEncodingName(e.EncodingMask),
+			e.EncodingMask,
+		)
 		return buf.Pos(), buf.Error()
 	}
 
 	body.ReadStruct(e.Value)
 	return buf.Pos(), body.Error()
+}
+
+func extensionObjectEncodingName(mask uint8) string {
+	switch mask {
+	case ExtensionObjectEmpty:
+		return "empty"
+	case ExtensionObjectBinary:
+		return "binary"
+	case ExtensionObjectXML:
+		return "xml"
+	default:
+		return "unknown"
+	}
+}
+
+func formatExpandedNodeIDForLog(id *ExpandedNodeID) string {
+	if id == nil {
+		return "<nil>"
+	}
+	if id.NodeID == nil {
+		return "<nil node id>"
+	}
+	if id.NamespaceURI == "" && id.ServerIndex == 0 {
+		return id.NodeID.String()
+	}
+
+	out := id.NodeID.String()
+	if id.NamespaceURI != "" {
+		out += fmt.Sprintf(" nsu=%q", id.NamespaceURI)
+	}
+	if id.ServerIndex != 0 {
+		out += fmt.Sprintf(" server_index=%d", id.ServerIndex)
+	}
+	return out
 }
 
 func (e *ExtensionObject) Encode() ([]byte, error) {

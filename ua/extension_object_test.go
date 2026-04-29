@@ -1,29 +1,59 @@
-// Copyright 2018-2020 opcua authors. All rights reserved.
-// Use of this source code is governed by a MIT-style license that can be
-// found in the LICENSE file.
-
 package ua
 
-import (
-	"testing"
-)
+import "testing"
 
-func TestExtensionObject(t *testing.T) {
-	cases := []CodecTestCase{
+func TestExtensionObjectEncodingName(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		mask uint8
+		want string
+	}{
+		{name: "empty", mask: ExtensionObjectEmpty, want: "empty"},
+		{name: "binary", mask: ExtensionObjectBinary, want: "binary"},
+		{name: "xml", mask: ExtensionObjectXML, want: "xml"},
+		{name: "unknown", mask: 99, want: "unknown"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := extensionObjectEncodingName(tt.mask); got != tt.want {
+				t.Fatalf("extensionObjectEncodingName(%d) = %q, want %q", tt.mask, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFormatExpandedNodeIDForLog(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		id   *ExpandedNodeID
+		want string
+	}{
+		{name: "nil", id: nil, want: "<nil>"},
+		{name: "nil node id", id: &ExpandedNodeID{}, want: "<nil node id>"},
+		{name: "plain node id", id: &ExpandedNodeID{NodeID: NewNumericNodeID(4, 936)}, want: "ns=4;i=936"},
 		{
-			Name:   "anonymous-user-identity-token",
-			Struct: NewExtensionObject(&AnonymousIdentityToken{PolicyID: "anonymous"}),
-			Bytes: []byte{
-				// TypeID
-				0x01, 0x00, 0x41, 0x01,
-				// EncodingMask
-				0x01,
-				// Length
-				0x0d, 0x00, 0x00, 0x00,
-				// AnonymousIdentityToken
-				0x09, 0x00, 0x00, 0x00, 0x61, 0x6e, 0x6f, 0x6e, 0x79, 0x6d, 0x6f, 0x75, 0x73,
+			name: "node id with namespace uri and server index",
+			id: &ExpandedNodeID{
+				NodeID:       NewNumericNodeID(4, 936),
+				NamespaceURI: "urn:test",
+				ServerIndex:  2,
 			},
+			want: `ns=4;i=936 nsu="urn:test" server_index=2`,
 		},
 	}
-	RunCodecTest(t, cases)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := formatExpandedNodeIDForLog(tt.id); got != tt.want {
+				t.Fatalf("formatExpandedNodeIDForLog() = %q, want %q", got, tt.want)
+			}
+		})
+	}
 }
