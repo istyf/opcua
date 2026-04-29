@@ -17,6 +17,7 @@ import (
 	"github.com/gopcua/opcua/ua"
 	"github.com/gopcua/opcua/uacp"
 	"github.com/gopcua/opcua/uapolicy"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -1180,6 +1181,16 @@ func TestOpenSecureChannelRequestDecodesBeforeSecurityModeNegotiation(t *testing
 	require.NoError(t, err)
 	require.Equal(t, uint16(id.OpenSecureChannelRequest_Encoding_DefaultBinary), uint16(typeID.NodeID.IntID()))
 	require.IsType(t, &ua.OpenSecureChannelRequest{}, body)
+}
+
+func TestMessageBodyFromRecoveredPanicReturnsError(t *testing.T) {
+	t.Parallel()
+
+	msg := messageBodyFromRecoveredPanic("boom")
+	require.NotNil(t, msg)
+	require.Error(t, msg.Err)
+	assert.Contains(t, msg.Err.Error(), "panic while receiving secure channel message")
+	assert.Contains(t, msg.Err.Error(), "boom")
 }
 
 func TestCreateSessionRequestMessageDecodes(t *testing.T) {

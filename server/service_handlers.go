@@ -6,6 +6,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 
 	srvctx "github.com/gopcua/opcua/server/context"
 	"github.com/gopcua/opcua/server/services"
@@ -47,6 +48,20 @@ func (s *serverImpl) handleService(ctx context.Context, sc *uasc.SecureChannel, 
 
 	var resp ua.Response
 	var err error
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			resp = serviceFaultFromRecoveredPanic(ctx, recovered)
+			err = nil
+		}
+		if resp == nil {
+			return
+		}
+
+		sendErr := sc.SendResponseWithContext(ctx, reqID, resp)
+		if sendErr != nil {
+			ualog.Warn(ctx, "unable to send response", ualog.Err(sendErr))
+		}
+	}()
 
 	typeID := int(ua.ServiceTypeID(req))
 	h, ok := s.handlers[typeID]
@@ -76,9 +91,11 @@ func (s *serverImpl) handleService(ctx context.Context, sc *uasc.SecureChannel, 
 	if resp == nil {
 		return
 	}
+}
 
-	err = sc.SendResponseWithContext(ctx, reqID, resp)
-	if err != nil {
-		ualog.Warn(ctx, "unable to send response", ualog.Err(err))
-	}
+func serviceFaultFromRecoveredPanic(ctx context.Context, recovered any) ua.Response {
+	ualog.Error(ctx, "recovered panic while handling service request",
+		ualog.String("panic", fmt.Sprint(recovered)),
+	)
+	return &ua.ServiceFault{ResponseHeader: services.NewResponseHeader(0, ua.StatusBadUnexpectedError)}
 }

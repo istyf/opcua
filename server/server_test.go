@@ -239,6 +239,16 @@ func TestWithUserNameAuthenticator(t *testing.T) {
 	assert.Same(t, expected, result)
 }
 
+func TestServiceFaultFromRecoveredPanicReturnsUnexpectedError(t *testing.T) {
+	t.Parallel()
+
+	resp := serviceFaultFromRecoveredPanic(t.Context(), "boom")
+	fault, ok := resp.(*ua.ServiceFault)
+	require.True(t, ok, "expected *ua.ServiceFault, got %T", resp)
+	require.NotNil(t, fault.ResponseHeader)
+	assert.Equal(t, ua.StatusBadUnexpectedError, fault.ResponseHeader.ServiceResult)
+}
+
 func TestTLSCertificateSetsLeafPrivateKeyAndAdvertisedChain(t *testing.T) {
 	t.Parallel()
 

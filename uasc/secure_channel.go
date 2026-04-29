@@ -67,6 +67,12 @@ func (b MessageBody) Response() ua.Response {
 	return nil
 }
 
+func messageBodyFromRecoveredPanic(recovered any) *MessageBody {
+	return &MessageBody{
+		Err: errors.Errorf("panic while receiving secure channel message: %v", recovered),
+	}
+}
+
 type conditionLocker struct {
 	bLock   bool
 	lockMu  sync.Mutex
@@ -331,7 +337,13 @@ func (s *SecureChannel) dispatcher() {
 // Receive receives message chunks from the secure channel, decodes and forwards
 // them to the registered callback channel, if there is one. Otherwise,
 // the message is dropped.
-func (s *SecureChannel) Receive(ctx context.Context) *MessageBody {
+func (s *SecureChannel) Receive(ctx context.Context) (msg *MessageBody) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			msg = messageBodyFromRecoveredPanic(recovered)
+			debug.Printf("uasc %d: recovered panic while receiving secure channel message: %v", s.c.ID(), recovered)
+		}
+	}()
 	for {
 		select {
 		case <-ctx.Done():
