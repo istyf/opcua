@@ -151,6 +151,103 @@ func TestNodeNamespaceAddNodeBindsVariableChangeNotifications(t *testing.T) {
 	assert.True(t, srv.changes[0].Equal(variable.ID()))
 }
 
+func TestNodeNamespaceProjectedVariableInstanceBindsMainAndPropertyNotifications(t *testing.T) {
+	t.Parallel()
+
+	srv := newMapNamespaceTestServer()
+	ns := NewNodeNameSpace(srv, "node")
+	source := node.NewBinding(struct {
+		Value int32
+		ID    int32
+		Name  string
+	}{
+		Value: 1,
+		ID:    10,
+		Name:  "Idle",
+	})
+
+	instance := node.NewProjectedVariableInstance(
+		source,
+		node.ProjectedVariableSpec[struct {
+			Value int32
+			ID    int32
+			Name  string
+		}]{
+			Base:         node.WithBase(node.WithID(ua.NewNumericNodeID(ns.ID(), 1006)), node.WithBrowseName(ns.NewQualifiedName("CurrentState"))),
+			VariableType: newNamespaceNodeTestVariableTypeNode(),
+			Value: func(s struct {
+				Value int32
+				ID    int32
+				Name  string
+			}) any {
+				return s.Value
+			},
+		},
+		node.ProjectedPropertySpec[struct {
+			Value int32
+			ID    int32
+			Name  string
+		}]{
+			ProjectedVariableSpec: node.ProjectedVariableSpec[struct {
+				Value int32
+				ID    int32
+				Name  string
+			}]{
+				Base:         node.WithBase(node.WithID(ua.NewNumericNodeID(ns.ID(), 1007)), node.WithBrowseName(ns.NewQualifiedName("Id"))),
+				VariableType: newNamespaceNodeTestVariableTypeNode(),
+				Value: func(s struct {
+					Value int32
+					ID    int32
+					Name  string
+				}) any {
+					return s.ID
+				},
+			},
+		},
+		node.ProjectedPropertySpec[struct {
+			Value int32
+			ID    int32
+			Name  string
+		}]{
+			ProjectedVariableSpec: node.ProjectedVariableSpec[struct {
+				Value int32
+				ID    int32
+				Name  string
+			}]{
+				Base:         node.WithBase(node.WithID(ua.NewNumericNodeID(ns.ID(), 1008)), node.WithBrowseName(ns.NewQualifiedName("Name"))),
+				VariableType: newNamespaceNodeTestVariableTypeNode(),
+				Value: func(s struct {
+					Value int32
+					ID    int32
+					Name  string
+				}) any {
+					return s.Name
+				},
+			},
+		},
+	)
+
+	ns.AddNode(instance.Main)
+	for _, property := range instance.Properties {
+		ns.AddNode(property)
+	}
+
+	source.Set(struct {
+		Value int32
+		ID    int32
+		Name  string
+	}{
+		Value: 2,
+		ID:    11,
+		Name:  "Running",
+	})
+
+	require.Len(t, srv.changes, 3)
+	assert.True(t, srv.changes[0].Equal(instance.Main.ID()))
+	assert.True(t, srv.changes[1].Equal(instance.Properties["Id"].ID()) || srv.changes[2].Equal(instance.Properties["Id"].ID()))
+	assert.True(t, srv.changes[1].Equal(instance.Properties["Name"].ID()) || srv.changes[2].Equal(instance.Properties["Name"].ID()))
+}
+
 type nodeNamespaceTestNode struct {
 	id          *ua.NodeID
 	browseName  *ua.QualifiedName
@@ -181,4 +278,14 @@ func (n nodeNamespaceTestNode) Attribute(context.Context, ua.AttributeID) (*type
 
 func (n nodeNamespaceTestNode) SetAttribute(context.Context, ua.AttributeID, *ua.DataValue) error {
 	return nil
+}
+
+func newNamespaceNodeTestVariableTypeNode() types.VariableTypeNode {
+	return node.NewVariableTypeNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(0, id.BaseDataVariableType)),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "BaseDataVariableType"}),
+		),
+		node.WithDefaultValue(ua.NewNumericNodeID(0, id.Int32), -1, int32(0)),
+	)
 }

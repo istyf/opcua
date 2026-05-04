@@ -100,6 +100,11 @@ func LinkWithHasComponentReferenceDescriptions(fromNode, toNode types.Node) {
 	toNode.AddRef(NewReferenceDescription(fromNode, HasComponentRefTypeID, false))
 }
 
+func LinkWithHasPropertyReferenceDescriptions(fromNode, toNode types.Node) {
+	fromNode.AddRef(NewReferenceDescription(toNode, HasPropertyRefTypeID, true))
+	toNode.AddRef(NewReferenceDescription(fromNode, HasPropertyRefTypeID, false))
+}
+
 func NewHasTypeDefinitionReferenceDescription(typeNode types.TypeNode) types.ReferenceWrapper {
 	return NewReferenceDescription(typeNode, HasTypeDefinitionRefTypeID, true)
 }
