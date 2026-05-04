@@ -69,6 +69,12 @@ func (as *NodeNameSpace) AddNode(n types.Node) types.Node {
 			if as.nodes[i] == existing {
 				as.nodes[i] = n
 				as.m[k] = n
+				if bindable, ok := n.(types.ChangeNotifierBindable); ok {
+					nodeID := n.ID()
+					bindable.BindChangeNotification(func() {
+						as.srv.ChangeNotification(context.Background(), nodeID)
+					})
+				}
 				return n
 			}
 		}
@@ -76,6 +82,14 @@ func (as *NodeNameSpace) AddNode(n types.Node) types.Node {
 
 	as.nodes = append(as.nodes, n)
 	as.m[k] = n
+
+	if bindable, ok := n.(types.ChangeNotifierBindable); ok {
+		nodeID := n.ID()
+		bindable.BindChangeNotification(func() {
+			as.srv.ChangeNotification(context.Background(), nodeID)
+		})
+	}
+
 	return n
 }
 

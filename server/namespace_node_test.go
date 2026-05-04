@@ -119,6 +119,38 @@ func TestNodeNamespaceAddNodeReplacesExistingNodeByID(t *testing.T) {
 	assert.Equal(t, "Replacement", ns.nodes[0].BrowseName().Name)
 }
 
+func TestNodeNamespaceAddNodeBindsVariableChangeNotifications(t *testing.T) {
+	t.Parallel()
+
+	srv := newMapNamespaceTestServer()
+	ns := NewNodeNameSpace(srv, "node")
+	binding := node.NewValueBinding(int32(1))
+	variable := node.NewVariableNode(
+		node.WithBase(
+			node.WithID(ua.NewNumericNodeID(ns.ID(), 1005)),
+			node.WithBrowseName(ns.NewQualifiedName("Variable")),
+			node.WithDisplayNames([]*ua.LocalizedText{ua.NewLocalizedText("Variable")}),
+		),
+		node.WithVariableType(
+			node.NewVariableTypeNode(
+				node.WithBase(
+					node.WithID(ua.NewNumericNodeID(0, id.BaseDataVariableType)),
+					node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "BaseDataVariableType"}),
+				),
+				node.WithDefaultValue(ua.NewNumericNodeID(0, id.Int32), -1, int32(0)),
+			),
+		),
+		node.WithValueBinding(binding),
+	)
+
+	ns.AddNode(variable)
+	binding.Set(int32(2))
+
+	require.Len(t, srv.changes, 1)
+	require.NotNil(t, srv.changes[0])
+	assert.True(t, srv.changes[0].Equal(variable.ID()))
+}
+
 type nodeNamespaceTestNode struct {
 	id          *ua.NodeID
 	browseName  *ua.QualifiedName

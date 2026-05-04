@@ -16,12 +16,18 @@ import (
 
 type ValueFunc func() *ua.DataValue
 
+type variableValueSource struct {
+	snapshotDataValue func() *ua.DataValue
+	onChange          func(func())
+	setDataValue      func(*ua.DataValue)
+}
+
 type variableConfig struct {
 	variableTypeNode types.VariableTypeNode
 
 	dataTypeNodeId *ua.NodeID
 	rank           int32
-	valueFunc      func() *ua.DataValue
+	valueSource    variableValueSource
 	historizing    bool
 
 	accessLevel   ua.AccessLevelType
@@ -83,18 +89,29 @@ func WithDataType(dataTypeNodeId *ua.NodeID) variableOption {
 func WithDataValue(value any) variableOption {
 	v, isVal := value.(*ua.DataValue)
 	f, isFun := value.(func() *ua.DataValue)
+	binding, isBinding := value.(types.DataValueBinding)
 
-	if !isVal && !isFun {
-		panic("variable data value must be a *ua.DataValue or a func returning *ua.DataValue")
+	if !isVal && !isFun && !isBinding {
+		panic("variable data value must be a *ua.DataValue, a func returning *ua.DataValue, or a DataValueBinding")
 	}
 
 	return func(cfg *variableConfig) {
 		if isVal {
-			cfg.valueFunc = func() *ua.DataValue { return v }
+			cfg.valueSource = dataValueSourceFromSnapshot(func() *ua.DataValue { return v })
 		} else if isFun {
-			cfg.valueFunc = f
+			cfg.valueSource = dataValueSourceFromSnapshot(f)
+		} else {
+			cfg.valueSource = dataValueSourceFromBinding(binding)
 		}
 	}
+}
+
+func WithDataValueFunc(valueFunc func() *ua.DataValue) variableOption {
+	return WithDataValue(valueFunc)
+}
+
+func WithDataValueBinding(binding types.DataValueBinding) variableOption {
+	return WithDataValue(binding)
 }
 
 func WithValueRank(rank int32) variableOption {
@@ -131,15 +148,38 @@ func WithValue(value any) variableOption {
 		cfg.rank = rank
 
 		dataValue := values.DataValueFromValue(value)
-		cfg.valueFunc = func() *ua.DataValue { return dataValue }
+		cfg.valueSource = dataValueSourceFromSnapshot(func() *ua.DataValue { return dataValue })
+	}
+}
+
+func WithValueFunc(valueFunc func() any) variableOption {
+	dataTypeNodeId, rank := LookupTypeNodeIDFromValue(valueFunc)
+	return func(cfg *variableConfig) {
+		if dataTypeNodeId != nil {
+			cfg.dataTypeNodeId = dataTypeNodeId
+			cfg.rank = rank
+		}
+		cfg.valueSource = dataValueSourceFromValueSnapshot(valueFunc)
+	}
+}
+
+func WithValueBinding(binding types.ValueBinding) variableOption {
+	dataTypeNodeId, rank := LookupTypeNodeIDFromValue(binding.Snapshot())
+	return func(cfg *variableConfig) {
+		if dataTypeNodeId != nil {
+			cfg.dataTypeNodeId = dataTypeNodeId
+			cfg.rank = rank
+		}
+		cfg.valueSource = dataValueSourceFromValueBinding(binding)
 	}
 }
 
 type variableNode struct {
 	baseNode
-	valueFunc              func() *ua.DataValue
+	valueSource            variableValueSource
 	accessLevel            ua.AccessLevelType
 	userAccessLevelHandler types.UserAccessLevelHandler
+	changeNotifier         func()
 }
 
 var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
@@ -162,6 +202,72 @@ var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
 	id.LocalizedText: ua.NewNumericNodeID(0, id.LocalizedText),
 }
 
+func cloneDataValue(value *ua.DataValue) *ua.DataValue {
+	if value == nil {
+		return nil
+	}
+	copy := *value
+	return &copy
+}
+
+func dataValueSourceFromSnapshot(snapshot func() *ua.DataValue) variableValueSource {
+	return variableValueSource{
+		snapshotDataValue: func() *ua.DataValue {
+			return cloneDataValue(snapshot())
+		},
+	}
+}
+
+func dataValueSourceFromValueSnapshot(snapshot func() any) variableValueSource {
+	return variableValueSource{
+		snapshotDataValue: func() *ua.DataValue {
+			value := snapshot()
+			if value == nil {
+				return nil
+			}
+			return values.DataValueFromValue(value)
+		},
+	}
+}
+
+func dataValueSourceFromBinding(binding types.DataValueBinding) variableValueSource {
+	source := variableValueSource{
+		snapshotDataValue: binding.SnapshotDataValue,
+		onChange:          binding.OnChange,
+	}
+
+	if mutableBinding, ok := binding.(types.MutableDataValueBinding); ok {
+		source.setDataValue = mutableBinding.SetDataValue
+	}
+
+	return source
+}
+
+func dataValueSourceFromValueBinding(binding types.ValueBinding) variableValueSource {
+	source := variableValueSource{
+		snapshotDataValue: func() *ua.DataValue {
+			value := binding.Snapshot()
+			if value == nil {
+				return nil
+			}
+			return values.DataValueFromValue(value)
+		},
+		onChange: binding.OnChange,
+	}
+
+	if mutableBinding, ok := binding.(types.MutableValueBinding); ok {
+		source.setDataValue = func(value *ua.DataValue) {
+			if value == nil || value.Value == nil {
+				mutableBinding.Set(nil)
+				return
+			}
+			mutableBinding.Set(value.Value.Value())
+		}
+	}
+
+	return source
+}
+
 func LookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 	valueRank := int32(-1)
 
@@ -170,6 +276,14 @@ func LookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 		if dataValue := v(); dataValue != nil && dataValue.Value != nil {
 			return LookupTypeNodeIDFromValue(dataValue.Value.Value())
 		}
+	case func() any:
+		return LookupTypeNodeIDFromValue(v())
+	case types.DataValueBinding:
+		if dataValue := v.SnapshotDataValue(); dataValue != nil && dataValue.Value != nil {
+			return LookupTypeNodeIDFromValue(dataValue.Value.Value())
+		}
+	case types.ValueBinding:
+		return LookupTypeNodeIDFromValue(v.Snapshot())
 	case bool:
 		return typeNodeIdFromDataType[id.Boolean], valueRank
 	case int8:
@@ -252,7 +366,7 @@ func NewVariableNode(base func(ua.NodeClass) *baseConfig, opts ...variableOption
 
 	n := &variableNode{
 		baseNode:               *newBaseNode(base(ua.NodeClassVariable)),
-		valueFunc:              cfg.valueFunc,
+		valueSource:            cfg.valueSource,
 		accessLevel:            cfg.accessLevel,
 		userAccessLevelHandler: cfg.userAccessLevelHandler,
 	}
@@ -300,7 +414,7 @@ func (n *variableNode) Attribute(ctx context.Context, id ua.AttributeID) (*types
 			}), nil
 		}
 
-		return NewAttrValue(n.valueFunc()), nil
+		return NewAttrValue(n.Value()), nil
 	}
 
 	return n.baseNode.Attribute(ctx, id)
@@ -313,13 +427,12 @@ func (n *variableNode) SetAttribute(ctx context.Context, id ua.AttributeID, val 
 			return ua.StatusBadUserAccessDenied
 		}
 
-		if val != nil {
-			copy := *val
-			n.SetValueFunc(func() *ua.DataValue { return &copy })
-		} else {
-			n.SetValue(nil)
+		if n.valueSource.setDataValue != nil {
+			n.valueSource.setDataValue(cloneDataValue(val))
+			return nil
 		}
 
+		n.SetValue(cloneDataValue(val))
 		return nil
 	}
 
@@ -331,5 +444,27 @@ func (n *variableNode) SetValue(value *ua.DataValue) {
 }
 
 func (n *variableNode) SetValueFunc(valueFunc func() *ua.DataValue) {
-	n.valueFunc = valueFunc
+	n.setValueSource(dataValueSourceFromSnapshot(valueFunc))
+}
+
+func (n *variableNode) SetValueBinding(binding types.ValueBinding) {
+	n.setValueSource(dataValueSourceFromValueBinding(binding))
+}
+
+func (n *variableNode) SetDataValueBinding(binding types.DataValueBinding) {
+	n.setValueSource(dataValueSourceFromBinding(binding))
+}
+
+func (n *variableNode) BindChangeNotification(fn func()) {
+	n.changeNotifier = fn
+	if fn != nil && n.valueSource.onChange != nil {
+		n.valueSource.onChange(fn)
+	}
+}
+
+func (n *variableNode) setValueSource(source variableValueSource) {
+	n.valueSource = source
+	if n.changeNotifier != nil && source.onChange != nil {
+		source.onChange(n.changeNotifier)
+	}
 }

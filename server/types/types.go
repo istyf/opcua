@@ -131,8 +131,16 @@ type VariableNode interface {
 	Value() *ua.DataValue
 	SetValue(*ua.DataValue)
 	SetValueFunc(func() *ua.DataValue)
+	SetValueBinding(ValueBinding)
+	SetDataValueBinding(DataValueBinding)
 
 	Attribute(context.Context, ua.AttributeID) (*AttrValue, error)
+}
+
+// ChangeNotifierBindable is implemented by nodes that can notify the server
+// when their dynamic value source changes.
+type ChangeNotifierBindable interface {
+	BindChangeNotification(func())
 }
 
 type VariableTypeNode interface {
@@ -181,6 +189,35 @@ type MethodFunc func(context.Context, ...*ua.Variant) *MethodResult
 type MethodMiddleware func(MethodFunc) MethodFunc
 type MethodUserExecutableHandler func(context.Context) bool
 type UserAccessLevelHandler func(context.Context, ua.AccessLevelType) ua.AccessLevelType
+
+// ValueBinding provides a current payload value and a change-notification hook
+// for dynamic variables.
+type ValueBinding interface {
+	Snapshot() any
+	OnChange(func())
+}
+
+// MutableValueBinding extends ValueBinding with mutation support for simple
+// value-centric dynamic variables.
+type MutableValueBinding interface {
+	ValueBinding
+	Set(any)
+}
+
+// DataValueBinding provides a current OPC UA DataValue snapshot and a
+// change-notification hook for dynamic variables that need status codes,
+// timestamps, or other DataValue semantics.
+type DataValueBinding interface {
+	SnapshotDataValue() *ua.DataValue
+	OnChange(func())
+}
+
+// MutableDataValueBinding extends DataValueBinding with mutation support for
+// full DataValue snapshots.
+type MutableDataValueBinding interface {
+	DataValueBinding
+	SetDataValue(*ua.DataValue)
+}
 
 type ServerConfig interface {
 	Certificate() []byte

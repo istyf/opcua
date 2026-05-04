@@ -119,7 +119,10 @@ func (n *baseNode) ID() *ua.NodeID {
 }
 
 func (n *variableNode) Value() *ua.DataValue {
-	return n.valueFunc()
+	if n.valueSource.snapshotDataValue == nil {
+		return nil
+	}
+	return n.valueSource.snapshotDataValue()
 }
 
 func (n *baseNode) Attribute(ctx context.Context, id ua.AttributeID) (*types.AttrValue, error) {

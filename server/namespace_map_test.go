@@ -71,6 +71,7 @@ type mapNamespaceTestServer struct {
 	namespaces map[int]types.NameSpace
 	nodes      map[string]types.Node
 	nextNS     uint16
+	changes    []*ua.NodeID
 }
 
 func newMapNamespaceTestServer() *mapNamespaceTestServer {
@@ -137,7 +138,9 @@ func (s *mapNamespaceTestServer) Node(id *ua.NodeID) types.Node {
 	return ns.Node(id)
 }
 
-func (s *mapNamespaceTestServer) ChangeNotification(context.Context, *ua.NodeID) {}
+func (s *mapNamespaceTestServer) ChangeNotification(_ context.Context, id *ua.NodeID) {
+	s.changes = append(s.changes, id)
+}
 
 func (s *mapNamespaceTestServer) DeleteSubscription(types.SubscriptionID) {}
 
