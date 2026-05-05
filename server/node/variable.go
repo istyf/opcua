@@ -196,6 +196,7 @@ var typeNodeIdFromDataType map[int]*ua.NodeID = map[int]*ua.NodeID{
 	id.Double:        ua.NewNumericNodeID(0, id.Double),
 	id.String:        ua.NewNumericNodeID(0, id.String),
 	id.ByteString:    ua.NewNumericNodeID(0, id.ByteString),
+	id.NodeID:        ua.NewNumericNodeID(0, id.NodeID),
 	id.UtcTime:       ua.NewNumericNodeID(0, id.UtcTime),
 	id.DateTime:      ua.NewNumericNodeID(0, id.DateTime),
 	id.QualifiedName: ua.NewNumericNodeID(0, id.QualifiedName),
@@ -339,10 +340,12 @@ func LookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 		return typeNodeIdFromDataType[id.LocalizedText], valueRank
 	case []*ua.LocalizedText:
 		return typeNodeIdFromDataType[id.LocalizedText], 1
+	case *ua.NodeID:
+		return typeNodeIdFromDataType[id.NodeID], valueRank
 	case []byte:
 		return typeNodeIdFromDataType[id.ByteString], valueRank
 	default:
-		fmt.Printf("failed to handle value type: %v (%T)", v, v)
+		fmt.Printf("failed to handle value type: %v (%T)\n", v, v)
 	}
 
 	return nil, valueRank
