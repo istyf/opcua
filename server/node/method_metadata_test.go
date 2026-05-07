@@ -85,6 +85,28 @@ func TestMethodInputArgumentMatchesBuiltinScalarStillMatches(t *testing.T) {
 	}, ua.MustVariant(int32(42))))
 }
 
+func TestMethodInputArgumentMatchesAcceptsInt32ForDeclaredEnumType(t *testing.T) {
+	t.Parallel()
+
+	resolver, ids := newMethodMetadataResolver(t)
+
+	assert.True(t, MethodInputArgumentMatches(resolver, &ua.Argument{
+		DataType:  ids.enumType,
+		ValueRank: -1,
+	}, ua.MustVariant(int32(2))))
+}
+
+func TestMethodInputArgumentMatchesRejectsInt32ForNonEnumDeclaredType(t *testing.T) {
+	t.Parallel()
+
+	resolver, ids := newMethodMetadataResolver(t)
+
+	assert.False(t, MethodInputArgumentMatches(resolver, &ua.Argument{
+		DataType:  ids.declaredType,
+		ValueRank: -1,
+	}, ua.MustVariant(int32(2))))
+}
+
 func TestMethodInputArgumentMatchesArrayStillMatches(t *testing.T) {
 	t.Parallel()
 
@@ -92,6 +114,17 @@ func TestMethodInputArgumentMatchesArrayStillMatches(t *testing.T) {
 		DataType:  ua.NewNumericNodeID(0, id.String),
 		ValueRank: 1,
 	}, ua.MustVariant([]string{"a", "b"})))
+}
+
+func TestMethodInputArgumentMatchesAcceptsInt32ArrayForDeclaredEnumType(t *testing.T) {
+	t.Parallel()
+
+	resolver, ids := newMethodMetadataResolver(t)
+
+	assert.True(t, MethodInputArgumentMatches(resolver, &ua.Argument{
+		DataType:  ids.enumType,
+		ValueRank: 1,
+	}, ua.MustVariant([]int32{1, 2})))
 }
 
 func TestMethodInputArgumentMatchesExtensionObjectArrayStillMatches(t *testing.T) {
@@ -112,6 +145,7 @@ func TestMethodInputArgumentMatchesExtensionObjectArrayStillMatches(t *testing.T
 
 type methodMetadataIDs struct {
 	declaredType            *ua.NodeID
+	enumType                *ua.NodeID
 	binaryEncodingType      *ua.NodeID
 	xmlEncodingType         *ua.NodeID
 	otherBinaryEncodingType *ua.NodeID
@@ -126,12 +160,26 @@ func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, metho
 			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "ObjectType"}),
 		),
 	)
+	enumerationType := NewDataTypeNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(0, id.Enumeration)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "Enumeration"}),
+		),
+	)
 	declaredType := NewDataTypeNode(
 		WithBase(
 			WithID(ua.NewNumericNodeID(2, 7001)),
 			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "StructuredType"}),
 		),
 	)
+	enumType := NewDataTypeNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(2, 7006)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 2, Name: "CustomEnum"}),
+		),
+	)
+	enumType.AddRef(refs.NewReferenceDescription(enumerationType, ua.NewNumericNodeID(0, id.HasSubtype), false))
+
 	binaryEncodingNode := NewObjectNode(
 		WithBase(
 			WithID(ua.NewNumericNodeID(2, 7002)),
@@ -168,9 +216,19 @@ func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, metho
 	otherBinaryEncodingNode.AddRef(refs.NewReferenceDescription(otherType, ua.NewNumericNodeID(0, id.HasEncoding), false))
 	otherType.AddRef(refs.NewReferenceDescription(otherBinaryEncodingNode, ua.NewNumericNodeID(0, id.HasEncoding), true))
 
+	ns0 := &methodMetadataTestNamespace{
+		id:   0,
+		name: "http://opcfoundation.org/UA/",
+		nodes: map[string]types.Node{
+			enumerationType.ID().String(): enumerationType,
+		},
+	}
 	ns := &methodMetadataTestNamespace{
+		id:   2,
+		name: "urn:test:method-metadata",
 		nodes: map[string]types.Node{
 			declaredType.ID().String():            declaredType,
+			enumType.ID().String():                enumType,
 			binaryEncodingNode.ID().String():      binaryEncodingNode,
 			xmlEncodingNode.ID().String():         xmlEncodingNode,
 			otherType.ID().String():               otherType,
@@ -180,11 +238,15 @@ func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, metho
 	}
 
 	resolver := &methodMetadataTestResolver{
-		namespaces: map[int]types.NameSpace{2: ns},
+		namespaces: map[int]types.NameSpace{
+			0: ns0,
+			2: ns,
+		},
 	}
 
 	return resolver, methodMetadataIDs{
 		declaredType:            declaredType.ID(),
+		enumType:                enumType.ID(),
 		binaryEncodingType:      binaryEncodingNode.ID(),
 		xmlEncodingType:         xmlEncodingNode.ID(),
 		otherBinaryEncodingType: otherBinaryEncodingNode.ID(),
@@ -212,10 +274,12 @@ func (r *methodMetadataTestResolver) Namespaces() []types.NameSpace {
 }
 
 type methodMetadataTestNamespace struct {
+	id    uint16
+	name  string
 	nodes map[string]types.Node
 }
 
-func (*methodMetadataTestNamespace) Name() string                    { return "urn:test:method-metadata" }
+func (ns *methodMetadataTestNamespace) Name() string                 { return ns.name }
 func (*methodMetadataTestNamespace) AddNode(n types.Node) types.Node { return n }
 func (ns *methodMetadataTestNamespace) Node(id *ua.NodeID) types.Node {
 	if id == nil {
@@ -226,16 +290,16 @@ func (ns *methodMetadataTestNamespace) Node(id *ua.NodeID) types.Node {
 func (*methodMetadataTestNamespace) Browse(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
 	return nil
 }
-func (*methodMetadataTestNamespace) ID() uint16   { return 2 }
-func (*methodMetadataTestNamespace) SetID(uint16) {}
+func (ns *methodMetadataTestNamespace) ID() uint16 { return ns.id }
+func (*methodMetadataTestNamespace) SetID(uint16)  {}
 func (*methodMetadataTestNamespace) Attribute(context.Context, *ua.NodeID, ua.AttributeID) *ua.DataValue {
 	return nil
 }
 func (*methodMetadataTestNamespace) SetAttribute(context.Context, *ua.NodeID, ua.AttributeID, *ua.DataValue) ua.StatusCode {
 	return ua.StatusOK
 }
-func (*methodMetadataTestNamespace) NewQualifiedName(name string) *ua.QualifiedName {
-	return &ua.QualifiedName{NamespaceIndex: 2, Name: name}
+func (ns *methodMetadataTestNamespace) NewQualifiedName(name string) *ua.QualifiedName {
+	return &ua.QualifiedName{NamespaceIndex: ns.id, Name: name}
 }
 func (*methodMetadataTestNamespace) NextAvailableID() *ua.NodeID {
 	panic("NextAvailableID should not be called in method metadata tests")

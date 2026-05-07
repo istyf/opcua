@@ -96,6 +96,9 @@ func MethodInputArgumentMatches(resolver namespaceResolver, declared *ua.Argumen
 	if declared.DataType == nil || declared.DataType.Equal(actualType) {
 		return true
 	}
+	if methodArgumentEnumScalarMatchesDeclaredDataType(resolver, declared.DataType, actualType) {
+		return true
+	}
 
 	if !isExtensionObjectValue(value.Value()) || resolver == nil {
 		return false
@@ -104,6 +107,70 @@ func MethodInputArgumentMatches(resolver namespaceResolver, declared *ua.Argumen
 	actualType = extensionObjectTypeNodeID(resolver, value.Value(), actualType)
 
 	return methodArgumentEncodingMatchesDeclaredDataType(resolver, declared.DataType, actualType)
+}
+
+func methodArgumentEnumScalarMatchesDeclaredDataType(resolver namespaceResolver, declaredType, actualType *ua.NodeID) bool {
+	if resolver == nil || declaredType == nil || actualType == nil {
+		return false
+	}
+	if actualType.Namespace() != 0 || actualType.IntID() != id.Int32 {
+		return false
+	}
+
+	return dataTypeDerivesFrom(resolver, declaredType, ua.NewNumericNodeID(0, id.Enumeration))
+}
+
+func dataTypeDerivesFrom(resolver namespaceResolver, declaredType, superType *ua.NodeID) bool {
+	if resolver == nil || declaredType == nil || superType == nil {
+		return false
+	}
+
+	pending := []*ua.NodeID{declaredType}
+	seen := map[string]struct{}{}
+
+	for len(pending) > 0 {
+		current := pending[len(pending)-1]
+		pending = pending[:len(pending)-1]
+		if current == nil {
+			continue
+		}
+		if current.Equal(superType) {
+			return true
+		}
+		if _, ok := seen[current.String()]; ok {
+			continue
+		}
+		seen[current.String()] = struct{}{}
+
+		currentNS, err := resolver.Namespace(int(current.Namespace()))
+		if err != nil {
+			continue
+		}
+
+		currentNode := currentNS.Node(current)
+		if currentNode == nil {
+			continue
+		}
+
+		for ref := range currentNode.References().Find(func(ref types.ReferenceWrapper) bool {
+			return ref.IsReferenceType(id.HasSubtype) && !ref.IsForward()
+		}) {
+			target := ref.TargetNode()
+			if target != nil {
+				pending = append(pending, target.ID())
+				continue
+			}
+
+			targetID := ref.TargetNodeID()
+			if targetID == nil || targetID.NodeID == nil {
+				continue
+			}
+
+			pending = append(pending, targetID.NodeID)
+		}
+	}
+
+	return false
 }
 
 func methodArgumentEncodingMatchesDeclaredDataType(resolver namespaceResolver, declaredType, actualType *ua.NodeID) bool {
