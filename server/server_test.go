@@ -8,9 +8,11 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"errors"
+	"fmt"
 	"math"
 	"math/big"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
@@ -481,4 +483,53 @@ func TestInitEndpointsOmitsUserNameWithoutSecurePolicy(t *testing.T) {
 	require.Len(t, endpoints, 1)
 	require.Len(t, endpoints[0].UserIdentityTokens, 1)
 	assert.Equal(t, "anonymous_none", endpoints[0].UserIdentityTokens[0].PolicyID)
+}
+
+func TestResolvedEndpointURLsRewritesConfiguredPorts(t *testing.T) {
+	t.Parallel()
+
+	got := resolvedEndpointURLs([]string{
+		"opc.tcp://localhost:0",
+		"opc.tcp://example.com:4840/path",
+	}, 51234)
+
+	assert.Equal(t, []string{
+		"opc.tcp://localhost:51234",
+		"opc.tcp://example.com:51234/path",
+	}, got)
+}
+
+func TestStartWithPortZeroPublishesResolvedPort(t *testing.T) {
+	ctx := t.Context()
+
+	srv := New(ctx,
+		EndPoint("localhost", 0),
+		EnableSecurity(SecurityPolicyNone, ua.MessageSecurityModeNone),
+		EnableAuthMode(ua.UserTokenTypeAnonymous),
+	)
+
+	err := srv.Start(ctx)
+	if err != nil && strings.Contains(err.Error(), "operation not permitted") {
+		t.Skipf("listener bind not permitted in this environment: %v", err)
+	}
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		require.NoError(t, srv.Close(context.WithoutCancel(ctx)))
+	})
+
+	port := srv.PortNumber()
+	require.Positive(t, port)
+
+	endpoints := srv.Endpoints()
+	require.NotEmpty(t, endpoints)
+
+	for _, ep := range endpoints {
+		assert.Contains(t, ep.EndpointURL, fmt.Sprintf(":%d", port))
+		assert.NotContains(t, ep.EndpointURL, ":0")
+	}
+
+	for _, url := range srv.(*serverImpl).URLs() {
+		assert.Contains(t, url, fmt.Sprintf(":%d", port))
+		assert.False(t, strings.HasSuffix(url, ":0"))
+	}
 }

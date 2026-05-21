@@ -163,6 +163,7 @@ type Server interface {
 
 	Config() ServerConfig
 	Endpoints() []*ua.EndpointDescription
+	PortNumber() int
 	Session(ctx context.Context, hdr *ua.RequestHeader) Session
 	Status() *ua.ServerStatusDataType
 

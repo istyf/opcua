@@ -1101,6 +1101,8 @@ func (s *viewTestServer) Config() types.ServerConfig { return viewTestConfig{} }
 
 func (s *viewTestServer) Endpoints() []*ua.EndpointDescription { return nil }
 
+func (s *viewTestServer) PortNumber() int { return 0 }
+
 func (s *viewTestServer) Session(context.Context, *ua.RequestHeader) types.Session { return nil }
 
 func (s *viewTestServer) Status() *ua.ServerStatusDataType { return nil }

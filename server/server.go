@@ -10,7 +10,9 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -31,19 +33,21 @@ const defaultListenAddr = "opc.tcp://localhost:0"
 
 // serverImpl is a high-level OPC-UA Server
 type serverImpl struct {
-	url string
+	listenURL string
 
 	cfg *serverConfig
 
 	importDeprecatedNodeSetNodes bool
 
-	mu         sync.Mutex
-	status     *ua.ServerStatusDataType
-	endpoints  []*ua.EndpointDescription
-	namespaces []types.NameSpace
-	closeOnce  sync.Once
-	runCancel  context.CancelFunc
-	runWG      sync.WaitGroup
+	mu           sync.Mutex
+	status       *ua.ServerStatusDataType
+	endpoints    []*ua.EndpointDescription
+	resolvedURLs []string
+	portNumber   int
+	namespaces   []types.NameSpace
+	closeOnce    sync.Once
+	runCancel    context.CancelFunc
+	runWG        sync.WaitGroup
 
 	l  *uacp.Listener
 	cb *channelBroker
@@ -83,13 +87,13 @@ func New(ctx context.Context, opts ...Option) types.Server {
 		opt(ctx, cfg)
 	}
 
-	url := ""
+	listenURL := ""
 	if len(cfg.endpoints) != 0 {
-		url = cfg.endpoints[0]
+		listenURL = cfg.endpoints[0]
 	}
 
 	s := &serverImpl{
-		url:        url,
+		listenURL:  listenURL,
 		cfg:        cfg,
 		cb:         newChannelBroker(),
 		sb:         newSessionBroker(),
@@ -218,8 +222,25 @@ func (s *serverImpl) Status() *ua.ServerStatusDataType {
 }
 
 // URLs returns opc endpoint that the server is listening on.
+//
+// Before Start, this returns the configured endpoint URLs verbatim. After
+// Start, it returns the runtime-resolved URLs, including the actual bound port
+// when the server was configured with port 0.
 func (s *serverImpl) URLs() []string {
+	s.mu.Lock()
+	urls := slices.Clone(s.resolvedURLs)
+	s.mu.Unlock()
+	if len(urls) != 0 {
+		return urls
+	}
 	return s.Config().Endpoints()
+}
+
+func (s *serverImpl) PortNumber() int {
+	s.mu.Lock()
+	portNumber := s.portNumber
+	s.mu.Unlock()
+	return portNumber
 }
 
 // Start initializes and starts a Server listening on addr
@@ -238,13 +259,19 @@ func (s *serverImpl) Start(ctx context.Context) error {
 	// Register all service handlers
 	s.initHandlers()
 
-	if s.url == "" {
-		s.url = defaultListenAddr
+	if s.listenURL == "" {
+		s.listenURL = defaultListenAddr
 	}
-	s.l, err = uacp.Listen(ctx, s.url, nil)
+	s.l, err = uacp.Listen(ctx, s.listenURL, nil)
 	if err != nil {
 		return err
 	}
+
+	port := listenerPort(s.l)
+	s.mu.Lock()
+	s.portNumber = port
+	s.resolvedURLs = resolvedEndpointURLs(s.cfg.endpoints, port)
+	s.mu.Unlock()
 
 	ualog.Info(ctx, "started listening", ualog.Any("urls", s.URLs()))
 
@@ -461,8 +488,12 @@ func (s *serverImpl) monitorConnections(ctx context.Context) {
 // initEndpoints builds the endpoint list from the server's configuration
 func (s *serverImpl) initEndpoints() {
 	var endpoints []*ua.EndpointDescription
+	resolvedURLs := s.URLs()
+	// The server currently creates a single listener using the first configured
+	// endpoint. We still advertise every configured endpoint URL shape, but all
+	// of them implicitly share that one listener and its resolved port.
 	for _, sec := range s.cfg.enabledSec {
-		for _, url := range s.cfg.endpoints {
+		for _, url := range resolvedURLs {
 			secLevel := uapolicy.SecurityLevel(sec.secPolicy.URI(), sec.secMode)
 
 			ep := &ua.EndpointDescription{
@@ -529,6 +560,42 @@ func (s *serverImpl) initEndpoints() {
 	s.mu.Lock()
 	s.endpoints = endpoints
 	s.mu.Unlock()
+}
+
+func listenerPort(l *uacp.Listener) int {
+	if l == nil {
+		return 0
+	}
+
+	addr, ok := l.Addr().(*net.TCPAddr)
+	if !ok || addr == nil {
+		return 0
+	}
+
+	return addr.Port
+}
+
+func resolvedEndpointURLs(configured []string, port int) []string {
+	if len(configured) == 0 {
+		return nil
+	}
+	if port <= 0 {
+		return slices.Clone(configured)
+	}
+
+	resolved := make([]string, 0, len(configured))
+	for _, endpoint := range configured {
+		u, err := url.Parse(endpoint)
+		if err != nil || u == nil || u.Hostname() == "" {
+			resolved = append(resolved, endpoint)
+			continue
+		}
+
+		u.Host = net.JoinHostPort(u.Hostname(), strconv.Itoa(port))
+		resolved = append(resolved, u.String())
+	}
+
+	return resolved
 }
 
 func (s *serverImpl) Node(nid *ua.NodeID) types.Node {

@@ -148,6 +148,8 @@ func (s *mapNamespaceTestServer) Config() types.ServerConfig { return mapNamespa
 
 func (s *mapNamespaceTestServer) Endpoints() []*ua.EndpointDescription { return nil }
 
+func (s *mapNamespaceTestServer) PortNumber() int { return 0 }
+
 func (s *mapNamespaceTestServer) Session(context.Context, *ua.RequestHeader) types.Session {
 	return nil
 }
