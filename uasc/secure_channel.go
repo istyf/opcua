@@ -890,6 +890,7 @@ func (s *SecureChannel) handleOpenSecureChannelRequest(ctx context.Context, reqI
 	if err != nil {
 		return err
 	}
+	instance.SetMaximumBodySize(int(s.c.SendBufSize()))
 
 	instance.state = channelActive // todo(fs): is this correct?
 	// s.setState(secureChannelOpen)
