@@ -55,6 +55,11 @@ func (s *NodeNameSpace) ChangeNotification(ctx context.Context, nodeid *ua.NodeI
 	s.srv.ChangeNotification(ctx, nodeid)
 }
 
+// EmitEvent emits an OPC UA event from sourceNodeID through the owning server.
+func (s *NodeNameSpace) EmitEvent(ctx context.Context, sourceNodeID *ua.NodeID, event *types.Event) error {
+	return s.srv.EmitEvent(ctx, sourceNodeID, event)
+}
+
 func (ns *NodeNameSpace) Name() string {
 	return ns.name
 }

@@ -151,6 +151,22 @@ func TestNodeNamespaceAddNodeBindsVariableChangeNotifications(t *testing.T) {
 	assert.True(t, srv.changes[0].Equal(variable.ID()))
 }
 
+func TestNodeNamespaceEmitEventDelegatesToServer(t *testing.T) {
+	t.Parallel()
+
+	srv := newMapNamespaceTestServer()
+	ns := NewNodeNameSpace(srv, "node")
+	sourceNodeID := ua.NewNumericNodeID(ns.ID(), 1006)
+	event := &types.Event{Message: ua.NewLocalizedText("event")}
+
+	require.NoError(t, ns.EmitEvent(t.Context(), sourceNodeID, event))
+
+	require.Len(t, srv.events, 1)
+	require.NotNil(t, srv.events[0].sourceNodeID)
+	assert.True(t, srv.events[0].sourceNodeID.Equal(sourceNodeID))
+	assert.Same(t, event, srv.events[0].event)
+}
+
 func TestNodeNamespaceProjectedVariableInstanceBindsMainAndPropertyNotifications(t *testing.T) {
 	t.Parallel()
 

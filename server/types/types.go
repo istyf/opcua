@@ -159,6 +159,7 @@ type Server interface {
 	Node(*ua.NodeID) Node
 
 	ChangeNotification(context.Context, *ua.NodeID)
+	EmitEvent(context.Context, *ua.NodeID, *Event) error
 	DeleteSubscription(id SubscriptionID)
 
 	Config() ServerConfig

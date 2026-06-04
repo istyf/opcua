@@ -72,6 +72,7 @@ type mapNamespaceTestServer struct {
 	nodes      map[string]types.Node
 	nextNS     uint16
 	changes    []*ua.NodeID
+	events     []mapNamespaceTestEvent
 }
 
 func newMapNamespaceTestServer() *mapNamespaceTestServer {
@@ -142,6 +143,14 @@ func (s *mapNamespaceTestServer) ChangeNotification(_ context.Context, id *ua.No
 	s.changes = append(s.changes, id)
 }
 
+func (s *mapNamespaceTestServer) EmitEvent(_ context.Context, sourceNodeID *ua.NodeID, event *types.Event) error {
+	s.events = append(s.events, mapNamespaceTestEvent{
+		sourceNodeID: sourceNodeID,
+		event:        event,
+	})
+	return nil
+}
+
 func (s *mapNamespaceTestServer) DeleteSubscription(types.SubscriptionID) {}
 
 func (s *mapNamespaceTestServer) Config() types.ServerConfig { return mapNamespaceTestConfig{} }
@@ -203,3 +212,8 @@ func (mapNamespaceTestConfig) MinSubscriptionMaxKeepAliveCount() uint32 { return
 func (mapNamespaceTestConfig) MinSubscriptionLifetimeCount() uint32 { return 0 }
 
 func (mapNamespaceTestConfig) MethodCallMiddleware() types.MethodMiddleware { return nil }
+
+type mapNamespaceTestEvent struct {
+	sourceNodeID *ua.NodeID
+	event        *types.Event
+}

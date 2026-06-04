@@ -1095,6 +1095,8 @@ func (s *viewTestServer) Node(id *ua.NodeID) types.Node {
 
 func (s *viewTestServer) ChangeNotification(context.Context, *ua.NodeID) {}
 
+func (s *viewTestServer) EmitEvent(context.Context, *ua.NodeID, *types.Event) error { return nil }
+
 func (s *viewTestServer) DeleteSubscription(types.SubscriptionID) {}
 
 func (s *viewTestServer) Config() types.ServerConfig { return viewTestConfig{} }
