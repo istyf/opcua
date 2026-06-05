@@ -36,6 +36,7 @@ func (c *PKCS1v15) Decrypt(src []byte) ([]byte, error) {
 	for srcRemaining > 0 {
 		end := min(start+blockSize, len(src))
 
+		//lint:ignore SA1019 OPC UA Basic128Rsa15 requires PKCS #1 v1.5 encryption.
 		p, err := rsa.DecryptPKCS1v15(rng, c.PrivateKey, src[start:end])
 		if err != nil {
 			return nil, err
@@ -64,6 +65,7 @@ func (c *PKCS1v15) Encrypt(src []byte) ([]byte, error) {
 	for srcRemaining > 0 {
 		end := min(start+maxBlock, len(src))
 
+		//lint:ignore SA1019 OPC UA Basic128Rsa15 requires PKCS #1 v1.5 encryption.
 		c, err := rsa.EncryptPKCS1v15(rng, c.PublicKey, src[start:end])
 		if err != nil {
 			return nil, err
