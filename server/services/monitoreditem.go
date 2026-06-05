@@ -303,67 +303,6 @@ func monitoredItemEventFilter(filterObject *ua.ExtensionObject) (*ua.EventFilter
 	}
 }
 
-func newEventFilterResult(filter *ua.EventFilter) *ua.ExtensionObject {
-	result := &ua.EventFilterResult{
-		SelectClauseDiagnosticInfos: []*ua.DiagnosticInfo{},
-	}
-	if filter != nil {
-		result.SelectClauseResults = make([]ua.StatusCode, len(filter.SelectClauses))
-		for i := range result.SelectClauseResults {
-			result.SelectClauseResults[i] = ua.StatusOK
-		}
-	}
-	return ua.NewExtensionObject(result)
-}
-
-func validateEventFilter(filter *ua.EventFilter, filterResult *ua.ExtensionObject) ua.StatusCode {
-	if filter == nil {
-		return ua.StatusBadMonitoredItemFilterInvalid
-	}
-
-	result, _ := filterResult.Value.(*ua.EventFilterResult)
-	var status ua.StatusCode = ua.StatusOK
-	for i, clause := range filter.SelectClauses {
-		if clause == nil || clause.AttributeID != ua.AttributeIDValue {
-			if result != nil && i < len(result.SelectClauseResults) {
-				result.SelectClauseResults[i] = ua.StatusBadFilterOperandInvalid
-			}
-			status = ua.StatusBadEventFilterInvalid
-		}
-	}
-	if status != ua.StatusOK {
-		return status
-	}
-
-	if filter.WhereClause != nil && len(filter.WhereClause.Elements) > 0 {
-		if result != nil {
-			result.WhereClauseResult = unsupportedContentFilterResult(filter.WhereClause)
-		}
-		return ua.StatusBadMonitoredItemFilterUnsupported
-	}
-
-	return ua.StatusOK
-}
-
-func unsupportedContentFilterResult(where *ua.ContentFilter) *ua.ContentFilterResult {
-	result := &ua.ContentFilterResult{
-		ElementResults:         make([]*ua.ContentFilterElementResult, len(where.Elements)),
-		ElementDiagnosticInfos: []*ua.DiagnosticInfo{},
-	}
-	for i, element := range where.Elements {
-		operandCount := 0
-		if element != nil {
-			operandCount = len(element.FilterOperands)
-		}
-		result.ElementResults[i] = &ua.ContentFilterElementResult{
-			StatusCode:             ua.StatusBadFilterOperatorUnsupported,
-			OperandStatusCodes:     make([]ua.StatusCode, operandCount),
-			OperandDiagnosticInfos: []*ua.DiagnosticInfo{},
-		}
-	}
-	return result
-}
-
 func nodeAllowsEventSubscription(ctx context.Context, node types.Node) bool {
 	attr, err := node.Attribute(ctx, ua.AttributeIDEventNotifier)
 	if err != nil || attr == nil || attr.Value == nil || attr.Value.Value == nil {

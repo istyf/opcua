@@ -126,7 +126,9 @@ func TestCreateMonitoredItemsAcceptsEventNotifierWithEventFilter(t *testing.T) {
 		namespace:    namespace,
 	}
 	service := NewMonitoredItemService(backend)
-	req := monitoredItemTestCreateEventRequest(ownerSession, sub, sourceNodeID, monitoredItemTestEventFilter("EventId", "Severity"))
+	filterObject := monitoredItemTestEventFilter("EventId", "Severity")
+	filterObject.Value.(*ua.EventFilter).WhereClause = monitoredItemTestSeverityWhereClause(ua.FilterOperatorGreaterThanOrEqual, uint16(100))
+	req := monitoredItemTestCreateEventRequest(ownerSession, sub, sourceNodeID, filterObject)
 	req.ItemsToCreate[0].RequestedParameters.QueueSize = 7
 	req.ItemsToCreate[0].RequestedParameters.DiscardOldest = false
 
@@ -144,6 +146,9 @@ func TestCreateMonitoredItemsAcceptsEventNotifierWithEventFilter(t *testing.T) {
 	filterResult, ok := result.FilterResult.Value.(*ua.EventFilterResult)
 	require.True(t, ok, "expected EventFilterResult, got %T", result.FilterResult.Value)
 	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusOK}, filterResult.SelectClauseResults)
+	require.NotNil(t, filterResult.WhereClauseResult)
+	require.Len(t, filterResult.WhereClauseResult.ElementResults, 1)
+	assert.Equal(t, ua.StatusOK, filterResult.WhereClauseResult.ElementResults[0].StatusCode)
 
 	item := service.items[result.MonitoredItemID]
 	require.NotNil(t, item)
