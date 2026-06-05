@@ -151,6 +151,9 @@ func (s *MonitoredItemService) ChangeNotification(ctx context.Context, n *ua.Nod
 		if item == nil {
 			continue
 		}
+		if item.Kind != monitoredItemKindDataChange {
+			continue
+		}
 		val := new(ua.MonitoredItemNotification)
 		val.ClientHandle = item.Req.RequestedParameters.ClientHandle
 		if err != nil {
@@ -183,8 +186,232 @@ type MonitoredItem struct {
 	Sub *Subscription
 	Req *ua.MonitoredItemCreateRequest
 
+	Kind          monitoredItemKind
+	EventFilter   *ua.EventFilter
+	QueueSize     uint32
+	DiscardOldest bool
+
 	//TODO: use this
 	Mode ua.MonitoringMode
+}
+
+type monitoredItemKind uint8
+
+const (
+	monitoredItemKindDataChange monitoredItemKind = iota
+	monitoredItemKindEvent
+)
+
+func (s *MonitoredItemService) newMonitoredItem(ctx context.Context, sub *Subscription, itemreq *ua.MonitoredItemCreateRequest) (*MonitoredItem, *ua.MonitoredItemCreateResult) {
+	if itemreq == nil || itemreq.ItemToMonitor == nil || itemreq.ItemToMonitor.NodeID == nil || itemreq.RequestedParameters == nil {
+		return nil, monitoredItemCreateResult(ua.StatusBadInvalidArgument, 0, sub.RevisedPublishingInterval, 0, nil)
+	}
+
+	kind := monitoredItemKindDataChange
+	queueSize := uint32(1)
+	filterResult := ua.NewExtensionObject(nil)
+	var eventFilter *ua.EventFilter
+
+	if itemreq.ItemToMonitor.AttributeID == ua.AttributeIDEventNotifier {
+		var status ua.StatusCode
+		eventFilter, filterResult, status = s.validateEventMonitoredItem(ctx, itemreq)
+		if status != ua.StatusOK {
+			return nil, monitoredItemCreateResult(status, 0, sub.RevisedPublishingInterval, 0, filterResult)
+		}
+		kind = monitoredItemKindEvent
+		queueSize = reviseMonitoredItemQueueSize(itemreq.RequestedParameters.QueueSize)
+	}
+
+	item := &MonitoredItem{
+		ID:            s.NextID(),
+		Sub:           sub,
+		Req:           itemreq,
+		Kind:          kind,
+		EventFilter:   eventFilter,
+		QueueSize:     queueSize,
+		DiscardOldest: itemreq.RequestedParameters.DiscardOldest,
+		Mode:          itemreq.MonitoringMode,
+	}
+
+	return item, monitoredItemCreateResult(ua.StatusOK, item.ID, sub.RevisedPublishingInterval, queueSize, filterResult)
+}
+
+func monitoredItemCreateResult(status ua.StatusCode, monitoredItemID uint32, revisedSamplingInterval float64, revisedQueueSize uint32, filterResult *ua.ExtensionObject) *ua.MonitoredItemCreateResult {
+	if filterResult == nil {
+		filterResult = ua.NewExtensionObject(nil)
+	}
+	return &ua.MonitoredItemCreateResult{
+		StatusCode:              status,
+		MonitoredItemID:         monitoredItemID,
+		RevisedSamplingInterval: revisedSamplingInterval,
+		RevisedQueueSize:        revisedQueueSize,
+		FilterResult:            filterResult,
+	}
+}
+
+func reviseMonitoredItemQueueSize(requested uint32) uint32 {
+	if requested == 0 {
+		return 1
+	}
+	return requested
+}
+
+func (s *MonitoredItemService) validateEventMonitoredItem(ctx context.Context, itemreq *ua.MonitoredItemCreateRequest) (*ua.EventFilter, *ua.ExtensionObject, ua.StatusCode) {
+	eventFilter, status := monitoredItemEventFilter(itemreq.RequestedParameters.Filter)
+	filterResult := newEventFilterResult(eventFilter)
+	if status != ua.StatusOK {
+		return nil, filterResult, status
+	}
+	if status = validateEventFilter(eventFilter, filterResult); status != ua.StatusOK {
+		return nil, filterResult, status
+	}
+
+	nodeID := itemreq.ItemToMonitor.NodeID
+	ns, err := s.backend.Namespace(int(nodeID.Namespace()))
+	if err != nil || ns == nil {
+		return nil, filterResult, ua.StatusBadNodeIDUnknown
+	}
+	node := ns.Node(nodeID)
+	if node == nil {
+		return nil, filterResult, ua.StatusBadNodeIDUnknown
+	}
+	if node.NodeClass() != ua.NodeClassObject {
+		return nil, filterResult, ua.StatusBadNodeClassInvalid
+	}
+	if !nodeAllowsEventSubscription(ctx, node) {
+		return nil, filterResult, ua.StatusBadNotSupported
+	}
+
+	return eventFilter, filterResult, ua.StatusOK
+}
+
+func monitoredItemEventFilter(filterObject *ua.ExtensionObject) (*ua.EventFilter, ua.StatusCode) {
+	if filterObject == nil || filterObject.Value == nil || filterObject.EncodingMask == ua.ExtensionObjectEmpty {
+		return nil, ua.StatusBadMonitoredItemFilterInvalid
+	}
+
+	switch filter := filterObject.Value.(type) {
+	case *ua.EventFilter:
+		if filter == nil {
+			return nil, ua.StatusBadMonitoredItemFilterInvalid
+		}
+		return filter, ua.StatusOK
+	case ua.EventFilter:
+		return &filter, ua.StatusOK
+	default:
+		return nil, ua.StatusBadMonitoredItemFilterUnsupported
+	}
+}
+
+func newEventFilterResult(filter *ua.EventFilter) *ua.ExtensionObject {
+	result := &ua.EventFilterResult{
+		SelectClauseDiagnosticInfos: []*ua.DiagnosticInfo{},
+	}
+	if filter != nil {
+		result.SelectClauseResults = make([]ua.StatusCode, len(filter.SelectClauses))
+		for i := range result.SelectClauseResults {
+			result.SelectClauseResults[i] = ua.StatusOK
+		}
+	}
+	return ua.NewExtensionObject(result)
+}
+
+func validateEventFilter(filter *ua.EventFilter, filterResult *ua.ExtensionObject) ua.StatusCode {
+	if filter == nil {
+		return ua.StatusBadMonitoredItemFilterInvalid
+	}
+
+	result, _ := filterResult.Value.(*ua.EventFilterResult)
+	var status ua.StatusCode = ua.StatusOK
+	for i, clause := range filter.SelectClauses {
+		if clause == nil || clause.AttributeID != ua.AttributeIDValue {
+			if result != nil && i < len(result.SelectClauseResults) {
+				result.SelectClauseResults[i] = ua.StatusBadFilterOperandInvalid
+			}
+			status = ua.StatusBadEventFilterInvalid
+		}
+	}
+	if status != ua.StatusOK {
+		return status
+	}
+
+	if filter.WhereClause != nil && len(filter.WhereClause.Elements) > 0 {
+		if result != nil {
+			result.WhereClauseResult = unsupportedContentFilterResult(filter.WhereClause)
+		}
+		return ua.StatusBadMonitoredItemFilterUnsupported
+	}
+
+	return ua.StatusOK
+}
+
+func unsupportedContentFilterResult(where *ua.ContentFilter) *ua.ContentFilterResult {
+	result := &ua.ContentFilterResult{
+		ElementResults:         make([]*ua.ContentFilterElementResult, len(where.Elements)),
+		ElementDiagnosticInfos: []*ua.DiagnosticInfo{},
+	}
+	for i, element := range where.Elements {
+		operandCount := 0
+		if element != nil {
+			operandCount = len(element.FilterOperands)
+		}
+		result.ElementResults[i] = &ua.ContentFilterElementResult{
+			StatusCode:             ua.StatusBadFilterOperatorUnsupported,
+			OperandStatusCodes:     make([]ua.StatusCode, operandCount),
+			OperandDiagnosticInfos: []*ua.DiagnosticInfo{},
+		}
+	}
+	return result
+}
+
+func nodeAllowsEventSubscription(ctx context.Context, node types.Node) bool {
+	attr, err := node.Attribute(ctx, ua.AttributeIDEventNotifier)
+	if err != nil || attr == nil || attr.Value == nil || attr.Value.Value == nil {
+		return false
+	}
+	if attr.Value.Status != ua.StatusOK {
+		return false
+	}
+
+	notifier, ok := eventNotifierType(attr.Value.Value.Value())
+	return ok && notifier&ua.EventNotifierTypeSubscribeToEvents != 0
+}
+
+func eventNotifierType(value any) (ua.EventNotifierType, bool) {
+	switch v := value.(type) {
+	case ua.EventNotifierType:
+		return v, true
+	case uint8:
+		return ua.EventNotifierType(v), true
+	case uint16:
+		return ua.EventNotifierType(v), true
+	case uint32:
+		return ua.EventNotifierType(v), true
+	case uint64:
+		return ua.EventNotifierType(v), true
+	case int:
+		if v < 0 {
+			return ua.EventNotifierTypeNone, false
+		}
+		return ua.EventNotifierType(v), true
+	case int16:
+		if v < 0 {
+			return ua.EventNotifierTypeNone, false
+		}
+		return ua.EventNotifierType(v), true
+	case int32:
+		if v < 0 {
+			return ua.EventNotifierTypeNone, false
+		}
+		return ua.EventNotifierType(v), true
+	case int64:
+		if v < 0 {
+			return ua.EventNotifierTypeNone, false
+		}
+		return ua.EventNotifierType(v), true
+	default:
+		return ua.EventNotifierTypeNone, false
+	}
 }
 
 // https://reference.opcfoundation.org/Core/Part4/v105/docs/5.12.2
@@ -221,26 +448,26 @@ func (s *MonitoredItemService) CreateMonitoredItems(ctx context.Context, sc *uas
 
 	for i := range req.ItemsToCreate {
 		itemreq := req.ItemsToCreate[i]
-		nodeid := itemreq.ItemToMonitor.NodeID
-		item := MonitoredItem{
-			ID:  s.NextID(),
-			Sub: sub,
-			Req: itemreq,
+		item, result := s.newMonitoredItem(ctx, sub, itemreq)
+		res[i] = result
+		if item == nil {
+			continue
 		}
+		nodeid := item.Req.ItemToMonitor.NodeID
 
 		// book keeping of the new item
-		s.items[item.ID] = &item
+		s.items[item.ID] = item
 		list, ok := s.nodes[item.Req.ItemToMonitor.NodeID.String()]
 		if !ok {
 			list = make([]*MonitoredItem, 0, 1)
 		}
-		s.nodes[item.Req.ItemToMonitor.NodeID.String()] = append(list, &item)
+		s.nodes[item.Req.ItemToMonitor.NodeID.String()] = append(list, item)
 
 		list, ok = s.subs[item.Sub.ID]
 		if !ok {
 			list = make([]*MonitoredItem, 0, 1)
 		}
-		s.subs[item.Sub.ID] = append(list, &item)
+		s.subs[item.Sub.ID] = append(list, item)
 
 		ualog.Debug(ctx, "adding monitored item to subscription",
 			ualog.Any(ualog.NodeIdKey, nodeid),
@@ -249,17 +476,12 @@ func (s *MonitoredItemService) CreateMonitoredItems(ctx context.Context, sc *uas
 			ualog.Uint32("client", itemreq.RequestedParameters.ClientHandle),
 		)
 
-		res[i] = &ua.MonitoredItemCreateResult{
-			StatusCode:              ua.StatusOK,
-			MonitoredItemID:         item.ID,
-			RevisedSamplingInterval: sub.RevisedPublishingInterval,
-			RevisedQueueSize:        1,
-			FilterResult:            ua.NewExtensionObject(nil),
-		}
-		// do an initial update for the nodeids in the background.
+		// do an initial update for data-change nodeids in the background.
 		// These lock the mutex so we can't do them inline here.
 		// This will cause them to happen once we unlock.
-		go s.ChangeNotification(ctx, nodeid)
+		if item.Kind == monitoredItemKindDataChange {
+			go s.ChangeNotification(ctx, nodeid)
+		}
 	}
 
 	resp := &ua.CreateMonitoredItemsResponse{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
 	"github.com/stretchr/testify/assert"
@@ -102,14 +103,155 @@ func TestCreateMonitoredItemsRejectsMissingSession(t *testing.T) {
 	assert.Equal(t, ua.StatusBadSessionIDInvalid, err)
 }
 
+func TestCreateMonitoredItemsAcceptsEventNotifierWithEventFilter(t *testing.T) {
+	t.Parallel()
+
+	ownerSession := newSubscriptionTestSession()
+	sub := NewSubscription()
+	sub.ID = 1
+	sub.session = ownerSession
+	sub.RevisedPublishingInterval = 1000
+	sourceNodeID := ua.NewNumericNodeID(1, 5001)
+	namespace := newMonitoredItemTestNamespace(
+		monitoredItemTestNode{
+			id:            sourceNodeID,
+			nodeClass:     ua.NodeClassObject,
+			eventNotifier: ua.EventNotifierTypeSubscribeToEvents,
+		},
+	)
+
+	backend := &monitoredItemTestBackend{
+		session:      ownerSession,
+		subscription: sub,
+		namespace:    namespace,
+	}
+	service := NewMonitoredItemService(backend)
+	req := monitoredItemTestCreateEventRequest(ownerSession, sub, sourceNodeID, monitoredItemTestEventFilter("EventId", "Severity"))
+	req.ItemsToCreate[0].RequestedParameters.QueueSize = 7
+	req.ItemsToCreate[0].RequestedParameters.DiscardOldest = false
+
+	resp, err := service.CreateMonitoredItems(t.Context(), nil, req, 1)
+	require.NoError(t, err)
+	createResp, ok := resp.(*ua.CreateMonitoredItemsResponse)
+	require.True(t, ok, "expected CreateMonitoredItemsResponse, got %T", resp)
+	require.Len(t, createResp.Results, 1)
+
+	result := createResp.Results[0]
+	require.Equal(t, ua.StatusOK, result.StatusCode)
+	assert.NotZero(t, result.MonitoredItemID)
+	assert.Equal(t, float64(1000), result.RevisedSamplingInterval)
+	assert.Equal(t, uint32(7), result.RevisedQueueSize)
+	filterResult, ok := result.FilterResult.Value.(*ua.EventFilterResult)
+	require.True(t, ok, "expected EventFilterResult, got %T", result.FilterResult.Value)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusOK}, filterResult.SelectClauseResults)
+
+	item := service.items[result.MonitoredItemID]
+	require.NotNil(t, item)
+	assert.Equal(t, monitoredItemKindEvent, item.Kind)
+	require.NotNil(t, item.EventFilter)
+	assert.Len(t, item.EventFilter.SelectClauses, 2)
+	assert.Equal(t, uint32(7), item.QueueSize)
+	assert.False(t, item.DiscardOldest)
+
+	select {
+	case notification := <-sub.NotifyChannel:
+		t.Fatalf("event monitored item should not enqueue initial data-change notification: %#v", notification)
+	default:
+	}
+}
+
+func TestCreateMonitoredItemsRejectsInvalidEventNotifierRequests(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		node       types.Node
+		filter     *ua.ExtensionObject
+		wantStatus ua.StatusCode
+	}{
+		{
+			name:       "missing node",
+			filter:     monitoredItemTestEventFilter("EventId"),
+			wantStatus: ua.StatusBadNodeIDUnknown,
+		},
+		{
+			name: "variable node",
+			node: monitoredItemTestNode{
+				id:            ua.NewNumericNodeID(1, 5002),
+				nodeClass:     ua.NodeClassVariable,
+				eventNotifier: ua.EventNotifierTypeSubscribeToEvents,
+			},
+			filter:     monitoredItemTestEventFilter("EventId"),
+			wantStatus: ua.StatusBadNodeClassInvalid,
+		},
+		{
+			name: "object without subscribe bit",
+			node: monitoredItemTestNode{
+				id:        ua.NewNumericNodeID(1, 5003),
+				nodeClass: ua.NodeClassObject,
+			},
+			filter:     monitoredItemTestEventFilter("EventId"),
+			wantStatus: ua.StatusBadNotSupported,
+		},
+		{
+			name: "unsupported filter",
+			node: monitoredItemTestNode{
+				id:            ua.NewNumericNodeID(1, 5004),
+				nodeClass:     ua.NodeClassObject,
+				eventNotifier: ua.EventNotifierTypeSubscribeToEvents,
+			},
+			filter:     ua.NewExtensionObject(&ua.DataChangeFilter{}),
+			wantStatus: ua.StatusBadMonitoredItemFilterUnsupported,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			ownerSession := newSubscriptionTestSession()
+			sub := NewSubscription()
+			sub.ID = 1
+			sub.session = ownerSession
+			sub.RevisedPublishingInterval = 1000
+			namespace := newMonitoredItemTestNamespace()
+			sourceNodeID := ua.NewNumericNodeID(1, 5000)
+			if tt.node != nil {
+				namespace.AddNode(tt.node)
+				sourceNodeID = tt.node.ID()
+			}
+			backend := &monitoredItemTestBackend{
+				session:      ownerSession,
+				subscription: sub,
+				namespace:    namespace,
+			}
+			service := NewMonitoredItemService(backend)
+			req := monitoredItemTestCreateEventRequest(ownerSession, sub, sourceNodeID, tt.filter)
+
+			resp, err := service.CreateMonitoredItems(t.Context(), nil, req, 1)
+			require.NoError(t, err)
+			createResp, ok := resp.(*ua.CreateMonitoredItemsResponse)
+			require.True(t, ok, "expected CreateMonitoredItemsResponse, got %T", resp)
+			require.Len(t, createResp.Results, 1)
+			assert.Equal(t, tt.wantStatus, createResp.Results[0].StatusCode)
+			assert.Zero(t, createResp.Results[0].MonitoredItemID)
+			assert.Empty(t, service.items)
+		})
+	}
+}
+
 type monitoredItemTestBackend struct {
 	session      types.Session
 	subscription *Subscription
+	namespace    types.NameSpace
 }
 
 func (b *monitoredItemTestBackend) RegisterHandler(int, Handler) {}
 
 func (b *monitoredItemTestBackend) Namespace(int) (types.NameSpace, error) {
+	if b.namespace != nil {
+		return b.namespace, nil
+	}
 	return nil, context.Canceled
 }
 
@@ -122,4 +264,142 @@ func (b *monitoredItemTestBackend) Subscription(id types.SubscriptionID) (*Subsc
 		return nil, false
 	}
 	return b.subscription, true
+}
+
+func monitoredItemTestCreateEventRequest(session types.Session, sub *Subscription, sourceNodeID *ua.NodeID, filter *ua.ExtensionObject) *ua.CreateMonitoredItemsRequest {
+	return &ua.CreateMonitoredItemsRequest{
+		RequestHeader: &ua.RequestHeader{
+			RequestHandle:       3,
+			AuthenticationToken: session.AuthTokenID(),
+		},
+		SubscriptionID: uint32(sub.ID),
+		ItemsToCreate: []*ua.MonitoredItemCreateRequest{
+			{
+				ItemToMonitor: &ua.ReadValueID{
+					NodeID:      sourceNodeID,
+					AttributeID: ua.AttributeIDEventNotifier,
+				},
+				MonitoringMode: ua.MonitoringModeReporting,
+				RequestedParameters: &ua.MonitoringParameters{
+					ClientHandle:     55,
+					SamplingInterval: 1000,
+					Filter:           filter,
+					QueueSize:        1,
+					DiscardOldest:    true,
+				},
+			},
+		},
+	}
+}
+
+func monitoredItemTestEventFilter(fieldNames ...string) *ua.ExtensionObject {
+	selectClauses := make([]*ua.SimpleAttributeOperand, len(fieldNames))
+	for i, name := range fieldNames {
+		selectClauses[i] = &ua.SimpleAttributeOperand{
+			TypeDefinitionID: ua.NewNumericNodeID(0, id.BaseEventType),
+			BrowsePath: []*ua.QualifiedName{
+				{NamespaceIndex: 0, Name: name},
+			},
+			AttributeID: ua.AttributeIDValue,
+		}
+	}
+	return ua.NewExtensionObject(&ua.EventFilter{
+		SelectClauses: selectClauses,
+	})
+}
+
+type monitoredItemTestNamespace struct {
+	nodes map[string]types.Node
+}
+
+func newMonitoredItemTestNamespace(nodes ...types.Node) *monitoredItemTestNamespace {
+	ns := &monitoredItemTestNamespace{nodes: make(map[string]types.Node, len(nodes))}
+	for _, node := range nodes {
+		ns.AddNode(node)
+	}
+	return ns
+}
+
+func (ns *monitoredItemTestNamespace) Name() string { return "urn:test:monitored-items" }
+
+func (ns *monitoredItemTestNamespace) AddNode(node types.Node) types.Node {
+	ns.nodes[node.ID().String()] = node
+	return node
+}
+
+func (ns *monitoredItemTestNamespace) Node(id *ua.NodeID) types.Node {
+	if id == nil {
+		return nil
+	}
+	return ns.nodes[id.String()]
+}
+
+func (ns *monitoredItemTestNamespace) Browse(context.Context, *ua.BrowseDescription) *ua.BrowseResult {
+	return &ua.BrowseResult{StatusCode: ua.StatusOK}
+}
+
+func (ns *monitoredItemTestNamespace) ID() uint16 { return 1 }
+
+func (ns *monitoredItemTestNamespace) SetID(uint16) {}
+
+func (ns *monitoredItemTestNamespace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.AttributeID) *ua.DataValue {
+	node := ns.Node(id)
+	if node == nil {
+		return &ua.DataValue{Status: ua.StatusBadNodeIDUnknown}
+	}
+	attrValue, err := node.Attribute(ctx, attr)
+	if err != nil || attrValue == nil {
+		return &ua.DataValue{Status: ua.StatusBadAttributeIDInvalid}
+	}
+	return attrValue.Value
+}
+
+func (ns *monitoredItemTestNamespace) SetAttribute(context.Context, *ua.NodeID, ua.AttributeID, *ua.DataValue) ua.StatusCode {
+	return ua.StatusBadNotWritable
+}
+
+func (ns *monitoredItemTestNamespace) NewQualifiedName(name string) *ua.QualifiedName {
+	return &ua.QualifiedName{NamespaceIndex: ns.ID(), Name: name}
+}
+
+func (ns *monitoredItemTestNamespace) NextAvailableID() *ua.NodeID {
+	return ua.NewNumericNodeID(ns.ID(), 1)
+}
+
+type monitoredItemTestNode struct {
+	id            *ua.NodeID
+	nodeClass     ua.NodeClass
+	eventNotifier ua.EventNotifierType
+}
+
+func (n monitoredItemTestNode) ID() *ua.NodeID { return n.id }
+
+func (n monitoredItemTestNode) BrowseName() *ua.QualifiedName {
+	return &ua.QualifiedName{NamespaceIndex: n.id.Namespace(), Name: "TestNode"}
+}
+
+func (n monitoredItemTestNode) DisplayName(context.Context) *ua.LocalizedText {
+	return ua.NewLocalizedText("TestNode")
+}
+
+func (n monitoredItemTestNode) NodeClass() ua.NodeClass { return n.nodeClass }
+
+func (n monitoredItemTestNode) AddComponent(types.Node) types.Node { return n }
+
+func (n monitoredItemTestNode) AddComponents(...types.Node) types.Node { return n }
+
+func (n monitoredItemTestNode) AddRef(types.ReferenceWrapper) {}
+
+func (n monitoredItemTestNode) References() types.ReferenceCollection { return nil }
+
+func (n monitoredItemTestNode) Attribute(context.Context, ua.AttributeID) (*types.AttrValue, error) {
+	return &types.AttrValue{
+		Value: &ua.DataValue{
+			Value: ua.MustVariant(uint8(n.eventNotifier)),
+		},
+	}, nil
+}
+
+func (n monitoredItemTestNode) SetAttribute(context.Context, ua.AttributeID, *ua.DataValue) error {
+	return nil
 }
