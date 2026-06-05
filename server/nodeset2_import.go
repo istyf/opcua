@@ -656,11 +656,13 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 		descriptions := localizedTextsFromSchema(ot.Description, "")
 
 		objtype := func() types.ObjectTypeNode {
-			for _, r := range ot.References.Reference {
-				if r.ReferenceTypeAttr == "HasTypeDefinition" || r.ReferenceTypeAttr == "i=40" {
-					if tn := s.Node(mustParseAndConvertNodeID(r.Value)); tn != nil {
-						if objtypenode, ok := tn.(types.ObjectTypeNode); ok {
-							return objtypenode
+			if ot.References != nil {
+				for _, r := range ot.References.Reference {
+					if r.ReferenceTypeAttr == "HasTypeDefinition" || r.ReferenceTypeAttr == "i=40" {
+						if tn := s.Node(mustParseAndConvertNodeID(r.Value)); tn != nil {
+							if objtypenode, ok := tn.(types.ObjectTypeNode); ok {
+								return objtypenode
+							}
 						}
 					}
 				}
@@ -1117,6 +1119,9 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		node := s.Node(nid)
 		if nid.IntID() == id.RootFolder {
 			ualog.Info(ctx, "doing root")
+		}
+		if ot.References == nil {
+			continue
 		}
 
 		for rid := range ot.References.Reference {

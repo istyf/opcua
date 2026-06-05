@@ -190,6 +190,16 @@ func TestCreateMonitoredItemsRejectsInvalidEventNotifierRequests(t *testing.T) {
 			wantStatus: ua.StatusBadNodeClassInvalid,
 		},
 		{
+			name: "view node",
+			node: monitoredItemTestNode{
+				id:            ua.NewNumericNodeID(1, 5005),
+				nodeClass:     ua.NodeClassView,
+				eventNotifier: ua.EventNotifierTypeSubscribeToEvents,
+			},
+			filter:     monitoredItemTestEventFilter("EventId"),
+			wantStatus: ua.StatusBadNodeClassInvalid,
+		},
+		{
 			name: "object without subscribe bit",
 			node: monitoredItemTestNode{
 				id:        ua.NewNumericNodeID(1, 5003),

@@ -131,6 +131,45 @@ func TestImportNodeSetSkipsDeprecatedNodesByDefault(t *testing.T) {
 	}))
 }
 
+func TestImportNodeSetPreservesObjectEventNotifier(t *testing.T) {
+	t.Parallel()
+
+	srv := New(t.Context()).(*serverImpl)
+
+	nodes := &schema.UANodeSet{
+		NamespaceUris: &schema.UriTable{
+			Uri: []string{"urn:test:events"},
+		},
+		UAObject: []*schema.UAObject{
+			{
+				EventNotifierAttr: uint8(ua.EventNotifierTypeSubscribeToEvents),
+				UAInstance: &schema.UAInstance{
+					UANode: &schema.UANode{
+						NodeIdAttr:     "ns=1;i=3200",
+						BrowseNameAttr: "1:EventSource",
+						DisplayName:    []*schema.LocalizedText{{Value: "EventSource"}},
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, srv.ImportNodeSet(t.Context(), nodes))
+
+	imported := srv.Node(ua.NewNumericNodeID(1, 3200))
+	require.NotNil(t, imported)
+
+	attr, err := imported.Attribute(t.Context(), ua.AttributeIDEventNotifier)
+	require.NoError(t, err)
+	require.NotNil(t, attr)
+	require.NotNil(t, attr.Value)
+	require.NotNil(t, attr.Value.Value)
+
+	notifier, ok := attr.Value.Value.Value().(uint8)
+	require.True(t, ok, "expected EventNotifier as uint8, got %T", attr.Value.Value.Value())
+	assert.NotZero(t, notifier&uint8(ua.EventNotifierTypeSubscribeToEvents))
+}
+
 func TestImportNodeSetSkipsMalformedDataTypeDefinition(t *testing.T) {
 	t.Parallel()
 
