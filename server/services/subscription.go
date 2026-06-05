@@ -946,6 +946,25 @@ func notificationDataForPublishBatch(batch subscriptionPublishBatch) []*ua.Exten
 	return notificationData
 }
 
+func (s *Subscription) publishResponse(pubreq types.PubReq, msg *ua.NotificationMessage, moreNotifications bool) *ua.PublishResponse {
+	return &ua.PublishResponse{
+		ResponseHeader: &ua.ResponseHeader{
+			Timestamp:          time.Now(),
+			RequestHandle:      pubreq.Req.RequestHeader.RequestHandle,
+			ServiceResult:      ua.StatusOK,
+			ServiceDiagnostics: &ua.DiagnosticInfo{},
+			StringTable:        []string{},
+			AdditionalHeader:   ua.NewExtensionObject(nil),
+		},
+		SubscriptionID:           uint32(s.ID),
+		MoreNotifications:        moreNotifications,
+		NotificationMessage:      msg,
+		AvailableSequenceNumbers: []uint32{}, // an empty array indicates taht we don't support retransmission of messages
+		Results:                  []ua.StatusCode{},
+		DiagnosticInfos:          []*ua.DiagnosticInfo{},
+	}
+}
+
 // this function should be run as a go-routine and will handle sending data out
 // to the client at the correct rate assuming there are publish requests queued up.
 // if the function returns it deletes the subscription
@@ -1075,22 +1094,7 @@ func (s *Subscription) run(ctx context.Context) {
 		}
 		//s.SeqNums[s.SequenceID] = struct{}{}
 
-		response := &ua.PublishResponse{
-			ResponseHeader: &ua.ResponseHeader{
-				Timestamp:          time.Now(),
-				RequestHandle:      pubreq.Req.RequestHeader.RequestHandle,
-				ServiceResult:      ua.StatusOK,
-				ServiceDiagnostics: &ua.DiagnosticInfo{},
-				StringTable:        []string{},
-				AdditionalHeader:   ua.NewExtensionObject(nil),
-			},
-			SubscriptionID:           uint32(s.ID),
-			MoreNotifications:        moreNotifications,
-			NotificationMessage:      &msg,
-			AvailableSequenceNumbers: []uint32{}, // an empty array indicates taht we don't support retransmission of messages
-			Results:                  []ua.StatusCode{},
-			DiagnosticInfos:          []*ua.DiagnosticInfo{},
-		}
+		response := s.publishResponse(pubreq, &msg, moreNotifications)
 		err := s.Channel.SendResponseWithContext(ctx, pubreq.ID, response)
 		if err != nil {
 			ualog.Error(ctx, "problem sending channel response", ualog.Err(err))
