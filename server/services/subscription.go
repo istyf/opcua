@@ -534,8 +534,8 @@ func (s *SubscriptionService) DeleteSubscriptions(ctx context.Context, sc *uasc.
 // This is the type that with its run() function will work in the bakground fullfilling subscription
 // publishes.
 //
-// MonitoredItems will send updates on the NotifyChannel to let the background task know that
-// an event has occured that needs to be published.
+// MonitoredItems send updates on NotifyChannel to let the background task know
+// a data-change or event notification needs to be published.
 type Subscription struct {
 	srv                        *SubscriptionService
 	session                    types.Session
@@ -551,13 +551,12 @@ type Subscription struct {
 	//SeqNums                   map[uint32]struct{}
 	T *time.Ticker
 
-	NotifyChannel            chan *ua.MonitoredItemNotification
-	EventNotifyChannel       chan *ua.EventFieldList
+	NotifyChannel            chan subscriptionNotification
 	ModifyChannel            chan subscriptionModify
 	SetPublishingModeChannel chan subscriptionPublishingMode
 
 	// Runtime state owned by the subscription goroutine.
-	publishQueue     map[uint32]*ua.MonitoredItemNotification
+	publishQueue     subscriptionNotificationQueue
 	keepaliveCounter int
 	lifetimeCounter  int
 
@@ -581,14 +580,205 @@ type subscriptionPublishingMode struct {
 	done    chan struct{}
 }
 
+type subscriptionNotificationKind uint8
+
+const (
+	subscriptionNotificationKindDataChange subscriptionNotificationKind = iota
+	subscriptionNotificationKindEvent
+)
+
+type subscriptionNotification struct {
+	kind          subscriptionNotificationKind
+	monitoredID   uint32
+	queueSize     uint32
+	discardOldest bool
+
+	dataChange *ua.MonitoredItemNotification
+	event      *ua.EventFieldList
+}
+
+func subscriptionDataChangeNotification(item *MonitoredItem, notification *ua.MonitoredItemNotification) subscriptionNotification {
+	queueSize := uint32(1)
+	discardOldest := true
+	var monitoredID uint32
+	if item != nil {
+		monitoredID = item.ID
+		queueSize = item.QueueSize
+		discardOldest = item.DiscardOldest
+	}
+	return subscriptionNotification{
+		kind:          subscriptionNotificationKindDataChange,
+		monitoredID:   monitoredID,
+		queueSize:     reviseMonitoredItemQueueSize(queueSize),
+		discardOldest: discardOldest,
+		dataChange:    notification,
+	}
+}
+
+func subscriptionEventNotification(item *MonitoredItem, event *ua.EventFieldList) subscriptionNotification {
+	queueSize := uint32(1)
+	discardOldest := true
+	var monitoredID uint32
+	if item != nil {
+		monitoredID = item.ID
+		queueSize = item.QueueSize
+		discardOldest = item.DiscardOldest
+	}
+	return subscriptionNotification{
+		kind:          subscriptionNotificationKindEvent,
+		monitoredID:   monitoredID,
+		queueSize:     reviseMonitoredItemQueueSize(queueSize),
+		discardOldest: discardOldest,
+		event:         event,
+	}
+}
+
+func (n subscriptionNotification) valid() bool {
+	switch n.kind {
+	case subscriptionNotificationKindDataChange:
+		return n.dataChange != nil
+	case subscriptionNotificationKindEvent:
+		return n.event != nil
+	default:
+		return false
+	}
+}
+
+type subscriptionNotificationQueue struct {
+	entries           []subscriptionNotification
+	dataChangeEntries map[uint32]int
+}
+
+func newSubscriptionNotificationQueue() subscriptionNotificationQueue {
+	return subscriptionNotificationQueue{
+		dataChangeEntries: make(map[uint32]int),
+	}
+}
+
+func (q *subscriptionNotificationQueue) Len() int {
+	if q == nil {
+		return 0
+	}
+	return len(q.entries)
+}
+
+func (q *subscriptionNotificationQueue) Enqueue(notification subscriptionNotification) {
+	if !notification.valid() {
+		return
+	}
+	q.ensureDataChangeEntries()
+	if notification.queueSize == 0 {
+		notification.queueSize = 1
+	}
+
+	if notification.kind == subscriptionNotificationKindDataChange && notification.monitoredID != 0 {
+		if index, ok := q.dataChangeEntries[notification.monitoredID]; ok && index < len(q.entries) {
+			q.entries[index] = notification
+			return
+		}
+	}
+
+	q.entries = append(q.entries, notification)
+	if notification.kind == subscriptionNotificationKindDataChange && notification.monitoredID != 0 {
+		q.dataChangeEntries[notification.monitoredID] = len(q.entries) - 1
+	}
+	q.enforceMonitoredItemQueue(notification)
+}
+
+func (q *subscriptionNotificationQueue) Drain(maxCount int) ([]subscriptionNotification, bool) {
+	if q == nil || len(q.entries) == 0 {
+		return nil, false
+	}
+	if maxCount <= 0 || maxCount > len(q.entries) {
+		maxCount = len(q.entries)
+	}
+
+	batch := make([]subscriptionNotification, maxCount)
+	copy(batch, q.entries[:maxCount])
+	remaining := len(q.entries) - maxCount
+	copy(q.entries, q.entries[maxCount:])
+	for i := remaining; i < len(q.entries); i++ {
+		q.entries[i] = subscriptionNotification{}
+	}
+	q.entries = q.entries[:remaining]
+	q.rebuildDataChangeEntries()
+	return batch, len(q.entries) > 0
+}
+
+func (q *subscriptionNotificationQueue) ensureDataChangeEntries() {
+	if q.dataChangeEntries == nil {
+		q.dataChangeEntries = make(map[uint32]int)
+		q.rebuildDataChangeEntries()
+	}
+}
+
+func (q *subscriptionNotificationQueue) enforceMonitoredItemQueue(notification subscriptionNotification) {
+	if notification.monitoredID == 0 {
+		return
+	}
+	limit := int(notification.queueSize)
+	if limit <= 0 {
+		limit = 1
+	}
+
+	count := 0
+	firstIndex := -1
+	lastIndex := -1
+	for i, entry := range q.entries {
+		if entry.monitoredID != notification.monitoredID {
+			continue
+		}
+		count++
+		if firstIndex < 0 {
+			firstIndex = i
+		}
+		lastIndex = i
+	}
+	if count <= limit {
+		return
+	}
+	if notification.discardOldest {
+		q.remove(firstIndex)
+		return
+	}
+	q.remove(lastIndex)
+}
+
+func (q *subscriptionNotificationQueue) remove(index int) {
+	if index < 0 || index >= len(q.entries) {
+		return
+	}
+	copy(q.entries[index:], q.entries[index+1:])
+	q.entries[len(q.entries)-1] = subscriptionNotification{}
+	q.entries = q.entries[:len(q.entries)-1]
+	q.rebuildDataChangeEntries()
+}
+
+func (q *subscriptionNotificationQueue) rebuildDataChangeEntries() {
+	q.dataChangeEntries = make(map[uint32]int)
+	for i, entry := range q.entries {
+		if entry.kind == subscriptionNotificationKindDataChange && entry.monitoredID != 0 {
+			q.dataChangeEntries[entry.monitoredID] = i
+		}
+	}
+}
+
+type subscriptionPublishBatch struct {
+	dataChanges []*ua.MonitoredItemNotification
+	events      []*ua.EventFieldList
+}
+
+func (b subscriptionPublishBatch) Len() int {
+	return len(b.dataChanges) + len(b.events)
+}
+
 func NewSubscription() *Subscription {
 	return &Subscription{
 		//SeqNums:       map[uint32]struct{}{},
-		NotifyChannel:            make(chan *ua.MonitoredItemNotification, 100),
-		EventNotifyChannel:       make(chan *ua.EventFieldList, 100),
+		NotifyChannel:            make(chan subscriptionNotification, 100),
 		ModifyChannel:            make(chan subscriptionModify, 2),
 		SetPublishingModeChannel: make(chan subscriptionPublishingMode, 2),
-		publishQueue:             make(map[uint32]*ua.MonitoredItemNotification),
+		publishQueue:             newSubscriptionNotificationQueue(),
 		shutdown:                 make(chan struct{}),
 		done:                     make(chan struct{}),
 	}
@@ -710,22 +900,50 @@ func (s *Subscription) nextKeepaliveSequenceNumber() uint32 {
 	return s.SequenceID + 1
 }
 
-func (s *Subscription) nextPublishBatch(publishQueue map[uint32]*ua.MonitoredItemNotification) ([]*ua.MonitoredItemNotification, bool) {
-	maxCount := len(publishQueue)
+func (s *Subscription) nextPublishBatch() (subscriptionPublishBatch, bool) {
+	maxCount := s.publishQueue.Len()
 	if s.MaxNotificationsPerPublish > 0 && int(s.MaxNotificationsPerPublish) < maxCount {
 		maxCount = int(s.MaxNotificationsPerPublish)
 	}
 
-	finalItems := make([]*ua.MonitoredItemNotification, 0, maxCount)
-	for clientHandle, notification := range publishQueue {
-		finalItems = append(finalItems, notification)
-		delete(publishQueue, clientHandle)
-		if len(finalItems) == maxCount {
-			break
+	notifications, moreNotifications := s.publishQueue.Drain(maxCount)
+	batch := subscriptionPublishBatch{}
+	for _, notification := range notifications {
+		switch notification.kind {
+		case subscriptionNotificationKindDataChange:
+			if notification.dataChange != nil {
+				batch.dataChanges = append(batch.dataChanges, notification.dataChange)
+			}
+		case subscriptionNotificationKindEvent:
+			if notification.event != nil {
+				batch.events = append(batch.events, notification.event)
+			}
 		}
 	}
 
-	return finalItems, len(publishQueue) > 0
+	return batch, moreNotifications
+}
+
+func notificationDataForPublishBatch(batch subscriptionPublishBatch) []*ua.ExtensionObject {
+	notificationData := make([]*ua.ExtensionObject, 0, 2)
+	if len(batch.dataChanges) != 0 {
+		dataChanges := &ua.DataChangeNotification{
+			MonitoredItems:  batch.dataChanges,
+			DiagnosticInfos: []*ua.DiagnosticInfo{},
+		}
+		obj := ua.NewExtensionObject(dataChanges)
+		obj.UpdateMask()
+		notificationData = append(notificationData, obj)
+	}
+	if len(batch.events) != 0 {
+		events := &ua.EventNotificationList{
+			Events: batch.events,
+		}
+		obj := ua.NewExtensionObject(events)
+		obj.UpdateMask()
+		notificationData = append(notificationData, obj)
+	}
+	return notificationData
 }
 
 // this function should be run as a go-routine and will handle sending data out
@@ -765,9 +983,9 @@ func (s *Subscription) run(ctx context.Context) {
 			case <-s.shutdown:
 				return
 			case newNotification := <-s.NotifyChannel:
-				s.publishQueue[newNotification.ClientHandle] = newNotification
+				s.publishQueue.Enqueue(newNotification)
 			case <-s.T.C:
-				if !s.canPublishNotifications(len(s.publishQueue)) {
+				if !s.canPublishNotifications(s.publishQueue.Len()) {
 					// nothing to publish, increment the keepalive counter and send a keepalive if it
 					// has been enough intervals.
 					s.keepaliveCounter++
@@ -812,7 +1030,7 @@ func (s *Subscription) run(ctx context.Context) {
 				// once we get a publish request, we should move on to publish them back
 				break L2
 			case newNotification := <-s.NotifyChannel:
-				s.publishQueue[newNotification.ClientHandle] = newNotification
+				s.publishQueue.Enqueue(newNotification)
 
 			case <-s.T.C:
 				// we had another tick without a publish request.
@@ -847,15 +1065,8 @@ func (s *Subscription) run(ctx context.Context) {
 		//delete(s.SeqNums, a.SequenceNumber)
 		//}
 
-		finalItems, moreNotifications := s.nextPublishBatch(s.publishQueue)
-
-		dcn := ua.DataChangeNotification{
-			MonitoredItems:  finalItems,
-			DiagnosticInfos: []*ua.DiagnosticInfo{},
-		}
-		eo := make([]*ua.ExtensionObject, 1)
-		eo[0] = ua.NewExtensionObject(&dcn)
-		eo[0].UpdateMask()
+		batch, moreNotifications := s.nextPublishBatch()
+		eo := notificationDataForPublishBatch(batch)
 
 		msg := ua.NotificationMessage{
 			SequenceNumber:   s.SequenceID,
@@ -887,7 +1098,7 @@ func (s *Subscription) run(ctx context.Context) {
 			return
 		}
 
-		ualog.Debug(ctx, "published items", ualog.Int("count", len(s.publishQueue)))
+		ualog.Debug(ctx, "published items", ualog.Int("count", s.publishQueue.Len()))
 
 		// wait till we've got a publish request.
 	}

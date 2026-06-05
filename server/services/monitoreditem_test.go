@@ -287,7 +287,9 @@ func TestEmitEventQueuesMatchingEventFieldList(t *testing.T) {
 	require.NoError(t, service.EmitEvent(t.Context(), sourceNodeID, event))
 
 	select {
-	case fieldList := <-sub.EventNotifyChannel:
+	case notification := <-sub.NotifyChannel:
+		require.Equal(t, subscriptionNotificationKindEvent, notification.kind)
+		fieldList := notification.event
 		require.NotNil(t, fieldList)
 		assert.Equal(t, uint32(55), fieldList.ClientHandle)
 		require.Len(t, fieldList.EventFields, 3)
@@ -336,8 +338,8 @@ func TestEmitEventSkipsNonMatchingEventFilter(t *testing.T) {
 	require.NoError(t, service.EmitEvent(t.Context(), sourceNodeID, &types.Event{Severity: 499}))
 
 	select {
-	case fieldList := <-sub.EventNotifyChannel:
-		t.Fatalf("did not expect event notification for non-matching filter: %#v", fieldList)
+	case notification := <-sub.NotifyChannel:
+		t.Fatalf("did not expect event notification for non-matching filter: %#v", notification)
 	default:
 	}
 }

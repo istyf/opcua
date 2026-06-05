@@ -883,19 +883,114 @@ func TestSubscriptionNextPublishBatch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			sub := &Subscription{MaxNotificationsPerPublish: tt.maxPerPublish}
-			publishQueue := make(map[uint32]*ua.MonitoredItemNotification, tt.queueSize)
+			sub := NewSubscription()
+			sub.MaxNotificationsPerPublish = tt.maxPerPublish
 			for i := range tt.queueSize {
-				handle := uint32(i + 1)
-				publishQueue[handle] = &ua.MonitoredItemNotification{ClientHandle: handle}
+				id := uint32(i + 1)
+				sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(id, id))
 			}
 
-			batch, more := sub.nextPublishBatch(publishQueue)
-			assert.Len(t, batch, tt.wantBatchSize)
-			assert.Len(t, publishQueue, tt.wantRemaining)
+			batch, more := sub.nextPublishBatch()
+			assert.Equal(t, tt.wantBatchSize, batch.Len())
+			assert.Equal(t, tt.wantRemaining, sub.publishQueue.Len())
 			assert.Equal(t, tt.wantMore, more)
 		})
 	}
+}
+
+func TestSubscriptionNextPublishBatchGroupsNotificationKinds(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.MaxNotificationsPerPublish = 3
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(1, 11))
+	sub.publishQueue.Enqueue(subscriptionTestEventNotification(2, 22, "first"))
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(3, 33))
+	sub.publishQueue.Enqueue(subscriptionTestEventNotification(4, 44, "second"))
+
+	batch, more := sub.nextPublishBatch()
+
+	require.Equal(t, 3, batch.Len())
+	assert.True(t, more)
+	assert.Len(t, batch.dataChanges, 2)
+	assert.Len(t, batch.events, 1)
+	assert.Equal(t, uint32(11), batch.dataChanges[0].ClientHandle)
+	assert.Equal(t, uint32(33), batch.dataChanges[1].ClientHandle)
+	assert.Equal(t, uint32(22), batch.events[0].ClientHandle)
+	assert.Equal(t, 1, sub.publishQueue.Len())
+}
+
+func TestSubscriptionNotificationDataForPublishBatchIncludesEvents(t *testing.T) {
+	t.Parallel()
+
+	batch := subscriptionPublishBatch{
+		dataChanges: []*ua.MonitoredItemNotification{
+			{ClientHandle: 11, Value: &ua.DataValue{Value: ua.MustVariant("data")}},
+		},
+		events: []*ua.EventFieldList{
+			{ClientHandle: 22, EventFields: []*ua.Variant{ua.MustVariant("event")}},
+		},
+	}
+
+	notificationData := notificationDataForPublishBatch(batch)
+
+	require.Len(t, notificationData, 2)
+	dataChanges, ok := notificationData[0].Value.(*ua.DataChangeNotification)
+	require.True(t, ok, "expected DataChangeNotification, got %T", notificationData[0].Value)
+	require.Len(t, dataChanges.MonitoredItems, 1)
+	assert.Equal(t, uint32(11), dataChanges.MonitoredItems[0].ClientHandle)
+
+	events, ok := notificationData[1].Value.(*ua.EventNotificationList)
+	require.True(t, ok, "expected EventNotificationList, got %T", notificationData[1].Value)
+	require.Len(t, events.Events, 1)
+	assert.Equal(t, uint32(22), events.Events[0].ClientHandle)
+}
+
+func TestSubscriptionNotificationQueueCoalescesDataChangesByMonitoredItem(t *testing.T) {
+	t.Parallel()
+
+	queue := newSubscriptionNotificationQueue()
+	queue.Enqueue(subscriptionTestDataChangeNotification(1, 11))
+	queue.Enqueue(subscriptionTestDataChangeNotification(1, 22))
+
+	assert.Equal(t, 1, queue.Len())
+	batch, more := queue.Drain(0)
+	require.False(t, more)
+	require.Len(t, batch, 1)
+	require.NotNil(t, batch[0].dataChange)
+	assert.Equal(t, uint32(22), batch[0].dataChange.ClientHandle)
+}
+
+func TestSubscriptionNotificationQueueRespectsEventQueueSizeDiscardOldest(t *testing.T) {
+	t.Parallel()
+
+	queue := newSubscriptionNotificationQueue()
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 11, "first", 2, true))
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 22, "second", 2, true))
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 33, "third", 2, true))
+
+	assert.Equal(t, 2, queue.Len())
+	batch, more := queue.Drain(0)
+	require.False(t, more)
+	require.Len(t, batch, 2)
+	assert.Equal(t, uint32(22), batch[0].event.ClientHandle)
+	assert.Equal(t, uint32(33), batch[1].event.ClientHandle)
+}
+
+func TestSubscriptionNotificationQueueRespectsEventQueueSizeDiscardNewest(t *testing.T) {
+	t.Parallel()
+
+	queue := newSubscriptionNotificationQueue()
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 11, "first", 2, false))
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 22, "second", 2, false))
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 33, "third", 2, false))
+
+	assert.Equal(t, 2, queue.Len())
+	batch, more := queue.Drain(0)
+	require.False(t, more)
+	require.Len(t, batch, 2)
+	assert.Equal(t, uint32(11), batch[0].event.ClientHandle)
+	assert.Equal(t, uint32(22), batch[1].event.ClientHandle)
 }
 
 func TestSubscriptionShouldSendKeepalive(t *testing.T) {
@@ -1036,17 +1131,13 @@ func TestSubscriptionApplySetPublishingModePreservesPendingNotifications(t *test
 
 	sub := NewSubscription()
 	sub.PublishingEnabled = true
-	sub.publishQueue[11] = &ua.MonitoredItemNotification{ClientHandle: 11}
-	sub.publishQueue[22] = &ua.MonitoredItemNotification{ClientHandle: 22}
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(1, 11))
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(2, 22))
 
 	sub.applySetPublishingMode(false)
 
 	assert.False(t, sub.PublishingEnabled)
-	assert.Len(t, sub.publishQueue, 2)
-	_, ok := sub.publishQueue[11]
-	assert.True(t, ok)
-	_, ok = sub.publishQueue[22]
-	assert.True(t, ok)
+	assert.Equal(t, 2, sub.publishQueue.Len())
 }
 
 func TestSubscriptionDisabledPublishingStillFollowsKeepalivePath(t *testing.T) {
@@ -1055,9 +1146,9 @@ func TestSubscriptionDisabledPublishingStillFollowsKeepalivePath(t *testing.T) {
 	sub := NewSubscription()
 	sub.PublishingEnabled = false
 	sub.RevisedMaxKeepAliveCount = 3
-	sub.publishQueue[11] = &ua.MonitoredItemNotification{ClientHandle: 11}
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(1, 11))
 
-	assert.False(t, sub.canPublishNotifications(len(sub.publishQueue)))
+	assert.False(t, sub.canPublishNotifications(sub.publishQueue.Len()))
 	assert.True(t, sub.shouldSendKeepalive(3))
 }
 
@@ -1067,20 +1158,20 @@ func TestSubscriptionReenablingPublishingResumesQueuedNotifications(t *testing.T
 	sub := NewSubscription()
 	sub.PublishingEnabled = false
 	sub.MaxNotificationsPerPublish = 1
-	sub.publishQueue[11] = &ua.MonitoredItemNotification{ClientHandle: 11}
-	sub.publishQueue[22] = &ua.MonitoredItemNotification{ClientHandle: 22}
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(1, 11))
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(2, 22))
 
-	assert.False(t, sub.canPublishNotifications(len(sub.publishQueue)))
+	assert.False(t, sub.canPublishNotifications(sub.publishQueue.Len()))
 
 	sub.applySetPublishingMode(true)
 
 	assert.True(t, sub.PublishingEnabled)
-	assert.True(t, sub.canPublishNotifications(len(sub.publishQueue)))
+	assert.True(t, sub.canPublishNotifications(sub.publishQueue.Len()))
 
-	batch, more := sub.nextPublishBatch(sub.publishQueue)
-	assert.Len(t, batch, 1)
+	batch, more := sub.nextPublishBatch()
+	assert.Equal(t, 1, batch.Len())
 	assert.True(t, more)
-	assert.Len(t, sub.publishQueue, 1)
+	assert.Equal(t, 1, sub.publishQueue.Len())
 }
 
 func TestSubscriptionApplyModifyRequestPreservesPendingNotificationsAndCounters(t *testing.T) {
@@ -1090,8 +1181,8 @@ func TestSubscriptionApplyModifyRequestPreservesPendingNotificationsAndCounters(
 	sub.RevisedPublishingInterval = 1000
 	sub.keepaliveCounter = 2
 	sub.lifetimeCounter = 5
-	sub.publishQueue[11] = &ua.MonitoredItemNotification{ClientHandle: 11}
-	sub.publishQueue[22] = &ua.MonitoredItemNotification{ClientHandle: 22}
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(1, 11))
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(2, 22))
 	sub.resetTicker()
 	originalTicker := sub.T
 	t.Cleanup(func() {
@@ -1112,11 +1203,37 @@ func TestSubscriptionApplyModifyRequestPreservesPendingNotificationsAndCounters(
 	assert.NotSame(t, originalTicker, sub.T)
 	assert.Equal(t, 2, sub.keepaliveCounter)
 	assert.Equal(t, 5, sub.lifetimeCounter)
-	assert.Len(t, sub.publishQueue, 2)
-	_, ok := sub.publishQueue[11]
-	assert.True(t, ok)
-	_, ok = sub.publishQueue[22]
-	assert.True(t, ok)
+	assert.Equal(t, 2, sub.publishQueue.Len())
+}
+
+func subscriptionTestDataChangeNotification(monitoredID, clientHandle uint32) subscriptionNotification {
+	return subscriptionNotification{
+		kind:          subscriptionNotificationKindDataChange,
+		monitoredID:   monitoredID,
+		queueSize:     1,
+		discardOldest: true,
+		dataChange: &ua.MonitoredItemNotification{
+			ClientHandle: clientHandle,
+			Value:        &ua.DataValue{Value: ua.MustVariant(clientHandle)},
+		},
+	}
+}
+
+func subscriptionTestEventNotification(monitoredID, clientHandle uint32, value string) subscriptionNotification {
+	return subscriptionTestEventNotificationWithQueue(monitoredID, clientHandle, value, 1, true)
+}
+
+func subscriptionTestEventNotificationWithQueue(monitoredID, clientHandle uint32, value string, queueSize uint32, discardOldest bool) subscriptionNotification {
+	return subscriptionNotification{
+		kind:          subscriptionNotificationKindEvent,
+		monitoredID:   monitoredID,
+		queueSize:     queueSize,
+		discardOldest: discardOldest,
+		event: &ua.EventFieldList{
+			ClientHandle: clientHandle,
+			EventFields:  []*ua.Variant{ua.MustVariant(value)},
+		},
+	}
 }
 
 type subscriptionTestBackend struct {

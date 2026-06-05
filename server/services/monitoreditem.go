@@ -164,18 +164,18 @@ func (s *MonitoredItemService) ChangeNotification(ctx context.Context, n *ua.Nod
 			val.Value = &ua.DataValue{}
 			val.Value.Status = ua.StatusBad
 			val.Value.EncodingMask |= ua.DataValueStatusCode
-			item.Sub.NotifyChannel <- val
+			item.Sub.NotifyChannel <- subscriptionDataChangeNotification(item, val)
 			continue
 		}
 		dv := ns.Attribute(ctx, n, item.Req.ItemToMonitor.AttributeID)
 		val.Value = dv
-		item.Sub.NotifyChannel <- val
+		item.Sub.NotifyChannel <- subscriptionDataChangeNotification(item, val)
 	}
 }
 
 type eventNotificationDelivery struct {
-	sub       *Subscription
-	fieldList *ua.EventFieldList
+	sub          *Subscription
+	notification subscriptionNotification
 }
 
 // EmitEvent queues an OPC UA event for monitored items on sourceNodeID.
@@ -203,19 +203,19 @@ func (s *MonitoredItemService) EmitEvent(ctx context.Context, sourceNodeID *ua.N
 
 		deliveries = append(deliveries, eventNotificationDelivery{
 			sub: item.Sub,
-			fieldList: &ua.EventFieldList{
+			notification: subscriptionEventNotification(item, &ua.EventFieldList{
 				ClientHandle: item.Req.RequestedParameters.ClientHandle,
 				EventFields:  eventFilterSelectFields(item.EventFilter, event),
-			},
+			}),
 		})
 	}
 	s.mu.Unlock()
 
 	for _, delivery := range deliveries {
-		if delivery.sub == nil || delivery.sub.EventNotifyChannel == nil || delivery.fieldList == nil {
+		if delivery.sub == nil || delivery.sub.NotifyChannel == nil || !delivery.notification.valid() {
 			continue
 		}
-		delivery.sub.EventNotifyChannel <- delivery.fieldList
+		delivery.sub.NotifyChannel <- delivery.notification
 	}
 
 	ualog.Debug(ctx, "event queued", ualog.Any(ualog.NodeIdKey, sourceNodeID), ualog.Int("matches", len(deliveries)))
