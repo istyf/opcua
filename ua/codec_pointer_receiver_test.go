@@ -142,7 +142,7 @@ func (v *testOptionalCodecValue) Encode() ([]byte, error) {
 	if v.HasText {
 		mask = 1
 	}
-	buf.WriteByte(mask)
+	buf.WriteUint8(mask)
 	buf.WriteInt32(v.Number)
 	if v.HasText {
 		buf.WriteString(v.Text)
@@ -152,7 +152,7 @@ func (v *testOptionalCodecValue) Encode() ([]byte, error) {
 
 func (v *testOptionalCodecValue) Decode(b []byte) (int, error) {
 	buf := NewBuffer(b)
-	mask := buf.ReadByte()
+	mask := buf.ReadUint8()
 	v.Number = buf.ReadInt32()
 	v.HasText = mask&1 == 1
 	if v.HasText {

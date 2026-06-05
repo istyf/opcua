@@ -71,7 +71,7 @@ func decode(b []byte, val reflect.Value, name string) (n int, err error) {
 		case reflect.Int8:
 			val.SetInt(int64(buf.ReadInt8()))
 		case reflect.Uint8:
-			val.SetUint(uint64(buf.ReadByte()))
+			val.SetUint(uint64(buf.ReadUint8()))
 		case reflect.Int16:
 			val.SetInt(int64(buf.ReadInt16()))
 		case reflect.Uint16:

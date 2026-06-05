@@ -993,6 +993,107 @@ func TestSubscriptionNotificationQueueRespectsEventQueueSizeDiscardNewest(t *tes
 	assert.Equal(t, uint32(22), batch[1].event.ClientHandle)
 }
 
+func TestSubscriptionNotificationQueueSizeOneDiscardOldestKeepsNewestEvent(t *testing.T) {
+	t.Parallel()
+
+	queue := newSubscriptionNotificationQueue()
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 55, "old", 1, true))
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 55, "new", 1, true))
+
+	assert.Equal(t, 1, queue.Len())
+	batch, more := queue.Drain(0)
+	require.False(t, more)
+	require.Len(t, batch, 1)
+	require.NotNil(t, batch[0].event)
+	require.Len(t, batch[0].event.EventFields, 1)
+	assert.Equal(t, "new", batch[0].event.EventFields[0].String())
+}
+
+func TestSubscriptionNotificationQueueSizeOneDiscardNewestKeepsOldestEvent(t *testing.T) {
+	t.Parallel()
+
+	queue := newSubscriptionNotificationQueue()
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 55, "old", 1, false))
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 55, "new", 1, false))
+
+	assert.Equal(t, 1, queue.Len())
+	batch, more := queue.Drain(0)
+	require.False(t, more)
+	require.Len(t, batch, 1)
+	require.NotNil(t, batch[0].event)
+	require.Len(t, batch[0].event.EventFields, 1)
+	assert.Equal(t, "old", batch[0].event.EventFields[0].String())
+}
+
+func TestSubscriptionNotificationQueueKeepsMultipleEventsWithSameClientHandle(t *testing.T) {
+	t.Parallel()
+
+	queue := newSubscriptionNotificationQueue()
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 55, "first", 2, true))
+	queue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 55, "second", 2, true))
+
+	assert.Equal(t, 2, queue.Len())
+	batch, more := queue.Drain(0)
+	require.False(t, more)
+	require.Len(t, batch, 2)
+	require.NotNil(t, batch[0].event)
+	require.NotNil(t, batch[1].event)
+	assert.Equal(t, uint32(55), batch[0].event.ClientHandle)
+	assert.Equal(t, uint32(55), batch[1].event.ClientHandle)
+	assert.Equal(t, "first", batch[0].event.EventFields[0].String())
+	assert.Equal(t, "second", batch[1].event.EventFields[0].String())
+}
+
+func TestSubscriptionMaxNotificationsPerPublishLimitsEventsAndSetsMore(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.MaxNotificationsPerPublish = 2
+	sub.publishQueue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 11, "first", 3, true))
+	sub.publishQueue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 22, "second", 3, true))
+	sub.publishQueue.Enqueue(subscriptionTestEventNotificationWithQueue(1, 33, "third", 3, true))
+
+	batch, more := sub.nextPublishBatch()
+
+	require.Equal(t, 2, batch.Len())
+	assert.True(t, more)
+	assert.Empty(t, batch.dataChanges)
+	require.Len(t, batch.events, 2)
+	assert.Equal(t, uint32(11), batch.events[0].ClientHandle)
+	assert.Equal(t, uint32(22), batch.events[1].ClientHandle)
+	assert.Equal(t, 1, sub.publishQueue.Len())
+
+	batch, more = sub.nextPublishBatch()
+	require.Equal(t, 1, batch.Len())
+	assert.False(t, more)
+	require.Len(t, batch.events, 1)
+	assert.Equal(t, uint32(33), batch.events[0].ClientHandle)
+}
+
+func TestSubscriptionPublishBatchKeepsMixedDataChangeAndEventNotifications(t *testing.T) {
+	t.Parallel()
+
+	sub := NewSubscription()
+	sub.publishQueue.Enqueue(subscriptionTestDataChangeNotification(1, 11))
+	sub.publishQueue.Enqueue(subscriptionTestEventNotification(2, 22, "event"))
+
+	batch, more := sub.nextPublishBatch()
+	require.False(t, more)
+	require.Equal(t, 2, batch.Len())
+
+	notificationData := notificationDataForPublishBatch(batch)
+	require.Len(t, notificationData, 2)
+	dataChanges, ok := notificationData[0].Value.(*ua.DataChangeNotification)
+	require.True(t, ok, "expected DataChangeNotification, got %T", notificationData[0].Value)
+	require.Len(t, dataChanges.MonitoredItems, 1)
+	assert.Equal(t, uint32(11), dataChanges.MonitoredItems[0].ClientHandle)
+
+	events, ok := notificationData[1].Value.(*ua.EventNotificationList)
+	require.True(t, ok, "expected EventNotificationList, got %T", notificationData[1].Value)
+	require.Len(t, events.Events, 1)
+	assert.Equal(t, uint32(22), events.Events[0].ClientHandle)
+}
+
 func TestSubscriptionShouldSendKeepalive(t *testing.T) {
 	t.Parallel()
 

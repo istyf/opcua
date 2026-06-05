@@ -169,10 +169,11 @@ func TestCreateMonitoredItemsRejectsInvalidEventNotifierRequests(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name       string
-		node       types.Node
-		filter     *ua.ExtensionObject
-		wantStatus ua.StatusCode
+		name            string
+		node            types.Node
+		filter          *ua.ExtensionObject
+		wantStatus      ua.StatusCode
+		wantWhereStatus ua.StatusCode
 	}{
 		{
 			name:       "missing node",
@@ -218,6 +219,17 @@ func TestCreateMonitoredItemsRejectsInvalidEventNotifierRequests(t *testing.T) {
 			filter:     ua.NewExtensionObject(&ua.DataChangeFilter{}),
 			wantStatus: ua.StatusBadMonitoredItemFilterUnsupported,
 		},
+		{
+			name: "unsupported where clause",
+			node: monitoredItemTestNode{
+				id:            ua.NewNumericNodeID(1, 5006),
+				nodeClass:     ua.NodeClassObject,
+				eventNotifier: ua.EventNotifierTypeSubscribeToEvents,
+			},
+			filter:          monitoredItemTestUnsupportedWhereClauseEventFilter(),
+			wantStatus:      ua.StatusBadMonitoredItemFilterUnsupported,
+			wantWhereStatus: ua.StatusBadFilterOperatorUnsupported,
+		},
 	}
 
 	for _, tt := range tests {
@@ -251,6 +263,15 @@ func TestCreateMonitoredItemsRejectsInvalidEventNotifierRequests(t *testing.T) {
 			assert.Equal(t, tt.wantStatus, createResp.Results[0].StatusCode)
 			assert.Zero(t, createResp.Results[0].MonitoredItemID)
 			assert.Empty(t, service.items)
+			assert.Empty(t, service.nodes)
+			assert.Empty(t, service.subs)
+			if tt.wantWhereStatus != 0 {
+				filterResult, ok := createResp.Results[0].FilterResult.Value.(*ua.EventFilterResult)
+				require.True(t, ok, "expected EventFilterResult, got %T", createResp.Results[0].FilterResult.Value)
+				require.NotNil(t, filterResult.WhereClauseResult)
+				require.Len(t, filterResult.WhereClauseResult.ElementResults, 1)
+				assert.Equal(t, tt.wantWhereStatus, filterResult.WhereClauseResult.ElementResults[0].StatusCode)
+			}
 		})
 	}
 }
@@ -420,6 +441,22 @@ func monitoredItemTestEventFilter(fieldNames ...string) *ua.ExtensionObject {
 	return ua.NewExtensionObject(&ua.EventFilter{
 		SelectClauses: selectClauses,
 	})
+}
+
+func monitoredItemTestUnsupportedWhereClauseEventFilter() *ua.ExtensionObject {
+	filter := monitoredItemTestEventFilter("Severity")
+	filter.Value.(*ua.EventFilter).WhereClause = &ua.ContentFilter{
+		Elements: []*ua.ContentFilterElement{
+			{
+				FilterOperator: ua.FilterOperatorLike,
+				FilterOperands: []*ua.ExtensionObject{
+					ua.NewExtensionObject(monitoredItemTestSelectClause("Severity")),
+					ua.NewExtensionObject(&ua.LiteralOperand{Value: ua.MustVariant(uint16(500))}),
+				},
+			},
+		},
+	}
+	return filter
 }
 
 type monitoredItemTestNamespace struct {

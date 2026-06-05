@@ -52,7 +52,7 @@ func (e *ExtensionObject) Decode(b []byte) (int, error) {
 	e.TypeID = new(ExpandedNodeID)
 	buf.ReadStruct(e.TypeID)
 
-	e.EncodingMask = buf.ReadByte()
+	e.EncodingMask = buf.ReadUint8()
 	if e.EncodingMask == ExtensionObjectEmpty {
 		return buf.Pos(), buf.Error()
 	}
@@ -90,7 +90,7 @@ func (e *ExtensionObject) Encode() ([]byte, error) {
 		e = &ExtensionObject{TypeID: NewTwoByteExpandedNodeID(0), EncodingMask: ExtensionObjectEmpty}
 	}
 	buf.WriteStruct(e.TypeID)
-	buf.WriteByte(e.EncodingMask)
+	buf.WriteUint8(e.EncodingMask)
 	if e.EncodingMask == ExtensionObjectEmpty {
 		return buf.Bytes(), buf.Error()
 	}

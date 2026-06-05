@@ -50,10 +50,10 @@ func (b *Buffer) Len() int {
 }
 
 func (b *Buffer) ReadBool() bool {
-	return b.ReadByte() > 0
+	return b.ReadUint8() > 0
 }
 
-func (b *Buffer) ReadByte() byte {
+func (b *Buffer) ReadUint8() uint8 {
 	if b.err != nil {
 		return 0
 	}
@@ -64,8 +64,19 @@ func (b *Buffer) ReadByte() byte {
 	return d[0]
 }
 
+func (b *Buffer) ReadByte() (byte, error) {
+	if b.err != nil {
+		return 0, b.err
+	}
+	v := b.ReadUint8()
+	if b.err != nil {
+		return 0, b.err
+	}
+	return v, nil
+}
+
 func (b *Buffer) ReadInt8() int8 {
-	return int8(b.ReadByte())
+	return int8(b.ReadUint8())
 }
 
 func (b *Buffer) ReadInt16() int16 {
@@ -213,8 +224,9 @@ func (b *Buffer) WriteBool(v bool) {
 	}
 }
 
-func (b *Buffer) WriteByte(n byte) {
-	b.buf = append(b.buf, n)
+func (b *Buffer) WriteByte(n byte) error {
+	b.WriteUint8(n)
+	return nil
 }
 
 func (b *Buffer) WriteInt8(n int8) {

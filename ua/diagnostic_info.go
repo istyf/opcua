@@ -32,7 +32,7 @@ type DiagnosticInfo struct {
 
 func (d *DiagnosticInfo) Decode(b []byte) (int, error) {
 	buf := NewBuffer(b)
-	d.EncodingMask = buf.ReadByte()
+	d.EncodingMask = buf.ReadUint8()
 	if d.Has(DiagnosticInfoSymbolicID) {
 		d.SymbolicID = buf.ReadInt32()
 	}
@@ -60,7 +60,7 @@ func (d *DiagnosticInfo) Decode(b []byte) (int, error) {
 
 func (d *DiagnosticInfo) Encode() ([]byte, error) {
 	buf := NewBuffer(nil)
-	buf.WriteByte(d.EncodingMask)
+	buf.WriteUint8(d.EncodingMask)
 	if d.Has(DiagnosticInfoSymbolicID) {
 		buf.WriteInt32(d.SymbolicID)
 	}

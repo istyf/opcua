@@ -67,6 +67,36 @@ func TestMapNamespaceBrowseHonorsDirectionAndReferenceTypeFilters(t *testing.T) 
 	assert.Empty(t, wrongType.References)
 }
 
+func TestMapNamespaceEventNotifierDoesNotAdvertiseSubscribeToEvents(t *testing.T) {
+	t.Parallel()
+
+	srv := newMapNamespaceTestServer()
+	ns := NewMapNamespace(srv, "map")
+	ns.data["alpha"] = int32(1)
+
+	value := ns.Attribute(t.Context(), ua.NewStringNodeID(ns.ID(), "alpha"), ua.AttributeIDEventNotifier)
+
+	require.NotNil(t, value)
+	require.NotNil(t, value.Value)
+	notifier, ok := eventNotifierTypeForMapNamespaceTest(value.Value.Value())
+	require.True(t, ok, "expected integer EventNotifier value, got %T", value.Value.Value())
+	assert.Equal(t, ua.EventNotifierTypeNone, notifier&ua.EventNotifierTypeSubscribeToEvents)
+}
+
+func eventNotifierTypeForMapNamespaceTest(value any) (ua.EventNotifierType, bool) {
+	switch v := value.(type) {
+	case int16:
+		if v < 0 {
+			return ua.EventNotifierTypeNone, false
+		}
+		return ua.EventNotifierType(v), true
+	case uint8:
+		return ua.EventNotifierType(v), true
+	default:
+		return ua.EventNotifierTypeNone, false
+	}
+}
+
 type mapNamespaceTestServer struct {
 	namespaces map[int]types.NameSpace
 	nodes      map[string]types.Node

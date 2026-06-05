@@ -45,7 +45,7 @@ func NewHeader(msgType string, chunkType byte, chanID uint32) *Header {
 func (h *Header) Decode(b []byte) (int, error) {
 	buf := ua.NewBuffer(b)
 	h.MessageType = string(buf.ReadN(3))
-	h.ChunkType = buf.ReadByte()
+	h.ChunkType = buf.ReadUint8()
 	h.MessageSize = buf.ReadUint32()
 	h.SecureChannelID = buf.ReadUint32()
 	return buf.Pos(), buf.Error()
@@ -57,7 +57,7 @@ func (h *Header) Encode() ([]byte, error) {
 		return nil, errors.Errorf("invalid message type: %q", h.MessageType)
 	}
 	buf.Write([]byte(h.MessageType))
-	buf.WriteByte(h.ChunkType)
+	buf.WriteUint8(h.ChunkType)
 	buf.WriteUint32(h.MessageSize)
 	buf.WriteUint32(h.SecureChannelID)
 	return buf.Bytes(), buf.Error()

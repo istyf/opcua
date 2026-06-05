@@ -39,7 +39,7 @@ type DataValue struct {
 
 func (d *DataValue) Decode(b []byte) (int, error) {
 	buf := NewBuffer(b)
-	d.EncodingMask = buf.ReadByte()
+	d.EncodingMask = buf.ReadUint8()
 	d.Value = new(Variant)
 	if d.Has(DataValueValue) {
 		buf.ReadStruct(d.Value)
@@ -231,7 +231,7 @@ func NewLocalizedTextWithLocale(text, locale string) *LocalizedText {
 
 func (l *LocalizedText) Decode(b []byte) (int, error) {
 	buf := NewBuffer(b)
-	l.EncodingMask = buf.ReadByte()
+	l.EncodingMask = buf.ReadUint8()
 	l.Locale = ""
 	l.Text = ""
 	if l.Has(LocalizedTextLocale) {

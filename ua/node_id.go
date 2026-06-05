@@ -338,16 +338,16 @@ func (n *NodeID) String() string {
 func (n *NodeID) Decode(b []byte) (int, error) {
 	buf := NewBuffer(b)
 
-	n.mask = NodeIDType(buf.ReadByte())
+	n.mask = NodeIDType(buf.ReadUint8())
 	typ := n.mask & 0xf
 
 	switch typ {
 	case NodeIDTypeTwoByte:
-		n.nid = uint32(buf.ReadByte())
+		n.nid = uint32(buf.ReadUint8())
 		return buf.Pos(), buf.Error()
 
 	case NodeIDTypeFourByte:
-		n.ns = uint16(buf.ReadByte())
+		n.ns = uint16(buf.ReadUint8())
 		n.nid = uint32(buf.ReadUint16())
 		return buf.Pos(), buf.Error()
 
@@ -374,13 +374,13 @@ func (n *NodeID) Decode(b []byte) (int, error) {
 
 func (n *NodeID) Encode() ([]byte, error) {
 	buf := NewBuffer(nil)
-	buf.WriteByte(byte(n.mask))
+	buf.WriteUint8(byte(n.mask))
 
 	switch n.Type() {
 	case NodeIDTypeTwoByte:
-		buf.WriteByte(byte(n.nid))
+		buf.WriteUint8(byte(n.nid))
 	case NodeIDTypeFourByte:
-		buf.WriteByte(byte(n.ns))
+		buf.WriteUint8(byte(n.ns))
 		buf.WriteUint16(uint16(n.nid))
 	case NodeIDTypeNumeric:
 		buf.WriteUint16(n.ns)

@@ -117,7 +117,7 @@ func (m *Variant) Value() any {
 // Decode implements the codec interface.
 func (m *Variant) Decode(b []byte) (int, error) {
 	buf := NewBuffer(b)
-	m.mask = buf.ReadByte()
+	m.mask = buf.ReadUint8()
 
 	// a null value specifies that no other fields are encoded
 	if m.Type() == TypeIDNull {
@@ -257,7 +257,7 @@ func (m *Variant) decodeValue(buf *Buffer) any {
 	case TypeIDSByte:
 		return buf.ReadInt8()
 	case TypeIDByte:
-		return buf.ReadByte()
+		return buf.ReadUint8()
 	case TypeIDInt16:
 		return buf.ReadInt16()
 	case TypeIDUint16:
@@ -330,7 +330,7 @@ func (m *Variant) decodeValue(buf *Buffer) any {
 // Encode implements the codec interface.
 func (m *Variant) Encode() ([]byte, error) {
 	buf := NewBuffer(nil)
-	buf.WriteByte(m.mask)
+	buf.WriteUint8(m.mask)
 
 	// a null value specifies that no other fields are encoded
 	if m.Type() == TypeIDNull {
@@ -372,7 +372,7 @@ func (m *Variant) encodeValue(buf *Buffer, v any) {
 	case int8:
 		buf.WriteInt8(x)
 	case byte:
-		buf.WriteByte(x)
+		buf.WriteUint8(x)
 	case int16:
 		buf.WriteInt16(x)
 	case uint16:
