@@ -14,8 +14,9 @@ const generatedEventIDLength = 16
 
 // EmitEvent publishes an OPC UA event from sourceNodeID.
 //
-// The Phase 1 implementation normalizes the event payload. Delivery to
-// subscriptions is wired in the monitored item and subscription phases.
+// The event payload is normalized before it is handed to the monitored item
+// service. For this first event path, sourceNodeID is also the event notifier
+// node clients subscribe to.
 func (s *serverImpl) EmitEvent(ctx context.Context, sourceNodeID *ua.NodeID, event *types.Event) error {
 	if sourceNodeID == nil {
 		return ua.StatusBadSourceNodeIDInvalid
@@ -51,6 +52,10 @@ func (s *serverImpl) EmitEvent(ctx context.Context, sourceNodeID *ua.NodeID, eve
 			return err
 		}
 		event.EventID = eventID
+	}
+
+	if s.MonitoredItemService != nil {
+		return s.MonitoredItemService.EmitEvent(ctx, sourceNodeID, event)
 	}
 
 	return nil

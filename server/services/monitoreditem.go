@@ -173,6 +173,65 @@ func (s *MonitoredItemService) ChangeNotification(ctx context.Context, n *ua.Nod
 	}
 }
 
+type eventNotificationDelivery struct {
+	sub       *Subscription
+	fieldList *ua.EventFieldList
+}
+
+// EmitEvent queues an OPC UA event for monitored items on sourceNodeID.
+//
+// The first event publication path treats sourceNodeID as both the event source
+// and the event notifier node that clients monitor.
+func (s *MonitoredItemService) EmitEvent(ctx context.Context, sourceNodeID *ua.NodeID, event *types.Event) error {
+	if sourceNodeID == nil {
+		return ua.StatusBadSourceNodeIDInvalid
+	}
+	if event == nil {
+		return ua.StatusBadInvalidArgument
+	}
+
+	s.mu.Lock()
+	items := s.nodes[sourceNodeID.String()]
+	deliveries := make([]eventNotificationDelivery, 0, len(items))
+	for _, item := range items {
+		if !monitoredItemReportsEvents(item) {
+			continue
+		}
+		if !eventFilterMatches(item.EventFilter, event) {
+			continue
+		}
+
+		deliveries = append(deliveries, eventNotificationDelivery{
+			sub: item.Sub,
+			fieldList: &ua.EventFieldList{
+				ClientHandle: item.Req.RequestedParameters.ClientHandle,
+				EventFields:  eventFilterSelectFields(item.EventFilter, event),
+			},
+		})
+	}
+	s.mu.Unlock()
+
+	for _, delivery := range deliveries {
+		if delivery.sub == nil || delivery.sub.EventNotifyChannel == nil || delivery.fieldList == nil {
+			continue
+		}
+		delivery.sub.EventNotifyChannel <- delivery.fieldList
+	}
+
+	ualog.Debug(ctx, "event queued", ualog.Any(ualog.NodeIdKey, sourceNodeID), ualog.Int("matches", len(deliveries)))
+	return nil
+}
+
+func monitoredItemReportsEvents(item *MonitoredItem) bool {
+	if item == nil || item.Sub == nil || item.Req == nil || item.Req.RequestedParameters == nil {
+		return false
+	}
+	if item.Kind != monitoredItemKindEvent {
+		return false
+	}
+	return item.Mode == ua.MonitoringModeReporting
+}
+
 func (s *MonitoredItemService) NextID() uint32 {
 	i := s.previousID.Add(uint32(1))
 	if i == 0 {

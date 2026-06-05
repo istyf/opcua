@@ -552,6 +552,7 @@ type Subscription struct {
 	T *time.Ticker
 
 	NotifyChannel            chan *ua.MonitoredItemNotification
+	EventNotifyChannel       chan *ua.EventFieldList
 	ModifyChannel            chan subscriptionModify
 	SetPublishingModeChannel chan subscriptionPublishingMode
 
@@ -584,6 +585,7 @@ func NewSubscription() *Subscription {
 	return &Subscription{
 		//SeqNums:       map[uint32]struct{}{},
 		NotifyChannel:            make(chan *ua.MonitoredItemNotification, 100),
+		EventNotifyChannel:       make(chan *ua.EventFieldList, 100),
 		ModifyChannel:            make(chan subscriptionModify, 2),
 		SetPublishingModeChannel: make(chan subscriptionPublishingMode, 2),
 		publishQueue:             make(map[uint32]*ua.MonitoredItemNotification),

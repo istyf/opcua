@@ -245,6 +245,103 @@ func TestCreateMonitoredItemsRejectsInvalidEventNotifierRequests(t *testing.T) {
 	}
 }
 
+func TestEmitEventQueuesMatchingEventFieldList(t *testing.T) {
+	t.Parallel()
+
+	ownerSession := newSubscriptionTestSession()
+	sub := NewSubscription()
+	sub.ID = 1
+	sub.session = ownerSession
+	sub.RevisedPublishingInterval = 1000
+	sourceNodeID := ua.NewNumericNodeID(1, 6001)
+	namespace := newMonitoredItemTestNamespace(
+		monitoredItemTestNode{
+			id:            sourceNodeID,
+			nodeClass:     ua.NodeClassObject,
+			eventNotifier: ua.EventNotifierTypeSubscribeToEvents,
+		},
+	)
+
+	backend := &monitoredItemTestBackend{
+		session:      ownerSession,
+		subscription: sub,
+		namespace:    namespace,
+	}
+	service := NewMonitoredItemService(backend)
+	filterObject := monitoredItemTestEventFilter("Severity", "Message", "SourceNode")
+	filterObject.Value.(*ua.EventFilter).WhereClause = monitoredItemTestSeverityWhereClause(ua.FilterOperatorGreaterThanOrEqual, uint16(100))
+	req := monitoredItemTestCreateEventRequest(ownerSession, sub, sourceNodeID, filterObject)
+
+	resp, err := service.CreateMonitoredItems(t.Context(), nil, req, 1)
+	require.NoError(t, err)
+	createResp, ok := resp.(*ua.CreateMonitoredItemsResponse)
+	require.True(t, ok, "expected CreateMonitoredItemsResponse, got %T", resp)
+	require.Len(t, createResp.Results, 1)
+	require.Equal(t, ua.StatusOK, createResp.Results[0].StatusCode)
+
+	event := &types.Event{
+		SourceNode: sourceNodeID,
+		Message:    ua.NewLocalizedText("threshold crossed"),
+		Severity:   250,
+	}
+	require.NoError(t, service.EmitEvent(t.Context(), sourceNodeID, event))
+
+	select {
+	case fieldList := <-sub.EventNotifyChannel:
+		require.NotNil(t, fieldList)
+		assert.Equal(t, uint32(55), fieldList.ClientHandle)
+		require.Len(t, fieldList.EventFields, 3)
+		assert.Equal(t, uint64(250), fieldList.EventFields[0].Uint())
+		assert.Equal(t, "threshold crossed", fieldList.EventFields[1].String())
+		assert.Same(t, sourceNodeID, fieldList.EventFields[2].Value())
+	default:
+		t.Fatal("expected a queued event field list")
+	}
+}
+
+func TestEmitEventSkipsNonMatchingEventFilter(t *testing.T) {
+	t.Parallel()
+
+	ownerSession := newSubscriptionTestSession()
+	sub := NewSubscription()
+	sub.ID = 1
+	sub.session = ownerSession
+	sub.RevisedPublishingInterval = 1000
+	sourceNodeID := ua.NewNumericNodeID(1, 6002)
+	namespace := newMonitoredItemTestNamespace(
+		monitoredItemTestNode{
+			id:            sourceNodeID,
+			nodeClass:     ua.NodeClassObject,
+			eventNotifier: ua.EventNotifierTypeSubscribeToEvents,
+		},
+	)
+
+	backend := &monitoredItemTestBackend{
+		session:      ownerSession,
+		subscription: sub,
+		namespace:    namespace,
+	}
+	service := NewMonitoredItemService(backend)
+	filterObject := monitoredItemTestEventFilter("Severity")
+	filterObject.Value.(*ua.EventFilter).WhereClause = monitoredItemTestSeverityWhereClause(ua.FilterOperatorGreaterThanOrEqual, uint16(500))
+	req := monitoredItemTestCreateEventRequest(ownerSession, sub, sourceNodeID, filterObject)
+
+	resp, err := service.CreateMonitoredItems(t.Context(), nil, req, 1)
+	require.NoError(t, err)
+	createResp, ok := resp.(*ua.CreateMonitoredItemsResponse)
+	require.True(t, ok, "expected CreateMonitoredItemsResponse, got %T", resp)
+	require.Len(t, createResp.Results, 1)
+	require.Equal(t, ua.StatusOK, createResp.Results[0].StatusCode)
+
+	require.NoError(t, service.EmitEvent(t.Context(), sourceNodeID, &types.Event{Severity: 499}))
+
+	select {
+	case fieldList := <-sub.EventNotifyChannel:
+		t.Fatalf("did not expect event notification for non-matching filter: %#v", fieldList)
+	default:
+	}
+}
+
 type monitoredItemTestBackend struct {
 	session      types.Session
 	subscription *Subscription
