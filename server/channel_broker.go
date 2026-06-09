@@ -151,11 +151,12 @@ func (c *channelBroker) RegisterConn(ctx context.Context, endpoint string, conn 
 
 	c.mu.Lock()
 	c.s[secureChannelID] = sc
+	channelCount := len(c.s)
 	c.mu.Unlock()
 	c.wg.Add(1)
 
 	ctx = ualog.WithAttrs(ctx, ualog.Uint32("channel", secureChannelID))
-	ualog.Info(ctx, "registered new channel", ualog.Int("count", len(c.s)))
+	ualog.Info(ctx, "registered new channel", ualog.Int("count", channelCount))
 
 outer:
 	for {
