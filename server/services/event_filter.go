@@ -125,6 +125,10 @@ func validateEventWhereElement(element *ua.ContentFilterElement) (*ua.ContentFil
 		result.OperandStatusCodes[i] = ua.StatusOK
 	}
 
+	if element.FilterOperator == ua.FilterOperatorOfType {
+		return validateEventWhereOfTypeElement(element, result)
+	}
+
 	if !eventFilterComparisonOperatorSupported(element.FilterOperator) {
 		result.StatusCode = ua.StatusBadFilterOperatorUnsupported
 		return result, ua.StatusBadMonitoredItemFilterUnsupported
@@ -146,6 +150,41 @@ func validateEventWhereElement(element *ua.ContentFilterElement) (*ua.ContentFil
 	}
 
 	return result, ua.StatusOK
+}
+
+func validateEventWhereOfTypeElement(element *ua.ContentFilterElement, result *ua.ContentFilterElementResult) (*ua.ContentFilterElementResult, ua.StatusCode) {
+	if len(element.FilterOperands) != 1 {
+		result.StatusCode = ua.StatusBadFilterOperandCountMismatch
+		return result, ua.StatusBadEventFilterInvalid
+	}
+
+	operand, ok := literalOperandFromExtensionObject(element.FilterOperands[0])
+	if !ok || operand.Value == nil {
+		result.OperandStatusCodes[0] = ua.StatusBadFilterOperandInvalid
+		return result, ua.StatusBadEventFilterInvalid
+	}
+
+	if _, ok := nodeIDFromVariant(operand.Value); !ok {
+		result.OperandStatusCodes[0] = ua.StatusBadFilterOperandInvalid
+		return result, ua.StatusBadEventFilterInvalid
+	}
+
+	return result, ua.StatusOK
+}
+
+func nodeIDFromVariant(value *ua.Variant) (*ua.NodeID, bool) {
+	if value == nil || value.ArrayLength() > 0 {
+		return nil, false
+	}
+
+	switch v := value.Value().(type) {
+	case *ua.NodeID:
+		return v, v != nil
+	case ua.NodeID:
+		return &v, true
+	default:
+		return nil, false
+	}
 }
 
 func unsupportedContentFilterElementResult(element *ua.ContentFilterElement) *ua.ContentFilterElementResult {
@@ -203,7 +242,15 @@ func eventFilterMatches(filter *ua.EventFilter, event *types.Event) bool {
 }
 
 func eventWhereElementMatches(element *ua.ContentFilterElement, event *types.Event) bool {
-	if element == nil || len(element.FilterOperands) != 2 {
+	if element == nil {
+		return false
+	}
+
+	if element.FilterOperator == ua.FilterOperatorOfType {
+		return eventWhereOfTypeElementMatches(element, event)
+	}
+
+	if len(element.FilterOperands) != 2 {
 		return false
 	}
 
@@ -218,6 +265,25 @@ func eventWhereElementMatches(element *ua.ContentFilterElement, event *types.Eve
 
 	left := eventFieldVariant(event, leftOperand)
 	return compareVariantNumbers(element.FilterOperator, left, rightOperand.Value)
+}
+
+func eventWhereOfTypeElementMatches(element *ua.ContentFilterElement, event *types.Event) bool {
+	if element == nil || event == nil || len(element.FilterOperands) != 1 {
+		return false
+	}
+
+	operand, ok := literalOperandFromExtensionObject(element.FilterOperands[0])
+	if !ok || operand.Value == nil {
+		return false
+	}
+
+	requestedType, ok := nodeIDFromVariant(operand.Value)
+	if !ok || requestedType == nil || event.EventType == nil {
+		return false
+	}
+
+	// TODO: walk the event type hierarchy so OfType also matches subtypes.
+	return event.EventType.Equal(requestedType)
 }
 
 func eventFieldVariant(event *types.Event, clause *ua.SimpleAttributeOperand) *ua.Variant {
