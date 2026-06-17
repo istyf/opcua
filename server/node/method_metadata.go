@@ -99,6 +99,9 @@ func MethodInputArgumentMatches(resolver namespaceResolver, declared *ua.Argumen
 	if methodArgumentEnumScalarMatchesDeclaredDataType(resolver, declared.DataType, actualType) {
 		return true
 	}
+	if methodArgumentDataTypeDerivationMatches(resolver, declared.DataType, actualType) {
+		return true
+	}
 
 	if !isExtensionObjectValue(value.Value()) || resolver == nil {
 		return false
@@ -118,6 +121,15 @@ func methodArgumentEnumScalarMatchesDeclaredDataType(resolver namespaceResolver,
 	}
 
 	return dataTypeDerivesFrom(resolver, declaredType, ua.NewNumericNodeID(0, id.Enumeration))
+}
+
+func methodArgumentDataTypeDerivationMatches(resolver namespaceResolver, declaredType, actualType *ua.NodeID) bool {
+	if resolver == nil || declaredType == nil || actualType == nil {
+		return false
+	}
+
+	return dataTypeDerivesFrom(resolver, declaredType, actualType) ||
+		dataTypeDerivesFrom(resolver, actualType, declaredType)
 }
 
 func dataTypeDerivesFrom(resolver namespaceResolver, declaredType, superType *ua.NodeID) bool {

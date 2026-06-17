@@ -96,6 +96,17 @@ func TestMethodInputArgumentMatchesAcceptsInt32ForDeclaredEnumType(t *testing.T)
 	}, ua.MustVariant(int32(2))))
 }
 
+func TestMethodInputArgumentMatchesAcceptsBuiltinForDeclaredSimpleSubtype(t *testing.T) {
+	t.Parallel()
+
+	resolver, ids := newMethodMetadataResolver(t)
+
+	assert.True(t, MethodInputArgumentMatches(resolver, &ua.Argument{
+		DataType:  ids.integerIDType,
+		ValueRank: -1,
+	}, ua.MustVariant(uint32(1))))
+}
+
 func TestMethodInputArgumentMatchesRejectsInt32ForNonEnumDeclaredType(t *testing.T) {
 	t.Parallel()
 
@@ -146,6 +157,7 @@ func TestMethodInputArgumentMatchesExtensionObjectArrayStillMatches(t *testing.T
 type methodMetadataIDs struct {
 	declaredType            *ua.NodeID
 	enumType                *ua.NodeID
+	integerIDType           *ua.NodeID
 	binaryEncodingType      *ua.NodeID
 	xmlEncodingType         *ua.NodeID
 	otherBinaryEncodingType *ua.NodeID
@@ -166,6 +178,19 @@ func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, metho
 			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "Enumeration"}),
 		),
 	)
+	uint32Type := NewDataTypeNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(0, id.UInt32)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "UInt32"}),
+		),
+	)
+	integerIDType := NewDataTypeNode(
+		WithBase(
+			WithID(ua.NewNumericNodeID(0, id.IntegerID)),
+			WithBrowseName(&ua.QualifiedName{NamespaceIndex: 0, Name: "IntegerId"}),
+		),
+	)
+	integerIDType.AddRef(refs.NewReferenceDescription(uint32Type, ua.NewNumericNodeID(0, id.HasSubtype), false))
 	declaredType := NewDataTypeNode(
 		WithBase(
 			WithID(ua.NewNumericNodeID(2, 7001)),
@@ -221,6 +246,8 @@ func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, metho
 		name: "http://opcfoundation.org/UA/",
 		nodes: map[string]types.Node{
 			enumerationType.ID().String(): enumerationType,
+			uint32Type.ID().String():      uint32Type,
+			integerIDType.ID().String():   integerIDType,
 		},
 	}
 	ns := &methodMetadataTestNamespace{
@@ -247,6 +274,7 @@ func newMethodMetadataResolver(t *testing.T) (*methodMetadataTestResolver, metho
 	return resolver, methodMetadataIDs{
 		declaredType:            declaredType.ID(),
 		enumType:                enumType.ID(),
+		integerIDType:           integerIDType.ID(),
 		binaryEncodingType:      binaryEncodingNode.ID(),
 		xmlEncodingType:         xmlEncodingNode.ID(),
 		otherBinaryEncodingType: otherBinaryEncodingNode.ID(),

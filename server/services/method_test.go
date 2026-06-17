@@ -938,6 +938,40 @@ func TestCallValidatesInputArgumentsMetadataForTypeMismatch(t *testing.T) {
 	assert.False(t, called)
 }
 
+func TestCallValidatesInputArgumentsMetadataAcceptsBuiltinForSimpleSubtype(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	fixture := newMethodCallFixture(1, 1, true, func(context.Context, ...*ua.Variant) *types.MethodResult {
+		called = true
+		return types.NewMethodResult(ua.StatusOK)
+	})
+	addMethodTestDataTypeSubtype(t, fixture, ua.NewNumericNodeID(0, id.IntegerID), ua.NewNumericNodeID(0, id.UInt32))
+	addMethodInputArgumentsProperty(t, fixture, &ua.Argument{
+		Name:      "SubscriptionId",
+		DataType:  ua.NewNumericNodeID(0, id.IntegerID),
+		ValueRank: -1,
+	})
+
+	service := NewMethodService(fixture.backend, nil)
+	resp, err := service.Call(t.Context(), nil, &ua.CallRequest{
+		RequestHeader: &ua.RequestHeader{RequestHandle: 15},
+		MethodsToCall: []*ua.CallMethodRequest{{
+			ObjectID: fixture.objectNode.ID(),
+			MethodID: fixture.methodNode.ID(),
+			InputArguments: []*ua.Variant{
+				ua.MustVariant(uint32(1)),
+			},
+		}},
+	}, 15)
+	require.NoError(t, err)
+
+	callResp := resp.(*ua.CallResponse)
+	require.Len(t, callResp.Results, 1)
+	assert.Equal(t, ua.StatusOK, callResp.Results[0].StatusCode)
+	assert.True(t, called)
+}
+
 func TestCallValidatesInputArgumentsMetadataForTooManyArguments(t *testing.T) {
 	t.Parallel()
 
@@ -1066,6 +1100,32 @@ func addMethodInputArgumentsProperty(t *testing.T, fixture *methodCallFixture, a
 	ns, ok := objectNS.(*methodTestNamespace)
 	require.True(t, ok)
 	ns.nodes[property.ID().String()] = property
+}
+
+func addMethodTestDataTypeSubtype(t *testing.T, fixture *methodCallFixture, dataTypeID, superTypeID *ua.NodeID) {
+	t.Helper()
+
+	superType := node.NewDataTypeNode(
+		node.WithBase(
+			node.WithID(superTypeID),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: superTypeID.Namespace(), Name: "SuperType"}),
+		),
+	)
+	dataType := node.NewDataTypeNode(
+		node.WithBase(
+			node.WithID(dataTypeID),
+			node.WithBrowseName(&ua.QualifiedName{NamespaceIndex: dataTypeID.Namespace(), Name: "DataType"}),
+		),
+	)
+	dataType.AddRef(refs.NewReferenceDescription(superType, refs.HasSubtypeRefTypeID, false))
+
+	ns, ok := fixture.backend.namespaces[int(dataTypeID.Namespace())].(*methodTestNamespace)
+	if !ok {
+		ns = &methodTestNamespace{nodes: map[string]types.Node{}}
+		fixture.backend.namespaces[int(dataTypeID.Namespace())] = ns
+	}
+	ns.nodes[superType.ID().String()] = superType
+	ns.nodes[dataType.ID().String()] = dataType
 }
 
 type methodTestBackend struct {
