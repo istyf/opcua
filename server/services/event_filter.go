@@ -13,6 +13,10 @@ const eventFieldPathSeparator = "/"
 func newEventFilterResult(filter *ua.EventFilter) *ua.ExtensionObject {
 	result := &ua.EventFilterResult{
 		SelectClauseDiagnosticInfos: []*ua.DiagnosticInfo{},
+		WhereClauseResult: &ua.ContentFilterResult{
+			ElementResults:         []*ua.ContentFilterElementResult{},
+			ElementDiagnosticInfos: []*ua.DiagnosticInfo{},
+		},
 	}
 	if filter != nil {
 		result.SelectClauseResults = make([]ua.StatusCode, len(filter.SelectClauses))
@@ -54,7 +58,13 @@ func validateEventFilter(filter *ua.EventFilter, filterResult *ua.ExtensionObjec
 }
 
 func validateEventSelectClause(clause *ua.SimpleAttributeOperand) ua.StatusCode {
-	if clause == nil || clause.AttributeID != ua.AttributeIDValue || len(clause.BrowsePath) == 0 {
+	if clause == nil {
+		return ua.StatusBadFilterOperandInvalid
+	}
+	if clause.AttributeID == ua.AttributeIDNodeID && len(clause.BrowsePath) == 0 {
+		return ua.StatusOK
+	}
+	if clause.AttributeID != ua.AttributeIDValue || len(clause.BrowsePath) == 0 {
 		return ua.StatusBadFilterOperandInvalid
 	}
 	for _, name := range clause.BrowsePath {
@@ -202,6 +212,10 @@ func eventWhereElementMatches(element *ua.ContentFilterElement, event *types.Eve
 func eventFieldVariant(event *types.Event, clause *ua.SimpleAttributeOperand) *ua.Variant {
 	if event == nil || clause == nil {
 		return nullVariant()
+	}
+
+	if clause.AttributeID == ua.AttributeIDNodeID && len(clause.BrowsePath) == 0 {
+		return variantOrNull(event.SourceNode)
 	}
 
 	key := selectClauseBrowsePathKey(clause)

@@ -165,6 +165,123 @@ func TestCreateMonitoredItemsAcceptsEventNotifierWithEventFilter(t *testing.T) {
 	}
 }
 
+func TestCreateMonitoredItemsAcceptsConditionNodeIDSelectClause(t *testing.T) {
+	t.Parallel()
+
+	ownerSession := newSubscriptionTestSession()
+	sub := NewSubscription()
+	sub.ID = 1
+	sub.session = ownerSession
+	sub.RevisedPublishingInterval = 1000
+	sourceNodeID := ua.NewNumericNodeID(1, 5010)
+	namespace := newMonitoredItemTestNamespace(
+		monitoredItemTestNode{
+			id:            sourceNodeID,
+			nodeClass:     ua.NodeClassObject,
+			eventNotifier: ua.EventNotifierTypeSubscribeToEvents,
+		},
+	)
+
+	backend := &monitoredItemTestBackend{
+		session:      ownerSession,
+		subscription: sub,
+		namespace:    namespace,
+	}
+	service := NewMonitoredItemService(backend)
+	filterObject := ua.NewExtensionObject(&ua.EventFilter{
+		SelectClauses: []*ua.SimpleAttributeOperand{
+			monitoredItemTestConditionNodeIDSelectClause(),
+		},
+	})
+	req := monitoredItemTestCreateEventRequest(ownerSession, sub, sourceNodeID, filterObject)
+
+	resp, err := service.CreateMonitoredItems(t.Context(), nil, req, 1)
+	require.NoError(t, err)
+	createResp, ok := resp.(*ua.CreateMonitoredItemsResponse)
+	require.True(t, ok, "expected CreateMonitoredItemsResponse, got %T", resp)
+	require.Len(t, createResp.Results, 1)
+
+	result := createResp.Results[0]
+	require.Equal(t, ua.StatusOK, result.StatusCode)
+	filterResult, ok := result.FilterResult.Value.(*ua.EventFilterResult)
+	require.True(t, ok, "expected EventFilterResult, got %T", result.FilterResult.Value)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK}, filterResult.SelectClauseResults)
+	require.NotNil(t, filterResult.WhereClauseResult)
+	assert.Empty(t, filterResult.WhereClauseResult.ElementResults)
+
+	decoded := assertCreateMonitoredItemsResponseRoundTrips(t, createResp)
+	require.Len(t, decoded.Results, 1)
+	decodedFilterResult, ok := decoded.Results[0].FilterResult.Value.(*ua.EventFilterResult)
+	require.True(t, ok, "expected decoded EventFilterResult, got %T", decoded.Results[0].FilterResult.Value)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK}, decodedFilterResult.SelectClauseResults)
+	require.NotNil(t, decodedFilterResult.WhereClauseResult)
+	assert.Empty(t, decodedFilterResult.WhereClauseResult.ElementResults)
+}
+
+func TestCreateMonitoredItemsAcceptsUAExpertStyleConditionEventFilter(t *testing.T) {
+	t.Parallel()
+
+	ownerSession := newSubscriptionTestSession()
+	sub := NewSubscription()
+	sub.ID = 1
+	sub.session = ownerSession
+	sub.RevisedPublishingInterval = 1000
+	sourceNodeID := ua.NewNumericNodeID(1, 5011)
+	namespace := newMonitoredItemTestNamespace(
+		monitoredItemTestNode{
+			id:            sourceNodeID,
+			nodeClass:     ua.NodeClassObject,
+			eventNotifier: ua.EventNotifierTypeSubscribeToEvents,
+		},
+	)
+
+	backend := &monitoredItemTestBackend{
+		session:      ownerSession,
+		subscription: sub,
+		namespace:    namespace,
+	}
+	service := NewMonitoredItemService(backend)
+	selectClauses := []*ua.SimpleAttributeOperand{
+		monitoredItemTestConditionNodeIDSelectClause(),
+		monitoredItemTestSelectClause("EventId"),
+		monitoredItemTestSelectClause("EventType"),
+		monitoredItemTestSelectClause("SourceName"),
+		monitoredItemTestSelectClause("Time"),
+		monitoredItemTestSelectClause("Message"),
+		monitoredItemTestSelectClause("AckedState", "Id"),
+		monitoredItemTestSelectClause("ConfirmedState", "Id"),
+		monitoredItemTestSelectClause("ActiveState"),
+		monitoredItemTestSelectClause("ActiveState", "Id"),
+		monitoredItemTestSelectClause("ActiveState", "EffectiveDisplayName"),
+	}
+	filterObject := ua.NewExtensionObject(&ua.EventFilter{SelectClauses: selectClauses})
+	req := monitoredItemTestCreateEventRequest(ownerSession, sub, sourceNodeID, filterObject)
+
+	resp, err := service.CreateMonitoredItems(t.Context(), nil, req, 1)
+	require.NoError(t, err)
+	createResp, ok := resp.(*ua.CreateMonitoredItemsResponse)
+	require.True(t, ok, "expected CreateMonitoredItemsResponse, got %T", resp)
+	require.Len(t, createResp.Results, 1)
+
+	result := createResp.Results[0]
+	require.Equal(t, ua.StatusOK, result.StatusCode)
+	filterResult, ok := result.FilterResult.Value.(*ua.EventFilterResult)
+	require.True(t, ok, "expected EventFilterResult, got %T", result.FilterResult.Value)
+	require.Len(t, filterResult.SelectClauseResults, len(selectClauses))
+	for _, status := range filterResult.SelectClauseResults {
+		assert.Equal(t, ua.StatusOK, status)
+	}
+
+	decoded := assertCreateMonitoredItemsResponseRoundTrips(t, createResp)
+	require.Len(t, decoded.Results, 1)
+	decodedFilterResult, ok := decoded.Results[0].FilterResult.Value.(*ua.EventFilterResult)
+	require.True(t, ok, "expected decoded EventFilterResult, got %T", decoded.Results[0].FilterResult.Value)
+	require.Len(t, decodedFilterResult.SelectClauseResults, len(selectClauses))
+	for _, status := range decodedFilterResult.SelectClauseResults {
+		assert.Equal(t, ua.StatusOK, status)
+	}
+}
+
 func TestCreateMonitoredItemsRejectsInvalidEventNotifierRequests(t *testing.T) {
 	t.Parallel()
 
@@ -399,6 +516,20 @@ func (b *monitoredItemTestBackend) Subscription(id types.SubscriptionID) (*Subsc
 		return nil, false
 	}
 	return b.subscription, true
+}
+
+func assertCreateMonitoredItemsResponseRoundTrips(t *testing.T, resp *ua.CreateMonitoredItemsResponse) *ua.CreateMonitoredItemsResponse {
+	t.Helper()
+
+	encoded, err := ua.Encode(resp)
+	require.NoError(t, err)
+
+	var decoded ua.CreateMonitoredItemsResponse
+	n, err := ua.Decode(encoded, &decoded)
+	require.NoError(t, err)
+	assert.Equal(t, len(encoded), n)
+
+	return &decoded
 }
 
 func monitoredItemTestCreateEventRequest(session types.Session, sub *Subscription, sourceNodeID *ua.NodeID, filter *ua.ExtensionObject) *ua.CreateMonitoredItemsRequest {

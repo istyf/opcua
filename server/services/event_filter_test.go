@@ -112,6 +112,22 @@ func TestEventFilterSelectFieldsSupportsBaseEventTypeFields(t *testing.T) {
 	}
 }
 
+func TestEventFilterSelectFieldsSupportsEmptyBrowsePathNodeIDOperand(t *testing.T) {
+	t.Parallel()
+
+	sourceNode := ua.NewNumericNodeID(2, 27820)
+	filter := &ua.EventFilter{
+		SelectClauses: []*ua.SimpleAttributeOperand{
+			monitoredItemTestConditionNodeIDSelectClause(),
+		},
+	}
+
+	fields := eventFilterSelectFields(filter, &types.Event{SourceNode: sourceNode})
+
+	require.Len(t, fields, 1)
+	assert.Same(t, sourceNode, fields[0].Value())
+}
+
 func TestEventFilterMatchesSeverityComparison(t *testing.T) {
 	t.Parallel()
 
@@ -144,6 +160,26 @@ func TestValidateEventFilterAcceptsSupportedSeverityWhereClause(t *testing.T) {
 	require.Len(t, result.WhereClauseResult.ElementResults, 1)
 	assert.Equal(t, ua.StatusOK, result.WhereClauseResult.ElementResults[0].StatusCode)
 	assert.Equal(t, []ua.StatusCode{ua.StatusOK, ua.StatusOK}, result.WhereClauseResult.ElementResults[0].OperandStatusCodes)
+}
+
+func TestValidateEventFilterAcceptsConditionNodeIDSelectClause(t *testing.T) {
+	t.Parallel()
+
+	filter := &ua.EventFilter{
+		SelectClauses: []*ua.SimpleAttributeOperand{
+			monitoredItemTestConditionNodeIDSelectClause(),
+		},
+	}
+	resultObj := newEventFilterResult(filter)
+
+	status := validateEventFilter(filter, resultObj)
+
+	require.Equal(t, ua.StatusOK, status)
+	result, ok := resultObj.Value.(*ua.EventFilterResult)
+	require.True(t, ok, "expected EventFilterResult, got %T", resultObj.Value)
+	assert.Equal(t, []ua.StatusCode{ua.StatusOK}, result.SelectClauseResults)
+	require.NotNil(t, result.WhereClauseResult)
+	assert.Empty(t, result.WhereClauseResult.ElementResults)
 }
 
 func TestValidateEventFilterRejectsUnsupportedWhereClause(t *testing.T) {
@@ -186,6 +222,14 @@ func monitoredItemTestSelectClause(path ...string) *ua.SimpleAttributeOperand {
 		TypeDefinitionID: ua.NewNumericNodeID(0, id.BaseEventType),
 		BrowsePath:       browsePath,
 		AttributeID:      ua.AttributeIDValue,
+	}
+}
+
+func monitoredItemTestConditionNodeIDSelectClause() *ua.SimpleAttributeOperand {
+	return &ua.SimpleAttributeOperand{
+		TypeDefinitionID: ua.NewNumericNodeID(0, id.ConditionType),
+		BrowsePath:       []*ua.QualifiedName{},
+		AttributeID:      ua.AttributeIDNodeID,
 	}
 }
 
