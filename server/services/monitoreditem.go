@@ -319,10 +319,28 @@ func reviseMonitoredItemQueueSize(requested uint32) uint32 {
 func (s *MonitoredItemService) validateEventMonitoredItem(ctx context.Context, itemreq *ua.MonitoredItemCreateRequest) (*ua.EventFilter, *ua.ExtensionObject, ua.StatusCode) {
 	eventFilter, status := monitoredItemEventFilter(ctx, itemreq)
 	filterResult := newEventFilterResult(eventFilter)
+
+	ualog.Debug(ctx, "event filter decoded",
+		ualog.Any(ualog.NodeIdKey, itemreq.ItemToMonitor.NodeID),
+		ualog.Uint32("attribute_id", uint32(itemreq.ItemToMonitor.AttributeID)),
+		ualog.Any("status", status),
+	)
+
 	if status != ua.StatusOK {
 		return nil, filterResult, status
 	}
-	if status = validateEventFilter(eventFilter, filterResult); status != ua.StatusOK {
+
+	status = validateEventFilter(eventFilter, filterResult)
+	ualog.Debug(ctx, "event filter validated",
+		ualog.Any(ualog.NodeIdKey, itemreq.ItemToMonitor.NodeID),
+		ualog.Int("select_clause_count", len(eventFilter.SelectClauses)),
+		ualog.Any("where_clause", eventFilter.WhereClause),
+		ualog.Any("status", status),
+		ualog.String("filter_result_type", fmt.Sprintf("%T", filterResult.Value)),
+		ualog.Any("filter_result", filterResult.Value),
+	)
+
+	if status != ua.StatusOK {
 		return nil, filterResult, status
 	}
 
@@ -473,6 +491,20 @@ func (s *MonitoredItemService) CreateMonitoredItems(ctx context.Context, sc *uas
 	for i := range req.ItemsToCreate {
 		itemreq := req.ItemsToCreate[i]
 		item, result := s.newMonitoredItem(ctx, sub, itemreq)
+
+		ualog.Debug(ctx, "create monitored item result",
+			ualog.Int("index", i),
+			ualog.Any(ualog.NodeIdKey, itemreq.ItemToMonitor.NodeID),
+			ualog.Uint32("attribute_id", uint32(itemreq.ItemToMonitor.AttributeID)),
+			ualog.Uint32("client_handle", itemreq.RequestedParameters.ClientHandle),
+			ualog.Any("status", result.StatusCode),
+			ualog.Uint32("monitored_item_id", result.MonitoredItemID),
+			ualog.String("revised_sampling_interval", fmt.Sprintf("%0.2f", result.RevisedSamplingInterval)),
+			ualog.Uint32("revised_queue_size", result.RevisedQueueSize),
+			ualog.String("filter_result_type", fmt.Sprintf("%T", result.FilterResult.Value)),
+			ualog.Any("filter_result", result.FilterResult.Value),
+		)
+
 		res[i] = result
 		if item == nil {
 			continue
