@@ -265,7 +265,7 @@ func canonicalMethodDataType(nodeID *ua.NodeID) *ua.NodeID {
 	}
 
 	switch nodeID.IntID() {
-	case id.IntegerID: // SubscriptionId
+	case id.IntegerID: // OPC UA IntegerId simple type, encoded as UInt32
 		return ua.NewNumericNodeID(0, id.UInt32)
 	default:
 		return nodeID
