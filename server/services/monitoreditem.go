@@ -330,7 +330,7 @@ func (s *MonitoredItemService) validateEventMonitoredItem(ctx context.Context, i
 		return nil, filterResult, status
 	}
 
-	status = validateEventFilter(eventFilter, filterResult)
+	status = validateEventFilter(ctx, eventFilter, filterResult)
 	ualog.Debug(ctx, "event filter validated",
 		ualog.Any(ualog.NodeIdKey, itemreq.ItemToMonitor.NodeID),
 		ualog.Int("select_clause_count", len(eventFilter.SelectClauses)),

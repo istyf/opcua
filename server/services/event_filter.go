@@ -1,11 +1,13 @@
 package services
 
 import (
+	"context"
 	"strings"
 	"time"
 
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/ua"
+	"github.com/gopcua/opcua/ualog"
 )
 
 const eventFieldPathSeparator = "/"
@@ -27,7 +29,7 @@ func newEventFilterResult(filter *ua.EventFilter) *ua.ExtensionObject {
 	return ua.NewExtensionObject(result)
 }
 
-func validateEventFilter(filter *ua.EventFilter, filterResult *ua.ExtensionObject) ua.StatusCode {
+func validateEventFilter(ctx context.Context, filter *ua.EventFilter, filterResult *ua.ExtensionObject) ua.StatusCode {
 	if filter == nil {
 		return ua.StatusBadMonitoredItemFilterInvalid
 	}
@@ -50,7 +52,7 @@ func validateEventFilter(filter *ua.EventFilter, filterResult *ua.ExtensionObjec
 		return status
 	}
 
-	whereResult, whereStatus := validateEventWhereClause(filter.WhereClause)
+	whereResult, whereStatus := validateEventWhereClause(ctx, filter.WhereClause)
 	if whereResult != nil && result != nil {
 		result.WhereClauseResult = whereResult
 	}
@@ -75,9 +77,18 @@ func validateEventSelectClause(clause *ua.SimpleAttributeOperand) ua.StatusCode 
 	return ua.StatusOK
 }
 
-func validateEventWhereClause(where *ua.ContentFilter) (*ua.ContentFilterResult, ua.StatusCode) {
+func validateEventWhereClause(ctx context.Context, where *ua.ContentFilter) (*ua.ContentFilterResult, ua.StatusCode) {
 	if where == nil || len(where.Elements) == 0 {
 		return nil, ua.StatusOK
+	}
+
+	for i, elem := range where.Elements {
+		ualog.Debug(ctx, "event where clause element",
+			ualog.Int("index", i),
+			ualog.Any("operator", elem.FilterOperator),
+			ualog.Int("operand_count", len(elem.FilterOperands)),
+			ualog.Any("operands", elem.FilterOperands),
+		)
 	}
 
 	result := &ua.ContentFilterResult{

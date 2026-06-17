@@ -151,7 +151,7 @@ func TestValidateEventFilterAcceptsSupportedSeverityWhereClause(t *testing.T) {
 	}
 	resultObj := newEventFilterResult(filter)
 
-	status := validateEventFilter(filter, resultObj)
+	status := validateEventFilter(t.Context(), filter, resultObj)
 
 	require.Equal(t, ua.StatusOK, status)
 	result, ok := resultObj.Value.(*ua.EventFilterResult)
@@ -172,7 +172,7 @@ func TestValidateEventFilterAcceptsConditionNodeIDSelectClause(t *testing.T) {
 	}
 	resultObj := newEventFilterResult(filter)
 
-	status := validateEventFilter(filter, resultObj)
+	status := validateEventFilter(t.Context(), filter, resultObj)
 
 	require.Equal(t, ua.StatusOK, status)
 	result, ok := resultObj.Value.(*ua.EventFilterResult)
@@ -203,7 +203,7 @@ func TestValidateEventFilterRejectsUnsupportedWhereClause(t *testing.T) {
 	}
 	resultObj := newEventFilterResult(filter)
 
-	status := validateEventFilter(filter, resultObj)
+	status := validateEventFilter(t.Context(), filter, resultObj)
 
 	require.Equal(t, ua.StatusBadMonitoredItemFilterUnsupported, status)
 	result, ok := resultObj.Value.(*ua.EventFilterResult)
