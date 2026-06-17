@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/gopcua/opcua/id"
 	"github.com/gopcua/opcua/server/types"
 	"github.com/gopcua/opcua/server/values"
 	"github.com/gopcua/opcua/ua"
@@ -234,16 +235,40 @@ func validateMethodWrapperSignature(n types.MethodNode, expected []expectedMetho
 			))
 		}
 
-		if exp.dataType != nil && arg.DataType != nil && !exp.dataType.Equal(arg.DataType) {
+		if !methodDataTypeCompatible(exp.dataType, arg.DataType) {
 			panic(fmt.Sprintf(
 				"method wrapper signature mismatch for %s argument %d (%s): metadata data type %s is incompatible with wrapper data type %s",
-				n.BrowseName().String(),
-				idx,
-				arg.Name,
-				arg.DataType.String(),
-				exp.dataType.String(),
+				n.BrowseName().String(), idx, arg.Name, arg.DataType.String(), exp.dataType.String(),
 			))
 		}
+	}
+}
+
+func methodDataTypeCompatible(wrapperDataType, metadataDataType *ua.NodeID) bool {
+	if wrapperDataType == nil || metadataDataType == nil {
+		return true
+	}
+
+	if wrapperDataType.Equal(metadataDataType) {
+		return true
+	}
+
+	wrapperDataType = canonicalMethodDataType(wrapperDataType)
+	metadataDataType = canonicalMethodDataType(metadataDataType)
+
+	return wrapperDataType.Equal(metadataDataType)
+}
+
+func canonicalMethodDataType(nodeID *ua.NodeID) *ua.NodeID {
+	if nodeID == nil || nodeID.Namespace() != 0 {
+		return nodeID
+	}
+
+	switch nodeID.IntID() {
+	case id.IntegerID: // SubscriptionId
+		return ua.NewNumericNodeID(0, id.UInt32)
+	default:
+		return nodeID
 	}
 }
 
