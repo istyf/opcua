@@ -317,7 +317,7 @@ func reviseMonitoredItemQueueSize(requested uint32) uint32 {
 }
 
 func (s *MonitoredItemService) validateEventMonitoredItem(ctx context.Context, itemreq *ua.MonitoredItemCreateRequest) (*ua.EventFilter, *ua.ExtensionObject, ua.StatusCode) {
-	eventFilter, status := monitoredItemEventFilter(ctx, itemreq.RequestedParameters.Filter)
+	eventFilter, status := monitoredItemEventFilter(ctx, itemreq)
 	filterResult := newEventFilterResult(eventFilter)
 	if status != ua.StatusOK {
 		return nil, filterResult, status
@@ -345,22 +345,37 @@ func (s *MonitoredItemService) validateEventMonitoredItem(ctx context.Context, i
 	return eventFilter, filterResult, ua.StatusOK
 }
 
-func monitoredItemEventFilter(ctx context.Context, filterObject *ua.ExtensionObject) (*ua.EventFilter, ua.StatusCode) {
-	if filterObject == nil || filterObject.Value == nil || filterObject.EncodingMask == ua.ExtensionObjectEmpty {
+func monitoredItemEventFilter(ctx context.Context, itemreq *ua.MonitoredItemCreateRequest) (*ua.EventFilter, ua.StatusCode) {
+	filterObject := itemreq.RequestedParameters.Filter
+
+	nodeID := itemreq.ItemToMonitor.NodeID
+	attrID := itemreq.ItemToMonitor.AttributeID
+	clientHandle := itemreq.RequestedParameters.ClientHandle
+
+	if filterObject == nil {
+		ualog.Debug(ctx, "monitoring filter",
+			ualog.Any(ualog.NodeIdKey, nodeID),
+			ualog.Uint32("attribute_id", uint32(attrID)),
+			ualog.Uint32("client_handle", clientHandle),
+			ualog.String("filter_type", "<nil>"),
+		)
 		return nil, ua.StatusBadMonitoredItemFilterInvalid
 	}
 
 	ualog.Debug(ctx, "monitoring filter",
-		ualog.String("type", fmt.Sprintf("%T", filterObject.Value)),
-		ualog.Any("value", filterObject.Value),
+		ualog.Any(ualog.NodeIdKey, nodeID),
+		ualog.Uint32("attribute_id", uint32(attrID)),
+		ualog.Uint32("client_handle", clientHandle),
+		ualog.Uint32("encoding_mask", uint32(filterObject.EncodingMask)),
+		ualog.String("filter_value_type", fmt.Sprintf("%T", filterObject.Value)),
+		ualog.Any("filter_value", filterObject.Value),
 	)
 
-	value := filterObject.Value
-	if nested, ok := value.(*ua.ExtensionObject); ok && nested != nil {
-		value = nested.Value
+	if filterObject.Value == nil || filterObject.EncodingMask == ua.ExtensionObjectEmpty {
+		return nil, ua.StatusBadMonitoredItemFilterInvalid
 	}
 
-	switch filter := value.(type) {
+	switch filter := filterObject.Value.(type) {
 	case *ua.EventFilter:
 		if filter == nil {
 			return nil, ua.StatusBadMonitoredItemFilterInvalid
