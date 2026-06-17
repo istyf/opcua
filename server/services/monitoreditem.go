@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"sync"
 	"sync/atomic"
@@ -316,7 +317,7 @@ func reviseMonitoredItemQueueSize(requested uint32) uint32 {
 }
 
 func (s *MonitoredItemService) validateEventMonitoredItem(ctx context.Context, itemreq *ua.MonitoredItemCreateRequest) (*ua.EventFilter, *ua.ExtensionObject, ua.StatusCode) {
-	eventFilter, status := monitoredItemEventFilter(itemreq.RequestedParameters.Filter)
+	eventFilter, status := monitoredItemEventFilter(ctx, itemreq.RequestedParameters.Filter)
 	filterResult := newEventFilterResult(eventFilter)
 	if status != ua.StatusOK {
 		return nil, filterResult, status
@@ -344,12 +345,22 @@ func (s *MonitoredItemService) validateEventMonitoredItem(ctx context.Context, i
 	return eventFilter, filterResult, ua.StatusOK
 }
 
-func monitoredItemEventFilter(filterObject *ua.ExtensionObject) (*ua.EventFilter, ua.StatusCode) {
+func monitoredItemEventFilter(ctx context.Context, filterObject *ua.ExtensionObject) (*ua.EventFilter, ua.StatusCode) {
 	if filterObject == nil || filterObject.Value == nil || filterObject.EncodingMask == ua.ExtensionObjectEmpty {
 		return nil, ua.StatusBadMonitoredItemFilterInvalid
 	}
 
-	switch filter := filterObject.Value.(type) {
+	ualog.Debug(ctx, "monitoring filter",
+		ualog.String("type", fmt.Sprintf("%T", filterObject.Value)),
+		ualog.Any("value", filterObject.Value),
+	)
+
+	value := filterObject.Value
+	if nested, ok := value.(*ua.ExtensionObject); ok && nested != nil {
+		value = nested.Value
+	}
+
+	switch filter := value.(type) {
 	case *ua.EventFilter:
 		if filter == nil {
 			return nil, ua.StatusBadMonitoredItemFilterInvalid
