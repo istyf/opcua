@@ -345,7 +345,9 @@ func LookupTypeNodeIDFromValue(value any) (*ua.NodeID, int32) {
 	case []byte:
 		return typeNodeIdFromDataType[id.ByteString], valueRank
 	default:
-		fmt.Printf("failed to handle value type: %v (%T)\n", v, v)
+		if v != nil {
+			fmt.Printf("failed to handle value type: %v (%T)\n", v, v)
+		}
 	}
 
 	return nil, valueRank

@@ -85,7 +85,7 @@ func ValueRankMatches(actual int32, declared int32) bool {
 // MethodInputArgumentMatches reports whether a call argument matches the
 // declared InputArguments metadata for one position.
 func MethodInputArgumentMatches(resolver namespaceResolver, declared *ua.Argument, value *ua.Variant) bool {
-	if declared == nil || value == nil {
+	if declared == nil || value == nil || value.Value() == nil {
 		return false
 	}
 

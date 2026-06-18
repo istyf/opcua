@@ -291,9 +291,10 @@ func expectedSliceArgument[T any]() expectedMethodArgument {
 	}
 }
 
-func expectedArgumentDataType[T any]() *ua.NodeID {
+func expectedArgumentDataType[T any]() (dataType *ua.NodeID) {
 	typ := reflect.TypeFor[T]()
 	var zero any
+
 	switch typ.Kind() {
 	case reflect.Slice:
 		zero = reflect.Zero(typ).Interface()
@@ -303,8 +304,11 @@ func expectedArgumentDataType[T any]() *ua.NodeID {
 		zero = reflect.Zero(typ).Interface()
 	}
 
-	dataType, _ := LookupTypeNodeIDFromValue(zero)
-	return dataType
+	if zero != nil {
+		dataType, _ = LookupTypeNodeIDFromValue(zero)
+	}
+
+	return
 }
 
 func expectedArgumentValueRank[T any]() int32 {
