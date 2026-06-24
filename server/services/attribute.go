@@ -61,7 +61,7 @@ func (s *AttributeService) Read(ctx context.Context, sc *uasc.SecureChannel, r u
 	results := make([]*ua.DataValue, len(req.NodesToRead))
 	for i, n := range req.NodesToRead {
 		ualog.Debug(ctx, "reading node",
-			ualog.Any(ualog.NodeIdKey, n.NodeID), ualog.Any("attr", n.AttributeID),
+			ualog.Any("node_id", n.NodeID), ualog.Any("attr", n.AttributeID),
 		)
 
 		ns, err := s.backend.Namespace(int(n.NodeID.Namespace()))
@@ -116,7 +116,7 @@ func (s *AttributeService) Write(ctx context.Context, sc *uasc.SecureChannel, r 
 	for i := range req.NodesToWrite {
 		n := req.NodesToWrite[i]
 		ualog.Debug(ctx, "writing node",
-			ualog.Any(ualog.NodeIdKey, n.NodeID), ualog.Any("attr", n.AttributeID),
+			ualog.Any("node_id", n.NodeID), ualog.Any("attr", n.AttributeID),
 		)
 
 		ns, err := s.backend.Namespace(int(n.NodeID.Namespace()))

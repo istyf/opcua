@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"crypto/rsa"
+	"errors"
 	"io"
 	mrand "math/rand"
 	"strings"
@@ -145,7 +146,7 @@ func (c *channelBroker) RegisterConn(ctx context.Context, endpoint string, conn 
 		secureTokenID,
 	)
 	if err != nil {
-		ualog.Error(ctx, "could not create secure channel for new connection", ualog.Err(err))
+		ualog.Error(ctx, "could not create secure channel for new connection", err)
 		return err
 	}
 
@@ -175,7 +176,7 @@ outer:
 				}
 				sendSecureChannelError(conn, msg.Err)
 				_ = conn.Close()
-				ualog.Error(ctx, "secure channel error", ualog.Err(msg.Err))
+				ualog.Error(ctx, "secure channel error", msg.Err)
 				break outer
 			}
 			if !c.enqueueMessage(ctx, msg) {
@@ -215,7 +216,8 @@ func (c *channelBroker) Close(ctx context.Context, timeout time.Duration) error 
 	select {
 	case <-done:
 	case <-time.After(timeout):
-		ualog.Error(ctx, "timed out waiting for channels to exit",
+		ualog.Error(ctx, "error during shutdown",
+			errors.New("timed out waiting for channels to exit"),
 			ualog.Duration("timeout", timeout),
 		)
 	}

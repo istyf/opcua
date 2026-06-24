@@ -146,6 +146,12 @@ func (s *MonitoredItemService) ChangeNotification(ctx context.Context, n *ua.Nod
 	}
 
 	ns, err := s.backend.Namespace(int(n.Namespace()))
+	if err != nil {
+		ualog.Error(ctx, "unable to get namespace", err,
+			ualog.Namespace(n.Namespace()),
+		)
+		// continue anyway to return one StatusBad per item
+	}
 
 	for i := range items {
 		item := items[i]
@@ -158,10 +164,6 @@ func (s *MonitoredItemService) ChangeNotification(ctx context.Context, n *ua.Nod
 		val := new(ua.MonitoredItemNotification)
 		val.ClientHandle = item.Req.RequestedParameters.ClientHandle
 		if err != nil {
-			ualog.Warn(ctx, "error getting namespace",
-				ualog.Namespace(n.Namespace()), ualog.Err(err),
-			)
-
 			val.Value = &ua.DataValue{}
 			val.Value.Status = ua.StatusBad
 			val.Value.EncodingMask |= ua.DataValueStatusCode
@@ -219,7 +221,7 @@ func (s *MonitoredItemService) EmitEvent(ctx context.Context, sourceNodeID *ua.N
 		delivery.sub.NotifyChannel <- delivery.notification
 	}
 
-	ualog.Debug(ctx, "event queued", ualog.Any(ualog.NodeIdKey, sourceNodeID), ualog.Int("matches", len(deliveries)))
+	ualog.Debug(ctx, "event queued", ualog.Any("node_id", sourceNodeID), ualog.Int("matches", len(deliveries)))
 	return nil
 }
 
@@ -321,7 +323,7 @@ func (s *MonitoredItemService) validateEventMonitoredItem(ctx context.Context, i
 	filterResult := newEventFilterResult(eventFilter)
 
 	ualog.Debug(ctx, "event filter decoded",
-		ualog.Any(ualog.NodeIdKey, itemreq.ItemToMonitor.NodeID),
+		ualog.Any("node_id", itemreq.ItemToMonitor.NodeID),
 		ualog.Uint32("attribute_id", uint32(itemreq.ItemToMonitor.AttributeID)),
 		ualog.Any("status", status),
 	)
@@ -332,7 +334,7 @@ func (s *MonitoredItemService) validateEventMonitoredItem(ctx context.Context, i
 
 	status = validateEventFilter(ctx, eventFilter, filterResult)
 	ualog.Debug(ctx, "event filter validated",
-		ualog.Any(ualog.NodeIdKey, itemreq.ItemToMonitor.NodeID),
+		ualog.Any("node_id", itemreq.ItemToMonitor.NodeID),
 		ualog.Int("select_clause_count", len(eventFilter.SelectClauses)),
 		ualog.Any("where_clause", eventFilter.WhereClause),
 		ualog.Any("status", status),
@@ -372,7 +374,7 @@ func monitoredItemEventFilter(ctx context.Context, itemreq *ua.MonitoredItemCrea
 
 	if filterObject == nil {
 		ualog.Debug(ctx, "monitoring filter",
-			ualog.Any(ualog.NodeIdKey, nodeID),
+			ualog.Any("node_id", nodeID),
 			ualog.Uint32("attribute_id", uint32(attrID)),
 			ualog.Uint32("client_handle", clientHandle),
 			ualog.String("filter_type", "<nil>"),
@@ -381,7 +383,7 @@ func monitoredItemEventFilter(ctx context.Context, itemreq *ua.MonitoredItemCrea
 	}
 
 	ualog.Debug(ctx, "monitoring filter",
-		ualog.Any(ualog.NodeIdKey, nodeID),
+		ualog.Any("node_id", nodeID),
 		ualog.Uint32("attribute_id", uint32(attrID)),
 		ualog.Uint32("client_handle", clientHandle),
 		ualog.Uint32("encoding_mask", uint32(filterObject.EncodingMask)),
@@ -494,7 +496,7 @@ func (s *MonitoredItemService) CreateMonitoredItems(ctx context.Context, sc *uas
 
 		ualog.Debug(ctx, "create monitored item result",
 			ualog.Int("index", i),
-			ualog.Any(ualog.NodeIdKey, itemreq.ItemToMonitor.NodeID),
+			ualog.Any("node_id", itemreq.ItemToMonitor.NodeID),
 			ualog.Uint32("attribute_id", uint32(itemreq.ItemToMonitor.AttributeID)),
 			ualog.Uint32("client_handle", itemreq.RequestedParameters.ClientHandle),
 			ualog.Any("status", result.StatusCode),
@@ -526,7 +528,7 @@ func (s *MonitoredItemService) CreateMonitoredItems(ctx context.Context, sc *uas
 		s.subs[item.Sub.ID] = append(list, item)
 
 		ualog.Debug(ctx, "adding monitored item to subscription",
-			ualog.Any(ualog.NodeIdKey, nodeid),
+			ualog.Any("node_id", nodeid),
 			ualog.Uint32("sub", uint32(subID)),
 			ualog.Uint32("item_id", item.ID),
 			ualog.Uint32("client", itemreq.RequestedParameters.ClientHandle),

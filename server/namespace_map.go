@@ -113,7 +113,7 @@ func (ns *MapNamespace) Browse(ctx context.Context, bd *ua.BrowseDescription) *u
 	defer ns.mu.RUnlock()
 
 	ualog.Debug(ctx, "browse request for node", ns.logAttributes,
-		ualog.Any(ualog.NodeIdKey, bd.NodeID), ualog.Bitmask("mask", bd.ResultMask),
+		ualog.Any("node_id", bd.NodeID), ualog.Bitmask("mask", bd.ResultMask),
 	)
 
 	if bd.NodeID.IntID() != ns.objectsFolder.ID().IntID() {
@@ -145,7 +145,7 @@ func (ns *MapNamespace) Browse(ctx context.Context, bd *ua.BrowseDescription) *u
 func (ns *MapNamespace) Attribute(ctx context.Context, n *ua.NodeID, a ua.AttributeID) *ua.DataValue {
 	ctx = ualog.WithAttrs(ctx, ns.logAttributes)
 	ualog.Debug(ctx, "read node attribute",
-		ualog.Any(ualog.NodeIdKey, n), ualog.Any("attr", a),
+		ualog.Any("node_id", n), ualog.Any("attr", a),
 	)
 
 	if n.IntID() != 0 {
@@ -261,39 +261,39 @@ func (ns *MapNamespace) Attribute(ctx context.Context, n *ua.NodeID, a ua.Attrib
 		case string:
 			dv.Value, err = ua.NewVariant(ua.NewNumericNodeID(0, 12))
 			if err != nil {
-				ualog.Warn(ctx, "problem creating variant", ualog.Err(err))
+				ualog.Warn(ctx, "problem creating variant", ualog.String("err", err.Error()))
 			}
 		case int:
 			// we can't use an int because it is of unspecified length.  I'm going to use int64 so that we don't
 			// have to worry about cutting data off.
 			dv.Value, err = ua.NewVariant(ua.NewNumericNodeID(0, 6))
 			if err != nil {
-				ualog.Warn(ctx, "problem creating variant", ualog.Err(err))
+				ualog.Warn(ctx, "problem creating variant", ualog.String("err", err.Error()))
 			}
 		case int32:
 			dv.Value, err = ua.NewVariant(ua.NewNumericNodeID(0, 6))
 			if err != nil {
-				ualog.Warn(ctx, "problem creating variant", ualog.Err(err))
+				ualog.Warn(ctx, "problem creating variant", ualog.String("err", err.Error()))
 			}
 		case float32:
 			dv.Value, err = ua.NewVariant(ua.NewNumericNodeID(0, 10))
 			if err != nil {
-				ualog.Warn(ctx, "problem creating variant", ualog.Err(err))
+				ualog.Warn(ctx, "problem creating variant", ualog.String("err", err.Error()))
 			}
 		case float64:
 			dv.Value, err = ua.NewVariant(ua.NewNumericNodeID(0, 11))
 			if err != nil {
-				ualog.Warn(ctx, "problem creating variant", ualog.Err(err))
+				ualog.Warn(ctx, "problem creating variant", ualog.String("err", err.Error()))
 			}
 		case bool:
 			dv.Value, err = ua.NewVariant(ua.NewNumericNodeID(0, 1))
 			if err != nil {
-				ualog.Warn(ctx, "problem creating variant", ualog.Err(err))
+				ualog.Warn(ctx, "problem creating variant", ualog.String("err", err.Error()))
 			}
 		default:
 			dv.Value, err = ua.NewVariant(ua.NewNumericNodeID(0, 24))
 			if err != nil {
-				ualog.Warn(ctx, "problem creating variant", ualog.Err(err))
+				ualog.Warn(ctx, "problem creating variant", ualog.String("err", err.Error()))
 			}
 		}
 
@@ -325,7 +325,7 @@ func (ns *MapNamespace) Attribute(ctx context.Context, n *ua.NodeID, a ua.Attrib
 
 func (s *MapNamespace) SetAttribute(ctx context.Context, node *ua.NodeID, attr ua.AttributeID, val *ua.DataValue) ua.StatusCode {
 	ctx = ualog.WithAttrs(ctx, s.logAttributes)
-	ualog.Debug(ctx, "write node attribute", ualog.Any(ualog.NodeIdKey, node), ualog.Any("attr", attr))
+	ualog.Debug(ctx, "write node attribute", ualog.Any("node_id", node), ualog.Any("attr", attr))
 
 	s.mu.Lock()
 	defer s.mu.Unlock()

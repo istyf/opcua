@@ -101,7 +101,7 @@ func (as *NodeNameSpace) AddNode(n types.Node) types.Node {
 func (as *NodeNameSpace) Attribute(ctx context.Context, id *ua.NodeID, attr ua.AttributeID) *ua.DataValue {
 	ctx = ualog.WithAttrs(ctx, as.logAttributes)
 	ualog.Debug(ctx, "read node attribute",
-		ualog.Any(ualog.NodeIdKey, id), ualog.Any("attr", attr),
+		ualog.Any("node_id", id), ualog.Any("attr", attr),
 	)
 
 	n := as.Node(id)
@@ -167,7 +167,7 @@ func (as *NodeNameSpace) Objects() types.ObjectNode {
 
 func (ns *NodeNameSpace) Browse(ctx context.Context, bd *ua.BrowseDescription) *ua.BrowseResult {
 	ualog.Debug(ctx, "browse", ns.logAttributes,
-		ualog.Any(ualog.NodeIdKey, bd.NodeID), ualog.Bitmask("mask", bd.ResultMask),
+		ualog.Any("node_id", bd.NodeID), ualog.Bitmask("mask", bd.ResultMask),
 	)
 
 	ns.mu.RLock()
@@ -224,7 +224,7 @@ func (ns *NodeNameSpace) SetID(id uint16) {
 
 func (as *NodeNameSpace) SetAttribute(ctx context.Context, id *ua.NodeID, attr ua.AttributeID, val *ua.DataValue) ua.StatusCode {
 	ctx = ualog.WithAttrs(ctx, as.logAttributes)
-	ualog.Debug(ctx, "write node attribute", ualog.Any(ualog.NodeIdKey, id), ualog.Any("attr", attr))
+	ualog.Debug(ctx, "write node attribute", ualog.Any("node_id", id), ualog.Any("attr", attr))
 
 	n := as.Node(id)
 	if n == nil {

@@ -402,7 +402,7 @@ func (s *SubscriptionService) Publish(ctx context.Context, sc *uasc.SecureChanne
 
 	req, err := safeReq[*ua.PublishRequest](r)
 	if err != nil {
-		ualog.Error(ctx, "bad PublishRequest struct", ualog.Err(err))
+		ualog.Error(ctx, "bad PublishRequest struct", err)
 		return nil, err
 	}
 
@@ -1014,7 +1014,7 @@ func (s *Subscription) run(ctx context.Context) {
 						case pubreq := <-s.session.PublishRequestChannel():
 							err := s.keepalive(ctx, pubreq)
 							if err != nil {
-								ualog.Warn(ctx, "problem sending keepalive to subscription", ualog.Err(err))
+								ualog.Warn(ctx, "problem sending keepalive to subscription", ualog.String("problem", err.Error()))
 								return
 							}
 						default:
@@ -1097,8 +1097,8 @@ func (s *Subscription) run(ctx context.Context) {
 		response := s.publishResponse(pubreq, &msg, moreNotifications)
 		err := s.Channel.SendResponseWithContext(ctx, pubreq.ID, response)
 		if err != nil {
-			ualog.Error(ctx, "problem sending channel response", ualog.Err(err))
-			ualog.Error(ctx, "killing subscription")
+			ualog.Error(ctx, "problem sending channel response", err)
+			ualog.Error(ctx, "killing subscription", nil)
 			return
 		}
 

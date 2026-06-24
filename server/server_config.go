@@ -9,6 +9,7 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"slices"
 	"time"
@@ -99,7 +100,7 @@ func TLSCertificate(cert tls.Certificate) Option {
 			var err error
 			leaf, err = x509.ParseCertificate(cert.Certificate[0])
 			if err != nil {
-				ualog.Error(ctx, "unable to parse leaf certificate from tls certificate", ualog.Err(err))
+				ualog.Error(ctx, "unable to parse leaf certificate from tls certificate", err)
 				return
 			}
 		}
@@ -132,14 +133,14 @@ func EnableSecurity(secPolicy SecurityPolicy, secMode ua.MessageSecurityMode) Op
 		ok := slices.Contains(ss, secPolicyURI)
 		if !ok {
 			ualog.Error(ctx, "unable to add endpoint security mode to config",
-				ualog.String(ualog.ErrorKey, "unsupported policy"),
+				errors.New("unsupported policy"),
 				ualog.String("policy", secPolicyURI),
 			)
 			return
 		}
 		if !slices.Contains(supportedServerSecurityPolicies, secPolicy) {
 			ualog.Error(ctx, "unable to add endpoint security mode to config",
-				ualog.String(ualog.ErrorKey, "unsupported server policy"),
+				errors.New("unsupported server policy"),
 				ualog.String("policy", secPolicyURI),
 			)
 			return

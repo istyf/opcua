@@ -3,22 +3,56 @@ package ualog
 import (
 	"context"
 	"log/slog"
+
+	"github.com/gopcua/opcua/ua"
 )
 
-type keyType struct{}
+type attributesKeyType struct{}
+type stateKeyType struct{}
 
-var loggerKey = keyType{}
+var attributesKey attributesKeyType
+var stateKey stateKeyType
 
-func newContext(ctx context.Context, logger *slog.Logger, args ...any) context.Context {
-	return context.WithValue(ctx, loggerKey, logger.With(args...))
+type RequestSanitizer func(ua.Request) any
+
+type state struct {
+	logger           *slog.Logger
+	errorKey         string
+	requestSanitizer RequestSanitizer
 }
 
-func fromContext(ctx context.Context) *slog.Logger {
-	logger, ok := ctx.Value(loggerKey).(*slog.Logger)
+func newContextWithLogAttributes(ctx context.Context, attrs []Attr) context.Context {
+	return context.WithValue(ctx, attributesKey, attrs)
+}
+
+func newContextWithStateFromConfig(ctx context.Context, cfg *config) context.Context {
+	return context.WithValue(ctx, stateKey, newStateFromConfig(cfg))
+}
+
+func newStateFromConfig(cfg *config) *state {
+	return &state{
+		logger:           cfg.logger,
+		errorKey:         cfg.errorKey,
+		requestSanitizer: cfg.requestSanitizer,
+	}
+}
+
+func attributesFromContext(ctx context.Context) []Attr {
+	attrs, ok := ctx.Value(attributesKey).([]Attr)
 
 	if !ok {
-		return slog.Default()
+		return nil
 	}
 
-	return logger
+	return attrs
+}
+
+func stateFromContext(ctx context.Context) *state {
+	theState, ok := ctx.Value(stateKey).(*state)
+
+	if !ok {
+		return newStateFromConfig(newConfig())
+	}
+
+	return theState
 }

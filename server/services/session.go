@@ -69,7 +69,7 @@ func (s *SessionService) CreateSession(ctx context.Context, sc *uasc.SecureChann
 	requestedTimeout := time.Duration(req.RequestedSessionTimeout) * time.Millisecond
 	nonce := make([]byte, sessionNonceLength)
 	if _, err := rand.Read(nonce); err != nil {
-		ualog.Error(ctx, "failed to create session nonce", ualog.Err(err))
+		ualog.Error(ctx, "failed to create session nonce", err)
 		return nil, ua.StatusBadInternalError
 	}
 
@@ -78,7 +78,7 @@ func (s *SessionService) CreateSession(ctx context.Context, sc *uasc.SecureChann
 
 	sig, alg, err := sc.NewSessionSignature(req.ClientCertificate, req.ClientNonce)
 	if err != nil {
-		ualog.Error(ctx, "failed to create session signature", ualog.Err(err))
+		ualog.Error(ctx, "failed to create session signature", err)
 		return nil, ua.StatusBadInternalError
 	}
 
@@ -139,7 +139,7 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 
 	err = sc.VerifySessionSignature(sess.RemoteCertificate(), sess.ServerNonce(), req.ClientSignature.Signature)
 	if err != nil {
-		ualog.Error(ctx, "failed to verify session signature", ualog.Err(err))
+		ualog.Error(ctx, "failed to verify session signature", err)
 		return nil, ua.StatusBadSecurityChecksFailed
 	}
 
@@ -176,7 +176,7 @@ func (s *SessionService) ActivateSession(ctx context.Context, sc *uasc.SecureCha
 
 	nonce := make([]byte, sessionNonceLength)
 	if _, err := rand.Read(nonce); err != nil {
-		ualog.Error(ctx, "failed to create session nonce", ualog.Err(err))
+		ualog.Error(ctx, "failed to create session nonce", err)
 		return nil, ua.StatusBadInternalError
 	}
 	sess.SetServerNonce(nonce)

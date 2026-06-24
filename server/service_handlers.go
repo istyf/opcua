@@ -6,6 +6,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	srvctx "github.com/gopcua/opcua/server/context"
@@ -44,7 +45,13 @@ func (s *serverImpl) RegisterHandler(typeID int, h services.Handler) {
 }
 
 func (s *serverImpl) handleService(ctx context.Context, sc *uasc.SecureChannel, reqID uint32, req ua.Request) {
-	ualog.Debug(ctx, "handling service request", ualog.Any("request", req))
+	if req != nil {
+		if hdr := req.Header(); hdr != nil {
+			ctx = ualog.WithAttrs(ctx, ualog.Uint32("request_handle", hdr.RequestHandle))
+		}
+	}
+
+	ualog.Debug(ctx, "handling service request")
 
 	var resp ua.Response
 	var err error
@@ -59,7 +66,7 @@ func (s *serverImpl) handleService(ctx context.Context, sc *uasc.SecureChannel, 
 
 		sendErr := sc.SendResponseWithContext(ctx, reqID, resp)
 		if sendErr != nil {
-			ualog.Warn(ctx, "unable to send response", ualog.Err(sendErr))
+			ualog.Error(ctx, "unable to send response", sendErr)
 		}
 	}()
 
@@ -75,7 +82,7 @@ func (s *serverImpl) handleService(ctx context.Context, sc *uasc.SecureChannel, 
 		resp, err = h(handlerContext, sc, req, reqID)
 	} else {
 		if typeID == 0 {
-			ualog.Warn(ctx, "unknown (potentially non registered) service", ualog.Any("request", req))
+			ualog.Warn(ctx, "unknown (potentially non registered) service", ualog.Request(ctx, req))
 		}
 		err = ua.StatusBadServiceUnsupported
 	}
@@ -94,7 +101,8 @@ func (s *serverImpl) handleService(ctx context.Context, sc *uasc.SecureChannel, 
 }
 
 func serviceFaultFromRecoveredPanic(ctx context.Context, recovered any) ua.Response {
-	ualog.Error(ctx, "recovered panic while handling service request",
+	ualog.Error(ctx, "failed to handle service request",
+		errors.New("handler paniced"),
 		ualog.String("panic", fmt.Sprint(recovered)),
 	)
 	return &ua.ServiceFault{ResponseHeader: services.NewResponseHeader(0, ua.StatusBadUnexpectedError)}

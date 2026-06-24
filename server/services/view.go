@@ -326,7 +326,7 @@ func (s *ViewService) Browse(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 	for i := range req.NodesToBrowse {
 		br := req.NodesToBrowse[i]
 		ualog.Debug(ctx, "browsing node",
-			ualog.Any(ualog.NodeIdKey, br.NodeID),
+			ualog.Any("node_id", br.NodeID),
 			ualog.Any("dir", br.BrowseDirection),
 			ualog.Any("subtypes", br.IncludeSubtypes),
 			ualog.String("ref", fmt.Sprint(br.ReferenceTypeID)),

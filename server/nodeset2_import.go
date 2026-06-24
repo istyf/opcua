@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"math"
 	"reflect"
@@ -374,17 +375,15 @@ func (s *serverImpl) nodesImportNodeSet(ctx context.Context, nodes *schema.UANod
 			node.WithAbstractType(dt.IsAbstractAttr),
 		)
 		if definition, err := importSchemaDataTypeDefinition(nodes, dt, resolveImportedNodeID); err != nil {
-			ualog.Warn(ctx, "failed to import data type definition",
+			ualog.Error(ctx, "failed to import data type definition", err,
 				ualog.String("node_id", nid.String()),
 				ualog.String("browse_name", dt.BrowseNameAttr),
-				ualog.Err(err),
 			)
 		} else if definition != nil {
 			if err := n.SetAttribute(ctx, ua.AttributeIDDataTypeDefinition, values.DataValueFromValue(definition)); err != nil {
-				ualog.Warn(ctx, "failed to attach data type definition",
+				ualog.Error(ctx, "failed to attach data type definition", err,
 					ualog.String("node_id", nid.String()),
 					ualog.String("browse_name", dt.BrowseNameAttr),
-					ualog.Err(err),
 				)
 			}
 		}
@@ -838,7 +837,8 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			}
 		}
 
-		ualog.Error(ctx, "unable to find reference type",
+		ualog.Error(ctx, "unable to resolve reference type",
+			errors.New("not found"),
 			ualog.String("ref_type", refType),
 			ualog.String("browse_name", browseName),
 		)
@@ -846,7 +846,7 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		return nil
 	}
 
-	// the first thing we have to do is go thorugh and define all the nodes.
+	// the first thing we have to do is go through and define all the nodes.
 	// set up the reference types.
 	for i := range nodes.UAReferenceType {
 		rt := nodes.UAReferenceType[i]
@@ -857,7 +857,7 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		nodeid := mustParseAndConvertNodeID(rt.NodeIdAttr)
 		node := s.Node(nodeid)
 		if node == nil {
-			ualog.Error(ctx, "error loading node", ualog.String("id", rt.NodeIdAttr))
+			ualog.Error(ctx, "error loading node", errors.New("not found"), ualog.String("id", rt.NodeIdAttr))
 		}
 
 		for rid := range rt.References.Reference {
@@ -868,7 +868,8 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			}
 			n := s.Node(refnodeid)
 			if n == nil {
-				ualog.Error(ctx, "unable to find node",
+				ualog.Error(ctx, "unable to add reference to node",
+					errors.New("node not found"),
 					ualog.String("value", ref.Value),
 					ualog.String("ref_type", ref.ReferenceTypeAttr),
 					ualog.String("browse_name", rt.BrowseNameAttr),
@@ -903,10 +904,6 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 		nid := mustParseAndConvertNodeID(dt.NodeIdAttr)
 		node := s.Node(nid)
 
-		if nid.IntID() == 24 {
-			ualog.Info(ctx, "doing basedatatype")
-		}
-
 		if dt.References != nil {
 			for rid := range dt.References.Reference {
 				ref := dt.References.Reference[rid]
@@ -916,7 +913,8 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 				}
 				n := s.Node(refnodeid)
 				if n == nil {
-					ualog.Error(ctx, "unable to find node",
+					ualog.Error(ctx, "unable to add reference to node",
+						errors.New("node not found"),
 						ualog.String("value", ref.Value),
 						ualog.String("ref_type", ref.ReferenceTypeAttr),
 						ualog.String("browse_name", dt.BrowseNameAttr),
@@ -961,7 +959,8 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			}
 			n := s.Node(refnodeid)
 			if n == nil {
-				ualog.Error(ctx, "unable to find node",
+				ualog.Error(ctx, "unable to add reference to node",
+					errors.New("node not found"),
 					ualog.String("value", ref.Value),
 					ualog.String("ref_type", ref.ReferenceTypeAttr),
 					ualog.String("browse_name", ot.BrowseNameAttr),
@@ -1003,7 +1002,8 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			}
 			n := s.Node(refnodeid)
 			if n == nil {
-				ualog.Error(ctx, "unable to find node",
+				ualog.Error(ctx, "unable to add reference to node",
+					errors.New("node not found"),
 					ualog.String("value", ref.Value),
 					ualog.String("ref_type", ref.ReferenceTypeAttr),
 					ualog.String("browse_name", ot.BrowseNameAttr),
@@ -1044,7 +1044,8 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			}
 			n := s.Node(refnodeid)
 			if n == nil {
-				ualog.Error(ctx, "unable to find node",
+				ualog.Error(ctx, "unable to add reference to node",
+					errors.New("node not found"),
 					ualog.String("value", ref.Value),
 					ualog.String("ref_type", ref.ReferenceTypeAttr),
 					ualog.String("browse_name", ot.BrowseNameAttr),
@@ -1085,7 +1086,8 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			}
 			n := s.Node(refnodeid)
 			if n == nil {
-				ualog.Error(ctx, "unable to find node",
+				ualog.Error(ctx, "unable to add reference to node",
+					errors.New("node not found"),
 					ualog.String("value", ref.Value),
 					ualog.String("ref_type", ref.ReferenceTypeAttr),
 					ualog.String("browse_name", ot.BrowseNameAttr),
@@ -1132,7 +1134,8 @@ func (s *serverImpl) refsImportNodeSet(ctx context.Context, nodes *schema.UANode
 			}
 			n := s.Node(refnodeid)
 			if n == nil {
-				ualog.Error(ctx, "unable to find node",
+				ualog.Error(ctx, "unable to add reference to node",
+					errors.New("node not found"),
 					ualog.String("value", ref.Value),
 					ualog.String("ref_type", ref.ReferenceTypeAttr),
 					ualog.String("browse_name", ot.BrowseNameAttr),

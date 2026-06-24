@@ -414,14 +414,14 @@ func (s *serverImpl) acceptAndRegister(ctx context.Context, l *uacp.Listener) {
 				}
 				switch x := err.(type) {
 				case *net.OpError:
-					ualog.Warn(ctx, "listener stopped accepting", ualog.Err(err))
+					ualog.Warn(ctx, "listener stopped accepting", ualog.String("err", err.Error()))
 					return
 				case temporary:
 					if x.Temporary() {
 						continue
 					}
 				default:
-					ualog.Error(ctx, "error accepting connection", ualog.Err(err))
+					ualog.Error(ctx, "error accepting connection", err)
 					continue
 				}
 			}
@@ -429,7 +429,7 @@ func (s *serverImpl) acceptAndRegister(ctx context.Context, l *uacp.Listener) {
 			go s.cb.RegisterConn(ctx, l.Endpoint(), c, s.Config().Certificate(), s.cfg.AdvertisedCertificate(), s.Config().PrivateKey(), slices.Clone(s.cfg.enabledSec))
 
 			ualog.Info(ctx, "registered connection",
-				ualog.String("remote", c.RemoteAddr().String()),
+				ualog.String("remote_addr", c.RemoteAddr().String()),
 			)
 		}
 	}
@@ -444,28 +444,28 @@ func (s *serverImpl) monitorConnections(ctx context.Context) {
 		if msg == nil {
 			continue // ctx is likely done, ctx.Err will be non-nil
 		}
+
+		msgCtx := ualog.WithAttrs(ctx,
+			ualog.Uint32("secure_channel_id", msg.SecureChannelID),
+			ualog.Uint32("request_id", msg.RequestID),
+		)
+
 		if msg.Err != nil {
-			ualog.Error(ctx, "error received",
-				ualog.String("func", "monitorConnections"),
-				ualog.Err(msg.Err),
-			)
+			ualog.Error(msgCtx, "error received", msg.Err)
 			if msg.SecureChannelID != 0 {
 				s.cb.CloseSecureChannel(ctx, msg.SecureChannelID)
 			}
 			continue
 		}
 		if resp := msg.Response(); resp != nil {
-			ualog.Error(ctx, "server received response", ualog.Any("response", resp))
+			ualog.Error(msgCtx, "server received response", nil, ualog.Any("response", resp))
 			if msg.SecureChannelID != 0 {
 				s.cb.CloseSecureChannel(ctx, msg.SecureChannelID)
 			}
 			continue
 		}
 
-		ualog.Debug(ctx, "received message",
-			ualog.String("func", "monitorConnections"),
-			ualog.Any("request", msg.Request()),
-		)
+		ualog.Debug(msgCtx, "received message")
 
 		s.cb.mu.RLock()
 		sc, ok := s.cb.s[msg.SecureChannelID]
@@ -473,15 +473,13 @@ func (s *serverImpl) monitorConnections(ctx context.Context) {
 		if !ok {
 			// if the secure channel ID is 0, this is probably a open secure channel request.
 			if msg.SecureChannelID != 0 {
-				ualog.Error(ctx, "unknown secure channel",
-					ualog.Uint64("channel_id", uint64(msg.SecureChannelID)),
-				)
+				ualog.Error(msgCtx, "unknown secure channel", errors.New("not found"))
 			}
 			continue
 		}
 
 		// todo: should this be delegated to another goroutine in case handling this hangs?
-		s.handleService(ctx, sc, msg.RequestID, msg.Request())
+		s.handleService(msgCtx, sc, msg.RequestID, msg.Request())
 	}
 }
 

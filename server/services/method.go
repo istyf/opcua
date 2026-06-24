@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/gopcua/opcua/id"
@@ -274,7 +275,8 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		}
 
 		if methodNode == nil || !methodBelongsToObjectOrTypeHierarchy(methodNode, objectNode) {
-			ualog.Error(ctx, "method does not exist or does not belong to object",
+			ualog.Error(ctx, "call failed",
+				errors.New("method does not exist or does not belong to object"),
 				ualog.String("method", requestedMethodLogName(method.MethodID, methodNode)),
 				ualog.String("object", nodeLogName(objectNode)),
 			)
@@ -283,7 +285,8 @@ func (s *MethodService) Call(ctx context.Context, sc *uasc.SecureChannel, r ua.R
 		}
 
 		if !methodNode.IsExecutable(ctx) {
-			ualog.Error(ctx, "method is not executable",
+			ualog.Error(ctx, "call failed",
+				errors.New("method is not executable"),
 				ualog.String("method", nodeLogName(methodNode)),
 				ualog.String("object", nodeLogName(objectNode)),
 			)
