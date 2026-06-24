@@ -773,7 +773,7 @@ func TestRefsImportNodeSetRejectsDirectNodeIDThatIsNotReferenceType(t *testing.T
 	ctx := ualog.New(t.Context(), ualog.WithHandler(handler))
 
 	require.NoError(t, srv.ImportNodeSet(ctx, nodes))
-	assert.Contains(t, out.String(), "unable to find reference type")
+	assert.Contains(t, out.String(), "unable to resolve reference type")
 }
 
 func TestImportNodeSetLoadsEnumDataTypeDefinitionAttribute(t *testing.T) {
